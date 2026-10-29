@@ -1,0 +1,48 @@
+/* Reference-inspired, light editorial layout. Original product images stay intact. */
+@font-face{font-family:GamttizEN;src:url('assets/fonts/gamttiz-en-regular.woff2') format('woff2');font-style:normal;font-weight:400;font-display:swap}
+@font-face{font-family:GamttizEN;src:url('assets/fonts/gamttiz-en-bold.woff2') format('woff2');font-style:normal;font-weight:700;font-display:swap}
+:root{--cream:#faf9f6;--ink:#252422;--line:#e9e6df}
+body{font-synthesis:none;background:var(--cream)}
+.header{min-height:88px;background:#faf9f6f5;border-bottom:1px solid var(--line);padding:18px max(5%,calc((100vw - 1280px)/2))}
+.wordmark{font-family:GamttizEN,sans-serif;font-weight:700;font-size:32px;letter-spacing:0;color:var(--red)}
+.wordmark span{font-weight:400;letter-spacing:.6px;font-size:11px}
+nav{font-weight:400;gap:32px;font-size:12px}.nav-social{border:0;padding-left:0}
+.hero{max-width:1280px;margin:auto;grid-template-columns:1fr 1.1fr;min-height:660px;align-items:center;padding:20px 3% 35px;gap:3%}
+.hero-copy{color:var(--ink);background:none;padding:45px 0 20px;min-height:560px}
+.hero .eyebrow{color:#a5382b;font-family:GamttizEN,sans-serif;font-size:12px;letter-spacing:1px}
+h1,h2{font-family:GamttizEN,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-weight:400;letter-spacing:-1.5px}
+h1{font-size:clamp(44px,4.7vw,68px);line-height:1.3;margin:36px 0 22px}h1 span{color:#a7a39a}
+.hero-description{color:#706d67;font-size:15px;line-height:1.9;margin-bottom:30px}
+.button{font-size:13px;font-weight:400;padding:16px 24px;gap:40px;box-shadow:0 5px 24px #29211509}
+.hero .yellow{background:white;color:var(--ink);border:1px solid var(--line)}
+.hero-foot{padding-top:40px;letter-spacing:1px;color:#8b867d;line-height:1.6;font-size:8px}
+.hero-poster{background:white;border-radius:14px;padding:18px 22px;min-width:0}
+.hero-poster img{height:550px}.poster-label{font-size:9px;color:#91897e;letter-spacing:1.6px}.poster-link{font-size:11px;border-color:#f1eee8;color:#726b60;padding-top:14px}
+.section{max-width:1280px;margin:0 auto;padding:65px 3%}
+.stories{padding-top:30px;padding-bottom:0}
+.story-row{display:grid;grid-template-columns:1.3fr 1fr;gap:8%;align-items:center;margin-bottom:48px}
+.story-row.reverse{grid-template-columns:1fr 1.3fr}.story-row.reverse .story-image{order:2}.story-row.reverse .story-copy{order:1;padding-left:25px}
+.story-image{display:flex;background:white;border-radius:12px;padding:15px;min-width:0;justify-content:center}
+.story-image img{width:50%;height:auto;object-fit:contain}
+.story-copy{padding:25px 0}.story-number{display:block;font-family:GamttizEN,sans-serif;font-size:44px;line-height:1;color:#292722;margin-bottom:18px}
+.story-copy .eyebrow,.holder-copy .eyebrow{font-size:9px;color:#948c7e;letter-spacing:1.6px;margin-bottom:17px;font-weight:400}
+.story-copy h2,.holder-copy h2{font-size:clamp(29px,3vw,40px);line-height:1.35;margin-bottom:18px}
+.story-copy>p:not(.eyebrow){font-size:14px;line-height:1.95;color:#77736c;margin-bottom:20px}
+.holder{background:none;grid-template-columns:1.3fr 1fr;gap:8%;padding-top:0;padding-bottom:50px}
+.holder-image{border-radius:12px;overflow:visible;position:relative}.holder-image img{max-height:440px;width:100%;border-radius:12px}.holder-image button{margin:0 0 16px;color:#726b60;font-size:11px}
+.holder-copy h2{margin-bottom:16px}.holder-copy p{font-size:14px;color:#77736c;line-height:1.9;margin-bottom:15px}.holder-copy .button{margin-top:8px;background:white;color:var(--ink);border:1px solid var(--line)}
+.collection{background:none;border:0;padding-top:65px}.section-heading{align-items:center;margin-bottom:30px}.section-heading h2{font-size:38px}.section-heading .eyebrow{font-family:GamttizEN,sans-serif;color:#a13e30;letter-spacing:1.2px;font-weight:400;margin-bottom:18px}.section-heading>p{font-size:13px;color:#837b70}
+.collection-tools{border-color:var(--line);font-size:10px}.collection-tools b{font-weight:400;background:#f6e8bf}.text-button{font-weight:400;text-decoration:none;border-bottom:1px solid #c7beb1;padding-bottom:6px}
+.gallery{gap:18px}.card{border:1px solid #eeebe5;border-radius:10px;overflow:hidden}.card:hover{border-color:#e5b37d;box-shadow:0 6px 20px #3b271508}.card-label{font-family:GamttizEN,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:15px;background:#fff;padding:15px;border-color:#f4f1eb}.card-label b{font-family:Arial,sans-serif;font-weight:400;font-size:16px}
+.social{position:relative;text-align:left;background:#f1eee7;margin:30px auto 55px;width:calc(100% - 6%);max-width:1204px;border-radius:14px;padding:48px 45px;display:grid;grid-template-columns:1fr auto;column-gap:30px;align-items:center;color:var(--ink)}
+.social img{position:absolute;width:90px;right:37%;top:50%;margin:0;opacity:1;translate:0 -50%}
+.social .eyebrow{grid-column:1;margin-bottom:16px;color:#8b7965;font-size:10px;font-weight:400}
+.social h2{grid-column:1;font-size:30px;margin:0}.social .button{grid-column:2;grid-row:1/3;background:white;z-index:1}
+footer{max-width:1280px;margin:auto;color:#8a8276;padding:20px 3% 40px;font-size:10px}
+.detail-copy h2{font-family:GamttizEN,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-weight:400}.detail-copy #detail-english{font-family:GamttizEN,sans-serif}
+@media(max-width:1000px){.hero{padding-left:5%;padding-right:5%;gap:4%;min-height:590px}.hero-copy{min-height:510px}h1{font-size:48px}.hero-poster img{height:480px}.hero-description{font-size:13px}.section{padding-left:5%;padding-right:5%}.story-row,.holder{gap:5%}.story-row.reverse{gap:5%}.social img{display:none}.section-heading h2{font-size:32px}}
+@media(max-width:600px){.header{padding:15px 5%;min-height:80px}.wordmark{font-size:25px}.wordmark span{font-size:9px}nav{gap:14px;font-size:11px}.hero{grid-template-columns:1fr;gap:0;padding:25px 6% 35px}.hero-copy{min-height:0;padding:20px 0 28px}.hero .eyebrow{font-size:10px;margin-bottom:10px}h1{font-size:46px;line-height:1.35;margin:20px 0}h1 span{white-space:nowrap}.hero-description{font-size:13px}.hero-foot{padding-top:28px}.hero-poster{padding:20px 15px}.hero-poster img{width:100%;height:auto;max-height:440px}.section{padding:40px 6%}.stories{padding-top:10px;padding-bottom:0}.story-row,.story-row.reverse{grid-template-columns:1fr;gap:0;margin-bottom:22px}.story-row.reverse .story-image,.story-row.reverse .story-copy{order:initial}.story-row.reverse .story-copy{padding-left:0}.story-copy{padding:26px 0 16px}.story-number{font-size:36px;margin-bottom:14px}.story-copy h2,.holder-copy h2{font-size:31px}.story-copy>p:not(.eyebrow){font-size:13px}.story-image{padding:8px}.holder{grid-template-columns:1fr;gap:28px;padding-top:0}.holder-image img{max-height:440px}.holder-copy p{font-size:13px}.section-heading{display:block}.section-heading h2{font-size:29px}.section-heading>p{font-size:12px}.section-heading .eyebrow{font-size:10px}.gallery{gap:10px}.card-label{font-size:13px;padding:12px 9px}.social{display:block;padding:32px 25px;width:88%;margin:15px auto 35px}.social h2{font-size:28px;margin-bottom:25px}.social .button{font-size:12px}.social .eyebrow{font-size:9px}.detail-copy h2{font-size:28px}}
+@media(max-width:360px){h1{font-size:40px}.wordmark{font-size:22px}nav{gap:10px}.card-label{font-size:12px}}
+
+h1,h2{font-weight:700;letter-spacing:-2px} .card-label{font-family:Arial,'Malgun Gothic','Apple SD Gothic Neo',sans-serif} .detail-copy h2{font-weight:700} @media(max-width:600px){h1{font-size:44px}h2{letter-spacing:-1.4px}}
+
