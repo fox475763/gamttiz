@@ -112,3 +112,14 @@
 .model-scene .combo-friend{bottom:40%;width:14%;height:46%;filter:drop-shadow(2px 7px 5px #4c180d78)}
 .model-scene .combo-friends:has(.combo-friend:first-child:last-child) .combo-friend{width:22%;height:50%}
 .model-scene .combo-friends:has(.combo-friend:nth-child(2):last-child) .combo-friend{width:19%;height:49%}
+
+.combo-static{position:absolute;inset:0}
+.combo-scene.is-3d-ready .combo-static{display:none}
+.combo-3d-canvas{position:absolute;inset:0;z-index:2;display:block;width:100%;height:100%;touch-action:pan-y;cursor:grab}
+.combo-3d-canvas:active{cursor:grabbing}
+.combo-orbit-controls{display:flex;justify-content:space-between;align-items:center;gap:15px;margin:13px auto 17px;width:min(100%,720px)}
+.combo-orbit-controls p{margin:0;color:#79543a;font-size:13px;line-height:1.5}
+.combo-orbit-controls button{flex:none;background:#fffaf0;border:1px solid #d9aa78;border-radius:50px;color:#8d2d25;font:700 13px "Wanted Sans Variable",sans-serif;padding:10px 16px;cursor:pointer}
+.combo-orbit-controls button:hover{transform:translateY(-2px)}
+@media(max-width:700px){.combo-orbit-controls p{font-size:12px}.combo-orbit-controls button{font-size:12px}}
+

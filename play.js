@@ -1,4 +1,5 @@
 const picked=[];
+window.gamttizComboPicked=()=>[...picked];
 const picker=document.querySelector('#picker');
 const tray=document.querySelector('#tray');
 const status=document.querySelector('#tray-status');
@@ -25,6 +26,7 @@ function renderTray(){
   document.querySelector('#tray-count').textContent=picked.length+' / '+maxFriends;
   downloadButton.disabled=picked.length===0;
   picker.querySelectorAll('button').forEach((button,i)=>button.setAttribute('aria-pressed',String(picked.includes(i))));
+  document.dispatchEvent(new CustomEvent('gamttiz-picks-changed',{detail:[...picked]}));
   renderNotes();
 }
 products.forEach((p,index)=>{
@@ -66,6 +68,11 @@ async function saveCombo(){
   downloadButton.disabled=true;downloadButton.textContent='이미지 만드는 중…';
   try{
     await document.fonts.ready;
+    if(window.gamttiz3d?.ready){
+      await window.gamttiz3d.savePng(picked);
+      status.textContent='지금 보고 있는 각도의 감띠 홀더 PNG를 저장했어요.';
+      return;
+    }
     const [holder,...arts]=await Promise.all([loadArt('assets/holder-fbx-render.png'),...picked.map(i=>loadArt(products[i].illustration))]);
     const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1450;const ctx=canvas.getContext('2d');
     const backdrop=ctx.createLinearGradient(0,0,1200,1450);backdrop.addColorStop(0,'#fffaf0');backdrop.addColorStop(1,'#ffe9bf');ctx.fillStyle=backdrop;ctx.fillRect(0,0,1200,1450);
