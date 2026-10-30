@@ -157,7 +157,7 @@ function renderQuizResult(){
   const art=quizElement('img','quiz-art');art.src=friend.illustration;art.alt=`${friend.name} 원본 일러스트`;art.loading='lazy';
   const copy=quizElement('div','quiz-result-copy');copy.append(quizElement('p','quiz-kicker','YOUR FRY FRIEND'),quizElement('h3','',friend.name),quizElement('p','quiz-english',friend.english),quizElement('p','quiz-type',profile.type),quizElement('p','quiz-story',stories[index][0]));
   const extras=quizElement('div','quiz-extras');
-  const intro=quizElement('section','quiz-insight-main');intro.append(quizElement('p','quiz-kicker','WHY THIS FRIEND?'),quizElement('h4','',`당신과 ${friend.name}가 닮은 점`),quizElement('p','',profile.similar));
+  const intro=quizElement('section','quiz-insight-main');intro.append(quizElement('p','quiz-kicker','WHY THIS FRIEND?'),quizElement('h4','',`당신과 ${friend.name}의 닮은 점`),quizElement('p','',profile.similar));
   const traits=quizElement('div','quiz-traits');profile.traits.forEach(trait=>traits.append(quizElement('span','',trait)));intro.append(traits);extras.append(intro);
   const facts=quizElement('div','quiz-facts');[['감튀를 먹는 방식',profile.habit],['당신의 좋은 점',profile.shine]].forEach(([title,body])=>{const card=quizElement('section','quiz-fact');card.append(quizElement('h4','',title),quizElement('p','',body));facts.append(card);});extras.append(facts);
   const matched=quizAnswers.map((choice,step)=>({label:activeQuestions[step].options[choice][0],score:activeQuestions[step].options[choice][1][index]||0})).filter(item=>item.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
