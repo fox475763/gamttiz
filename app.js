@@ -41,7 +41,7 @@ products.forEach((p,i)=>{
   const label=document.createElement('span');label.className='card-label';
   const name=document.createElement('span');name.textContent=p.name;
   const arrow=document.createElement('b');arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');
-  label.append(name,arrow);card.append(img,label);card.addEventListener('click',()=>showDetail(i));gallery.append(card);
+  label.append(name,arrow);card.append(img,label);card.addEventListener('click',()=>showDetail(i));gallery?.append(card);
 });
 function showDetail(index){
   current=index;const p=index===-1?holder:products[index];
@@ -63,5 +63,5 @@ dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoun
 document.querySelector('#previous').addEventListener('click',()=>showDetail((current+13)%14));
 document.querySelector('#next').addEventListener('click',()=>showDetail((current+1)%14));
 dialog.addEventListener('keydown',e=>{if(current<0)return;if(e.key==='ArrowRight'){e.preventDefault();showDetail((current+1)%14);}if(e.key==='ArrowLeft'){e.preventDefault();showDetail((current+13)%14);}});
-document.querySelector('#random').addEventListener('click',()=>showDetail(Math.floor(Math.random()*14)));
-document.querySelector('.holder-open').addEventListener('click',()=>showDetail(-1));
+document.querySelector('#random')?.addEventListener('click',()=>showDetail(Math.floor(Math.random()*14)));
+document.querySelector('.holder-open')?.addEventListener('click',()=>showDetail(-1));
