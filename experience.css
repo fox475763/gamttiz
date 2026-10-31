@@ -102,6 +102,12 @@
 .download-combo{display:block;width:100%;border:0;border-radius:50px;background:#d02c29;color:#fff;font-weight:800;font-size:16px;padding:19px 22px;margin-top:21px;cursor:pointer;box-shadow:0 5px 0 #9e201f}
 .download-combo:disabled{opacity:.48;cursor:not-allowed;box-shadow:none}
 .download-combo:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 8px 0 #9e201f}
+.combo-save-preview{width:min(92vw,440px);max-height:88vh;border:0;border-radius:20px;padding:20px;background:#fffaf0;color:#38251d;box-shadow:0 20px 60px #39201866;text-align:center;overflow:auto}
+.combo-save-preview::backdrop{background:#2d1b15aa}
+.combo-save-preview h2{margin:0 0 8px;font-size:22px}
+.combo-save-preview p{margin:0 0 15px;font-size:14px;line-height:1.6}
+.combo-save-preview img{display:block;width:100%;height:auto;touch-action:manipulation;-webkit-touch-callout:default;user-select:auto;-webkit-user-select:auto}
+.combo-save-preview button{margin-top:16px;border:0;border-radius:30px;padding:12px 25px;background:#d02c29;color:#fff;font-weight:700}
 @keyframes friend-in{from{opacity:0;transform:translateX(-50%) translateY(30px) scale(.85)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 @media(max-width:700px){.combo-preview{border-radius:20px;padding:17px 14px 23px}.combo-scene{border-radius:14px}.holder-front>span{font-size:clamp(20px,7vw,40px);letter-spacing:0}.holder-front small{font-size:9px}.combo-preview-top{font-size:14px}.combo-preview .tray-actions{align-items:stretch}.combo-preview .tray-actions button{align-self:flex-end}.download-combo{font-size:14px;padding:16px}.combo-instruction{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.combo-friend{animation:none}.download-combo{transition:none}}

@@ -63,16 +63,30 @@ function drawFront(ctx){
   ctx.beginPath();ctx.moveTo(202,760);ctx.quadraticCurveTo(600,720,998,760);ctx.lineTo(986,1210);ctx.quadraticCurveTo(984,1285,902,1285);ctx.lineTo(298,1285);ctx.quadraticCurveTo(216,1285,214,1210);ctx.closePath();
 }
 function loadArt(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});}
+function showMobileSavePreview(image){
+  let dialog=document.querySelector('#combo-save-preview');
+  if(!dialog){
+    dialog=document.createElement('dialog');dialog.id='combo-save-preview';dialog.className='combo-save-preview';
+    const heading=document.createElement('h2');heading.textContent='이미지 저장하기';
+    const guide=document.createElement('p');guide.textContent='다운로드가 시작되지 않았다면 이미지를 길게 눌러 사진에 저장하세요.';
+    const preview=document.createElement('img');preview.alt='내 감띠 홀더 PNG 미리보기';
+    const close=document.createElement('button');close.type='button';close.textContent='닫기 ✕';close.addEventListener('click',()=>dialog.close());
+    dialog.append(heading,guide,preview,close);document.body.append(dialog);
+  }
+  dialog.querySelector('img').src=image;
+  dialog.showModal();
+}
 async function saveCombo(){
   if(!picked.length)return;
   downloadButton.disabled=true;downloadButton.textContent='이미지 만드는 중…';
   try{
-    await document.fonts.ready;
     if(window.gamttiz3d?.ready){
-      await window.gamttiz3d.savePng(picked);
-      status.textContent='지금 보고 있는 각도의 감띠 홀더 PNG를 저장했어요.';
+      const image=window.gamttiz3d.savePng(picked);
+      if(matchMedia('(pointer: coarse)').matches)showMobileSavePreview(image);
+      status.textContent='PNG 다운로드를 시작했어요. 모바일에서 저장이 막히면 미리보기 이미지를 길게 눌러 저장하세요.';
       return;
     }
+    await document.fonts.ready;
     const [holder,...arts]=await Promise.all([loadArt('assets/holder-fbx-render.png'),...picked.map(i=>loadArt(products[i].illustration))]);
     const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1450;const ctx=canvas.getContext('2d');
     const backdrop=ctx.createLinearGradient(0,0,1200,1450);backdrop.addColorStop(0,'#fffaf0');backdrop.addColorStop(1,'#ffe9bf');ctx.fillStyle=backdrop;ctx.fillRect(0,0,1200,1450);

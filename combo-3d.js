@@ -192,12 +192,17 @@ function savePng(indices) {
   ctx.fillText('FRENCH FRY LOVERS', 72, 1420);
   const link = document.createElement('a');
   const image = exportCanvas.toDataURL('image/png');
-  link.href = image;
+  const binary = atob(image.slice(image.indexOf(',') + 1));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
+  link.href = url;
   link.download = 'gamttiz-my-holder.png';
   document.body.append(link);
   link.click();
   link.remove();
-  return Promise.resolve(image);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return image;
 }
 
 window.gamttiz3d = { get ready() { return ready; }, setFriends, savePng };
