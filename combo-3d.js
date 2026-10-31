@@ -151,7 +151,7 @@ async function setFriends(indices) {
   });
 }
 
-function savePng(indices) {
+function createPng(indices) {
   const originalRatio = renderer.getPixelRatio();
   const originalAspect = camera.aspect;
   renderer.setPixelRatio(1);
@@ -160,42 +160,74 @@ function savePng(indices) {
   camera.updateProjectionMatrix();
   renderer.render(scene, camera);
   const exportCanvas = document.createElement('canvas');
-  exportCanvas.width = 1200;
-  exportCanvas.height = 1450;
+  exportCanvas.width = 1080;
+  exportCanvas.height = 1920;
   const ctx = exportCanvas.getContext('2d');
-  const background = ctx.createLinearGradient(0, 0, 1200, 1450);
+  const background = ctx.createLinearGradient(0, 0, 1080, 1920);
   background.addColorStop(0, '#fffaf0');
   background.addColorStop(1, '#ffe9bf');
   ctx.fillStyle = background;
-  ctx.fillRect(0, 0, 1200, 1450);
+  ctx.fillRect(0, 0, 1080, 1920);
+  ctx.fillStyle = '#ffb511';
+  ctx.fillRect(0, 0, 1080, 20);
   ctx.fillStyle = '#bd2d27';
-  ctx.font = '700 39px GamttizEN,sans-serif';
-  ctx.fillText('GAMTTIZ / MY HOLDER', 72, 100);
-  ctx.font = '600 24px GamttizEN,sans-serif';
-  ctx.fillText(indices.length + ' / 5 FRIENDS', 900, 100);
+  ctx.font = '700 55px GamttizEN,sans-serif';
+  ctx.fillText('GAMTTIZ', 68, 110);
+  ctx.fillStyle = '#a83d2e';
+  ctx.font = '700 22px GamttizEN,sans-serif';
+  ctx.fillText('French Fry Lovers', 70, 146);
+  ctx.textAlign = 'right';
+  ctx.fillText(indices.length + ' / 5 FRIENDS', 1012, 112);
+  ctx.textAlign = 'left';
+  ctx.fillStyle = '#33241c';
+  ctx.font = '800 66px "Wanted Sans Variable",sans-serif';
+  ctx.fillText('나만의 감띠 홀더', 68, 246);
+  ctx.fillStyle = '#b32d29';
+  ctx.font = '700 25px GamttizEN,sans-serif';
+  ctx.fillText('MY GAMTTIZ HOLDER', 70, 292);
   ctx.fillStyle = '#f8e9ca';
   ctx.beginPath();
-  ctx.roundRect(50, 145, 1100, 1120, 34);
+  ctx.roundRect(48, 340, 984, 1050, 38);
   ctx.fill();
-  ctx.drawImage(renderer.domElement, 70, 180, 1060, 1060);
+  ctx.drawImage(renderer.domElement, 50, 350, 980, 980);
   camera.aspect = originalAspect;
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(originalRatio);
   resize();
-  ctx.fillStyle = '#8d3928';
-  ctx.font = '700 23px "Wanted Sans Variable",sans-serif';
-  ctx.fillText('나의 감띠 친구들', 72, 1322);
-  ctx.font = '500 22px "Wanted Sans Variable",sans-serif';
-  ctx.fillText(indices.map(index => products[index].name).join('  ·  '), 72, 1372, 1050);
   ctx.fillStyle = '#b62924';
-  ctx.font = '700 19px GamttizEN,sans-serif';
-  ctx.fillText('FRENCH FRY LOVERS', 72, 1420);
-  const link = document.createElement('a');
+  ctx.font = '800 27px GamttizEN,sans-serif';
+  ctx.fillText('INSIDE MY HOLDER', 70, 1470);
+  ctx.fillStyle = '#33241c';
+  ctx.font = '800 42px "Wanted Sans Variable",sans-serif';
+  const labels = indices.map(index => products[index].name);
+  labels.forEach((label, i) => {
+    const column = i % 2;
+    const row = Math.floor(i / 2);
+    const x = 70 + column * 485;
+    const y = 1545 + row * 78;
+    ctx.fillStyle = '#ffb511';
+    ctx.beginPath();ctx.arc(x + 21, y - 12, 21, 0, Math.PI * 2);ctx.fill();
+    ctx.fillStyle = '#a72a23';ctx.font = '800 21px GamttizEN,sans-serif';
+    ctx.textAlign = 'center';ctx.fillText(String(i + 1).padStart(2, '0'), x + 21, y - 5);ctx.textAlign = 'left';
+    ctx.fillStyle = '#33241c';ctx.font = '700 33px "Wanted Sans Variable",sans-serif';
+    ctx.fillText(label, x + 58, y, 400);
+  });
+  ctx.fillStyle = '#9b6549';ctx.font = '500 22px "Wanted Sans Variable",sans-serif';
+  ctx.fillText('좋아하는 감띠를 담아 만든 나만의 조합', 70, 1843);
+  ctx.textAlign = 'right';ctx.fillStyle = '#b62924';ctx.font = '700 22px GamttizEN,sans-serif';
+  ctx.fillText('@gamttiz_official', 1010, 1843);ctx.textAlign = 'left';
   const image = exportCanvas.toDataURL('image/png');
   const binary = atob(image.slice(image.indexOf(',') + 1));
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  const url = URL.createObjectURL(new Blob([bytes], { type: 'image/png' }));
+  const blob = new Blob([bytes], { type: 'image/png' });
+  const url = URL.createObjectURL(blob);
+  return { image, url, blob };
+}
+
+function savePng(indices) {
+  const { image, url } = createPng(indices);
+  const link = document.createElement('a');
   link.href = url;
   link.download = 'gamttiz-my-holder.png';
   document.body.append(link);
@@ -205,7 +237,17 @@ function savePng(indices) {
   return image;
 }
 
-window.gamttiz3d = { get ready() { return ready; }, setFriends, savePng };
+function sharePng(indices) {
+  const { image, url, blob } = createPng(indices);
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  const file = new File([blob], 'gamttiz-my-holder.png', { type: 'image/png' });
+  if (navigator.share && navigator.canShare?.({ files: [file] })) {
+    return { image, promise: navigator.share({ files: [file], title: '나만의 감띠 홀더', text: '내가 고른 감띠 친구들을 만나보세요!' }) };
+  }
+  return { image, promise: null };
+}
+
+window.gamttiz3d = { get ready() { return ready; }, setFriends, savePng, sharePng };
 document.addEventListener('gamttiz-picks-changed', event => setFriends(event.detail));
 const loader = new GLTFLoader();
 loader.load('assets/holder-fbx.glb', gltf => {

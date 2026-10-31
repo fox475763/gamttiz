@@ -6,6 +6,7 @@ const status=document.querySelector('#tray-status');
 const friendLayer=document.querySelector('#combo-friends');
 const nameLayer=document.querySelector('#combo-names');
 const downloadButton=document.querySelector('#download-combo');
+const shareButton=document.createElement('button');shareButton.id='share-combo';shareButton.className='share-combo';shareButton.type='button';shareButton.textContent='내 감띠 홀더 공유 ↗';downloadButton.insertAdjacentElement('afterend',shareButton);
 const maxFriends=5;
 function togglePick(index){
   const found=picked.indexOf(index);
@@ -25,6 +26,7 @@ function renderTray(){
   tray.setAttribute('aria-label',picked.length?'빨간 홀더에 '+picked.map(i=>products[i].name).join(', ')+' 담긴 모습':'비어 있는 빨간 감띠즈 홀더');
   document.querySelector('#tray-count').textContent=picked.length+' / '+maxFriends;
   downloadButton.disabled=picked.length===0;
+  shareButton.disabled=picked.length===0;
   picker.querySelectorAll('button').forEach((button,i)=>button.setAttribute('aria-pressed',String(picked.includes(i))));
   document.dispatchEvent(new CustomEvent('gamttiz-picks-changed',{detail:[...picked]}));
   renderNotes();
@@ -63,7 +65,7 @@ function drawFront(ctx){
   ctx.beginPath();ctx.moveTo(202,760);ctx.quadraticCurveTo(600,720,998,760);ctx.lineTo(986,1210);ctx.quadraticCurveTo(984,1285,902,1285);ctx.lineTo(298,1285);ctx.quadraticCurveTo(216,1285,214,1210);ctx.closePath();
 }
 function loadArt(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});}
-function showMobileSavePreview(image){
+function showMobileSavePreview(image,message='다운로드가 시작되지 않았다면 이미지를 길게 눌러 사진에 저장하세요.'){
   let dialog=document.querySelector('#combo-save-preview');
   if(!dialog){
     dialog=document.createElement('dialog');dialog.id='combo-save-preview';dialog.className='combo-save-preview';
@@ -73,6 +75,7 @@ function showMobileSavePreview(image){
     const close=document.createElement('button');close.type='button';close.textContent='닫기 ✕';close.addEventListener('click',()=>dialog.close());
     dialog.append(heading,guide,preview,close);document.body.append(dialog);
   }
+  dialog.querySelector('p').textContent=message;
   dialog.querySelector('img').src=image;
   dialog.showModal();
 }
@@ -82,13 +85,13 @@ async function saveCombo(){
   try{
     if(window.gamttiz3d?.ready){
       const image=window.gamttiz3d.savePng(picked);
-      if(matchMedia('(pointer: coarse)').matches)showMobileSavePreview(image);
+      if(matchMedia('(pointer: coarse)').matches||navigator.maxTouchPoints>0)showMobileSavePreview(image);
       status.textContent='PNG 다운로드를 시작했어요. 모바일에서 저장이 막히면 미리보기 이미지를 길게 눌러 저장하세요.';
       return;
     }
     await document.fonts.ready;
     const [holder,...arts]=await Promise.all([loadArt('assets/holder-fbx-render.png'),...picked.map(i=>loadArt(products[i].illustration))]);
-    const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=1450;const ctx=canvas.getContext('2d');
+    const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;const ctx=canvas.getContext('2d');ctx.fillStyle='#fffaf0';ctx.fillRect(0,0,1080,1920);ctx.scale(.9,.9);
     const backdrop=ctx.createLinearGradient(0,0,1200,1450);backdrop.addColorStop(0,'#fffaf0');backdrop.addColorStop(1,'#ffe9bf');ctx.fillStyle=backdrop;ctx.fillRect(0,0,1200,1450);
     ctx.fillStyle='#bd2d27';ctx.font='700 39px GamttizEN,sans-serif';ctx.fillText('GAMTTIZ / MY HOLDER',88,110);ctx.font='600 24px GamttizEN,sans-serif';ctx.fillText(picked.length+' / 5 FRIENDS',890,110);
     const x=90,y=180,w=1020,h=1020;
@@ -105,10 +108,23 @@ async function saveCombo(){
     ctx.save();ctx.beginPath();const line=[[0,1],[0,.44],[.2,.44],[.25,.42],[.33,.44],[.42,.46],[.5,.47],[.58,.46],[.67,.44],[.75,.42],[.8,.44],[1,.44],[1,1]];line.forEach(([px,py],i)=>i?ctx.lineTo(x+px*w,y+py*h):ctx.moveTo(x+px*w,y+py*h));ctx.closePath();ctx.clip();ctx.drawImage(holder,x,y,w,h);ctx.restore();
     ctx.fillStyle='#8d3928';ctx.font='700 24px "Wanted Sans Variable",sans-serif';ctx.fillText('나의 감띠 친구들',90,1303);ctx.font='500 23px "Wanted Sans Variable",sans-serif';ctx.fillText(picked.map(i=>products[i].name).join('  ·  '),90,1351,1000);
     ctx.fillStyle='#b62924';ctx.font='700 19px GamttizEN,sans-serif';ctx.fillText('FRENCH FRY LOVERS',90,1410);
+    ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#f6e8c9';ctx.beginPath();ctx.roundRect(64,1390,952,410,30);ctx.fill();ctx.fillStyle='#b62924';ctx.font='800 29px GamttizEN,sans-serif';ctx.fillText('MY GAMTTIZ HOLDER',90,1452);ctx.fillStyle='#352a21';ctx.font='700 32px "Wanted Sans Variable",sans-serif';picked.forEach((index,i)=>ctx.fillText(String(i+1).padStart(2,'0')+'  '+products[index].name,90+(i%2)*470,1526+Math.floor(i/2)*78,430));ctx.fillStyle='#ad3a2b';ctx.font='700 22px GamttizEN,sans-serif';ctx.fillText('@gamttiz_official',90,1870);
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('PNG 생성 실패');
     const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='gamttiz-my-holder.png';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);status.textContent='3D 모델 홀더 PNG 이미지를 저장했어요.';
   }catch(error){status.textContent='이미지를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.';console.error(error);}
   finally{downloadButton.disabled=picked.length===0;downloadButton.textContent='내 감띠 홀더 PNG 저장 ↓';}
 }downloadButton.addEventListener('click',saveCombo);
+shareButton.addEventListener('click',async()=>{
+  if(!picked.length)return;
+  if(!window.gamttiz3d?.ready){status.textContent='3D 홀더가 준비된 뒤 다시 눌러주세요.';return;}
+  shareButton.disabled=true;
+  try{
+    const {image,promise}=window.gamttiz3d.sharePng(picked);
+    if(promise)await promise;
+    else showMobileSavePreview(image,'이 브라우저는 파일 공유를 지원하지 않아요. 이미지를 길게 누르거나 마우스 오른쪽 버튼으로 저장하세요.');
+    status.textContent=promise?'공유 메뉴에서 이미지 또는 저장 위치를 선택해 주세요.':'공유 메뉴를 지원하지 않아 이미지를 열었어요. 길게 눌러 저장할 수 있어요.';
+  }catch(error){if(error.name!=='AbortError'){status.textContent='공유 메뉴를 열지 못했어요. PNG 저장 버튼을 이용해 주세요.';console.error(error);}}
+  finally{shareButton.disabled=picked.length===0;}
+});
 renderTray();
 

@@ -39,6 +39,13 @@
 @media(max-width:600px){.header nav{gap:16px}#hero-title{font-size:50px}#random{font-size:13px;padding:15px 18px}.selected-note{padding:24px}}
 @media(max-width:360px){#hero-title{font-size:43px}.header nav{gap:12px;font-size:10px}}
 
+@media(pointer:coarse) and (prefers-reduced-motion:no-preference){
+  button,a,summary,.card{transition:scale .28s cubic-bezier(.2,1.6,.4,1),filter .2s}
+  .tap-press{scale:.965;filter:brightness(.96)}
+  .tap-bounce{animation:tap-spring .38s cubic-bezier(.2,1.5,.4,1)}
+}
+@keyframes tap-spring{0%{scale:.965}55%{scale:1.025}100%{scale:1}}
+
 /* A fry carton silhouette for the combination tray. Product artwork stays untouched. */
 .tray{border:0;border-radius:0;padding:46px clamp(80px,9vw,120px) 64px;clip-path:polygon(1% 0,34% 0,39% 6%,61% 6%,66% 0,99% 0,100% 12%,91% 100%,9% 100%,0 12%);background:#cf302b;box-shadow:none}
 .tray.drop-ready{background:#b52a25;box-shadow:none}

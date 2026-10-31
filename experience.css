@@ -129,3 +129,108 @@
 .combo-orbit-controls button:hover{transform:translateY(-2px)}
 @media(max-width:700px){.combo-orbit-controls p{font-size:12px}.combo-orbit-controls button{font-size:12px}}
 
+/* Experience pages: stronger hierarchy, tactile controls, and consistent surfaces. */
+.experience-page .experience-intro{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(circle at 82% 22%,#fb5746 0 9%,transparent 30%),linear-gradient(135deg,#df302f,#ed3c35 68%,#da2c2b)}
+.experience-page .experience-intro:before{content:'';position:absolute;z-index:-1;right:-9%;top:-160%;width:min(72vw,780px);aspect-ratio:1;border:2px dashed #ffbd4270;border-radius:50%;animation:experience-orbit 24s linear infinite}
+.experience-page .experience-intro:after{content:'';position:absolute;z-index:-1;left:0;right:0;bottom:0;height:10px;background:repeating-linear-gradient(90deg,#ffb511 0 30px,transparent 30px 50px);opacity:.85}
+.experience-page .experience-intro h1{max-width:900px;text-wrap:balance;letter-spacing:-.055em}
+.experience-page .experience-intro>p:last-child{max-width:58ch;color:#fff3e1}
+.experience-page .experience-back{color:#fff4d7;transition:translate .35s cubic-bezier(.2,1.5,.4,1),color .2s}
+.experience-page .experience-back:hover{translate:-5px 0;color:#ffcf53}
+.experience-page .fry-quiz{background:radial-gradient(circle at 7% 15%,#ffe6a4,transparent 27%),#fff0c6}
+.quiz-root{max-width:920px}
+.quiz-panel,.quiz-result{border:1px solid #f0d3a6;border-radius:30px;box-shadow:0 18px 45px #8e4c1118,0 8px 0 #e6bd7370;background:#fffaf2}
+.quiz-panel,.quiz-result{animation:experience-panel-in .42s cubic-bezier(.2,1.15,.4,1) both}
+.quiz-panel{position:relative;overflow:hidden;min-height:420px}
+.quiz-panel:before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#e93636 0 70%,#ffb511 70%)}
+.quiz-top{padding-top:7px}
+.quiz-kicker{font-size:14px;letter-spacing:.09em}
+.quiz-count{display:grid;place-items:center;min-width:64px;min-height:42px;padding:0 12px;border-radius:30px;background:#fce9cf}
+.quiz-progress{height:8px;margin:24px 0 38px;background:#efe3d2}
+.quiz-progress::before{background:linear-gradient(90deg,#e93636,#ffb511);transition:width .45s cubic-bezier(.2,1.2,.4,1)}
+.quiz-question{max-width:32ch;font-weight:800;letter-spacing:-.045em;line-height:1.43;margin-bottom:33px;text-wrap:balance}
+.quiz-options{gap:14px}
+.quiz-option{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;min-height:98px;border:1.5px solid #ebd8bd;border-radius:18px;padding:16px 19px;background:#fff;box-shadow:0 3px 0 #eadbc7;color:#35291f;font-size:15px;font-weight:700;transition:transform .35s cubic-bezier(.2,1.5,.4,1),box-shadow .25s,border-color .2s,background .2s}
+.quiz-option-index{display:grid;place-items:center;width:36px;height:36px;flex:none;border-radius:50%;background:#fff1c9;color:#ac3228;font:800 13px GamttizEN,sans-serif}
+.quiz-option-arrow{color:#bd3027;font-size:20px;opacity:.7;transition:transform .25s}
+.quiz-option:hover,.quiz-option:focus-visible{background:#fff7e8;border-color:#d64430;box-shadow:0 7px 0 #ffc348;transform:translateY(-4px)}
+.quiz-option:hover .quiz-option-arrow{transform:translate(3px,-3px)}
+.quiz-option.is-chosen{background:#e93636;color:#fff;border-color:#c82e29;transform:scale(.98)}
+.quiz-option.is-chosen .quiz-option-index{background:#ffbe25;color:#572c12}
+.quiz-option.is-chosen .quiz-option-arrow{color:#fff}
+.quiz-result{gap:26px 36px;align-items:stretch}
+.quiz-art{height:100%;min-height:360px;max-height:520px;object-fit:contain;padding:36px;border:1px solid #f0dfc3;border-radius:26px;background:radial-gradient(circle at 50% 42%,#fff1bf 0 36%,#fffdf6 37% 100%);filter:none}
+.quiz-result-copy{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.quiz-result-copy h3{letter-spacing:-.06em;line-height:1.1;text-wrap:balance}
+.quiz-type{border-radius:12px;padding:11px 16px;box-shadow:4px 4px 0 #ffbf27;font-size:15px}
+.quiz-insight-main{background:#fff0c5;border:1px solid #f0d798;border-radius:24px}
+.quiz-fact,.quiz-evidence,.quiz-companions{border-radius:22px;box-shadow:0 5px 0 #f2dfc2}
+.quiz-traits span{background:#fffdf7;border-color:#dfb855}
+.quiz-companion{transition:transform .35s cubic-bezier(.2,1.5,.4,1),box-shadow .2s}
+.quiz-companion:hover{box-shadow:0 6px 0 #ffca50}
+.quiz-result-actions{width:100%}
+.quiz-result-actions button{min-height:48px;transition:transform .35s cubic-bezier(.2,1.5,.4,1),box-shadow .2s}
+.quiz-result-actions button:hover{transform:translateY(-3px);box-shadow:0 5px 0 #c4a57670}
+.quiz-save,.quiz-share{font-size:14px;padding:15px 20px}
+.quiz-share{background:#ffbc22;color:#372717}
+.experience-page .playground{background:radial-gradient(circle at 90% 8%,#ffd158 0,transparent 27%),#ffb511}
+.experience-page .picker{gap:13px;margin-bottom:40px}
+.experience-page .pick-card{border:2px solid #ffffff8c;border-radius:17px;box-shadow:0 6px 0 #ca820130;overflow:hidden;background:#fffdfa;transition:transform .4s cubic-bezier(.2,1.5,.4,1),box-shadow .2s,border-color .2s}
+.experience-page .pick-card img{background:#fff2ce;aspect-ratio:1/1.08;padding:13px}
+.experience-page .pick-card span{background:#fffefa;min-height:48px;display:grid;place-items:center;padding:10px 6px;font-size:11px;line-height:1.3;text-align:center}
+.experience-page .pick-card[aria-pressed=true]{border-color:#c92c27;box-shadow:0 6px 0 #a62a22,0 0 0 3px #fff7e3}
+.experience-page .pick-card:active{transform:scale(.96)}
+.combo-preview{border:1px solid #f1c980;box-shadow:0 20px 50px #9a5b1229,0 8px 0 #c77b0050;padding:30px 34px 34px}
+.combo-preview-top{padding-bottom:17px;border-bottom:1px solid #ecd6b6}
+.combo-scene{margin-top:22px;border:1px solid #f0d9aa;background:radial-gradient(circle at 46% 35%,#fffcf5,#fff2d6 66%,#f4dfbb)}
+.combo-orbit-controls{margin-top:18px}
+.combo-orbit-controls button,.combo-preview .tray-actions button,.combo-names button{transition:transform .35s cubic-bezier(.2,1.5,.4,1),background .2s,box-shadow .2s}
+.combo-orbit-controls button:hover,.combo-preview .tray-actions button:hover,.combo-names button:hover{transform:translateY(-3px);box-shadow:0 4px 0 #e5c38e}
+.combo-names button{background:#fff3d6;border-color:#e4bf82}
+.combo-names button{animation:experience-chip-in .32s cubic-bezier(.2,1.5,.4,1) both}
+.download-combo,.share-combo{display:block;width:100%;border:0;border-radius:15px;min-height:60px;padding:16px 22px;font-weight:800;font-size:16px;transition:transform .4s cubic-bezier(.2,1.5,.4,1),box-shadow .25s,background .2s}
+.download-combo{background:#d42e2c;color:#fff;box-shadow:0 6px 0 #9e201f}
+.share-combo{margin-top:12px;background:#ffbf23;color:#362414;box-shadow:0 6px 0 #d79311}
+.share-combo:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.download-combo:not(:disabled):hover,.share-combo:not(:disabled):hover{transform:translateY(-3px)}
+.download-combo:not(:disabled):active,.share-combo:not(:disabled):active{transform:translateY(2px);box-shadow:0 2px 0 #a73b24}
+.experience-page .notebook{background:#fff9ec}
+.selected-note{box-shadow:0 5px 0 #e9d5b5;border-radius:20px}
+.experience-next a{transition:translate .35s cubic-bezier(.2,1.5,.4,1)}
+.experience-next a:hover{translate:4px 0}
+@keyframes experience-orbit{to{transform:rotate(360deg)}}
+@keyframes experience-panel-in{from{opacity:.4;translate:0 13px;scale:.985}to{opacity:1;translate:0 0;scale:1}}
+@keyframes experience-chip-in{from{opacity:0;scale:.75}to{opacity:1;scale:1}}
+@media(max-width:700px){
+  .experience-page .experience-intro{padding-top:27px;padding-bottom:36px}
+  .experience-page .experience-intro:before{width:105vw;top:-95%;right:-35%}
+  .experience-page .experience-intro h1{font-size:clamp(35px,9vw,48px);line-height:1.13}
+  .experience-page .fry-quiz,.experience-page .playground,.experience-page .notebook{padding:30px 5% 55px}
+  .quiz-panel,.quiz-result{padding:22px 18px;border-radius:23px;box-shadow:0 9px 0 #e5be7c70}
+  .quiz-panel{min-height:0}
+  .quiz-progress{margin:19px 0 27px}
+  .quiz-question{font-size:clamp(21px,5.4vw,26px);margin-bottom:23px}
+  .quiz-option{min-height:70px;font-size:13px;gap:10px;padding:12px 13px}
+  .quiz-option-index{width:30px;height:30px;font-size:11px}
+  .quiz-art{min-height:0;max-height:360px;height:310px;padding:18px}
+  .quiz-result-copy{align-items:flex-start;text-align:left}
+  .quiz-result-copy h3{font-size:clamp(30px,8vw,42px)}
+  .quiz-extras{gap:16px;padding-top:22px}
+  .quiz-result-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .quiz-result-actions button{width:100%;padding:12px 8px;font-size:12px}
+  .quiz-result-actions .quiz-reset{grid-column:1/-1}
+  .experience-page .picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  .experience-page .pick-card{border-radius:12px}
+  .experience-page .pick-card img{padding:7px}
+  .experience-page .pick-card span{min-height:39px;font-size:10px;padding:7px 3px}
+  .combo-preview{padding:17px 13px 22px;border-radius:22px}
+  .combo-preview-top{font-size:14px;padding-bottom:12px}
+  .combo-scene{margin-top:14px}
+  .combo-orbit-controls{align-items:flex-start;gap:10px}
+  .combo-orbit-controls p{font-size:11px}
+  .combo-orbit-controls button{font-size:11px;padding:9px 11px}
+  .download-combo,.share-combo{min-height:52px;font-size:13px;border-radius:13px}
+}
+@media(max-width:380px){.experience-page .picker{grid-template-columns:repeat(2,minmax(0,1fr))}.quiz-result-actions{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.experience-page .experience-intro:before,.quiz-panel,.quiz-result,.combo-names button{animation:none}.quiz-option,.quiz-progress::before,.experience-page .pick-card,.download-combo,.share-combo{transition:none!important}}
+
