@@ -1,6 +1,13 @@
 const form = document.getElementById('news-form');
 const statusLine = document.getElementById('admin-status');
 const publishButton = document.getElementById('publish-button');
+const loginView = document.getElementById('login-view');
+const editorView = document.getElementById('editor-view');
+const settingsView = document.getElementById('settings-view');
+const loginStatus = document.getElementById('login-status');
+let activeToken = '';
+let accountName = '';
+let authorName = '채민석';
 const value = id => document.getElementById(id).value.trim();
 const encodeBytes = bytes => {
   let binary = '';
@@ -19,10 +26,71 @@ const apiRequest = async (url, token, options = {}) => {
   }
   return response.json();
 };
+function showView(view) {
+  loginView.hidden = view !== loginView;
+  editorView.hidden = view !== editorView;
+  settingsView.hidden = view !== settingsView;
+}
+function logout() {
+  activeToken = '';
+  accountName = '';
+  authorName = '채민석';
+  document.getElementById('login-token').value = '';
+  form.reset();
+  showView(loginView);
+}
+document.getElementById('login-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const token = value('login-token');
+  const button = document.getElementById('login-button');
+  button.disabled = true;
+  loginStatus.textContent = 'GitHub 계정과 저장소 권한을 확인하고 있어요…';
+  try {
+    const user = await apiRequest('https://api.github.com/user', token);
+    if (user.login?.toLowerCase() !== 'fox475763') throw new Error('감띠즈 제작자 GitHub 계정으로 로그인해 주세요.');
+    const repository = await apiRequest('https://api.github.com/repos/fox475763/gamttiz', token);
+    if (!repository.permissions?.push) throw new Error('이 계정에 감띠즈 저장소 게시 권한이 없습니다.');
+    activeToken = token;
+    accountName = user.login;
+    try {
+      const settings = await apiRequest('https://api.github.com/repos/fox475763/gamttiz/contents/news/settings.json', token);
+      const data = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(settings.content.replace(/\s/g, '')), char => char.charCodeAt(0))));
+      if (typeof data.author === 'string' && data.author.trim()) authorName = data.author.trim();
+    } catch (error) { if (!String(error.message).startsWith('404:')) throw error; }
+    document.getElementById('login-token').value = '';
+    document.getElementById('signed-in-name').textContent = `${accountName} 계정으로 로그인됨`;
+    document.getElementById('author-name').value = authorName;
+    loginStatus.textContent = '';
+    showView(editorView);
+  } catch (error) { loginStatus.textContent = `로그인하지 못했어요. ${error.message}`; }
+  finally { button.disabled = false; }
+});
+document.getElementById('logout-button').addEventListener('click', logout);
+document.getElementById('settings-logout').addEventListener('click', logout);
+document.getElementById('settings-button').addEventListener('click', () => showView(settingsView));
+document.getElementById('back-to-editor').addEventListener('click', () => showView(editorView));
+document.getElementById('settings-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const nextName = value('author-name');
+  const line = document.getElementById('settings-status');
+  const button = event.currentTarget.querySelector('button[type=submit]');
+  button.disabled = true;
+  line.textContent = '게시자 이름을 저장하고 있어요…';
+  try {
+    const url = 'https://api.github.com/repos/fox475763/gamttiz/contents/news/settings.json';
+    let sha;
+    try { sha = (await apiRequest(url, activeToken)).sha; }
+    catch (error) { if (!String(error.message).startsWith('404:')) throw error; }
+    await apiRequest(url, activeToken, {method:'PUT', body: JSON.stringify({message:'Update GAMTTIZ news author', content: encodeText(JSON.stringify({author:nextName}, null, 2) + '\n'), ...(sha ? {sha} : {})})});
+    authorName = nextName;
+    line.textContent = '게시자 이름을 저장했어요. 이후 소식부터 적용됩니다.';
+  } catch (error) { line.textContent = `저장하지 못했어요. ${error.message}`; }
+  finally { button.disabled = false; }
+});
 form.addEventListener('submit', async event => {
   event.preventDefault();
-  const owner = value('repo-owner'), repo = value('repo-name'), token = value('github-token');
-  if (!/^[\w.-]+$/.test(owner) || !/^[\w.-]+$/.test(repo)) { statusLine.textContent = '저장소 주소를 확인해 주세요.'; return; }
+  if (!activeToken) { showView(loginView); return; }
+  const owner = 'fox475763', repo = 'gamttiz', token = activeToken;
   const files = [...document.getElementById('post-images').files];
   const documents = [...document.getElementById('post-files').files];
   if (files.length > 6 || files.some(file => file.size > 8 * 1024 * 1024)) { statusLine.textContent = '사진은 최대 6장, 각 8MB 이하로 올려 주세요.'; return; }
@@ -61,13 +129,12 @@ form.addEventListener('submit', async event => {
       attachments.push({ path, name: file.name });
     }
     const body = value('post-body');
-    const post = { id, date: new Date().toISOString(), title: value('post-title'), excerpt: value('post-excerpt') || body.slice(0, 180), body, images, attachments };
+    const post = { id, date: new Date().toISOString(), author: authorName, title: value('post-title'), excerpt: value('post-excerpt') || body.slice(0, 180), body, images, attachments };
     posts.unshift(post);
     statusLine.textContent = '글을 게시하고 있어요…';
     await apiRequest(`${base}news/posts.json`, token, { method:'PUT', body: JSON.stringify({ message:`Publish GAMTTIZ news: ${post.title}`, content: encodeText(JSON.stringify(posts, null, 2) + '\n'), sha: existing.sha }) });
     statusLine.replaceChildren(document.createTextNode('게시 완료! GitHub Pages 반영에는 잠시 걸릴 수 있어요. '));
     const link = document.createElement('a'); link.href = `news.html?id=${encodeURIComponent(id)}`; link.textContent = '게시한 글 보기 ↗'; statusLine.append(link);
-    document.getElementById('github-token').value = '';
     form.reset();
   } catch (error) { statusLine.textContent = `게시하지 못했어요. ${error.message}`; }
   finally { publishButton.disabled = false; }

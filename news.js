@@ -21,7 +21,7 @@ function articleNode(post, index) {
     const image = document.createElement('img'); image.src = post.images[0]; image.alt = `${post.title} 사진`; image.loading = 'lazy'; media.append(image);
   } else { const monogram = document.createElement('span'); monogram.textContent = 'GAMTTIZ'; media.append(monogram); }
   const info = document.createElement('div'); info.className = 'news-card-info';
-  const meta = document.createElement('small'); meta.textContent = `${String(index + 1).padStart(2, '0')} / ${prettyDate(post.date)}`;
+  const meta = document.createElement('small'); meta.textContent = `${String(index + 1).padStart(2, '0')} / ${prettyDate(post.date)}${post.author ? ` · ${post.author}` : ''}`;
   const title = document.createElement('h3'); title.textContent = post.title;
   const excerpt = document.createElement('p'); excerpt.textContent = post.excerpt || post.body?.slice(0, 100) || '';
   const more = document.createElement('b'); more.textContent = '자세히 보기 ↗';
@@ -30,7 +30,7 @@ function articleNode(post, index) {
 function renderDetail(post) {
   const wrap = document.createElement('article'); wrap.className = 'news-detail';
   const back = document.createElement('a'); back.href = 'news.html'; back.className = 'news-back'; back.textContent = '← ALL NEWS';
-  const meta = document.createElement('p'); meta.className = 'eyebrow'; meta.textContent = `GAMTTIZ / ${prettyDate(post.date)}`;
+  const meta = document.createElement('p'); meta.className = 'eyebrow'; meta.textContent = `GAMTTIZ / ${prettyDate(post.date)}${post.author ? ` · ${post.author}` : ''}`;
   const title = document.createElement('h2'); title.textContent = post.title;
   const body = document.createElement('p'); body.className = 'news-body'; body.textContent = post.body || '';
   wrap.append(back, meta, title);
