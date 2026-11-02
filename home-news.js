@@ -21,10 +21,7 @@ if (homeNews && collection) {
     const note = create('p', 'home-news-feed-empty', '새로운 소식을 준비하고 있어요. 다음 이야기를 기대해 주세요.');
     list.replaceChildren(note);
   };
-  fetch('news/posts.json', { cache: 'no-store' }).then(response => {
-    if (!response.ok) throw new Error('News unavailable');
-    return response.json();
-  }).then(posts => {
+  loadNewsPosts().then(posts => {
     if (!Array.isArray(posts)) throw new Error('Invalid news');
     const latest = posts.filter(post => post && typeof post.id === 'string' && typeof post.title === 'string')
       .sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 2);
@@ -35,7 +32,7 @@ if (homeNews && collection) {
       card.href = `news.html?id=${encodeURIComponent(post.id)}`;
       const imagePath = Array.isArray(post.images) ? post.images[0] : '';
       const imageWrap = create('div', 'home-news-feed-media');
-      if (typeof imagePath === 'string' && /^assets\/news\/[a-zA-Z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(imagePath)) {
+      if (typeof imagePath === 'string' && (/^assets\/news\/[a-zA-Z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(imagePath) || issueMedia(imagePath))) {
         const image = create('img'); image.src = imagePath; image.alt = `${post.title} 사진`; image.loading = 'lazy';
         imageWrap.append(image);
       } else imageWrap.append(create('span', '', 'GAMTTIZ'));
@@ -47,3 +44,4 @@ if (homeNews && collection) {
     }
   }).catch(showEmpty);
 }
+
