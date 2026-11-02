@@ -18,8 +18,8 @@
 .catalog-hero-image { border-radius: 22px; overflow: hidden; min-height: 420px; background: #eee9e2; }
 .catalog-hero-image img { display: block; width: 100%; height: 100%; min-height: 420px; max-height: 580px; object-fit: cover; }
 .catalog-hero-image { position: relative; }
-.catalog-hero-cutout { display: grid; place-items: center; background: linear-gradient(145deg,#fff5df,#f6e6ca); }
-.catalog-hero-cutout img { object-fit: contain; padding: clamp(14px,2.5vw,40px); filter: drop-shadow(0 28px 24px #5e231a30); }
+.catalog-hero-cutout { display: grid; place-items: center; background: #fff; border: 1px solid var(--line); }
+.catalog-hero-cutout img { object-fit: contain; padding: clamp(14px,2.5vw,40px); background: #fff; filter: drop-shadow(0 28px 24px #5e231a30); }
 .catalog-hero-image span { position: absolute; left: 18px; bottom: 18px; padding: 8px 11px; border-radius: 999px; background: #ffffffed; color: #6c625d; font: 700 10px GamttizEN,sans-serif; letter-spacing: .06em; }
 .catalog-studio { background: #fff; }
 .studio-photo-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: clamp(12px,2vw,28px); }
@@ -33,13 +33,14 @@
 .catalog-section-heading .eyebrow { grid-column: 1/-1; margin: 0; }
 .catalog-section-heading h2 { font-size: clamp(32px, 3.5vw, 56px); line-height: 1.15; letter-spacing: -.05em; margin: 0; }
 .catalog-section-heading>p { font-size: 15px; color: #68645f; line-height: 1.8; margin: 0; }
-.catalog-package { background: #f1eee9; }
-.package-photo-grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: clamp(12px,1.8vw,26px); }
+.catalog-package { background: #ffb511; }
+.catalog-package .catalog-section-heading>p:not(.eyebrow), .catalog-package .catalog-caption { color: #fff; }
+.package-photo-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: clamp(12px,1.8vw,26px); }
 .package-photo-grid figure { margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: #fff; }
 .package-photo-grid img { display: block; width: 100%; height: clamp(280px,30vw,470px); object-fit: cover; }
-.package-photo-grid figure:nth-child(-n+2) { background: linear-gradient(145deg,#fffaf1,#f6e7d2); }
-.package-photo-grid figure:nth-child(-n+2) img { object-fit: contain; padding: clamp(12px,1.8vw,28px); filter: drop-shadow(0 14px 15px #51281f20); }
-.package-photo-grid figcaption { font-size: 12px; font-weight: 800; padding: 16px 20px; }
+.package-photo-grid figure:nth-child(-n+2) { background: #fff; }
+.package-photo-grid figure:nth-child(-n+2) img { object-fit: contain; padding: clamp(12px,1.8vw,28px); background: #fff; filter: drop-shadow(0 14px 15px #51281f20); }
+.package-photo-grid figcaption { font-size: 12px; font-weight: 800; padding: 16px 20px; background: #fff; border-top: 1px solid #eee8e1; min-height: 52px; }
 .catalog-caption { color: #77716b; font-size: 12px; margin: 18px 0 0; }
 .catalog-keyrings { background: #fff; }
 .catalog-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: clamp(12px,1.5vw,22px); }
@@ -50,7 +51,7 @@
 .catalog-card-text small { color: #b52d29; font: 700 10px GamttizEN,sans-serif; letter-spacing: .07em; }
 .catalog-card-text strong { grid-column: 1; font-size: 17px; }
 .catalog-card-text b { grid-column: 2; grid-row: 1/3; align-self: end; color: var(--red); font-size: 20px; }
-.catalog-holder { display: grid; grid-template-columns: .9fr 1fr; gap: clamp(30px,6vw,100px); align-items: center; background: #fff0c6; }
+.catalog-holder { display: grid; grid-template-columns: .9fr 1fr; gap: clamp(30px,6vw,100px); align-items: center; background: #ffb511; }
 .catalog-holder-image { border-radius: 22px; overflow: hidden; background: #fff; }
 .catalog-holder-image img { display: block; width: 100%; max-height: 650px; object-fit: contain; }
 .catalog-holder h2 { font-size: clamp(34px,3.6vw,58px); line-height: 1.15; }
@@ -160,16 +161,15 @@
 .spec-grid strong { display: block; font-size: clamp(24px,2.5vw,37px); letter-spacing: -.04em; }
 .spec-grid p { line-height: 1.75; color: #66615a; font-size: 13px; }
 .spec-note { color: #736d66; font-size: 12px; line-height: 1.8; margin: 20px 0 0; }
-.project-packaging { background: #f1e9df; }
+.project-packaging { background: #f1eee9; }
 .packaging-design-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.packaging-design-grid figure { margin: 0; border-radius: 17px; overflow: hidden; background: #fff; border: 1px solid #ddd5ca; }
+.packaging-design-grid figure { margin: 0; border-radius: 17px; overflow: hidden; background: #fff; border: 1px solid #e2d9cf; display: flex; flex-direction: column; }
 .packaging-design-grid img { display: block; width: 100%; height: clamp(250px,28vw,430px); object-fit: contain; }
-.packaging-design-grid figure:first-child img { object-fit: cover; }
-.packaging-design-grid figure:first-child img, .packaging-design-grid figure:last-child img { object-fit: contain; padding: 18px; background: linear-gradient(145deg,#fffaf1,#f6e7d2); filter: drop-shadow(0 12px 13px #51281f1d); }
+.packaging-design-grid figure:first-child img, .packaging-design-grid figure:last-child img { object-fit: contain; padding: 18px; background: #fff; filter: drop-shadow(0 12px 13px #51281f1d); }
 .packaging-label-pair { min-height: clamp(250px,28vw,430px); display: flex; align-items: center; justify-content: center; gap: clamp(8px,1.4vw,22px); padding: 20px; }
 .packaging-label-pair img { width: 45%; height: auto; max-height: 260px; object-fit: contain; }
 .packaging-label-pair img:first-child { width: 46%; }
-.packaging-design-grid figcaption { padding: 14px 18px; font-weight: 700; font-size: 12px; }
+.packaging-design-grid figcaption { padding: 14px 18px; font-weight: 700; font-size: 12px; background: #fff; border-top: 1px solid #eee8e1; margin-top: auto; min-height: 49px; }
 @media (max-width: 900px) { .catalog-grid { grid-template-columns: repeat(3,minmax(0,1fr)); } .news-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
 @media (max-width: 700px) {
   .header, .experience-header { display: block; padding: 13px 5% 9px; }
@@ -216,3 +216,4 @@
   .packaging-design-grid img { height: 260px; }
 }
 @media (prefers-reduced-motion: reduce) { .catalog-jump, .catalog-card, .news-card { transition: none; } }
+
