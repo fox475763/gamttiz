@@ -13,25 +13,36 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserv
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = .95;
-renderer.setClearColor(0xffffff, 0);
+renderer.toneMappingExposure = .82;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.setClearColor(0xe8e3dc, 1);
 renderer.domElement.className = 'combo-3d-canvas';
 renderer.domElement.setAttribute('aria-hidden', 'true');
 tray.append(renderer.domElement);
 
 const environmentGenerator = new THREE.PMREMGenerator(renderer);
 scene.environment = environmentGenerator.fromScene(new RoomEnvironment(), .05).texture;
-scene.environmentIntensity = .55;
+scene.environmentIntensity = .32;
 environmentGenerator.dispose();
 
-scene.add(new THREE.HemisphereLight(0xfffaf2, 0x8e7870, 1.2));
-const key = new THREE.DirectionalLight(0xfff5e8, 1.0);
-key.position.set(-.09, .17, .15);
+scene.add(new THREE.HemisphereLight(0xfff4e9, 0x665550, .66));
+const key = new THREE.DirectionalLight(0xffebd8, 2.15);
+key.position.set(-.12, .23, .18);
+key.castShadow = true;
+key.shadow.mapSize.set(2048, 2048);
+key.shadow.camera.left = key.shadow.camera.bottom = -.14;
+key.shadow.camera.right = key.shadow.camera.top = .14;
+key.shadow.camera.near = .01;
+key.shadow.camera.far = .6;
+key.shadow.bias = -.00003;
+key.shadow.normalBias = .00012;
+key.shadow.radius = 3;
 scene.add(key);
-const fill = new THREE.DirectionalLight(0xe4eeff, .5);
-fill.position.set(.12, .08, .05);
+const fill = new THREE.DirectionalLight(0xe3edff, .42);
+fill.position.set(.14, .10, .07);
 scene.add(fill);
-const rim = new THREE.DirectionalLight(0xffe2c9, .4);
+const rim = new THREE.DirectionalLight(0xffe1c6, .7);
 rim.position.set(.08, .13, -.12);
 scene.add(rim);
 
@@ -49,24 +60,70 @@ const shadow = new THREE.Mesh(
   new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shadowCanvas), transparent: true, depthWrite: false, toneMapped: false })
 );
 shadow.rotation.x = -Math.PI / 2;
-shadow.position.y = -.0018;
+shadow.position.set(.008, -.0018, -.006);
 scene.add(shadow);
 
-const grainCanvas = document.createElement('canvas');
-grainCanvas.width = grainCanvas.height = 256;
-const grainContext = grainCanvas.getContext('2d');
-const grainPixels = grainContext.createImageData(256, 256);
-let grainSeed = 20261030;
-for (let pixel = 0; pixel < grainPixels.data.length; pixel += 4) {
-  grainSeed = (1664525 * grainSeed + 1013904223) >>> 0;
-  const shade = 112 + (grainSeed % 34);
-  grainPixels.data[pixel] = grainPixels.data[pixel + 1] = grainPixels.data[pixel + 2] = shade;
-  grainPixels.data[pixel + 3] = 255;
+// One material for the holder only. The character illustrations keep their original colors.
+const finishSize = 1024;
+let finishSeed = 20261102;
+function randomFinish() {
+  finishSeed = (1664525 * finishSeed + 1013904223) >>> 0;
+  return finishSeed / 4294967296;
 }
-grainContext.putImageData(grainPixels, 0, 0);
-const plasticGrain = new THREE.CanvasTexture(grainCanvas);
-plasticGrain.wrapS = plasticGrain.wrapT = THREE.RepeatWrapping;
-plasticGrain.repeat.set(8, 8);
+const finishCanvas = document.createElement('canvas');
+finishCanvas.width = finishCanvas.height = finishSize;
+const finishContext = finishCanvas.getContext('2d');
+const finishPixels = finishContext.createImageData(finishSize, finishSize);
+for (let p = 0; p < finishPixels.data.length; p += 4) {
+  const variation = Math.round((randomFinish() - .5) * 5);
+  finishPixels.data[p] = 188 + variation;
+  finishPixels.data[p + 1] = 42 + variation;
+  finishPixels.data[p + 2] = 39 + variation;
+  finishPixels.data[p + 3] = 255;
+}
+finishContext.putImageData(finishPixels, 0, 0);
+const heightCanvas = document.createElement('canvas');
+heightCanvas.width = heightCanvas.height = finishSize;
+const heightContext = heightCanvas.getContext('2d');
+heightContext.fillStyle = '#808080';
+heightContext.fillRect(0, 0, finishSize, finishSize);
+for (let i = 0; i < 185; i++) {
+  const x = randomFinish() * finishSize;
+  const y = randomFinish() * finishSize;
+  const length = 4 + randomFinish() ** 3 * 65;
+  const angle = -.2 + randomFinish() * .4;
+  const width = .3 + randomFinish() * 1.1;
+  finishContext.strokeStyle = randomFinish() > .5 ? 'rgba(255,211,184,.11)' : 'rgba(62,8,12,.08)';
+  finishContext.lineWidth = width;
+  finishContext.beginPath();
+  finishContext.moveTo(x, y);
+  finishContext.lineTo(x + length * Math.cos(angle), y + length * Math.sin(angle));
+  finishContext.stroke();
+  heightContext.strokeStyle = 'rgba(230,230,230,.23)';
+  heightContext.lineWidth = width;
+  heightContext.beginPath();
+  heightContext.moveTo(x, y);
+  heightContext.lineTo(x + length * Math.cos(angle), y + length * Math.sin(angle));
+  heightContext.stroke();
+}
+const finishColor = new THREE.CanvasTexture(finishCanvas);
+finishColor.colorSpace = THREE.SRGBColorSpace;
+const finishHeight = new THREE.CanvasTexture(heightCanvas);
+for (const texture of [finishColor, finishHeight]) {
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+}
+const holderMaterial = new THREE.MeshPhysicalMaterial({
+  color: 0xffffff,
+  map: finishColor,
+  bumpMap: finishHeight,
+  bumpScale: .000045,
+  roughness: .48,
+  metalness: 0,
+  clearcoat: .16,
+  clearcoatRoughness: .48,
+  envMapIntensity: .45
+});
 
 const holder = new THREE.Group();
 scene.add(holder);
@@ -253,15 +310,10 @@ const loader = new GLTFLoader();
 loader.load('assets/holder-fbx.glb', gltf => {
   gltf.scene.traverse(object => {
     if (!object.isMesh) return;
-    const material = object.material;
-    if (material) {
-      material.color?.set('#c91f29');
-      material.roughness = .42;
-      if ('clearcoat' in material) { material.clearcoat = .08; material.clearcoatRoughness = .7; }
-      material.bumpMap = plasticGrain;
-      material.bumpScale = .000035;
-      material.needsUpdate = true;
-    }
+    object.material?.dispose();
+    object.material = holderMaterial;
+    object.castShadow = true;
+    object.receiveShadow = true;
   });
   holder.add(gltf.scene);
   ready = true;
@@ -287,3 +339,4 @@ function animate(time) {
   renderer.render(scene, camera);
 }
 requestAnimationFrame(animate);
+
