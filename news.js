@@ -1,5 +1,6 @@
 const newsRoot = document.getElementById('news-root');
 const safeImage = path => typeof path === 'string' && /^assets\/news\/[a-zA-Z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(path);
+const safeAttachment = path => typeof path === 'string' && /^assets\/news\/[a-zA-Z0-9._-]+\.(pdf|txt|docx|xlsx|zip)$/i.test(path);
 const prettyDate = value => {
   const date = new Date(value);
   return Number.isNaN(date.valueOf()) ? '' : new Intl.DateTimeFormat('ko-KR', {year:'numeric', month:'long', day:'numeric'}).format(date);
@@ -37,7 +38,19 @@ function renderDetail(post) {
     if (!safeImage(path)) continue;
     const image = document.createElement('img'); image.src = path; image.alt = `${post.title} 사진`; image.loading = 'lazy'; wrap.append(image);
   }
-  wrap.append(body); newsRoot.replaceChildren(wrap);
+  wrap.append(body);
+  if (Array.isArray(post.attachments) && post.attachments.length) {
+    const files = document.createElement('div'); files.className = 'news-attachments';
+    const heading = document.createElement('h3'); heading.textContent = '첨부 파일'; files.append(heading);
+    for (const item of post.attachments) {
+      if (!item || !safeAttachment(item.path)) continue;
+      const link = document.createElement('a'); link.href = item.path; link.download = '';
+      link.textContent = `${typeof item.name === 'string' ? item.name : '파일 받기'} ↘`;
+      files.append(link);
+    }
+    if (files.children.length > 1) wrap.append(files);
+  }
+  newsRoot.replaceChildren(wrap);
   document.title = `${post.title} — GAMTTIZ News`;
 }
 fetch('news/posts.json', { cache: 'no-store' }).then(response => {

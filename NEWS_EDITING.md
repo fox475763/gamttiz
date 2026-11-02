@@ -6,8 +6,8 @@
 
 1. 배포된 사이트의 `admin.html`을 직접 엽니다. 이 주소는 방문자 메뉴에 표시되지 않습니다.
 2. `fox475763/gamttiz` 저장소에 대해 **Contents: Read and write** 권한이 있는 GitHub fine-grained personal access token을 준비합니다. 토큰은 본인만 보관합니다.
-3. 제목, 짧은 소개, 본문과 사진(최대 6장, 장당 8MB 이하)을 입력하고 게시합니다.
-4. 새 글과 사진이 GitHub 저장소에 반영됩니다. GitHub Pages 배포가 끝나면 `news.html`에서 보입니다.
+3. 소식 페이지의 **＋ 소식 올리기**를 누릅니다. 제목과 본문을 입력하고 사진(최대 6장, 장당 8MB 이하)이나 첨부 파일(PDF·TXT·DOCX·XLSX·ZIP, 최대 6개, 개당 10MB 이하)을 고른 뒤 게시합니다. 짧은 소개는 비워 두어도 됩니다.
+4. 새 글과 사진·파일이 GitHub 저장소에 반영됩니다. GitHub Pages 배포가 끝나면 `news.html`과 홈페이지의 컬렉션 위 최신 소식 영역에 보입니다.
 
 토큰은 페이지에 저장되지 않으며 게시 요청에만 사용됩니다. 공개 컴퓨터에서는 토큰을 입력하지 마세요. `admin.html` 주소를 숨기는 것은 보안 장치가 아닙니다. 실제 게시 권한은 GitHub 토큰으로 확인됩니다.
 
@@ -22,7 +22,8 @@
   "title": "소식 제목",
   "excerpt": "목록에 보일 짧은 소개",
   "body": "전체 글 내용",
-  "images": ["assets/news/example.jpg"]
+  "images": ["assets/news/example.jpg"],
+  "attachments": [{"path": "assets/news/example.pdf", "name": "안내문.pdf"}]
 }
 ```
 

@@ -24,9 +24,13 @@ form.addEventListener('submit', async event => {
   const owner = value('repo-owner'), repo = value('repo-name'), token = value('github-token');
   if (!/^[\w.-]+$/.test(owner) || !/^[\w.-]+$/.test(repo)) { statusLine.textContent = '저장소 주소를 확인해 주세요.'; return; }
   const files = [...document.getElementById('post-images').files];
+  const documents = [...document.getElementById('post-files').files];
   if (files.length > 6 || files.some(file => file.size > 8 * 1024 * 1024)) { statusLine.textContent = '사진은 최대 6장, 각 8MB 이하로 올려 주세요.'; return; }
   const allowed = new Set(['image/png','image/jpeg','image/webp','image/gif']);
   if (files.some(file => !allowed.has(file.type))) { statusLine.textContent = 'PNG, JPG, WEBP, GIF 사진만 사용할 수 있어요.'; return; }
+  const allowedFiles = new Set(['pdf','txt','docx','xlsx','zip']);
+  if (documents.length > 6 || documents.some(file => file.size > 10 * 1024 * 1024)) { statusLine.textContent = '첨부 파일은 최대 6개, 각 10MB 이하로 올려 주세요.'; return; }
+  if (documents.some(file => !allowedFiles.has(file.name.split('.').pop().toLowerCase()))) { statusLine.textContent = 'PDF, TXT, DOCX, XLSX, ZIP 파일만 첨부할 수 있어요.'; return; }
   publishButton.disabled = true;
   const base = `https://api.github.com/repos/${owner}/${repo}/contents/`;
   try {
@@ -37,6 +41,7 @@ form.addEventListener('submit', async event => {
     if (!Array.isArray(posts)) throw new Error('소식 목록 파일 형식이 올바르지 않습니다.');
     const id = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
     const images = [];
+    const attachments = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const ext = file.type === 'image/jpeg' ? 'jpg' : file.type.split('/')[1];
@@ -46,7 +51,17 @@ form.addEventListener('submit', async event => {
       await apiRequest(`${base}${path}`, token, { method:'PUT', body: JSON.stringify({ message:`Add GAMTTIZ news image ${id}`, content: encodeBytes(bytes) }) });
       images.push(path);
     }
-    const post = { id, date: new Date().toISOString(), title: value('post-title'), excerpt: value('post-excerpt'), body: value('post-body'), images };
+    for (let i = 0; i < documents.length; i++) {
+      const file = documents[i];
+      const ext = file.name.split('.').pop().toLowerCase();
+      const path = `assets/news/${id}-file-${i + 1}.${ext}`;
+      statusLine.textContent = `첨부 파일 ${i + 1}/${documents.length}개를 올리고 있어요…`;
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      await apiRequest(`${base}${path}`, token, { method:'PUT', body: JSON.stringify({ message:`Add GAMTTIZ news attachment ${id}`, content: encodeBytes(bytes) }) });
+      attachments.push({ path, name: file.name });
+    }
+    const body = value('post-body');
+    const post = { id, date: new Date().toISOString(), title: value('post-title'), excerpt: value('post-excerpt') || body.slice(0, 180), body, images, attachments };
     posts.unshift(post);
     statusLine.textContent = '글을 게시하고 있어요…';
     await apiRequest(`${base}news/posts.json`, token, { method:'PUT', body: JSON.stringify({ message:`Publish GAMTTIZ news: ${post.title}`, content: encodeText(JSON.stringify(posts, null, 2) + '\n'), sha: existing.sha }) });
