@@ -44,4 +44,3 @@ if (homeNews && collection) {
     }
   }).catch(showEmpty);
 }
-

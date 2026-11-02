@@ -65,4 +65,3 @@ loadNewsPosts().then(posts => {
   valid.sort((a,b) => String(b.date).localeCompare(String(a.date))).forEach((post, i) => list.append(articleNode(post, i)));
   newsRoot.replaceChildren(list);
 }).catch(() => emptyState('소식을 불러오지 못했어요.'));
-

@@ -222,4 +222,3 @@
   .packaging-design-grid img { height: 260px; }
 }
 @media (prefers-reduced-motion: reduce) { .catalog-jump, .catalog-card, .news-card { transition: none; } }
-

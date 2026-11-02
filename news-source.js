@@ -42,4 +42,3 @@ async function loadNewsPosts() {
     return Array.isArray(posts) ? posts : [];
   }
 }
-
