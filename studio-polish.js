@@ -25,7 +25,11 @@
   const targets = document.querySelectorAll(
     '.story-row, .section-heading, .guide-grid article, .project-top, ' +
     '.project-facts, .project-ideas article, .project-system, .project-subhead, ' +
-    '.hub-grid a, .experience-intro h1, .experience-links a'
+    '.hub-grid a, .experience-intro h1, .experience-links a, ' +
+    '.catalog-hero-copy, .catalog-hero-image, .catalog-section-heading, ' +
+    '.studio-photo-grid figure, .package-photo-grid figure, .catalog-card, ' +
+    '.catalog-holder-image, .catalog-holder-copy, .news-hero h1, ' +
+    '.news-list-head, .news-card, .news-empty, .news-detail'
   );
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
@@ -39,3 +43,4 @@
   }, { threshold: .09 });
   targets.forEach((target) => observer.observe(target));
 })();
+
