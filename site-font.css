@@ -1,0 +1,4 @@
+@font-face{font-family:"Wanted Sans Variable";src:url("assets/fonts/wanted-sans-variable.woff2") format("woff2");font-style:normal;font-weight:100 900;font-display:swap}
+body,button,input,select,textarea{font-family:"Wanted Sans Variable","Malgun Gothic",sans-serif}
+h2,h3,.card-label,.detail-copy h2,.note-card summary strong,.project-ideas h3,.project-facts dd{font-family:"Wanted Sans Variable","Malgun Gothic",sans-serif}
+h2,h3{letter-spacing:-.045em}
