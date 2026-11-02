@@ -1,6 +1,6 @@
 const newsRoot = document.getElementById('news-root');
-const safeImage = path => typeof path === 'string' && /^assets\/news\/[a-zA-Z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(path);
-const safeAttachment = path => typeof path === 'string' && /^assets\/news\/[a-zA-Z0-9._-]+\.(pdf|txt|docx|xlsx|zip)$/i.test(path);
+const safeImage = path => typeof path === 'string' && (/^assets\/news\/[a-zA-Z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(path) || issueMedia(path));
+const safeAttachment = path => typeof path === 'string' && (/^assets\/news\/[a-zA-Z0-9._-]+\.(pdf|txt|docx|xlsx|zip)$/i.test(path) || issueMedia(path));
 const prettyDate = value => {
   const date = new Date(value);
   return Number.isNaN(date.valueOf()) ? '' : new Intl.DateTimeFormat('ko-KR', {year:'numeric', month:'long', day:'numeric'}).format(date);
@@ -44,7 +44,9 @@ function renderDetail(post) {
     const heading = document.createElement('h3'); heading.textContent = '첨부 파일'; files.append(heading);
     for (const item of post.attachments) {
       if (!item || !safeAttachment(item.path)) continue;
-      const link = document.createElement('a'); link.href = item.path; link.download = '';
+      const link = document.createElement('a'); link.href = item.path;
+      if (item.path.startsWith('assets/')) link.download = '';
+      else { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
       link.textContent = `${typeof item.name === 'string' ? item.name : '파일 받기'} ↘`;
       files.append(link);
     }
@@ -53,9 +55,7 @@ function renderDetail(post) {
   newsRoot.replaceChildren(wrap);
   document.title = `${post.title} — GAMTTIZ News`;
 }
-fetch('news/posts.json', { cache: 'no-store' }).then(response => {
-  if (!response.ok) throw new Error('News unavailable'); return response.json();
-}).then(posts => {
+loadNewsPosts().then(posts => {
   if (!Array.isArray(posts)) throw new Error('Invalid news');
   const valid = posts.filter(post => post && typeof post.id === 'string' && typeof post.title === 'string');
   const wanted = new URLSearchParams(location.search).get('id');
@@ -65,3 +65,4 @@ fetch('news/posts.json', { cache: 'no-store' }).then(response => {
   valid.sort((a,b) => String(b.date).localeCompare(String(a.date))).forEach((post, i) => list.append(articleNode(post, i)));
   newsRoot.replaceChildren(list);
 }).catch(() => emptyState('소식을 불러오지 못했어요.'));
+
