@@ -75,6 +75,7 @@
   function setMode(mode){
     const next=dock.dataset.mode===mode?'closed':mode;
     dock.dataset.mode=next;
+    updateMenuTextColor();
     scrim.classList.toggle('is-open',next!=='closed');
     trigger.setAttribute('aria-expanded',String(next!=='closed'));
     for(const [name,panel] of [['search',search],['menu',menu],['contact',contact]]){const active=next===name;panel.inert=!active;panel.setAttribute('aria-hidden',String(!active));}
@@ -153,7 +154,7 @@ function updateMenuTextColor() {
     break;
   }
 
-  trigger.style.color = isRed ? '#ffffff' : '#e93636';
+  trigger.style.setProperty('color', dock.dataset.mode !== 'closed' || isRed ? '#ffffff' : '#e93636', 'important');
 }
 
 window.addEventListener('scroll', updateMenuTextColor, {
