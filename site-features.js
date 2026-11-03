@@ -123,4 +123,43 @@
     const dismiss=make('button','','닫기 ✕');dismiss.type='button';dismiss.addEventListener('click',()=>{guide.remove();try{sessionStorage.setItem('gamttiz-entry-dismissed','1');}catch{}});guide.append(dismiss);
     header?.after(guide);
   }
+  
+function updateMenuTextColor() {
+  const rect = trigger.getBoundingClientRect();
+
+  // 버튼과 어두운 오버레이를 잠깐 제외하고
+  // 버튼 뒤에 있는 실제 웹페이지 요소 확인
+  dock.style.visibility = 'hidden';
+  scrim.style.visibility = 'hidden';
+
+  const behind = document.elementFromPoint(
+    rect.left + rect.width / 2,
+    rect.top + rect.height / 2
+  );
+
+  dock.style.visibility = '';
+  scrim.style.visibility = '';
+
+  let isRed = false;
+
+  for (let el = behind; el; el = el.parentElement) {
+    const rgb = getComputedStyle(el)
+      .backgroundColor.match(/[\d.]+/g)?.map(Number);
+
+    if (!rgb || (rgb[3] ?? 1) < 0.8) continue;
+
+    const [r, g, b] = rgb;
+    isRed = r > 140 && r > g * 1.45 && r > b * 1.45;
+    break;
+  }
+
+  trigger.style.color = isRed ? '#ffffff' : '#e93636';
+}
+
+window.addEventListener('scroll', updateMenuTextColor, {
+  passive: true
+});
+window.addEventListener('resize', updateMenuTextColor);
+updateMenuTextColor();
+
 })();
