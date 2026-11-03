@@ -15,15 +15,18 @@
   const make = (tag, className, value) => { const el=document.createElement(tag); if(className)el.className=className; if(value)el.textContent=value; return el; };
   const header = document.querySelector('.header');
   const nav = header?.querySelector('nav[aria-label="주 메뉴"]');
+  const scrim = make('div','control-scrim');
+  scrim.setAttribute('aria-hidden','true');
+  document.body.append(scrim);
 
   const dock = make('div','control-dock');
   dock.dataset.mode = 'closed';
   const trigger = make('button','control-trigger');
   trigger.type = 'button';
-  trigger.setAttribute('aria-label','컨트롤 버튼: 누르면 검색, 위로 밀거나 길게 누르면 메뉴');
+  trigger.setAttribute('aria-label','컨트롤 버튼: 누르면 메뉴, 길게 누르면 검색');
   trigger.setAttribute('aria-expanded','false');
   trigger.setAttribute('aria-controls','control-search control-menu control-contact');
-  trigger.innerHTML = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  trigger.textContent = 'Menu';
   const search = make('section','control-search'); search.id='control-search'; search.setAttribute('aria-label','사이트 검색'); search.setAttribute('aria-hidden','true'); search.inert=true;
   const searchInput=make('input','control-search-input'); searchInput.type='search'; searchInput.placeholder='감띠즈 검색'; searchInput.autocomplete='off'; searchInput.setAttribute('aria-label','검색어');
   const searchResults=make('div','control-search-results'); searchResults.setAttribute('aria-live','polite');
@@ -33,9 +36,10 @@
   const menuLinks=make('div','control-menu-links');
   const home=make('a','','Home');home.href='index.html';menuLinks.append(home);
   nav?.querySelectorAll('a').forEach(link=>{const item=link.cloneNode(true);item.removeAttribute('class');menuLinks.append(item);});
-  const menuSearch=make('button','','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
   const menuContact=make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
-  menuLinks.append(menuSearch,menuContact);menu.append(menuLinks);
+  const menuSearch=make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
+  menuSearch.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>');
+  menuLinks.append(menuContact,menuSearch);menu.append(menuLinks);
   const contact=make('section','control-contact');contact.id='control-contact';contact.setAttribute('aria-label','문의 방법 선택');contact.setAttribute('aria-hidden','true');contact.inert=true;
   contact.append(make('span','control-panel-label','CONTACT GAMTTIZ'));
   const contactLinks=make('div','control-contact-links');
@@ -62,9 +66,10 @@
   function setMode(mode){
     const next=dock.dataset.mode===mode?'closed':mode;
     dock.dataset.mode=next;
+    scrim.classList.toggle('is-open',next!=='closed');
     trigger.setAttribute('aria-expanded',String(next!=='closed'));
     for(const [name,panel] of [['search',search],['menu',menu],['contact',contact]]){const active=next===name;panel.inert=!active;panel.setAttribute('aria-hidden',String(!active));}
-    trigger.setAttribute('aria-label',next==='closed'?'컨트롤 버튼: 누르면 검색, 위로 밀거나 길게 누르면 메뉴':`${next==='search'?'검색':next==='menu'?'메뉴':'문의'} 닫기`);
+    trigger.setAttribute('aria-label',next==='closed'?'컨트롤 버튼: 누르면 메뉴, 길게 누르면 검색':`${next==='search'?'검색':next==='menu'?'메뉴':'문의'} 닫기`);
     if(next==='search'){renderResults();loadSearchNews();window.setTimeout(()=>searchInput.focus({preventScroll:true}),180);}
     else if(document.activeElement===searchInput)trigger.focus({preventScroll:true});
   }
@@ -72,7 +77,7 @@
   trigger.addEventListener('pointerdown',event=>{
     start={x:event.clientX,y:event.clientY};gestureHandled=false;
     clearTimeout(holdTimer);
-    holdTimer=window.setTimeout(()=>{gestureHandled=true;setMode('menu');try{navigator.vibrate?.(12);}catch{}},540);
+    holdTimer=window.setTimeout(()=>{gestureHandled=true;setMode('search');try{navigator.vibrate?.(12);}catch{}},540);
   });
   trigger.addEventListener('pointermove',event=>{if(start && (Math.abs(event.clientX-start.x)>12||Math.abs(event.clientY-start.y)>12))clearTimeout(holdTimer);});
   trigger.addEventListener('pointerup',event=>{
@@ -85,7 +90,12 @@
   });
   trigger.addEventListener('pointercancel',()=>{clearTimeout(holdTimer);start=null;});
   trigger.addEventListener('contextmenu',event=>event.preventDefault());
-  trigger.addEventListener('click',()=>{if(gestureHandled){gestureHandled=false;return;}setMode('search');});
+  trigger.addEventListener('click',()=>{if(gestureHandled){gestureHandled=false;return;}setMode('menu');});
+  let menuSwipeX=null;
+  menu.addEventListener('pointerdown',event=>{menuSwipeX=event.clientX;});
+  menu.addEventListener('pointerup',event=>{if(menuSwipeX!==null && event.clientX-menuSwipeX < -45)setMode('search');menuSwipeX=null;});
+  menu.addEventListener('pointercancel',()=>{menuSwipeX=null;});
+  scrim.addEventListener('click',()=>setMode('closed'));
   searchInput.addEventListener('input',renderResults);
   document.addEventListener('pointerdown',event=>{if(dock.dataset.mode!=='closed'&&!dock.contains(event.target))setMode('closed');});
   document.addEventListener('keydown',event=>{
