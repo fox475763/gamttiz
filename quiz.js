@@ -1,9 +1,9 @@
 // A playful match based on fry preferences, not a personality assessment.
 const fryQuestions=[
-  {title:'감자튀김이 나오면 소스는 어떻게 먹나요?',options:[
+  {title:'감자튀김에 소스가 함께 나오면 어떻게 먹나요?',options:[
     ['먼저 아무것도 찍지 않고 감튀 맛부터 본다',{0:4,4:2,3:1}],
     ['케첩을 한 번에 듬뿍 찍는다',{5:5,13:2}],
-    ['매콤한 시즈닝이나 색다른 맛을 찾는다',{2:5,9:2}],
+    ['매콤한 소스를 찾아 찍는다',{2:5,9:2}],
     ['여러 소스를 주문해 친구와 바꿔 찍는다',{8:4,12:3,1:1}]
   ]},
   {title:'접시에서 제일 먼저 집는 한 조각은?',options:[
@@ -27,8 +27,8 @@ const fryQuestions=[
   {title:'감튀가 조금 식었다면 어떻게 하나요?',options:[
     ['에어프라이어에 다시 바삭하게 데운다',{0:4,3:3}],['소스를 곁들여 그대로 즐긴다',{5:4,13:3}],['부드러워진 식감도 좋아한다',{4:4,13:4}],['친구와 수다 떨며 금세 먹는다',{8:5,12:3}]
   ]},
-  {title:'케첩을 찍을 때 나만의 방식은?',options:[
-    ['끝에 살짝만 찍는다',{0:3,4:4}],['감튀 위에 크게 한 바퀴 짜 넣는다',{5:6}],['찍지 않고 짭짤함을 즐긴다',{2:3,3:3}],['두 개를 겹쳐서 같이 찍는다',{8:5,12:3}]
+  {title:'케첩이 함께 나왔을 때 어떻게 먹나요?',options:[
+    ['끝에 살짝만 찍는다',{0:3,4:4}],['감튀 위에 케첩을 한 바퀴 듬뿍 짠다',{5:6}],['찍지 않고 짭짤함을 즐긴다',{2:3,3:3}],['두 개를 겹쳐서 같이 찍는다',{8:5,12:3}]
   ]},
   {title:'감튀를 먹는 가장 좋은 순간은?',options:[
     ['상자를 열자마자 나는 따뜻한 향',{0:4,1:2}],['영화 보면서 한 조각씩',{4:3,7:3}],['친구들과 마지막 조각을 두고 웃을 때',{8:4,12:3}],['집에 와서 혼자 조용히 먹을 때',{11:4,13:3}]
@@ -52,10 +52,10 @@ const fryQuestions=[
     ['끝까지 바삭한 가느다란 끝',{2:3,11:4}],['속이 부드러운 통통한 가운데',{1:5,10:2}],['살짝 진하게 익은 모서리',{3:5,9:2}],['구부러진 재미있는 실루엣',{7:4,13:3}]
   ]},
   {title:'갓 나온 감튀가 너무 뜨거울 때는?',options:[
-    ['후후 불어 바로 한 입',{0:5,2:2}],['조금 식혀 속까지 맛본다',{4:5,10:2}],['친구에게 먼저 먹어 보라고 한다',{8:5,12:2}],['소스에 찍어 온도부터 낮춘다',{5:5,13:2}]
+    ['후후 불어 바로 한 입',{0:5,2:2}],['조금 식혀 속까지 맛본다',{4:5,10:2}],['친구와 함께 후후 불어 먹는다',{8:5,12:2}],['잠깐 식힌 뒤 소스에 찍는다',{5:5,13:2}]
   ]},
   {title:'포장 감튀를 집에 가져오면 가장 신경 쓰이는 것은?',options:[
-    ['봉지 안 수증기 때문에 눅눅해질까 봐',{6:5,13:3}],['따뜻한 온기가 남아 있을까 봐',{4:4,1:3}],['소스가 새지 않았을까 봐',{5:5,11:2}],['친구 몫이 충분할까 봐',{8:5,12:3}]
+    ['봉지 안 수증기 때문에 눅눅해질까 봐',{6:5,13:3}],['따뜻한 온기가 남아 있을까 봐',{4:4,1:3}],['소스가 새지 않았을까 봐',{5:5,11:2}],['함께 먹을 사람 몫이 충분할지',{8:5,12:3}]
   ]},
   {title:'감튀를 먹기 전 소금이 한쪽에 몰려 있다면?',options:[
     ['봉지를 흔들어 고르게 섞는다',{0:5,2:2}],['짭짤한 조각부터 골라 먹는다',{3:5,9:2}],['소금 적은 쪽이 오히려 좋다',{4:5,10:2}],['친구와 각자 취향대로 나눈다',{8:5,12:2}]
@@ -90,7 +90,7 @@ const fryQuestions=[
   {title:'웨지 감튀가 나오면 어떻게 먹고 싶나요?',options:[
     ['두툼한 속을 먼저 맛본다',{10:7,1:2}],['껍질 부분의 고소함을 즐긴다',{10:5,3:3}],['소스에 넓게 찍어 먹는다',{5:4,10:3}],['친구와 반씩 나눈다',{8:4,12:3}]
   ]},
-  {title:'감튀를 들고 걷다가 조금 휘어졌다면?',options:[
+  {title:'휘어진 감튀를 발견했다면?',options:[
     ['모양이 더 재미있어졌다',{7:7}],['바로 먹어 바삭함을 지킨다',{0:4,11:3}],['친구에게 보여주며 사진을 찍는다',{8:4,12:3}],['느긋하게 한 입씩 먹는다',{13:5,4:2}]
   ]},
   {title:'감튀를 친구와 먹을 때 소스 접시는?',options:[
@@ -106,7 +106,7 @@ const fryProfiles=[
   {type:'시즈닝 탐험파',traits:['새로운 맛에 호기심','양념의 균형 감각','한입의 변화를 좋아함'],similar:'케이준띠는 한 조각의 향까지 챙기는 친구예요. 당신도 소금 한 꼬집이나 시즈닝의 차이를 즐겁게 구별하는 편이에요.',habit:'감튀를 가볍게 흔들어 양념을 골고루 묻히고 맛의 차이를 비교해요.',shine:'평범한 감튀 시간에 새로운 소스와 조합을 제안해요.',pair:5,pairWhy:'케찹 감띠와 만나면 매콤함과 새콤함의 조합이 완성돼요.',helper:0,helperWhy:'감띠가 기본 감자 맛을 다시 떠올리게 해줘요.'},
   {type:'진한 모서리 수집가',traits:['고소한 풍미 선호','색의 차이에 민감','남다른 한 조각 발견'],similar:'탄감띠는 남들보다 조금 더 진하게 익은 모서리가 개성이에요. 당신도 다른 사람이 지나친 갈색 조각의 고소함을 알아보는 편이에요.',habit:'살짝 진하게 익은 끝이나 바삭한 모서리를 먼저 찾아요.',shine:'예상 밖의 맛에서 재미를 발견하고 친구에게 알려줘요.',pair:9,pairWhy:'울룩불룩띠와는 울퉁불퉁한 바삭한 면을 함께 찾아요.',helper:4,helperWhy:'덜감띠가 부드러운 감자 맛으로 강한 풍미를 쉬게 해줘요.'},
   {type:'담백한 천천히파',traits:['감자 본연의 맛','속도보다 여유','은은한 식감 선호'],similar:'덜감띠는 조금 일찍 나온 덕분에 부드러운 매력이 있어요. 당신도 강한 양념보다 감자 자체의 맛을 천천히 느끼는 편이에요.',habit:'소스를 조금만 찍거나 생략하고, 한 조각씩 느긋하게 먹어요.',shine:'빠르게 사라지는 감튀 한 상자에 잠깐의 쉼표를 만들어요.',pair:13,pairWhy:'촉촉감띠와는 부드러운 식감의 다른 얼굴을 즐길 수 있어요.',helper:2,helperWhy:'케이준띠가 가끔은 새로운 자극을 건네줘요.'},
-  {type:'소스 조합 연구가',traits:['찍는 방식에도 취향','새콤한 한입','재미있는 조합'],similar:'케찹 감띠는 소스를 단순한 곁들이가 아니라 자기만의 스타일로 만들어요. 당신도 얼마나, 어디에 찍을지까지 나름의 방식이 있어요.',habit:'케첩을 넉넉히 준비하고 마지막 한 조각까지 소스를 남김없이 즐겨요.',shine:'친구들이 새로운 소스 조합을 시도하게 만드는 아이디어가 있어요.',pair:2,pairWhy:'케이준띠의 양념과 케첩이 만나면 풍미가 더 커져요.',helper:0,helperWhy:'감띠가 소스를 빼고도 맛있는 첫입을 알려줘요.'},
+  {type:'소스 조합 연구가',traits:['찍는 방식에도 취향','새콤한 한입','재미있는 조합'],similar:'케찹 감띠는 소스를 단순한 곁들임이 아니라 자기만의 스타일로 만들어요. 당신도 얼마나, 어디에 찍을지까지 나름의 방식이 있어요.',habit:'케첩을 넉넉히 준비하고 마지막 한 조각까지 소스를 남김없이 즐겨요.',shine:'친구들이 새로운 소스 조합을 시도하게 만드는 아이디어가 있어요.',pair:2,pairWhy:'케이준띠의 양념과 케첩이 만나면 풍미가 더 커져요.',helper:0,helperWhy:'감띠가 소스를 빼고도 맛있는 첫입을 알려줘요.'},
   {type:'차가운 감튀도 발견파',traits:['온도에 민감','의외의 식감 수용','자기만의 속도'],similar:'빙빙이는 차가운 곳에서 막 나왔지만 아직 모험이 시작되지 않았어요. 당신도 감튀의 온도와 상태 변화를 세심하게 느끼는 편이에요.',habit:'따뜻할 때와 식었을 때의 차이를 알아보고, 다시 데우는 방법도 궁리해요.',shine:'남들이 놓치는 작은 온도 차이를 이야기로 바꿔요.',pair:13,pairWhy:'촉촉감띠와는 식감이 변한 감튀도 즐겨 보는 동료예요.',helper:0,helperWhy:'감띠가 갓 튀긴 바삭함으로 출발점을 다시 보여줘요.'},
   {type:'모양부터 즐기는 곡선파',traits:['독특한 모양 선호','유쾌한 발견','틀에 얽매이지 않음'],similar:'휜감띠는 반듯하지 않은 모양 자체가 매력이에요. 당신도 휘어진 감튀를 보면 먼저 웃고 한 번 더 살펴보는 편이에요.',habit:'특이하게 휘어진 조각을 집어 사진을 찍거나 소스에 푹 담가요.',shine:'감튀 한 상자에서도 예상 밖의 재미를 발견해요.',pair:9,pairWhy:'울룩불룩띠와 만나면 모양이 다른 친구들끼리 더 즐거워져요.',helper:0,helperWhy:'감띠가 익숙한 기준점을 잡아줘서 차이가 더 선명해져요.'},
   {type:'함께 먹는 나눔파',traits:['친구와 나누기','마지막 조각 양보','대화가 곁들여진 감튀'],similar:'감감이와 띠띠는 한 감자에서 시작한 두 친구예요. 당신도 감튀가 맛있는 순간을 혼자보다 누군가와 나누는 편이에요.',habit:'친구가 좋아하는 조각을 남겨두고 소스도 가운데 두고 함께 찍어요.',shine:'마지막 조각을 두고 웃을 수 있는 분위기를 만들어요.',pair:12,pairWhy:'두리감띠와는 서로 다른 취향을 딱 맞게 나눌 수 있어요.',helper:11,helperWhy:'부스러끼가 당신 몫의 작은 조각도 챙겨줘요.'},
@@ -119,6 +119,7 @@ const fryProfiles=[
 const quizRoot=document.querySelector('#quiz-root');
 const quizAnswers=[];
 const quizLength=10;
+const quizProgressKey='gamttiz-quiz-progress-v1';
 let preparedResult=null;
 function chooseQuestions(){const shuffled=[...fryQuestions];for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}return shuffled.slice(0,quizLength);}
 let activeQuestions=chooseQuestions();
@@ -128,7 +129,16 @@ const sharedAnswerIds=(sharedParams.get('a')||'').split('').map(Number);
 if(sharedQuestionIds.length===quizLength&&new Set(sharedQuestionIds).size===quizLength&&sharedAnswerIds.length===quizLength&&sharedQuestionIds.every(id=>Number.isInteger(id)&&id>=0&&id<fryQuestions.length)&&sharedAnswerIds.every(id=>Number.isInteger(id)&&id>=0&&id<4)){
   activeQuestions=sharedQuestionIds.map(id=>fryQuestions[id]);
   quizAnswers.push(...sharedAnswerIds);
+} else if(!sharedParams.has('q')&&!sharedParams.has('a')) {
+  try {
+    const saved=JSON.parse(localStorage.getItem(quizProgressKey)||'null');
+    if(saved&&Array.isArray(saved.questions)&&Array.isArray(saved.answers)&&saved.questions.length===quizLength&&new Set(saved.questions).size===quizLength&&saved.answers.length<=quizLength&&saved.questions.every(id=>Number.isInteger(id)&&id>=0&&id<fryQuestions.length)&&saved.answers.every(id=>Number.isInteger(id)&&id>=0&&id<4)){
+      activeQuestions=saved.questions.map(id=>fryQuestions[id]);quizAnswers.push(...saved.answers);
+      if(quizAnswers.length){const note=document.createElement('div');note.className='experience-resume';note.textContent=`지난 감튀 취향 테스트를 ${quizAnswers.length} / ${quizLength} 단계부터 이어갑니다.`;const restart=document.createElement('button');restart.type='button';restart.textContent='처음부터';restart.addEventListener('click',()=>{localStorage.removeItem(quizProgressKey);quizAnswers.length=0;activeQuestions=chooseQuestions();note.remove();renderQuiz();});note.append(restart);quizRoot.before(note);}
+    }
+  } catch {}
 }
+function saveQuizProgress(){try{localStorage.setItem(quizProgressKey,JSON.stringify({questions:activeQuestions.map(q=>fryQuestions.indexOf(q)),answers:quizAnswers}));}catch{}}
 function quizElement(tag,className,text){const el=document.createElement(tag);if(className)el.className=className;if(text!==undefined)el.textContent=text;return el;}
 function renderQuiz(){
   quizRoot.replaceChildren();
@@ -138,9 +148,9 @@ function renderQuiz(){
   const top=quizElement('div','quiz-top');top.append(quizElement('span','quiz-kicker',`QUESTION ${String(step+1).padStart(2,'0')}`),quizElement('span','quiz-count',`${step+1} / ${quizLength}`));
   const bar=quizElement('div','quiz-progress');bar.setAttribute('aria-hidden','true');bar.style.setProperty('--progress',`${(step+1)/quizLength*100}%`);
   const title=quizElement('h3','quiz-question',question.title);const options=quizElement('div','quiz-options');
-  question.options.forEach(([label],choice)=>{const button=quizElement('button','quiz-option');button.type='button';button.append(quizElement('span','quiz-option-index',String(choice+1).padStart(2,'0')),quizElement('span','',label),quizElement('span','quiz-option-arrow','↗'));button.addEventListener('click',()=>{options.querySelectorAll('button').forEach(option=>option.disabled=true);button.classList.add('is-chosen');quizAnswers.push(choice);setTimeout(renderQuiz,220);});options.append(button);});
+  question.options.forEach(([label],choice)=>{const button=quizElement('button','quiz-option');button.type='button';button.append(quizElement('span','quiz-option-index',String(choice+1).padStart(2,'0')),quizElement('span','',label),quizElement('span','quiz-option-arrow','↗'));button.addEventListener('click',()=>{options.querySelectorAll('button').forEach(option=>option.disabled=true);button.classList.add('is-chosen');quizAnswers.push(choice);saveQuizProgress();setTimeout(renderQuiz,220);});options.append(button);});
   panel.append(top,bar,title,options);
-  if(step){const back=quizElement('button','quiz-back','← 이전 질문');back.type='button';back.addEventListener('click',()=>{quizAnswers.pop();renderQuiz();});panel.append(back);}
+  if(step){const back=quizElement('button','quiz-back','← 이전 질문');back.type='button';back.addEventListener('click',()=>{quizAnswers.pop();saveQuizProgress();renderQuiz();});panel.append(back);}
   quizRoot.append(panel);
 }
 function matchFriend(){
@@ -164,11 +174,11 @@ function renderQuizResult(){
   const matched=quizAnswers.map((choice,step)=>({label:activeQuestions[step].options[choice][0],score:activeQuestions[step].options[choice][1][index]||0})).filter(item=>item.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
   const evidence=quizElement('section','quiz-evidence');evidence.append(quizElement('p','quiz-kicker','YOUR ANSWERS'),quizElement('h4','','이 답변들이 힌트였어요'));const list=document.createElement('ul');matched.forEach(item=>list.append(quizElement('li','',item.label)));evidence.append(list);extras.append(evidence);
   const companions=quizElement('section','quiz-companions');companions.append(quizElement('p','quiz-kicker','FRY FRIENDS'),quizElement('h4','','함께하면 더 맛있는 감띠들'));const companionGrid=quizElement('div','quiz-companion-grid');[[profile.pair,'가장 잘 어울리는 감띠',profile.pairWhy],[profile.helper,'도움이 되는 감띠',profile.helperWhy]].forEach(([other,label,why])=>{const card=quizElement('button','quiz-companion');card.type='button';const image=quizElement('img','');image.src=products[other].illustration;image.alt='';const words=quizElement('span','');words.append(quizElement('small','',label),quizElement('strong','',products[other].name),quizElement('span','',why));card.append(image,words);card.addEventListener('click',()=>showDetail(other));companionGrid.append(card);});companions.append(companionGrid);extras.append(companions);
-  const actions=quizElement('div','quiz-result-actions');const save=quizElement('button','quiz-save','결과 이미지 저장 ↓');save.type='button';save.addEventListener('click',()=>saveQuizImage(index,save));const share=quizElement('button','quiz-share','SNS에 공유 ↗');share.type='button';share.addEventListener('click',()=>shareQuizResult(index,share));const copyLink=quizElement('button','quiz-copy','결과 링크 복사');copyLink.type='button';copyLink.addEventListener('click',()=>copyQuizLink(copyLink));const detail=quizElement('button','quiz-detail','이 친구 자세히 보기 ↗');detail.type='button';detail.addEventListener('click',()=>showDetail(index));const reset=quizElement('button','quiz-reset','다시 해보기 ↺');reset.type='button';reset.addEventListener('click',()=>{quizAnswers.length=0;activeQuestions=chooseQuestions();history.replaceState(null,'',location.pathname);renderQuiz();});actions.append(save,share,copyLink,detail,reset);extras.append(actions,quizElement('p','quiz-share-note','인스타그램에는 저장한 이미지를 올릴 수 있어요. 이 결과는 감튀 취향으로 즐기는 놀이입니다.'));
+  const actions=quizElement('div','quiz-result-actions');const save=quizElement('button','quiz-save','결과 이미지 저장 ↓');save.type='button';save.addEventListener('click',()=>saveQuizImage(index,save));const share=quizElement('button','quiz-share','SNS에 공유 ↗');share.type='button';share.addEventListener('click',()=>shareQuizResult(index,share));const copyLink=quizElement('button','quiz-copy','결과 링크 복사');copyLink.type='button';copyLink.addEventListener('click',()=>copyQuizLink(copyLink));const detail=quizElement('button','quiz-detail','이 친구 자세히 보기 ↗');detail.type='button';detail.addEventListener('click',()=>showDetail(index));const reset=quizElement('button','quiz-reset','다시 해보기 ↺');reset.type='button';reset.addEventListener('click',()=>{quizAnswers.length=0;activeQuestions=chooseQuestions();try{localStorage.removeItem(quizProgressKey);}catch{}document.querySelector('.experience-resume')?.remove();history.replaceState(null,'',location.pathname);renderQuiz();});actions.append(save,share,copyLink,detail,reset);extras.append(actions,quizElement('p','quiz-share-note','인스타그램에는 저장한 이미지를 올릴 수 있어요. 이 결과는 감튀 취향으로 즐기는 놀이입니다.'));
   panel.append(art,copy,extras);quizRoot.append(panel);
   preparedResult={index,promise:quizImageBlob(index).then(blob=>{if(preparedResult?.index===index)preparedResult.blob=blob;return blob;}).catch(error=>{console.error(error);return null;}),blob:null};
 }
-function quizShareUrl(){const url=new URL(location.href);url.search='';url.hash='';url.searchParams.set('q',activeQuestions.map(q=>fryQuestions.indexOf(q)).join(','));url.searchParams.set('a',quizAnswers.join(''));return url.href;}
+function quizShareUrl(){const base=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'https://fox475763.github.io/gamttiz/':location.href;const url=new URL('quiz.html',base);url.searchParams.set('q',activeQuestions.map(q=>fryQuestions.indexOf(q)).join(','));url.searchParams.set('a',quizAnswers.join(''));return url.href;}
 function quizShareText(index){return `내 감튀 취향은 ${fryProfiles[index].type}! 감띠즈의 ${products[index].name}와 닮았대요. 당신의 감띠도 찾아봐요.`;}
 function quizLoadArt(src){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=src;});}
 function quizWrap(ctx,text,x,y,maxWidth,lineHeight,maxLines=5){let line='',drawn=0;for(const word of text.split(' ')){const next=line?line+' '+word:word;if(ctx.measureText(next).width>maxWidth&&line){ctx.fillText(line,x,y+drawn*lineHeight);drawn++;line=word;if(drawn>=maxLines)return y+drawn*lineHeight;}else line=next;}if(line){ctx.fillText(line,x,y+drawn*lineHeight);drawn++;}return y+drawn*lineHeight;}
@@ -205,6 +215,6 @@ function quizDownloadBlob(blob){const url=URL.createObjectURL(blob),link=documen
 function quizResultBlob(index){return preparedResult?.index===index?(preparedResult.blob||preparedResult.promise):quizImageBlob(index);}
 function quizSavePreview(blob){let dialog=document.querySelector('#quiz-save-preview');if(!dialog){dialog=document.createElement('dialog');dialog.id='quiz-save-preview';dialog.className='combo-save-preview';const title=quizElement('h2','','결과 이미지 저장하기'),guide=quizElement('p','','다운로드가 시작되지 않았다면 이미지를 길게 눌러 사진에 저장하세요.'),image=quizElement('img','');image.alt='감튀 취향 테스트 결과 이미지';const close=quizElement('button','','닫기 ✕');close.type='button';close.addEventListener('click',()=>dialog.close());dialog.append(title,guide,image,close);document.body.append(dialog);}const image=dialog.querySelector('img');if(image.dataset.url)URL.revokeObjectURL(image.dataset.url);image.dataset.url=URL.createObjectURL(blob);image.src=image.dataset.url;dialog.showModal();}
 async function saveQuizImage(index,button){const original=button.textContent;button.disabled=true;button.textContent='이미지 만드는 중…';try{const blob=await quizResultBlob(index);if(!blob)throw Error('PNG');quizDownloadBlob(blob);if(matchMedia('(pointer: coarse)').matches||navigator.maxTouchPoints>0)quizSavePreview(blob);button.textContent='이미지 저장 완료 ✓';}catch(error){button.textContent='저장 실패 · 다시 시도';console.error(error);}finally{button.disabled=false;setTimeout(()=>{button.textContent=original;},3000);}}
-async function shareQuizResult(index,button){const original=button.textContent;button.disabled=true;try{const text=quizShareText(index),url=quizShareUrl(),blob=await quizResultBlob(index);if(!blob)throw Error('PNG');const file=new File([blob],'gamttiz-fry-result.png',{type:'image/png'});if(navigator.share){if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file],title:'나의 감띠즈 감튀 취향',text,...(location.hostname==='localhost'||location.hostname==='127.0.0.1'?{}:{url})});else await navigator.share({title:'나의 감띠즈 감튀 취향',text,url});button.textContent='공유했어요 ✓';}else{await navigator.clipboard.writeText(text+' '+url);button.textContent='결과 문구 복사 완료 ✓';}}catch(error){if(error.name!=='AbortError'){button.textContent='공유할 수 없어 링크를 복사해 주세요';console.error(error);}}finally{button.disabled=false;setTimeout(()=>{button.textContent=original;},4000);}}
+async function shareQuizResult(index,button){const original=button.textContent;button.disabled=true;try{const text=quizShareText(index),url=quizShareUrl(),blob=await quizResultBlob(index);if(!blob)throw Error('PNG');const file=new File([blob],'gamttiz-fry-result.png',{type:'image/png'});if(navigator.share){if(navigator.canShare?.({files:[file]}))await navigator.share({files:[file],title:'나의 감띠즈 감튀 취향',text,url});else await navigator.share({title:'나의 감띠즈 감튀 취향',text,url});button.textContent='공유했어요 ✓';}else{await navigator.clipboard.writeText(text+' '+url);button.textContent='결과 문구 복사 완료 ✓';}}catch(error){if(error.name!=='AbortError'){button.textContent='공유할 수 없어 링크를 복사해 주세요';console.error(error);}}finally{button.disabled=false;setTimeout(()=>{button.textContent=original;},4000);}}
 async function copyQuizLink(button){try{await navigator.clipboard.writeText(quizShareText(matchFriend())+' '+quizShareUrl());button.textContent='복사 완료 ✓';}catch(error){button.textContent='복사 실패';}setTimeout(()=>{button.textContent='결과 링크 복사';},3000);}
 renderQuiz();

@@ -5,14 +5,14 @@ const products = [
   ['탄감띠','Tan Gamtti','실수로 200°C 기름에 들어간 감자튀김'],
   ['덜감띠','Deol Gamtti','약속이 있어서 조금 일찍 밖으로 나온 감자튀김'],
   ['(케찹 발린) 감띠','Ketchup Gamtti','머리에 케찹을 돌돌 바른 조금 특별한 감자튀김'],
-  ['빙빙이','BingBingi','꽁꽁냉동실에서 이제 막 나온 감자튀김'],
+  ['빙빙이','BingBingi','꽁꽁 언 냉동실에서 이제 막 나온 감자튀김'],
   ['휜감띠','Hwin Gamtti','그냥 휘었다.'],
   ['감감이와 띠띠','GamGami & TtiTti','한 감자에서 나뉜 쌍둥이 남매 감자튀김'],
-  ['울룩불룩띠','Ulluk Bulluk tti','형태가 아주 그냥 울룩이불룩이한 감자튀김'],
+  ['울룩불룩띠','Ulluk Bulluk tti','울룩불룩한 굴곡이 매력인 감자튀김'],
   ['웨지감띠','Weji Gamtti','조각 사과처럼 옆으로 누운 감자튀김'],
-  ['부스러끼','Bueureokki','겁이 많아서 어딘가에 숨어있는 감자튀김'],
-  ['두리감띠','Duri Gamtti','서로 등 부분이 딱 붙어사는 감자튀김'],
-  ['촉촉감띠','Chokchok Gamtti','기름이 흥건해 촉촉흐물흐물한 감자튀김']
+  ['부스러끼','Bueureokki','겁이 많아 어딘가에 숨어 있는 감자튀김'],
+  ['두리감띠','Duri Gamtti','서로 등을 맞대고 붙어 사는 감자튀김'],
+  ['촉촉감띠','Chokchok Gamtti','기름을 머금어 촉촉하고 흐물흐물한 감자튀김']
 ].map(([name,english,description],i)=>({name,english,description,image:`assets/keyring-${String(i+1).padStart(2,'0')}.png`,illustration:`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`}));
 const holder={name:'감띠즈 홀더',english:'GAMTTIZ HOLDER',description:'수집한 감띠즈 키링을 보관할 수 있는 보관통이자 직접 키링을 원하는 대로 걸 수 있는 키링입니다.',image:'assets/holder.png'};
 // 원본 제품 설명을 바탕으로 쓴 사이트용 상상 이야기입니다.
@@ -65,3 +65,5 @@ document.querySelector('#next').addEventListener('click',()=>showDetail((current
 dialog.addEventListener('keydown',e=>{if(current<0)return;if(e.key==='ArrowRight'){e.preventDefault();showDetail((current+1)%14);}if(e.key==='ArrowLeft'){e.preventDefault();showDetail((current+13)%14);}});
 document.querySelector('#random')?.addEventListener('click',()=>showDetail(Math.floor(Math.random()*14)));
 document.querySelector('.holder-open')?.addEventListener('click',()=>showDetail(-1));
+const linkedFriend=Number(new URLSearchParams(location.search).get('friend'));
+if(Number.isInteger(linkedFriend)&&linkedFriend>=1&&linkedFriend<=products.length)showDetail(linkedFriend-1);
