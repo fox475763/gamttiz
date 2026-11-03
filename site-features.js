@@ -52,8 +52,10 @@
   }
   function renderResults(){
     const query=normalize(searchInput.value);
-    const results=pages.filter(item=>!query||normalize(`${item.title} ${item.description} ${item.keys}`).includes(query)).slice(0,20);
     searchResults.replaceChildren();
+    searchResults.hidden=!query;
+    if(!query)return;
+    const results=pages.filter(item=>normalize(`${item.title} ${item.description} ${item.keys}`).includes(query)).slice(0,8);
     if(!results.length){searchResults.append(make('p','control-no-results','검색 결과가 없어요. 다른 단어로 찾아보세요.'));return;}
     results.forEach(item=>{const link=make('a','control-result');link.href=item.url;link.append(make('strong','',item.title),make('span','',item.description),make('b','','↗'));searchResults.append(link);});
   }
