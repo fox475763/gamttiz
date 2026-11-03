@@ -222,3 +222,37 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   box-shadow: none;
 }
 
+
+/* 메뉴 버튼 확대 시 잘림 방지 */
+.control-menu-links {
+  overflow: visible;
+}
+
+/* 기본 버튼 크기 */
+.control-menu-links a,
+.control-menu-links button {
+  width: calc(100% - 10px);
+  min-height: 40px;
+  justify-self: center;
+  box-sizing: border-box;
+
+  transition:
+    width .3s ease,
+    min-height .3s ease,
+    padding .3s ease,
+    background .3s ease,
+    color .3s ease;
+}
+
+/* 마우스 및 손가락으로 선택했을 때 */
+.control-menu-links a:hover,
+.control-menu-links button:hover,
+.control-menu-links a:focus-visible,
+.control-menu-links button:focus-visible {
+  width: 100%;
+  min-height: 48px;
+  padding: 13px 15px;
+
+  transform: none !important;
+  animation: none !important;
+}
