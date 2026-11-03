@@ -146,3 +146,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
     inset 0 -2px 3px rgba(37, 51, 91, 0.28),
     0 17px 36px rgba(12, 14, 25, 0.3);
 }
+.control-trigger {
+  color: #e93636;
+  text-shadow: none;
+}
