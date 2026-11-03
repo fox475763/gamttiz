@@ -47,6 +47,15 @@
   const mail=make('a','','Gmail ↗');mail.href='mailto:fox475763@gmail.com?subject=GAMTTIZ%20%EB%AC%B8%EC%9D%98';mail.append(make('small','','fox475763@gmail.com'));
   contactLinks.append(dm,mail);contact.append(contactLinks);
   dock.append(search,menu,contact,trigger);document.body.append(dock);
+  // Restart one complete light sweep for every touch or mouse press.
+  dock.addEventListener('pointerdown',event=>{
+    const target=event.target.closest('button,a');
+    if(!target || !dock.contains(target))return;
+    target.classList.remove('glass-pressed');
+    void target.offsetWidth;
+    target.classList.add('glass-pressed');
+    window.setTimeout(()=>target.classList.remove('glass-pressed'),900);
+  });
 
   const normalize=value=>String(value||'').toLocaleLowerCase('ko').replace(/\s+/g,'');
   let newsLoaded=false;
