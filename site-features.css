@@ -256,3 +256,37 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   transform: none !important;
   animation: none !important;
 }
+
+
+/* 검색 결과 전체 박스 */
+.control-search-results {
+  max-height: min(72dvh, calc(100dvh - 110px));
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* 검색 결과 개별 버튼 */
+.control-result {
+  box-sizing: border-box;
+  width: calc(100% - 12px);
+  margin: 4px auto;
+  padding: 12px 13px;
+
+  transform: none !important;
+  animation: none !important;
+
+  transition:
+    width .3s ease,
+    padding .3s ease,
+    background .3s ease !important;
+}
+
+/* 마우스를 올리면 실제 박스 크기가 커짐 */
+.control-result:hover,
+.control-result:focus-visible {
+  width: 100%;
+  padding: 18px 16px;
+
+  transform: none !important;
+  animation: none !important;
+}
