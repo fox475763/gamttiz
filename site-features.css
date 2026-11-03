@@ -62,3 +62,26 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .control-trigger::after{background:radial-gradient(ellipse at 27% 13%,rgba(255,255,255,.29),transparent 44%),radial-gradient(ellipse at 83% 89%,rgba(78,139,255,.09),transparent 35%)}
 .control-menu-links a,.control-menu-links button,.control-contact-links a{background:rgba(255,255,255,.72)}
 
+/* Optical glass: clear centre, rolled bright edge, and moving white highlights. */
+@property --glass-angle{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes glass-glint{to{--glass-angle:-360deg}}
+@keyframes glass-lap{from{--glass-angle:0deg}to{--glass-angle:-360deg}}
+@keyframes glass-pop{0%{transform:scale(1)}42%{transform:scale(1.075)}73%{transform:scale(.988)}100%{transform:scale(1.035)}}
+.control-trigger,.control-search,.control-menu,.control-contact,.control-search-results{background:linear-gradient(135deg,rgba(255,255,255,.105),rgba(255,255,255,.012) 47%,rgba(255,255,255,.07));-webkit-backdrop-filter:blur(2px) saturate(1.08);backdrop-filter:blur(2px) saturate(1.08);border-color:rgba(255,255,255,.64);box-shadow:inset 0 2px 1px rgba(255,255,255,.86),inset 0 -3px 5px rgba(17,32,61,.24),inset 6px 0 9px rgba(255,255,255,.16),inset -5px 0 9px rgba(80,112,165,.13),0 15px 36px rgba(9,12,21,.22)}
+.control-trigger::before,.control-search::before,.control-menu::before,.control-contact::before,.control-search-results::before{inset:-2px;border:3px solid transparent;background:conic-gradient(from var(--glass-angle),rgba(255,255,255,.96) 0deg,rgba(255,255,255,.4) 34deg,rgba(192,235,255,.74) 48deg,rgba(255,255,255,.55) 67deg,rgba(255,255,255,.85) 130deg,rgba(255,224,232,.63) 182deg,rgba(255,255,255,.72) 243deg,rgba(240,244,255,.46) 304deg,rgba(255,255,255,.98) 360deg) border-box;opacity:.9;animation:glass-glint 11s linear infinite}
+.control-trigger::after{inset:4px;border:1px solid rgba(255,255,255,.42);background:radial-gradient(ellipse at 22% 12%,rgba(255,255,255,.4),transparent 39%),radial-gradient(ellipse at 86% 89%,rgba(223,237,255,.14),transparent 34%);box-shadow:inset 2px 2px 5px rgba(255,255,255,.38),inset -2px -2px 5px rgba(19,37,70,.15)}
+.control-menu,.control-contact{display:block!important;max-height:calc(100dvh - 115px);overflow-x:hidden;overflow-y:auto;scrollbar-width:none;overscroll-behavior:contain;background:linear-gradient(145deg,rgba(255,255,255,.095),rgba(255,255,255,.013) 52%,rgba(255,255,255,.065));-webkit-backdrop-filter:blur(2px) saturate(1.06);backdrop-filter:blur(2px) saturate(1.06)}
+.control-menu::-webkit-scrollbar,.control-contact::-webkit-scrollbar,.control-search-results::-webkit-scrollbar{display:none;width:0;height:0}
+.control-menu-links{display:grid!important;grid-template-columns:minmax(0,1fr);min-width:0;width:100%;overflow:hidden}
+.control-menu-links a,.control-menu-links button,.control-contact-links a{position:relative;isolation:isolate;overflow:hidden;background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.19);box-shadow:inset 0 1px rgba(255,255,255,.34);transform-origin:center right}
+.control-menu-links a:hover,.control-menu-links button:hover,.control-contact-links a:hover,.control-result:hover{background:rgba(255,255,255,.31);transform:scale(1.035);animation:glass-pop .46s cubic-bezier(.22,1,.36,1) both}
+.control-menu-links a:active,.control-menu-links button:active,.control-contact-links a:active,.control-result:active{transform:scale(.965);animation:none}
+.control-menu-links a::before,.control-menu-links button::before,.control-contact-links a::before,.control-result::before{content:"";position:absolute;inset:0;border-radius:inherit;border:2px solid transparent;background:conic-gradient(from var(--glass-angle),transparent 0deg,transparent 250deg,rgba(255,255,255,.95) 297deg,rgba(220,243,255,.95) 321deg,transparent 352deg) border-box;-webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:0}
+.control-trigger.glass-pressed::before,.control-menu-links .glass-pressed::before,.control-contact-links .glass-pressed::before,.control-result.glass-pressed::before{opacity:1;animation:glass-lap .82s linear 1}
+.control-menu-links button.control-menu-search{background:rgba(255,255,255,.22)}
+.control-search-input{color:#fff;caret-color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.72)}
+.control-search-input::placeholder{color:rgba(255,255,255,.92);text-shadow:0 1px 3px rgba(0,0,0,.65)}
+.control-search-results{scrollbar-width:none;overflow-x:hidden;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02) 60%,rgba(255,255,255,.07));-webkit-backdrop-filter:blur(2px) saturate(1.06);backdrop-filter:blur(2px) saturate(1.06)}
+.control-result{position:relative;overflow:hidden;background:rgba(255,255,255,.22);margin:2px 0}
+@media(prefers-reduced-motion:reduce){.control-trigger::before,.control-search::before,.control-menu::before,.control-contact::before,.control-search-results::before,.control-trigger.glass-pressed::before,.control-menu-links .glass-pressed::before,.control-contact-links .glass-pressed::before,.control-result.glass-pressed::before{animation:none!important}.control-menu-links a:hover,.control-menu-links button:hover,.control-contact-links a:hover,.control-result:hover{animation:none!important}}
+
