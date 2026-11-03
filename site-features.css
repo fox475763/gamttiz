@@ -53,3 +53,12 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .control-menu-links button.control-menu-search::after{display:none}
 @media(prefers-reduced-motion:reduce){.control-scrim{transition-duration:.01ms}}
 
+/* The site's generic nav rule uses flex; this floating navigation is a panel. */
+.control-menu{display:block;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.035) 55%,rgba(255,255,255,.08));-webkit-backdrop-filter:blur(4px) saturate(1.12);backdrop-filter:blur(4px) saturate(1.12)}
+.control-menu-links{grid-template-columns:minmax(0,1fr);width:100%}
+.control-menu-links a,.control-menu-links button{min-width:0}
+.control-contact{overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.035) 55%,rgba(255,255,255,.08));-webkit-backdrop-filter:blur(4px) saturate(1.12);backdrop-filter:blur(4px) saturate(1.12)}
+.control-trigger,.control-search{background:linear-gradient(140deg,rgba(255,255,255,.12),rgba(255,255,255,.025) 58%,rgba(255,255,255,.1));-webkit-backdrop-filter:blur(4px) saturate(1.12);backdrop-filter:blur(4px) saturate(1.12)}
+.control-trigger::after{background:radial-gradient(ellipse at 27% 13%,rgba(255,255,255,.29),transparent 44%),radial-gradient(ellipse at 83% 89%,rgba(78,139,255,.09),transparent 35%)}
+.control-menu-links a,.control-menu-links button,.control-contact-links a{background:rgba(255,255,255,.72)}
+
