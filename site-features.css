@@ -85,3 +85,24 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .control-result{position:relative;overflow:hidden;background:rgba(255,255,255,.22);margin:2px 0}
 @media(prefers-reduced-motion:reduce){.control-trigger::before,.control-search::before,.control-menu::before,.control-contact::before,.control-search-results::before,.control-trigger.glass-pressed::before,.control-menu-links .glass-pressed::before,.control-contact-links .glass-pressed::before,.control-result.glass-pressed::before{animation:none!important}.control-menu-links a:hover,.control-menu-links button:hover,.control-contact-links a:hover,.control-result:hover{animation:none!important}}
 
+/* Keep the glass clear. Broken, moving white reflections replace continuous outlines. */
+.control-menu,.control-search-results,.control-search{border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 18px 38px rgba(8,10,19,.21)}
+.control-search-results::before{display:none}
+.control-menu::before,.control-search::before,.control-trigger::before{border-width:2px;background:conic-gradient(from var(--glass-angle),rgba(255,255,255,.98) 0deg,rgba(255,255,255,.58) 22deg,rgba(255,255,255,.05) 58deg,transparent 96deg,rgba(225,240,255,.25) 122deg,rgba(255,255,255,.93) 150deg,rgba(255,255,255,.08) 178deg,transparent 232deg,rgba(255,255,255,.5) 278deg,rgba(255,255,255,.03) 309deg,rgba(255,255,255,.98) 360deg) border-box;opacity:.9}
+.control-trigger{border:0;background:linear-gradient(155deg,rgba(255,255,255,.16),transparent 38%,rgba(85,12,21,.11) 85%),var(--red,#e93636);color:#fff;text-shadow:0 1px 2px rgba(93,9,18,.42);box-shadow:inset 0 1px 1px rgba(255,255,255,.28),inset 0 -4px 9px rgba(91,7,17,.18),0 13px 29px rgba(17,10,18,.25)}
+.control-trigger::after{border-color:rgba(255,255,255,.14);box-shadow:inset 2px 2px 5px rgba(255,255,255,.16),inset -2px -2px 5px rgba(90,9,20,.16)}
+.control-trigger:hover{box-shadow:inset 0 1px 2px rgba(255,255,255,.35),inset 0 -4px 9px rgba(91,7,17,.2),0 17px 34px rgba(17,10,18,.3)}
+.control-panel-label{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.55)}
+.control-menu-links a,.control-menu-links button,.control-contact-links a{border:0;background:rgba(24,31,42,.16);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.58);box-shadow:inset 0 1px rgba(255,255,255,.12)}
+.control-menu-links a::after,.control-menu-links button::after{display:none!important;content:none!important}
+.control-menu-links a:hover,.control-menu-links button:hover,.control-menu-links a:focus-visible,.control-menu-links button:focus-visible,.control-contact-links a:hover,.control-contact-links a:focus-visible{background:rgba(255,255,255,.82);color:#15151b;text-shadow:none;transform:scale(1.035);animation:glass-pop .46s cubic-bezier(.22,1,.36,1) both}
+.control-menu-links a:active,.control-menu-links button:active,.control-contact-links a:active{background:rgba(255,255,255,.9);color:#15151b;transform:scale(.965);animation:none}
+.control-menu-links button.control-menu-search{background:rgba(24,31,42,.16);border-top:0;border-radius:12px}
+.control-menu-links button.control-menu-search:hover,.control-menu-links button.control-menu-search:focus-visible{background:rgba(255,255,255,.82)}
+.control-search-input{border:0!important;outline:0!important;box-shadow:none!important}
+.control-search-input:focus-visible{outline:0!important}
+.control-result{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.58);background:rgba(24,31,42,.14)}
+.control-result span,.control-no-results{color:rgba(255,255,255,.83)}
+.control-result b{color:#fff}
+.control-result:hover,.control-result:focus-visible{color:#15151b;text-shadow:none;background:rgba(255,255,255,.82)}
+.control-result:hover span,.control-result:focus-visible span,.control-result:hover b,.control-result:focus-visible b{color:#33343b}
