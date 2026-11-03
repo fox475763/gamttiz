@@ -290,3 +290,10 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   transform: none !important;
   animation: none !important;
 }
+
+/* 메뉴가 열려 있을 때 글씨 흰색 */
+.control-dock[data-mode="menu"] .control-trigger,
+.control-dock[data-mode="contact"] .control-trigger,
+.control-dock[data-mode="search"] .control-trigger {
+  color: #ffffff !important;
+}
