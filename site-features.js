@@ -34,12 +34,19 @@
   const menu=make('nav','control-menu'); menu.id='control-menu'; menu.setAttribute('aria-label','컨트롤 메뉴'); menu.setAttribute('aria-hidden','true'); menu.inert=true;
   menu.append(make('span','control-panel-label','GAMTTIZ / MENU'));
   const menuLinks=make('div','control-menu-links');
-  const home=make('a','','Home');home.href='index.html';menuLinks.append(home);
-  nav?.querySelectorAll('a').forEach(link=>{const item=link.cloneNode(true);item.removeAttribute('class');item.textContent=item.textContent.replace(/\s*↗\s*$/u,'');menuLinks.append(item);});
+  const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Products:'제품',News:'소식','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
+  const addMenuSubtitle=(item)=>{
+    const label=item.textContent.trim();
+    const translation=menuTranslations[label];
+    if(translation)item.append(make('small','control-menu-subtitle',translation));
+    return item;
+  };
+  const home=make('a','','Home');home.href='index.html';menuLinks.append(addMenuSubtitle(home));
+  nav?.querySelectorAll('a').forEach(link=>{const item=link.cloneNode(true);item.removeAttribute('class');item.textContent=item.textContent.replace(/\s*↗\s*$/u,'');menuLinks.append(addMenuSubtitle(item));});
   const menuContact=make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
   const menuSearch=make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
   menuSearch.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>');
-  menuLinks.append(menuContact,menuSearch);menu.append(menuLinks);
+  menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menu.append(menuLinks);
   const contact=make('section','control-contact');contact.id='control-contact';contact.setAttribute('aria-label','문의 방법 선택');contact.setAttribute('aria-hidden','true');contact.inert=true;
   contact.append(make('span','control-panel-label','CONTACT GAMTTIZ'));
   const contactLinks=make('div','control-contact-links');
