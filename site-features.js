@@ -125,42 +125,59 @@
     header?.after(guide);
   }
   
-function updateMenuTextColor() {
-  const rect = trigger.getBoundingClientRect();
+let colorFrame = 0;
+let lastButtonColor = '';
 
-  // 버튼과 어두운 오버레이를 잠깐 제외하고
-  // 버튼 뒤에 있는 실제 웹페이지 요소 확인
+function setButtonColor(color) {
+  if (color === lastButtonColor) return;
+  trigger.style.setProperty('color', color, 'important');
+  lastButtonColor = color;
+}
+
+function updateMenuTextColor() {
+  if (dock.dataset.mode !== 'closed') {
+    setButtonColor('#ffffff');
+    return;
+  }
+
+  const rect = trigger.getBoundingClientRect();
+  const dockVisibility = dock.style.visibility;
+  const scrimVisibility = scrim.style.visibility;
   dock.style.visibility = 'hidden';
   scrim.style.visibility = 'hidden';
 
-  const behind = document.elementFromPoint(
-    rect.left + rect.width / 2,
-    rect.top + rect.height / 2
-  );
-
-  dock.style.visibility = '';
-  scrim.style.visibility = '';
+  let behind;
+  try {
+    behind = document.elementFromPoint(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2
+    );
+  } finally {
+    dock.style.visibility = dockVisibility;
+    scrim.style.visibility = scrimVisibility;
+  }
 
   let isRed = false;
-
   for (let el = behind; el; el = el.parentElement) {
-    const rgb = getComputedStyle(el)
-      .backgroundColor.match(/[\d.]+/g)?.map(Number);
-
+    const rgb = getComputedStyle(el).backgroundColor.match(/[\d.]+/g)?.map(Number);
     if (!rgb || (rgb[3] ?? 1) < 0.8) continue;
-
     const [r, g, b] = rgb;
     isRed = r > 140 && r > g * 1.45 && r > b * 1.45;
     break;
   }
-
-  trigger.style.setProperty('color', dock.dataset.mode !== 'closed' || isRed ? '#ffffff' : '#e93636', 'important');
+  setButtonColor(isRed ? '#ffffff' : '#e93636');
 }
 
-window.addEventListener('scroll', updateMenuTextColor, {
-  passive: true
-});
-window.addEventListener('resize', updateMenuTextColor);
+function scheduleMenuTextColorUpdate() {
+  if (colorFrame) return;
+  colorFrame = requestAnimationFrame(() => {
+    colorFrame = 0;
+    updateMenuTextColor();
+  });
+}
+
+window.addEventListener('scroll', scheduleMenuTextColorUpdate, { passive: true });
+window.addEventListener('resize', scheduleMenuTextColorUpdate);
 updateMenuTextColor();
 
 })();
