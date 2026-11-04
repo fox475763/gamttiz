@@ -258,3 +258,33 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .control-dock[data-mode="search"] .control-trigger {
   color: #ffffff !important;
 }
+
+/* Keep the search pill slimmer than the floating menu button. */
+.control-search {
+  inset: auto 0 8px;
+  height: 52px;
+}
+
+.control-menu-links a,
+.control-menu-links button {
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.control-menu-subtitle {
+  color: rgba(255, 255, 255, .58);
+  font-size: .69rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: none;
+}
+
+.control-menu-links a:is(:hover, :focus-visible, :active) .control-menu-subtitle,
+.control-menu-links button:is(:hover, :focus-visible, :active) .control-menu-subtitle {
+  color: rgba(21, 21, 27, .58);
+}
+
+@media (max-width: 520px) {
+  .control-search { height: 46px; }
+}
