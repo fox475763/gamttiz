@@ -44,7 +44,12 @@ const getFeed = async query => {
   try {
     const response = await fetch(`https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss&setlang=ko`, {signal:controller.signal, headers:{'user-agent':'GAMTTIZ-Fry-Radar/1.0 (+https://fox475763.github.io/gamttiz/)'}});
     if (!response.ok) throw Error(`RSS ${response.status}`);
-    return await response.text();
+    const xml = await response.text();
+    if (!/<rss\b/i.test(xml)) {
+      throw new Error('RSS 형식이 아닌 응답입니다.');
+    }
+    return xml;
+
   } finally { clearTimeout(timeout); }
 };
 const verify = async url => {
@@ -66,6 +71,7 @@ let added = 0;
 for (const query of queries) {
   let xml;
   try { xml = await getFeed(query); feedsSucceeded++; } catch (error) { console.warn(`${query}: ${error.message}`); continue; }
+  console.log(`[RSS 검색] ${query}: ${(xml.match(/<item\b/gi) || []).length}건 발견`);
   for (const match of xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)) {
     const item = match[1];
     const title = field(item,'title');
@@ -78,7 +84,12 @@ for (const query of queries) {
     if (published > now || now - published > 120 * 86400000) continue;
     if (!/[가-힣]/.test(title) || /\.jp$|\.cn$|\.tw$/.test(new URL(url).hostname)) continue;
     if (found.has(url)) continue;
-    if (!(await verify(url))) continue;
+    console.log(`[검증 시도] ${title}`);
+
+    if (!(await verify(url))) {
+      console.warn(`[원문 접근 실패] ${title}: ${url}`);
+      continue;
+    }
     const summary = description && fry.test(description) ? description.slice(0, 140) : title;
     const id = crypto.createHash('sha256').update(url).digest('hex').slice(0, 12);
     found.set(url,{id,title,url,summary,source,category:category(title),publishedAt:published.toISOString(),collectedAt:now.toISOString(),eventStart:null,eventEnd:null});
