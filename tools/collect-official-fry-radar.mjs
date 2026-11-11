@@ -76,10 +76,13 @@ const heroImage = (html, base) => {
 };
 const titleOf = (html,fallback='') => {
   const candidates=[meta(html,'og:title')];
-  for(const m of String(html).matchAll(/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/gi))candidates.push(plain(m[1]));
+  for(const m of String(html).matchAll(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi))candidates.push(plain(m[1]));
   candidates.push(plain(fallback));
-  return candidates.map(s=>s.replace(/\s*[|｜]\s*(?:LOTTE EATZ|맥도날드|버거킹|프랭크버거).*$/i,'').trim())
-    .find(s=>s.length>=8&&!/^(?:이벤트|프로모션소식|뉴스|홈|행사|이벤트 상세|프로모션 상세)/.test(s))||'';
+  const useful=candidates.map(s=>s.replace(/\s*[|｜]\s*(?:LOTTE EATZ|맥도날드|버거킹|프랭크버거).*$/i,'').trim())
+    .filter(s=>s.length>=7&&!/^(?:이벤트|프로모션소식|뉴스|홈|행사|이벤트 상세|프로모션 상세|LOTTE EATZ|GAMTTIZ|Burger King)$/i.test(s)
+      && !/^이벤트 상세\s*(?:[<|｜]|$)/.test(s));
+  const titled=useful.find(s=>FRY.test(s)||TOPIC.test(s));
+  return titled || useful.find(s=>s.length>=10) || '';
 };
 const relevant = (title,body) => {
   const head=String(title||'');
@@ -150,6 +153,7 @@ for(const source of officialSources){
     try{page=await fetchHtml(candidate.url);}catch(e){continue;}
     if(!hostAllowed(page.url,source))continue;
     const title=titleOf(page.html,candidate.hint);
+    if(source.brand==='롯데리아' && checked<=4)console.log('[공식 제목 분석] '+candidate.url+' => '+title);
     const body=page.html.replace(/<(?:header|footer|nav)\b[^>]*>[\s\S]*?<\/(?:header|footer|nav)>/gi,' ');
     if(!relevant(title,body)){if(source.brand==='롯데리아')console.log('[공식 제외] 관련성 부족: '+title);continue;}
     const clean=plain(body);
