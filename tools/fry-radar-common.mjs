@@ -72,7 +72,8 @@ export function dedupe(items){
     if(!item||!item.url||!item.title)continue;
     const url=canonical(item.url);
     if(!url)continue;
-    const key=normalizeTitle(item.title)+'|'+(item.eventStart||'')+'|'+(item.eventEnd||'');
+    const host=new URL(url).hostname.replace(/^www\./,'');
+    const key=host+'|'+normalizeTitle(item.title)+'|'+(item.eventStart||'')+'|'+(item.eventEnd||'');
     if(byUrl.has(url)||byTitle.has(key))continue;
     byUrl.set(url,{...item,url});byTitle.add(key);
   }
