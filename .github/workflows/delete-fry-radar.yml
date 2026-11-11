@@ -1,0 +1,56 @@
+name: Delete Fry Radar post (owner only)
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: write
+  issues: write
+  pages: write
+concurrency:
+  group: fry-radar-update
+  cancel-in-progress: false
+jobs:
+  remove:
+    if: ${{ github.event.sender.login == 'fox475763' && github.event.issue.user.login == 'fox475763' && startsWith(github.event.issue.title, '[FRY DELETE]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Remove selected post and suppress rediscovery
+        env:
+          REQUEST_ACTOR: ${{ github.event.sender.login }}
+          REQUEST_AUTHOR: ${{ github.event.issue.user.login }}
+          REQUEST_TITLE: ${{ github.event.issue.title }}
+          REQUEST_BODY: ${{ github.event.issue.body }}
+        run: node tools/delete-fry-radar.mjs
+      - name: Publish removal
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/fry-radar.json data/fry-radar-blocked.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Remove Fry Radar post via owner approval"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort
+              exit 1
+            fi
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 3))
+          done
+          exit 1
+      - name: Rebuild Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method POST "repos/${{ github.repository }}/pages/builds"
+      - name: Close processed deletion request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "FRY RADAR 삭제 및 재수집 차단이 반영되었습니다."
