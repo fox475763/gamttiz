@@ -17,7 +17,7 @@ for(const file of htmlFiles){
 for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.js'))){
   try{execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});}catch(error){errors.push(`${file}: JavaScript syntax error\n${error.stderr?.toString()||''}`);}
 }
-for(const file of ['tools/check-site.mjs','tools/sync-news.mjs']){
+for(const file of ['tools/check-site.mjs','tools/sync-news.mjs','tools/collect-fry-radar.mjs']){
   try{execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});}catch(error){errors.push(`${file}: JavaScript syntax error\n${error.stderr?.toString()||''}`);}
 }
 try{const posts=JSON.parse(fs.readFileSync('news/posts.json','utf8'));if(!Array.isArray(posts))errors.push('news/posts.json: expected an array');}catch{errors.push('news/posts.json: invalid JSON');}
