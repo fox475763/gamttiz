@@ -163,6 +163,21 @@
     }
   };
   [search,category,sort].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
+  // Source transparency: distinguish no qualifying posts from pages we could not inspect.
+  const healthView=document.getElementById('radar-health');
+  if(healthView){
+    fetch('data/fry-radar-health.json',{cache:'no-store'})
+      .then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();})
+      .then(report=>{
+        const total=report.summary?.sources||0;
+        const reached=report.summary?.reachable||0;
+        const checked=report.summary?.detailChecked||0;
+        const at=report.checkedAt?new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(report.checkedAt)):'시간 미확인';
+        healthView.textContent='최근 수집 검사 '+at+' · 공식 채널 '+reached+'/'+total+'곳 접근 · 상세 '+checked+'건 확인'+(reached<total?' · 일부 브랜드 접속 제한으로 누락 가능':'');
+        healthView.classList.toggle('radar-health-partial',reached<total);
+      })
+      .catch(()=>{healthView.textContent='수집 상태 보고서를 확인할 수 없어요. 게시글 목록은 그대로 제공됩니다.';healthView.classList.add('radar-health-partial');});
+  }
   fetch('data/fry-radar.json',{cache:'no-store'})
     .then(response=>{if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json();})
     .then(data=>{
