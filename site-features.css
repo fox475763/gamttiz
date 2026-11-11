@@ -288,3 +288,18 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 @media (max-width: 520px) {
   .control-search { height: 46px; }
 }
+
+/* GAMTTIZ lifestyle mockup triptych, sourced from user-supplied art. */
+.gamttiz-lifestyle{padding:clamp(68px,8vw,120px) max(5vw,24px);background:#fffaf3;color:#242321}
+.gamttiz-lifestyle-heading{max-width:1180px;margin:0 auto 32px}
+.gamttiz-lifestyle-heading .eyebrow{color:#e93636}
+.gamttiz-lifestyle-heading h2{margin:12px 0 16px;font-size:clamp(2.4rem,5.3vw,5.5rem);line-height:1.12;letter-spacing:-.055em}
+.gamttiz-lifestyle-heading>p:last-child{max-width:570px;line-height:1.7;color:#6c625a}
+.gamttiz-lifestyle-grid{max-width:1180px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 auto}
+.gamttiz-lifestyle-grid figure{margin:0;min-width:0;overflow:hidden;background:#fff;border-radius:15px;border:1px solid #eae3da}
+.gamttiz-lifestyle-grid img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.gamttiz-lifestyle-grid figcaption{display:flex;justify-content:space-between;gap:10px;padding:15px 14px;font-size:.83rem;font-weight:850;letter-spacing:.03em}
+.gamttiz-lifestyle-grid figcaption span{font-size:.67rem;font-weight:650;color:#9a7465;white-space:nowrap}
+.gamttiz-lifestyle-disclosure{max-width:1180px;margin:16px auto 0;font-size:.75rem;color:#8c827a}
+@media(max-width:780px){.gamttiz-lifestyle-grid{grid-template-columns:1fr 1fr}.gamttiz-lifestyle-grid figure:first-child{grid-column:1/-1}}
+@media(max-width:540px){.gamttiz-lifestyle-grid{grid-template-columns:1fr}.gamttiz-lifestyle-grid figure:first-child{grid-column:auto}.gamttiz-lifestyle-grid figcaption{padding:13px}}
