@@ -6,10 +6,13 @@ on:
     paths:
       - 'tools/collect-fry-radar.mjs'
       - 'tools/collect-official-fry-radar.mjs'
+      - 'tools/fry-radar-common.mjs'
+      - 'tools/test-fry-radar.mjs'
       - '.github/workflows/fry-radar.yml'
   schedule:
-    # GitHub Actions uses UTC. 00:00 UTC is 09:00 in Korea.
-    - cron: '0 0 * * *'
+    # Every even Korean hour: 00, 02, 04, ... 22 KST = odd UTC hours.
+    # GitHub Actions may delay queued runs, including those scheduled on :00.
+    - cron: '0 1-23/2 * * *'
   workflow_dispatch:
 
 permissions:
@@ -23,6 +26,7 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,7 +34,9 @@ jobs:
           persist-credentials: true
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+      - name: Test Fry Radar parsing and date rules
+        run: node --test tools/test-fry-radar.mjs
       - name: Collect verified fry news
         run: node tools/collect-fry-radar.mjs
       - name: Collect official brand promotions and preview images
@@ -41,19 +47,30 @@ jobs:
         id: publish
         shell: bash
         run: |
-          if git diff --quiet -- data/fry-radar.json; then
+          if git diff --quiet -- data/fry-radar.json data/fry-radar-health.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/fry-radar.json
-          git commit -m "Update Fry Radar news"
-          git push origin HEAD:main
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-      - name: Rebuild GitHub Pages
-        if: steps.publish.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh api --method POST "repos/${{ github.repository }}/pages/builds"
+          git add data/fry-radar.json data/fry-radar-health.json
+          git commit -m "Update Fry Radar news and collection health"
+          # Rebase on fresh main if another edit was made during collection.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort
+              echo "ERROR: Rebase conflict; preserving remote data instead of overwriting it."
+              exit 1
+            fi
+            if git push origin HEAD:main; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep $((attempt * 3))
+          done
+          echo "ERROR: Failed to publish after 3 attempts."
+          exit 1
+      # GitHub Pages already builds automatically after a push to main.
+      # Do not request a duplicate build (it can cancel the newer deployment).
 
