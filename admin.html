@@ -14,20 +14,8 @@
   <p class="admin-help"><a href="news.html?refresh=1">게시 상태 확인하기 ↗</a> · 글이 보이지 않으면 GitHub에서 제출이 완료되었는지, 작성 계정이 fox475763인지 확인해 주세요.</p>
   <p class="admin-help">게시자 이름은 글 작성 화면에서 바꿀 수 있습니다. 계정 비밀번호 변경과 로그아웃은 GitHub 계정 설정에서 진행해 주세요.</p>
   <section class="admin-radar" aria-labelledby="admin-radar-title">
-    <h2 id="admin-radar-title">FRY RADAR 게시물 관리</h2>
-    <p>게시물을 선택해 삭제 요청을 만들 수 있어요. GitHub에서 <strong>fox475763</strong> 계정으로 로그인한 뒤 <strong>Submit new issue</strong>를 누르면 삭제가 진행됩니다. 다른 계정의 요청은 처리되지 않습니다.</p>
-    <p><strong>주의:</strong> 삭제된 글은 자동 수집에서도 다시 게시되지 않습니다. 다시 올리려면 차단 목록을 관리해야 해요.</p>
-    <p id="admin-radar-status" role="status">게시물을 불러오는 중이에요.</p>
-    <div id="admin-radar-posts" class="admin-radar-posts"></div>
+    <h2 id="admin-radar-title">FRY RADAR 관리</h2>
+    <p>감튀 소식의 삭제는 GitHub 소유자 인증 후에만 가능합니다. 아래 링크에서 로그인하면 게시물 선택 화면을 열 수 있습니다.</p>
+    <p><a href="fry-admin.html">FRY RADAR 관리자 로그인 ↗</a></p>
   </section>
-  <style>
-    .admin-radar{margin:3rem 0 1rem;padding-top:2rem;border-top:1px solid #e6d7cc}
-    .admin-radar-posts{display:grid;gap:12px;margin-top:18px}
-    .admin-radar-post{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px;border:1px solid #e9d9c8;border-radius:12px}
-    .admin-radar-post strong{display:block;margin-bottom:5px}
-    .admin-radar-post small{display:block;opacity:.7;overflow-wrap:anywhere}
-    .admin-radar-delete{display:inline-block;flex:none;background:#e93636;color:#fff!important;padding:10px 14px;border-radius:8px;font-weight:700;text-decoration:none}
-    @media(max-width:600px){.admin-radar-post{align-items:stretch;flex-direction:column}.admin-radar-delete{text-align:center}}
-  </style>
-  <script src="admin-fry-radar.js" defer></script>
 </main></body></html>
