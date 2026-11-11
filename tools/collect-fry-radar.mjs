@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
+import {dedupe} from './fry-radar-common.mjs';
 
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
@@ -33,6 +34,17 @@ const queries = [
   '감자튀김 트렌드',
   '감자튀김 소비',
   '감자튀김 인기',
+  // Independent brand-specific keyword searches help when a site has no public RSS.
+  '맥도날드 감자튀김',
+  '롯데리아 포테이토',
+  '버거킹 감자튀김',
+  '맘스터치 감자튀김',
+  '프랭크버거 감자튀김',
+  '노브랜드버거 감자튀김',
+  '쉐이크쉑 감자튀김',
+  '파이브가이즈 감자튀김',
+  '다운타우너 감자튀김',
+  '바스버거 감자튀김',
 ];
 
 const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&#(x[\da-f]+|\d+);|&([a-z]+);/gi, (_, numeric, named) => {
@@ -40,7 +52,7 @@ const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/
   return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[named.toLowerCase()] || `&${named};`;
 }).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const field = (xml, tag) => decode(xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'))?.[1]);
-const fry = /감자\s*튀김|감튀|프렌치\s*프라이|후렌치\s*후라이(?:즈)?|양념\s*감자|치즈\s*프라이|트러플\s*프라이|웨지\s*감자|french\s*fr(?:y|ies)/i;
+const fry = /감자\s*튀김|감튀|프렌치\s*프라이|후렌치\s*후라이(?:즈)?|양념\s*감자|포테이토|치즈\s*프라이|트러플\s*프라이|웨지\s*감자|french\s*fr(?:y|ies)/i;
 const news = /할인|이벤트|행사|축제|신제품|신메뉴|신상|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시|굿즈|홀더|키링|콜라보|협업|컬래버|디핑|소스|시즈닝|맛집|전문점|팝업|오픈|개점|트렌드|문화|유행|인기|화제|소비|조사|통계|선호|순위/i;
 const exclude = /주가|증시|환율|부동산|정치|대통령|코인|투자|레시피|먹방|칼로리|건강|만드는 법|요리법/i;
 // 해외 기사 자체는 제외하되 해외 브랜드의 국내 출시 소식은 허용합니다.
@@ -115,9 +127,12 @@ const existing = Array.isArray(previous.items) ? previous.items.filter(item => !
 const found = new Map(existing.map(item => [item.url,item]));
 let feedsSucceeded = 0;
 let added = 0;
+let failedFeeds=0, newsCandidates=0;
+const feedFailures=[];
 for (const query of queries) {
   let xml;
-  try { xml = await getFeed(query); feedsSucceeded++; } catch (error) { console.warn(`${query}: ${error.message}`); continue; }
+  try { xml = await getFeed(query); feedsSucceeded++; } catch (error) { failedFeeds++;feedFailures.push({query,reason:error.message}); console.warn(`${query}: ${error.message}`); continue; }
+  newsCandidates += (xml.match(/<item\b/gi) || []).length;
   console.log(`[RSS 검색] ${query}: ${(xml.match(/<item\b/gi) || []).length}건 발견`);
   for (const match of xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)) {
     const item = match[1];
@@ -238,10 +253,17 @@ for (const query of googleQueries) {
     console.warn(`[Google 뉴스 오류] ${query}: ${error.message}`);
   }
 }
-if (!feedsSucceeded) throw Error('All RSS feeds failed; preserving previous data.');
-const items = [...found.values()].sort((a,b)=>
+if (!feedsSucceeded) console.warn('[RSS 경고] 모든 피드 실패: 기존 게시글을 유지하며 공식 사이트 수집은 계속합니다.');
+const items = dedupe([...found.values()]).sort((a,b)=>
   (Date.parse(b.publishedAt || b.eventStart) || 0) - (Date.parse(a.publishedAt || a.eventStart) || 0)
-).slice(0,100);
+).slice(0,250);
 await fs.writeFile(output,JSON.stringify({updatedAt:now.toISOString(),items},null,2)+'\n');
+const healthFile = new URL('../data/fry-radar-health.json', import.meta.url);
+let health={};
+try{health=JSON.parse(await fs.readFile(healthFile,'utf8'));}catch{}
+health.checkedAt=now.toISOString();
+health.schedule='KST every 2 hours (00,02,...,22); GitHub execution can be delayed';
+health.news={feedsSucceeded,failedFeeds,newsCandidates,newVerified:added,failures:feedFailures.slice(0,25),note:'Google News RSS publisher redirects are not assumed to be canonical article URLs.'};
+await fs.writeFile(healthFile,JSON.stringify(health,null,2)+'\n');
 console.log(`Feeds: ${feedsSucceeded}; new verified items: ${added}; total: ${items.length}`);
 
