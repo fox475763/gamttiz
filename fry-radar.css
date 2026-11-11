@@ -66,3 +66,6 @@
 }
 .radar-archive-arrow{flex:none;color:var(--radar-red);font-size:1rem}
 @media(prefers-reduced-motion:reduce){.radar-archive-row{transition:none}}
+
+/* Time-verified active promotions stay visible even when their announcement is older. */
+.radar-status-ongoing{background:#e7f4e9;color:#236b3c}
