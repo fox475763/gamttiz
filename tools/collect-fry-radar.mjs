@@ -47,6 +47,28 @@ const queries = [
   '바스버거 감자튀김',
 ];
 
+// Bing can return an anti-bot HTML page instead of RSS after many rapid queries.
+// Keep an eight-topic core on every two-hour run and rotate the remaining topics.
+// Every rotating term is attempted within three runs (six hours).
+const coreQueries=[
+  '감자튀김 할인',
+  '감자튀김 이벤트',
+  '감자튀김 신메뉴',
+  '감자튀김 굿즈',
+  '감자튀김 디핑소스',
+  '감자튀김 맛집',
+  '감자튀김 트렌드',
+  '감자튀김 축제'
+];
+const rotatingQueries=queries.filter(q=>!coreQueries.includes(q));
+const runSlot=Math.floor(now.getTime()/(2*60*60*1000));
+const rotationCount=Math.min(12,rotatingQueries.length);
+const scheduledQueries=[
+  ...coreQueries,
+  ...Array.from({length:rotationCount},(_,i)=>rotatingQueries[(runSlot*rotationCount+i)%rotatingQueries.length])
+];
+console.log('[RSS 일정] 총 '+queries.length+'개 검색어 중 이번 실행 '+scheduledQueries.length+'개 (핵심 '+coreQueries.length+', 순환 '+rotationCount+')');
+
 const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&#(x[\da-f]+|\d+);|&([a-z]+);/gi, (_, numeric, named) => {
   if (numeric) return String.fromCodePoint(parseInt(numeric.replace(/^x/i, ''), numeric.startsWith('x') ? 16 : 10));
   return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[named.toLowerCase()] || `&${named};`;
@@ -129,7 +151,7 @@ let feedsSucceeded = 0;
 let added = 0;
 let failedFeeds=0, newsCandidates=0;
 const feedFailures=[];
-for (const query of queries) {
+for (const query of scheduledQueries) {
   let xml;
   try { xml = await getFeed(query); feedsSucceeded++; } catch (error) { failedFeeds++;feedFailures.push({query,reason:error.message}); console.warn(`${query}: ${error.message}`); continue; }
   newsCandidates += (xml.match(/<item\b/gi) || []).length;
@@ -263,7 +285,7 @@ let health={};
 try{health=JSON.parse(await fs.readFile(healthFile,'utf8'));}catch{}
 health.checkedAt=now.toISOString();
 health.schedule='KST every 2 hours (00,02,...,22); GitHub execution can be delayed';
-health.news={feedsSucceeded,failedFeeds,newsCandidates,newVerified:added,failures:feedFailures.slice(0,25),note:'Google News RSS publisher redirects are not assumed to be canonical article URLs.'};
+health.news={feedsSucceeded,failedFeeds,newsCandidates,newVerified:added,availableQueries:queries.length,attemptedBingQueries:scheduledQueries.length,rotatingOverHours:6,failures:feedFailures.slice(0,25),note:'Google News RSS publisher redirects are not assumed to be canonical article URLs. Bing queries are rotated to avoid provider throttling.'};
 await fs.writeFile(healthFile,JSON.stringify(health,null,2)+'\n');
 console.log(`Feeds: ${feedsSucceeded}; new verified items: ${added}; total: ${items.length}`);
 
