@@ -1,11 +1,14 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
 import {canonical,dedupe,dateRange,FRY as SHARED_FRY,TOPIC as SHARED_TOPIC,related,koreanRelated} from './fry-radar-common.mjs';
 
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
 const DAY = 86400000;
 const MAX_PUBLISHED_AGE = 14 * DAY;
+const execFileAsync=promisify(execFile);
 const FRY = /감자\s*튀김|감튀|양념\s*감자|포테이토|프렌치\s*프라이|후렌치\s*후라이|치즈\s*프라이|프라이즈|프라이드\s*포테이토|french\s*fries/i;
 const TOPIC = /할인|프로모션|행사|이벤트|쿠폰|특가|소식|출시|신메뉴|신제품|굿즈|콜라보|협업|시즈닝|디핑|소스|맛집|팝업|오픈|한정|무료|증정|시즌/i;
 const EXCLUDE = /주가|채용|가맹\s*모집|창업\s*비용|개인정보|매장\s*찾기/i;
@@ -110,8 +113,11 @@ const fetchHtml = async url => {
   const ctl=new AbortController(), timeout=setTimeout(()=>ctl.abort(),8500);
   try{
     const r=await fetch(url,{signal:ctl.signal,redirect:'follow',headers:{'user-agent':'GAMTTIZ-Fry-Radar/1.1 (public official site monitoring; +https://fox475763.github.io/gamttiz/)',accept:'text/html,application/xhtml+xml;q=0.9'}});
-    if(!r.ok||!/text\/html|application\/xhtml/i.test(r.headers.get('content-type')||''))throw Error('HTTP '+r.status+' / non-HTML');
+    if(!r.ok)throw Error('HTTP '+r.status);
     const body=await r.text();
+    // Some official sites serve valid HTML with text/plain content-type (e.g. KFC).
+    if(!/text\/html|application\/xhtml/i.test(r.headers.get('content-type')||'') &&
+      !/^\s*(?:<!doctype html|<html\b)/i.test(body))throw Error('non-HTML response');
     if(body.length>3_000_000)throw Error('oversized HTML');
     return {html:body,url:r.url};
   }finally{clearTimeout(timeout);}
@@ -134,6 +140,27 @@ const links = (html, source) => {
     add(candidate,html.slice(Math.max(0,m.index-150),m.index+200));
   }
   return [...map].slice(0,55).map(([url,hint])=>({url,hint}));
+};
+
+// Optional browser rendering for JS-only event listings. GitHub-hosted Linux
+// runners commonly provide Chrome; when unavailable, report the limitation.
+const renderOfficialListing=async url=>{
+  const candidates=['google-chrome','chromium','chromium-browser'];
+  const args=['--headless=new','--no-sandbox','--disable-dev-shm-usage',
+    '--disable-gpu','--disable-extensions','--no-first-run',
+    '--virtual-time-budget=6000','--dump-dom',url];
+  let last;
+  for(const command of candidates){
+    try{
+      const {stdout}=await execFileAsync(command,args,{timeout:19000,maxBuffer:6_000_000});
+      if(/<html\b/i.test(stdout))return stdout;
+      last=Error('browser returned no HTML');
+    }catch(e){
+      last=e;
+      if(e.code!=='ENOENT')break;
+    }
+  }
+  throw Error('브라우저 보조 수집 실패: '+String(last?.message||'not installed').slice(0,110));
 };
 
 // Fallback: find only brand-owned detail URLs indexed by Bing News RSS.
@@ -191,6 +218,20 @@ for(const source of officialSources){
       if(indexed.length){candidates=indexed;diag.indexedFallback=true;}
       diag.indexedCandidates=indexed.length;
     }catch(e){diag.errors.push('보조 검색: '+String(e.message).slice(0,100));}
+  }
+  if(!candidates.length){
+    try{
+      const rendered=await renderOfficialListing(source.list);
+      const fromBrowser=links(rendered,source);
+      if(fromBrowser.length){
+        candidates=fromBrowser;
+        diag.browserFallback=true;
+        diag.reachable=true;
+        diag.lastReachableAt=now.toISOString();
+        accessed=true;
+      }
+      diag.browserCandidates=fromBrowser.length;
+    }catch(e){diag.errors.push(String(e.message).slice(0,150));}
   }
   if(!accessed&&!candidates.length)continue;
   if(accessed)successes++;
