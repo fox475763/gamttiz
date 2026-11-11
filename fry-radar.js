@@ -53,6 +53,18 @@
   };
   const statusLabels={ended:'종료',past:'지난 기사',upcoming:'예정',ongoing:'진행 중',recent:'기간 미확인'};
   const isArchived=item=>['ended','past'].includes(statusOf(item));
+  // Brand-neutral artwork authored for GAMTTIZ. No copied product photos or trademarks.
+  const friesArt=()=>{
+    const art=el('div','radar-fries-art');
+    art.setAttribute('aria-hidden','true');
+    const stars=el('div','radar-fries-stars');
+    const fries=el('div','radar-fries-sticks');
+    for(let n=0;n<7;n++)fries.append(el('i','radar-fry-stick'));
+    const pack=el('div','radar-fries-pack');
+    pack.append(el('span','', 'FRY'));
+    art.append(stars,fries,pack,el('span','radar-art-label','GAMTTIZ · FRY RADAR'));
+    return art;
+  };
   const card=(item,home)=>{
     const state=statusOf(item);
     const node=el('a','radar-card'+(isArchived(item)?' radar-card-archived':''));
@@ -65,26 +77,36 @@
     const time=el('time','',period);
     top.append(badge,stateBadge,time);
     const title=el('h3','',item.title);
-    let picture=null;
-    try {
-      const imageUrl=new URL(item.imageUrl||'');
-      if(imageUrl.protocol==='https:' && !/\.(?:svg|ico)(?:\?|$)/i.test(imageUrl.pathname)){
-        picture=el('div','radar-card-media');
-        const img=el('img','radar-card-image');
-        img.src=imageUrl.href;
-        img.alt=(item.source||'원문')+' 대표 이미지';
-        img.loading='lazy';
-        img.decoding='async';
-        img.referrerPolicy='no-referrer';
-        img.addEventListener('error',()=>picture.remove(),{once:true});
-        picture.append(img);
-      }
-    } catch {} 
+    // A source image is visible only after a human verifies the specific public display licence.
+    const rights=item.imageRights;
+    const approved=rights?.status==='approved' &&
+      rights?.scope==='public-thumbnail' &&
+      typeof rights?.evidenceUrl==='string' &&
+      /^https:\/\//i.test(rights.evidenceUrl);
+    const picture=el('div','radar-card-media');
+    let imageAdded=false;
+    if(approved && typeof item.imageUrl==='string'){
+      try {
+        const imageUrl=new URL(item.imageUrl);
+        if(imageUrl.protocol==='https:'&&!/\.(?:svg|ico)(?:\?|$)/i.test(imageUrl.pathname)){
+          const img=el('img','radar-card-image');
+          img.src=imageUrl.href;
+          img.alt=(item.source||'원문')+' 허가받은 이미지';
+          img.loading='lazy';
+          img.decoding='async';
+          img.referrerPolicy='no-referrer';
+          img.addEventListener('error',()=>{img.remove();picture.append(friesArt());},{once:true});
+          picture.append(img);
+          imageAdded=true;
+        }
+      }catch{}
+    }
+    if(!imageAdded)picture.append(friesArt());
     const summary=el('p','',item.summary||'원문에서 자세히 확인해 주세요.');
     const bottom=el('div','radar-card-bottom');
     bottom.append(el('span','',item.source||'출처 확인'),el('span','','↗'));
     node.append(top);
-    if(picture)node.append(picture);
+    node.append(picture);
     node.append(title,summary,bottom);
     return node;
   };
