@@ -35,5 +35,12 @@ try{
     }catch{errors.push('Malformed image URL in fry-radar.json: '+item.id);}
   }
 }catch(e){errors.push('data/fry-radar.json: invalid JSON');}
+// Validate collector status and avoid silently claiming that blocked sources were checked.
+try{
+  const state=JSON.parse(fs.readFileSync('data/fry-radar-health.json','utf8'));
+  if(!Array.isArray(state.sources)||state.sources.length<8)errors.push('fry-radar-health.json: official source status missing');
+  if(!state.news||!Number.isInteger(state.news.feedsSucceeded))errors.push('fry-radar-health.json: RSS status missing');
+  if(!Number.isFinite(Date.parse(state.checkedAt)))errors.push('fry-radar-health.json: checkedAt missing');
+}catch{errors.push('data/fry-radar-health.json: missing or invalid JSON');}
 if(!fs.existsSync('404.html'))errors.push('Missing 404.html');
 if(errors.length){console.error(errors.join('\n'));process.exitCode=1;}else console.log(`Site check passed: ${htmlFiles.length} pages, ${count} quiz questions, local assets and JavaScript syntax`);
