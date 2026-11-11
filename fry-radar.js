@@ -91,7 +91,7 @@
     const params=new URLSearchParams({
       template:'fry-delete.md',
       title:'[FRY DELETE] '+post.id,
-      body:'POST_ID: '+post.id+'\\n\\n삭제 대상: '+post.title+'\\n출처: '+post.url+'\\n\\nGitHub 관리자 계정으로 Submit new issue를 누르면 삭제 및 재수집 차단을 진행합니다.'
+      body:'POST_ID: '+post.id+'\n\n삭제 대상: '+post.title+'\n출처: '+post.url+'\n\nGitHub 관리자 계정으로 Submit new issue를 누르면 삭제 및 재수집 차단을 진행합니다.'
     });
     window.open('https://github.com/fox475763/gamttiz/issues/new?'+params.toString(),'_blank','noopener,noreferrer');
   };
