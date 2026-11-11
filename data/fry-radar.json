@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-11T10:21:09.057Z",
+  "updatedAt": "2026-11-11T10:40:53.269Z",
   "items": [
     {
       "id": "lotteria-lia-lunch-fries-verified-202611",
@@ -20,27 +20,6 @@
       "collectedAt": "2026-11-11T10:05:13.132Z",
       "verificationPhrase": "리아런치",
       "imageUrl": "https://img.lotteeatz.com/upload/event/CONTENT_IMG/2026/08/12/202608121620094_3.png"
-    },
-    {
-      "id": "burgerking-alldayking-fries-verified-202611",
-      "title": "버거킹 올데이킹 할인 세트 — 프렌치프라이 포함",
-      "url": "https://pf.kakao.com/_xcBxnxah/113620669",
-      "source": "버거킹 공식 카카오톡 채널",
-      "category": "discount",
-      "summary": "버거킹 공식 올데이킹 소개에는 롱치킨버거·불고기 롱치킨버거 등 세트 메뉴가 있고, 공식 메뉴에서 프렌치프라이(R/L)와 음료 구성도 확인돼요. 과거 공식 안내는 5,900원부터였지만 현재 가격·행사 매장 및 지속 여부는 주문 화면에서 다시 확인해야 해요.",
-      "publishedAt": null,
-      "eventStart": null,
-      "eventEnd": null,
-      "kind": "ongoing-menu",
-      "verifiedAt": null,
-      "sourceVerification": [
-        "https://web-prd.burgerking.co.kr/menu/main"
-      ],
-      "collectedAt": "2026-11-11T10:05:13.132Z",
-      "verificationPhrase": "올데이킹",
-      "imageUrl": "https://img.insight.co.kr/static/2021/04/26/700/img_20210426113457_l1h0k2a4.webp",
-      "imageNote": "과거 올데이킹 홍보 이미지 (2021년) · 현재 가격·메뉴와 다를 수 있음",
-      "imageSource": "https://www.insight.co.kr/news/335463"
     },
     {
       "id": "burgerking-shakingfries-flavors-202611",
