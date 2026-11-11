@@ -23,8 +23,8 @@ const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/
   return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[named.toLowerCase()] || `&${named};`;
 }).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const field = (xml, tag) => decode(xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'))?.[1]);
-const fry = /감자\s*튀김|프렌치\s*프라이|프렌치\s*프라이즈|후렌치\s*후라이|french\s*fr(?:y|ies)/i;
-const news = /할인|이벤트|행사|축제|신제품|출시|증정|무료|프로모션|한정|쿠폰|판매|선보/i;
+const fry = /감자\s*튀김|감튀|프렌치\s*프라이|후렌치\s*후라이|후렌치\s*후라이즈|양념\s*감자|french\s*fr(?:y|ies)/i;
+const news = /할인|이벤트|행사|축제|신제품|신메뉴|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시/i;
 const exclude = /주가|증시|환율|부동산|정치|대통령|코인|투자|레시피|먹방|리뷰|칼로리|건강|만드는 법|요리법/i;
 const category = title => /축제/.test(title) ? 'festival' : /할인|쿠폰|특가/.test(title) ? 'discount' : /신제품|출시|선보/.test(title) ? 'new-product' : 'event';
 const canonical = raw => {
@@ -73,7 +73,8 @@ for (const query of queries) {
     const source = field(item,'News:Source') || new URL(url || 'https://example.com').hostname;
     const description = field(item,'description');
     const published = new Date(field(item,'pubDate'));
-    if (!url || !fry.test(title) || !news.test(title) || exclude.test(title) || !Number.isFinite(published.getTime())) continue;
+    const searchText = `${title} ${description}`;
+    if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || !Number.isFinite(published.getTime())) continue;
     if (published > now || now - published > 120 * 86400000) continue;
     if (!/[가-힣]/.test(title) || /\.jp$|\.cn$|\.tw$/.test(new URL(url).hostname)) continue;
     if (found.has(url)) continue;
