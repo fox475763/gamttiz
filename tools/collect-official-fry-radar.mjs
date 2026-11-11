@@ -10,11 +10,11 @@ const TOPIC = /할인|프로모션|행사|이벤트|쿠폰|특가|소식|출시|
 const EXCLUDE = /주가|채용|가맹\s*모집|창업\s*비용|개인정보|매장\s*찾기/i;
 const officialSources = [
   {brand:'롯데리아', list:'https://www.lotteeatz.com/event/main/', host:'lotteeatz.com', detail:/\/event\/main\/selectEvent\/\d+/i},
-  {brand:'맥도날드', list:'https://www.mcdonalds.co.kr/kor/promotion/list', host:'mcdonalds.co.kr', detail:/\/kor\/promotion\/detail\/[a-z0-9]+/i},
-  {brand:'버거킹', list:'https://www.burgerking.co.kr/event', host:'burgerking.co.kr', detail:/\/event\/detail\/\d+/i},
+  {brand:'맥도날드', list:'https://www.mcdonalds.co.kr/kor/promotion/list', host:'mcdonalds.co.kr', alternates:['https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404'], detail:/\/kor\/promotion\/detail\/[a-z0-9]+/i},
+  {brand:'버거킹', list:'https://www.burgerking.co.kr/event', host:'burgerking.co.kr', alternates:['https://web-prd.burgerking.co.kr/event'], detail:/\/event\/detail\/\d+/i},
   {brand:'맘스터치', list:'https://www.momstouch.co.kr/', host:'momstouch.co.kr', detail:/\/[^?#]*(event|promotion|board|notice|news)[^?#]*/i},
   {brand:'프랭크버거', list:'https://www.frankburger.co.kr/board/index.php?board=event_01&tab=3&type=list', host:'frankburger.co.kr', detail:/\/board\/index\.php\?.*board=event_01.*(?:no=|idx=|seq=|id=)\d+/i},
-  {brand:'노브랜드버거', list:'https://www.shinsegaefood.co.kr/main.sf', host:'shinsegaefood.co.kr', detail:/\/(news|contents|pr|media|press|board)\b|\/\w+\.sf\?/i},
+  {brand:'노브랜드버거', list:'https://www.shinsegaefood.co.kr/main.sf', host:'shinsegaefood.co.kr', alternates:['https://shinsegaefood.co.kr/main.sf'], detail:/\/(news|contents|pr|media|press|board)\b|\/\w+\.sf\?/i},
   {brand:'쉐이크쉑', list:'https://www.shakeshack.kr/', host:'shakeshack.kr', detail:/\/(news|event|promotion|notice)\b/i},
   {brand:'파이브가이즈', list:'https://www.fiveguys.co.kr/모든-소식-보기/', host:'fiveguys.co.kr', detail:/\/(news|blog|stories|article|press|소식|뉴스)\b/i},
   {brand:'다운타우너', list:'https://pf.kakao.com/_feexixj', host:'pf.kakao.com', detail:/\/_feexixj\/contents\/posts\/\d+/i},
@@ -79,15 +79,15 @@ const titleOf = (html,fallback='') => {
   for(const m of String(html).matchAll(/<h[1-3]\b[^>]*>([\s\S]*?)<\/h[1-3]>/gi))candidates.push(plain(m[1]));
   candidates.push(plain(fallback));
   return candidates.map(s=>s.replace(/\s*[|｜]\s*(?:LOTTE EATZ|맥도날드|버거킹|프랭크버거).*$/i,'').trim())
-    .find(s=>s.length>=8&&!/^(?:이벤트|프로모션소식|뉴스|홈|행사|이벤트 상세|프로모션 상세)|^이벤트 상세\b/.test(s))||'';
+    .find(s=>s.length>=8&&!/^(?:이벤트|프로모션소식|뉴스|홈|행사|이벤트 상세|프로모션 상세)/.test(s))||'';
 };
 const relevant = (title,body) => {
   const head=String(title||'');
   if(EXCLUDE.test(head))return false;
   if(FRY.test(head)&&TOPIC.test(head))return true;
   if(FRY.test(head))return true;
-  const text=plain(body).slice(0,3800);
-  return TOPIC.test(head)&&FRY.test(text)&&new RegExp('(?:'+FRY.source+')[\\s\\S]{0,75}(?:'+TOPIC.source+')|(?:'+TOPIC.source+')[\\s\\S]{0,75}(?:'+FRY.source+')','i').test(text);
+  const text=plain(body).slice(0,12000);
+  return TOPIC.test(head)&&FRY.test(text)&&new RegExp('(?:'+FRY.source+')[\\s\\S]{0,220}(?:'+TOPIC.source+')|(?:'+TOPIC.source+')[\\s\\S]{0,220}(?:'+FRY.source+')','i').test(text);
 };
 const category = title => /축제/.test(title)?'festival':/할인|쿠폰|특가/.test(title)?'discount':/굿즈|홀더|콜라보|협업/.test(title)?'goods':/소스|시즈닝|디핑/.test(title)?'sauce':/맛집|오픈|팝업/.test(title)?'place':/신메뉴|신제품|출시/.test(title)?'new-product':'event';
 const hostAllowed = (url, source) => {
@@ -131,11 +131,17 @@ const items=new Map(data.items.filter(x=>x&&x.url).map(x=>[x.url,x]));
 let checked=0, added=0, pictures=0, successes=0;
 for(const source of officialSources){
   let candidates=[];
-  try{
-    const listing=await fetchHtml(source.list);
-    candidates=links(listing.html,source);
-    successes++;
-  }catch(e){console.warn('[공식 수집 오류] '+source.brand+': '+e.message);continue;}
+  let accessed=false;
+  for(const listUrl of [source.list,...(source.alternates||[])]){
+    try{
+      const listing=await fetchHtml(listUrl);
+      candidates=links(listing.html,{...source,list:listUrl});
+      accessed=true;
+      if(candidates.length)break;
+    }catch(e){console.warn('[공식 수집 오류] '+source.brand+': '+e.message);}
+  }
+  if(!accessed)continue;
+  successes++;
   console.log('[공식 목록] '+source.brand+': 상세 후보 '+candidates.length+'건');
   for(const candidate of candidates.slice(0,18)){
     if(checked>=90)break;
@@ -145,14 +151,14 @@ for(const source of officialSources){
     if(!hostAllowed(page.url,source))continue;
     const title=titleOf(page.html,candidate.hint);
     const body=page.html.replace(/<(?:header|footer|nav)\b[^>]*>[\s\S]*?<\/(?:header|footer|nav)>/gi,' ');
-    if(!relevant(title,body))continue;
+    if(!relevant(title,body)){if(source.brand==='롯데리아')console.log('[공식 제외] 관련성 부족: '+title);continue;}
     const clean=plain(body);
     const dateRange=rangeOf(clean.slice(0,2600))||rangeOf(candidate.hint);
     const datePublished=meta(page.html,'article:published_time')||meta(page.html,'datePublished')||meta(page.html,'pubdate');
     const publishedTime=Date.parse(datePublished||'');
     const endTime=dateRange?Date.parse(dateRange.eventEnd+'T23:59:59+09:00'):NaN;
-    if(dateRange&&endTime<now.getTime())continue;
-    if(!dateRange&&(!Number.isFinite(publishedTime)||publishedTime>now.getTime()||now.getTime()-publishedTime>MAX_PUBLISHED_AGE))continue;
+    if(dateRange&&endTime<now.getTime()){if(source.brand==='롯데리아')console.log('[공식 제외] 행사 종료: '+title);continue;}
+    if(!dateRange&&(!Number.isFinite(publishedTime)||publishedTime>now.getTime()||now.getTime()-publishedTime>MAX_PUBLISHED_AGE)){if(source.brand==='롯데리아')console.log('[공식 제외] 날짜 확인 불가: '+title);continue;}
     const image=heroImage(page.html,page.url);
     const current=items.get(page.url)||items.get(candidate.url);
     if(current){
