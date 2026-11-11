@@ -239,7 +239,9 @@ for (const query of googleQueries) {
   }
 }
 if (!feedsSucceeded) throw Error('All RSS feeds failed; preserving previous data.');
-const items = [...found.values()].sort((a,b)=>Date.parse(b.publishedAt)-Date.parse(a.publishedAt)).slice(0,100);
+const items = [...found.values()].sort((a,b)=>
+  (Date.parse(b.publishedAt || b.eventStart) || 0) - (Date.parse(a.publishedAt || a.eventStart) || 0)
+).slice(0,100);
 await fs.writeFile(output,JSON.stringify({updatedAt:now.toISOString(),items},null,2)+'\n');
 console.log(`Feeds: ${feedsSucceeded}; new verified items: ${added}; total: ${items.length}`);
 
