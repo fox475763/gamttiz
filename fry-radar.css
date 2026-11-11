@@ -20,3 +20,49 @@
 .radar-status-ended,.radar-status-past{background:#ece9e3;color:#6a655d}
 .radar-status-upcoming{background:#e9f0ff;color:#294e9a}
 .radar-status-recent{background:#f4efe5;color:#8b6134}
+
+/* Compact, title-only rows for the past/ended archive. */
+.radar-archive{padding-top:44px;padding-bottom:64px}
+.radar-archive .radar-board-heading{padding-bottom:22px}
+.radar-archive .radar-board-heading h2{font-size:clamp(1.5rem,2.8vw,2.35rem)}
+.radar-archive .radar-archive-note{font-size:.84rem;margin:14px 0 6px}
+.radar-archive .radar-list{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:8px;
+  margin-top:18px;
+}
+.radar-archive-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  width:100%;
+  min-width:0;
+  min-height:52px;
+  padding:12px 18px;
+  border:1px solid #e5e1d9;
+  border-radius:10px;
+  background:#fffefa;
+  color:var(--radar-ink);
+  text-decoration:none;
+  transition:border-color .2s,background .2s;
+}
+.radar-archive-row:hover,
+.radar-archive-row:focus-visible{
+  border-color:var(--radar-red);
+  background:#fff;
+}
+.radar-archive-row:focus-visible{outline:2px solid var(--radar-red);outline-offset:2px}
+.radar-archive-title{
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:.93rem;
+  font-weight:650;
+  line-height:1.5;
+}
+.radar-archive-arrow{flex:none;color:var(--radar-red);font-size:1rem}
+@media(prefers-reduced-motion:reduce){.radar-archive-row{transition:none}}
