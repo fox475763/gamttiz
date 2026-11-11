@@ -8,6 +8,10 @@ on:
       - 'tools/collect-official-fry-radar.mjs'
       - 'tools/fry-radar-common.mjs'
       - 'tools/test-fry-radar.mjs'
+      - 'tools/test-fry-delete.mjs'
+      - 'tools/fry-delete-common.mjs'
+      - 'tools/sync-fry-delete-template.mjs'
+      - 'data/fry-radar.json'
       - '.github/workflows/fry-radar.yml'
   schedule:
     # Every even Korean hour: 00, 02, 04, ... 22 KST = odd UTC hours.
@@ -37,23 +41,27 @@ jobs:
           node-version: '24'
       - name: Test Fry Radar parsing and date rules
         run: node --test tools/test-fry-radar.mjs
+      - name: Test deletion authorization
+        run: node --test tools/test-fry-delete.mjs
       - name: Collect verified fry news
         run: node tools/collect-fry-radar.mjs
       - name: Collect official brand promotions and preview images
         run: node tools/collect-official-fry-radar.mjs
+      - name: Refresh authenticated deletion choices
+        run: node tools/sync-fry-delete-template.mjs
       - name: Check site
         run: node tools/check-site.mjs
       - name: Publish updated data
         id: publish
         shell: bash
         run: |
-          if git diff --quiet -- data/fry-radar.json data/fry-radar-health.json; then
+          if git diff --quiet -- data/fry-radar.json data/fry-radar-health.json .github/ISSUE_TEMPLATE/fry-delete.yml; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/fry-radar.json data/fry-radar-health.json
+          git add data/fry-radar.json data/fry-radar-health.json .github/ISSUE_TEMPLATE/fry-delete.yml
           git commit -m "Update Fry Radar news and collection health"
           # Rebase on fresh main if another edit was made during collection.
           for attempt in 1 2 3; do
