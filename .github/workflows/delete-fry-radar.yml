@@ -21,6 +21,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Test authorization and selection parsing
+        run: node --test tools/test-fry-delete.mjs
       - name: Remove selected post and suppress rediscovery
         env:
           REQUEST_ACTOR: ${{ github.event.sender.login }}
@@ -28,11 +30,13 @@ jobs:
           REQUEST_TITLE: ${{ github.event.issue.title }}
           REQUEST_BODY: ${{ github.event.issue.body }}
         run: node tools/delete-fry-radar.mjs
+      - name: Refresh owner-authenticated deletion list
+        run: node tools/sync-fry-delete-template.mjs
       - name: Publish removal
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/fry-radar.json data/fry-radar-blocked.json
+          git add data/fry-radar.json data/fry-radar-blocked.json .github/ISSUE_TEMPLATE/fry-delete.yml
           git diff --cached --quiet && exit 0
           git commit -m "Remove Fry Radar post via owner approval"
           for attempt in 1 2 3; do
