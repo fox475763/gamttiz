@@ -21,6 +21,7 @@
         info.append(create('strong','',post.title),create('small','',post.id));
         const link=create('a','admin-radar-delete','삭제 요청');
         const params=new URLSearchParams({
+          template:'fry-delete.md',
           title:'[FRY DELETE] '+post.id,
           body:'POST_ID: '+post.id+'\n\n삭제 대상: '+post.title+'\n출처: '+post.url+'\n\n관리자 계정으로 이 이슈를 등록하면 해당 게시물이 삭제되고 자동 재게시가 차단됩니다.'
         });
