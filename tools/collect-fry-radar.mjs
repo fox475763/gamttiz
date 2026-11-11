@@ -44,9 +44,19 @@ const fry = /감자\s*튀김|감튀|프렌치\s*프라이|후렌치\s*후라이(
 const news = /할인|이벤트|행사|축제|신제품|신메뉴|신상|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시|굿즈|홀더|키링|콜라보|협업|컬래버|디핑|소스|시즈닝|맛집|전문점|팝업|오픈|개점|트렌드|문화|유행|인기|화제|소비|조사|통계|선호|순위/i;
 const exclude = /주가|증시|환율|부동산|정치|대통령|코인|투자|레시피|먹방|칼로리|건강|만드는 법|요리법/i;
 // 해외 기사 자체는 제외하되 해외 브랜드의 국내 출시 소식은 허용합니다.
-const overseasOnly = title =>
-  /해외(?:에서|의|발|현지|시장|소식)|(?:일본|미국|중국|대만|홍콩|영국|프랑스|벨기에|독일|캐나다|호주|싱가포르|태국)(?:에서|현지|시장|매장|한정|출시|유행|소식)/i.test(title) &&
-  !/한국|국내|우리나라|서울|부산|대구|인천|광주|대전|울산|제주/i.test(title);
+const overseasOnly = (title, url = '') => {
+  let host;
+  try { host = new URL(url).hostname.toLowerCase(); }
+  catch { return true; }
+
+  // 한국어로 번역된 해외 기사도 국내 소식으로 저장하지 않습니다.
+  if (/(?:^|\\.)(?:note\\.com|medium\\.com|reddit\\.com)$/.test(host) ||
+      /\\.(?:jp|cn|tw|hk|sg|uk|de|fr|be|ca|au|th|vn|id|my)$/.test(host)) return true;
+
+  const domestic = /한국|국내|우리나라|서울|부산|대구|인천|광주|대전|울산|제주|경기도|대한민국/i.test(title);
+  const foreignTopic = /세계(?:의|에서|각국)|해외(?:에서|의|발|현지|시장|소식)|\\d+개국|유학생|(?:일본|미국|중국|대만|홍콩|영국|프랑스|벨기에|독일|캐나다|호주|싱가포르|태국)(?:에서|현지|시장|매장|한정|출시|유행|소식)/i.test(title);
+  return foreignTopic && !domestic;
+};
 // 제목의 주제부터 확인해 분류하고, 필요할 때만 설명을 참고합니다.
 const category = (title, description = '') => {
   const rules = [
@@ -101,7 +111,7 @@ const verify = async url => {
 
 let previous;
 try { previous = JSON.parse(await fs.readFile(output, 'utf8')); } catch { previous = {updatedAt:null,items:[]}; }
-const existing = Array.isArray(previous.items) ? previous.items.map(item => ({...item, category:category(item.title || '', item.summary || '')})) : [];
+const existing = Array.isArray(previous.items) ? previous.items.filter(item => !overseasOnly(item.title || '', item.url)).map(item => ({...item, category:category(item.title || '', item.summary || '')})) : [];
 const found = new Map(existing.map(item => [item.url,item]));
 let feedsSucceeded = 0;
 let added = 0;
@@ -117,7 +127,7 @@ for (const query of queries) {
     const description = field(item,'description');
     const published = new Date(field(item,'pubDate'));
     const searchText = `${title} ${description}`;
-    if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || overseasOnly(title) || !Number.isFinite(published.getTime())) continue;
+    if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || overseasOnly(title,url) || !Number.isFinite(published.getTime())) continue;
     if (published > now || now - published > 14 * 86400000) continue;
     if (!/[가-힣]/.test(title) || /\.jp$|\.cn$|\.tw$/.test(new URL(url).hostname)) continue;
     if (found.has(url)) continue;
@@ -182,7 +192,7 @@ for (const query of googleQueries) {
       const searchText = `${title} ${description}`;
 
       if (!publisher || !fry.test(searchText) || !news.test(searchText)) continue;
-      if (!/[가-힣]/.test(title) || exclude.test(title) || overseasOnly(title) || !Number.isFinite(published.getTime())) continue;
+      if (!/[가-힣]/.test(title) || exclude.test(title) || !Number.isFinite(published.getTime())) continue;
       if (published > now || now - published > 14 * 86400000) continue;
 
       let url;
@@ -196,6 +206,7 @@ for (const query of googleQueries) {
         continue;
       }
 
+      if (overseasOnly(title,url)) continue;
       if (found.has(url)) continue;
       if ([...found.values()].some(x => x.title === title)) continue;
 
