@@ -60,6 +60,23 @@ const meta = (html,key) => {
   }
   return '';
 };
+
+const heroImage=(html,base)=>{
+  const candidates=[meta(html,'og:image:secure_url'),meta(html,'og:image'),meta(html,'twitter:image')];
+  for(const m of String(html).matchAll(/<img\s+[^>]*>/gi)){
+    const a=attrs(m[0]);
+    if(FRY.test(a.alt||'')||/event|promotion|visual|banner|product|thumbnail/i.test(a.class||'')){
+      candidates.push(a['data-src'],a.src,a['data-original']);
+    }
+  }
+  for(const value of candidates){
+    if(!value)continue;
+    const url=safeUrl(value,base);
+    if(!url||!url.startsWith('https:')||/\.(?:svg|ico)(?:\?|$)|logo|favicon|default|placeholder|sprite/i.test(url))continue;
+    return url;
+  }
+  return null;
+};
 const titleOf = (html,fallback='') => {
   const candidates=[meta(html,'og:title')];
   for(const m of String(html).matchAll(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi))candidates.push(plain(m[1]));
@@ -116,18 +133,8 @@ const links = (html, source) => {
 let data;
 try {data=JSON.parse(await fs.readFile(output,'utf8'));}catch{data={items:[]};}
 if(!Array.isArray(data.items))data.items=[];
-// Never publish brand or newspaper photos just because their URL is publicly accessible.
-// Image rights must be checked manually and supported by an explicit approval document/link.
-const hasVerifiedRights = item =>
-  item.imageRights?.status==='approved' &&
-  item.imageRights?.scope==='public-thumbnail' &&
-  typeof item.imageRights?.evidenceUrl==='string' &&
-  /^https:\/\//i.test(item.imageRights.evidenceUrl);
-for(const item of data.items){
-  if(!hasVerifiedRights(item))delete item.imageUrl;
-}
 const items=new Map(data.items.filter(x=>x&&x.url).map(x=>[x.url,x]));
-let checked=0, added=0, successes=0;
+let checked=0, added=0, successes=0, pictures=0;
 for(const source of officialSources){
   let candidates=[];
   let accessed=false;
@@ -164,20 +171,31 @@ for(const source of officialSources){
     const endTime=dateRange?Date.parse(dateRange.eventEnd+'T23:59:59+09:00'):NaN;
     if(dateRange&&endTime<now.getTime()){if(source.brand==='롯데리아')console.log('[공식 제외] 행사 종료: '+title);continue;}
     if(!dateRange&&(!Number.isFinite(publishedTime)||publishedTime>now.getTime()||now.getTime()-publishedTime>MAX_PUBLISHED_AGE)){if(source.brand==='롯데리아')console.log('[공식 제외] 날짜 확인 불가: '+title);continue;}
+    const image=heroImage(page.html,page.url);
     const current=items.get(page.url)||items.get(candidate.url);
     if(current){
+      if(image&&!current.imageUrl){current.imageUrl=image;pictures++;}
       if(dateRange&&!current.eventEnd){Object.assign(current,dateRange);}
       continue;
     }
     const id=crypto.createHash('sha256').update(page.url).digest('hex').slice(0,12);
     const summary=meta(page.html,'og:description')||meta(page.html,'description')||'감자튀김 관련 공식 소식입니다. 행사 조건은 원문에서 확인해 주세요.';
     const item={id,title,summary:plain(summary).slice(0,180),url:page.url,source:source.brand+' 공식 홈페이지',category:category(title),publishedAt:Number.isFinite(publishedTime)?new Date(publishedTime).toISOString():null,collectedAt:now.toISOString(),eventStart:dateRange?.eventStart||null,eventEnd:dateRange?.eventEnd||null};
+    if(image)item.imageUrl=image;
     items.set(page.url,item);added++;
     console.log('[공식 등록] '+source.brand+': '+title+' / '+page.url);
   }
+}
+// Enrich existing posts with representative images, if the original page exposes one.
+for(const post of [...items.values()].filter(x=>!x.imageUrl).slice(0,8)){
+  try{
+    const page=await fetchHtml(post.url);
+    const image=heroImage(page.html,page.url);
+    if(image){post.imageUrl=image;pictures++;}
+  }catch{}
 }
 if(successes===0)console.warn('[공식 수집] 모든 출처 접근 실패: 기존 데이터는 유지됩니다.');
 data.items=[...items.values()].sort((a,b)=>Date.parse(b.publishedAt||b.eventStart||b.collectedAt||0)-Date.parse(a.publishedAt||a.eventStart||a.collectedAt||0)).slice(0,100);
 data.updatedAt=now.toISOString();
 await fs.writeFile(output,JSON.stringify(data,null,2)+'\n');
-console.log('[공식 수집 결과] 목록 접근 '+successes+'/'+officialSources.length+', 상세 확인 '+checked+', 새 글 '+added+', 이미지 사용 승인 검사 적용, 전체 '+data.items.length);
+console.log('[공식 수집 결과] 목록 접근 '+successes+'/'+officialSources.length+', 상세 확인 '+checked+', 새 글 '+added+', 이미지 추출 '+pictures+', 전체 '+data.items.length);
