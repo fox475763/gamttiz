@@ -40,16 +40,18 @@
     return Date.parse(value||'');
   };
   const statusOf=item=>{
+    const now=Date.now();
     const end=eventTime(item.eventEnd,true);
-    if(Number.isFinite(end) && end<Date.now())return 'ended';
+    if(Number.isFinite(end) && end<now)return 'ended';
     const start=eventTime(item.eventStart);
-    if(Number.isFinite(start) && start>Date.now())return 'upcoming';
-    if(Number.isFinite(end))return 'dated';
+    if(Number.isFinite(start) && start>now)return 'upcoming';
+    // 기간을 검증한 행사는 발표 기사가 오래됐어도 최신 목록에 남깁니다.
+    if(Number.isFinite(end) && end>=now)return 'ongoing';
     const published=Date.parse(item.publishedAt||'');
-    if(!Number.isFinite(published)||Date.now()-published>MAX_RECENT_DAYS*DAY)return 'past';
+    if(!Number.isFinite(published)||now-published>MAX_RECENT_DAYS*DAY)return 'past';
     return 'recent';
   };
-  const statusLabels={ended:'종료',past:'지난 기사',upcoming:'예정',dated:'종료일 확인',recent:'기간 미확인'};
+  const statusLabels={ended:'종료',past:'지난 기사',upcoming:'예정',ongoing:'진행 중',recent:'기간 미확인'};
   const isArchived=item=>['ended','past'].includes(statusOf(item));
   const card=(item,home)=>{
     const state=statusOf(item);
@@ -59,7 +61,8 @@
     const top=el('div','radar-card-top');
     const badge=el('span','radar-badge',labels[item.category]||'소식');
     const stateBadge=el('span','radar-status radar-status-'+state,statusLabels[state]);
-    const time=el('time','',dateLabel(item.publishedAt));
+    const period=item.eventStart&&item.eventEnd?dateLabel(item.eventStart)+' ~ '+dateLabel(item.eventEnd):dateLabel(item.publishedAt);
+    const time=el('time','',period);
     top.append(badge,stateBadge,time);
     const title=el('h3','',item.title);
     const summary=el('p','',item.summary||'원문에서 자세히 확인해 주세요.');
@@ -87,7 +90,7 @@
     node.append(el('strong','',title),el('p','',description));
     container.append(node);
   };
-  const byNewest=(a,b)=>(date(b.publishedAt)?.getTime()||0)-(date(a.publishedAt)?.getTime()||0);
+  const byNewest=(a,b)=>(date(b.publishedAt||b.eventStart)?.getTime()||0)-(date(a.publishedAt||a.eventStart)?.getTime()||0);
   const render=()=>{
     const term=(search?.value||'').trim().toLocaleLowerCase();
     const group=category?.value||'all';
