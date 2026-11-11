@@ -103,6 +103,10 @@
       }catch{}
     }
     if(!imageAdded)picture.append(friesArt());
+    if(imageAdded && item.imageNote){
+      const note=el('span','radar-image-note',item.imageNote);
+      picture.append(note);
+    }
     const summary=el('p','',item.summary||'원문에서 자세히 확인해 주세요.');
     const bottom=el('div','radar-card-bottom');
     bottom.append(el('span','',item.source||'출처 확인'),el('span','','↗'));
