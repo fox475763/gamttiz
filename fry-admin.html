@@ -2,68 +2,39 @@
 <html lang="ko"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>FRY RADAR 관리자 | GAMTTIZ</title>
+<meta name="theme-color" content="#e93636">
+<title>FRY RADAR 관리자 로그인 | GAMTTIZ</title>
 <link rel="icon" href="assets/badge.png">
 <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="site-font.css">
 <link rel="stylesheet" href="fry-radar.css">
 <style>
-.radar-admin-page{min-height:75vh;max-width:880px;margin:0 auto;padding:80px 24px 100px;color:#292622}
+.radar-admin-page{min-height:75vh;max-width:720px;margin:0 auto;padding:80px 24px 110px;color:#292622}
 .radar-admin-back{color:#776d66;font-size:.87rem;text-decoration:none}
 .radar-admin-kicker{margin:44px 0 8px;color:#e93636;font-size:.75rem;font-weight:800;letter-spacing:.16em}
 .radar-admin-page h1{margin:0 0 22px;font-size:clamp(2rem,5vw,3.3rem);letter-spacing:-.06em}
 .radar-admin-page p{line-height:1.7;color:#5b5550}
-.radar-admin-login{padding:30px;background:#fff8ed;border:1px solid #f0e5d6;border-radius:18px}
-.radar-admin-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:24px}
-.radar-admin-btn{display:inline-flex;justify-content:center;align-items:center;cursor:pointer;min-height:46px;border:0;border-radius:10px;background:#e93636;padding:12px 18px;color:#fff;text-decoration:none;font:inherit;font-weight:800;font-size:.9rem}
-.radar-admin-btn.secondary{background:#292622}
-.radar-admin-logout{border:0;background:none;text-decoration:underline;cursor:pointer;color:#68625d;font:inherit}
-.radar-admin-help{font-size:.84rem}
-.radar-admin-posts{display:grid;gap:12px;margin:20px 0}
-.radar-admin-post{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;background:#fff;border:1px solid #e7dfd6;border-radius:14px}
-.radar-admin-post-info{min-width:0}
-.radar-admin-post-title{font-weight:800;line-height:1.5;overflow-wrap:anywhere}
-.radar-admin-post-meta{color:#777;font-size:.78rem;margin-top:8px}
-.radar-admin-delete{flex:none;cursor:pointer;border:0;border-radius:9px;background:#e93636;color:#fff;padding:10px 14px;font:inherit;font-size:.85rem;font-weight:800}
-.radar-admin-notice{padding:15px 18px;border:1px solid #eedccc;background:#fff8ef;border-radius:12px;font-size:.9rem}
-.radar-admin-modal{width:min(92vw,470px);border:0;border-radius:18px;padding:28px;background:#fff;color:#292622}
-.radar-admin-modal::backdrop{background:#12121299}
-.radar-admin-modal h2{margin:0 0 10px}
-.radar-admin-modal .radar-admin-actions{justify-content:flex-end}
-@media(max-width:540px){.radar-admin-post{align-items:stretch;flex-direction:column}.radar-admin-delete{align-self:stretch}}
-</style></head>
-<body>
-<header class="header"><a class="wordmark" href="index.html">GAMTTIZ<span>French Fry Lovers</span></a><nav><a href="fry-radar.html">FRY RADAR</a><a href="index.html">Home</a></nav></header>
+.radar-admin-login{padding:clamp(25px,5vw,42px);background:#fff8ed;border:1px solid #f0e5d6;border-radius:18px}
+.radar-admin-login h2{margin:0 0 15px}
+.radar-admin-btn{display:inline-flex;justify-content:center;align-items:center;min-height:48px;border:0;border-radius:10px;background:#e93636;padding:12px 20px;color:#fff!important;text-decoration:none;font:inherit;font-weight:800;font-size:.95rem;margin-top:15px}
+.radar-admin-help{font-size:.85rem}
+.radar-admin-steps{margin:20px 0 8px;padding-left:22px;line-height:1.95;color:#4f4b46}
+.radar-admin-steps li{padding-left:3px}
+</style></head><body>
+<header class="header"><a class="wordmark" href="index.html">GAMTTIZ<span>French Fry Lovers</span></a><nav aria-label="주 메뉴"><a href="fry-radar.html">FRY RADAR</a><a href="index.html">Home</a></nav></header>
 <main class="radar-admin-page">
-<a href="fry-radar.html" class="radar-admin-back">← 감튀 소식 돌아가기</a>
-<p class="radar-admin-kicker">GAMTTIZ / PRIVATE MANAGEMENT</p>
-<h1>FRY RADAR 관리자</h1>
-<section id="radar-login-panel" class="radar-admin-login">
-  <h2>관리자 로그인</h2>
-  <p>게시물 삭제는 GitHub 관리자 계정 <strong>fox475763</strong>만 처리할 수 있어요. GitHub에서 로그인한 다음 이 화면으로 돌아와 관리 화면을 여세요.</p>
-  <div class="radar-admin-actions">
-    <a class="radar-admin-btn" href="https://github.com/login?return_to=%2Ffox475763%2Fgamttiz" target="_blank" rel="noopener noreferrer">GitHub 로그인 ↗</a>
-    <button class="radar-admin-btn secondary" id="radar-enter-admin" type="button">로그인 후 관리 화면 열기</button>
-  </div>
-  <p class="radar-admin-help">로그인 확인과 삭제 권한 검증은 GitHub에서 최종 삭제 요청을 제출할 때 이루어집니다. 이 페이지 자체는 GitHub 로그인 상태를 읽지 못합니다.</p>
-</section>
-<section id="radar-admin-panel" hidden aria-labelledby="radar-admin-heading">
-  <div class="radar-admin-actions" style="justify-content:space-between">
-    <h2 id="radar-admin-heading">게시물 관리</h2>
-    <button id="radar-admin-exit" class="radar-admin-logout" type="button">관리 화면 닫기</button>
-  </div>
-  <p class="radar-admin-notice">삭제 버튼을 누르면 삭제 요청이 준비됩니다. GitHub에서 <strong>Submit new issue</strong>를 한 번 눌러야 실제 삭제되며, 삭제한 글은 다시 자동 수집되지 않아요.</p>
-  <p id="radar-admin-status" role="status" aria-live="polite">게시물을 확인하고 있어요.</p>
-  <div id="radar-admin-posts" class="radar-admin-posts"></div>
-</section>
+ <a href="fry-radar.html" class="radar-admin-back">← 감튀 소식으로 돌아가기</a>
+ <p class="radar-admin-kicker">GAMTTIZ / OWNER ACCESS</p>
+ <h1>FRY RADAR 관리자</h1>
+ <section class="radar-admin-login">
+  <h2>GitHub 계정 인증</h2>
+  <p>소식을 삭제하려면 GitHub에서 <strong>fox475763</strong> 계정으로 로그인해야 합니다. 비밀번호를 이 사이트에 입력하거나 저장하지 않으며, 로그인하지 않은 방문자에게 게시물 삭제 화면을 제공하지 않습니다.</p>
+  <ol class="radar-admin-steps">
+    <li>아래 <strong>관리자 로그인</strong>을 누릅니다.</li>
+    <li>GitHub 로그인 후 <strong>삭제할 소식</strong> 목록에서 글을 선택합니다.</li>
+    <li>삭제 확인에 체크하고 <strong>Submit new issue</strong>를 누릅니다.</li>
+  </ol>
+  <a class="radar-admin-btn" href="https://github.com/fox475763/gamttiz/issues/new?template=fry-delete.yml" rel="noopener noreferrer">GitHub 관리자 로그인 · 글 선택 ↗</a>
+  <p class="radar-admin-help">실제 삭제는 GitHub Actions가 계정 소유권을 재검증한 뒤 실행합니다. 다른 GitHub 계정으로 요청해도 게시물은 변경되지 않습니다. 삭제한 소식은 자동 재수집이 차단됩니다.</p>
+ </section>
 </main>
-<dialog class="radar-admin-modal" id="radar-admin-confirm">
- <h2>게시물을 삭제할까요?</h2>
- <p id="radar-admin-selected"></p>
- <p>GitHub에서 마지막으로 제출해야 삭제됩니다. 삭제 후 자동 재게시도 차단됩니다.</p>
- <div class="radar-admin-actions">
- <button id="radar-admin-cancel" type="button" class="radar-admin-btn secondary">취소</button>
- <button id="radar-admin-approve" type="button" class="radar-admin-btn">삭제 요청 열기</button>
- </div>
-</dialog>
-<script src="fry-admin.js" defer></script>
 </body></html>
