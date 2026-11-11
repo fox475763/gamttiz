@@ -4,18 +4,35 @@ import crypto from 'node:crypto';
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
 const queries = [
+  // 국내 할인 및 이벤트
   '감튀 할인',
   '감튀 이벤트',
-  '감튀 신제품',
-  '감튀 프로모션',
   '감자튀김 할인',
   '감자튀김 이벤트',
-  '감자튀김 신제품',
-  '프렌치프라이 프로모션',
-  '후렌치후라이 행사',
+  '감자튀김 프로모션',
   '양념감자 할인',
-  '감튀 축제',
-  'french fries promotion Korea',
+  '감자튀김 축제',
+  // 신메뉴
+  '감자튀김 신메뉴',
+  '양념감자 신메뉴',
+  '프렌치프라이 신제품',
+  // 국내 감자튀김 굿즈·콜라보
+  '감자튀김 굿즈',
+  '감튀홀더 굿즈',
+  '감자튀김 콜라보',
+  '프렌치프라이 한정판',
+  // 소스·시즈닝
+  '감자튀김 디핑소스',
+  '감자튀김 시즈닝',
+  '치즈프라이 신메뉴',
+  // 국내 맛집·팝업
+  '감자튀김 맛집',
+  '감자튀김 전문점 오픈',
+  '감자튀김 팝업스토어',
+  // 감튀 트렌드
+  '감자튀김 트렌드',
+  '감자튀김 소비',
+  '감자튀김 인기',
 ];
 
 const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&#(x[\da-f]+|\d+);|&([a-z]+);/gi, (_, numeric, named) => {
@@ -23,10 +40,30 @@ const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/
   return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[named.toLowerCase()] || `&${named};`;
 }).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const field = (xml, tag) => decode(xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'))?.[1]);
-const fry = /감자\s*튀김|감튀|프렌치\s*프라이|후렌치\s*후라이|후렌치\s*후라이즈|양념\s*감자|french\s*fr(?:y|ies)/i;
-const news = /할인|이벤트|행사|축제|신제품|신메뉴|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시/i;
-const exclude = /주가|증시|환율|부동산|정치|대통령|코인|투자|레시피|먹방|리뷰|칼로리|건강|만드는 법|요리법/i;
-const category = title => /축제/.test(title) ? 'festival' : /할인|쿠폰|특가/.test(title) ? 'discount' : /신제품|출시|선보/.test(title) ? 'new-product' : 'event';
+const fry = /감자\s*튀김|감튀|프렌치\s*프라이|후렌치\s*후라이(?:즈)?|양념\s*감자|치즈\s*프라이|트러플\s*프라이|웨지\s*감자|french\s*fr(?:y|ies)/i;
+const news = /할인|이벤트|행사|축제|신제품|신메뉴|신상|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시|굿즈|홀더|키링|콜라보|협업|컬래버|디핑|소스|시즈닝|맛집|전문점|팝업|오픈|개점|트렌드|문화|유행|인기|화제|소비|조사|통계|선호|순위/i;
+const exclude = /주가|증시|환율|부동산|정치|대통령|코인|투자|레시피|먹방|칼로리|건강|만드는 법|요리법/i;
+// 해외 기사 자체는 제외하되 해외 브랜드의 국내 출시 소식은 허용합니다.
+const overseasOnly = title =>
+  /해외(?:에서|의|발|현지|시장|소식)|(?:일본|미국|중국|대만|홍콩|영국|프랑스|벨기에|독일|캐나다|호주|싱가포르|태국)(?:에서|현지|시장|매장|한정|출시|유행|소식)/i.test(title) &&
+  !/한국|국내|우리나라|서울|부산|대구|인천|광주|대전|울산|제주/i.test(title);
+// 제목의 주제부터 확인해 분류하고, 필요할 때만 설명을 참고합니다.
+const category = (title, description = '') => {
+  const rules = [
+    ['festival', /축제|페스티벌/],
+    ['discount', /할인|쿠폰|특가|가격\s*인하|무료\s*증정/],
+    ['goods', /굿즈|감튀\s*홀더|감자튀김\s*홀더|키링|한정판\s*(?:패키지|굿즈)|콜라보|협업|컬래버|기획\s*상품/],
+    ['sauce', /디핑|소스|시즈닝|맛가루|양념\s*가루|트러플\s*마요/],
+    ['place', /맛집|전문점|팝업|푸드트럭|매장\s*(?:오픈|개점)|(?:오픈|개점)한\s*(?:매장|가게)/],
+    ['new-product', /신메뉴|신제품|신상|신규\s*메뉴|출시|재출시|선보/],
+    ['trend', /트렌드|문화|유행|인기|화제|소비|통계|조사|선호|순위|판매량/],
+    ['event', /이벤트|행사|프로모션|한정|증정|혜택/]
+  ];
+  for (const text of [title, title + ' ' + description]) {
+    for (const [key, pattern] of rules) if (pattern.test(text)) return key;
+  }
+  return 'other';
+};
 const canonical = raw => {
   try {
     let url = new URL(raw);
@@ -64,7 +101,7 @@ const verify = async url => {
 
 let previous;
 try { previous = JSON.parse(await fs.readFile(output, 'utf8')); } catch { previous = {updatedAt:null,items:[]}; }
-const existing = Array.isArray(previous.items) ? previous.items : [];
+const existing = Array.isArray(previous.items) ? previous.items.map(item => ({...item, category:category(item.title || '', item.summary || '')})) : [];
 const found = new Map(existing.map(item => [item.url,item]));
 let feedsSucceeded = 0;
 let added = 0;
@@ -80,7 +117,7 @@ for (const query of queries) {
     const description = field(item,'description');
     const published = new Date(field(item,'pubDate'));
     const searchText = `${title} ${description}`;
-    if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || !Number.isFinite(published.getTime())) continue;
+    if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || overseasOnly(title) || !Number.isFinite(published.getTime())) continue;
     if (published > now || now - published > 14 * 86400000) continue;
     if (!/[가-힣]/.test(title) || /\.jp$|\.cn$|\.tw$/.test(new URL(url).hostname)) continue;
     if (found.has(url)) continue;
@@ -92,7 +129,7 @@ for (const query of queries) {
     }
     const summary = description && fry.test(description) ? description.slice(0, 140) : title;
     const id = crypto.createHash('sha256').update(url).digest('hex').slice(0, 12);
-    found.set(url,{id,title,url,summary,source,category:category(title),publishedAt:published.toISOString(),collectedAt:now.toISOString(),eventStart:null,eventEnd:null});
+    found.set(url,{id,title,url,summary,source,category:category(title,description),publishedAt:published.toISOString(),collectedAt:now.toISOString(),eventStart:null,eventEnd:null});
     added++;
     console.log(`Added: ${title} — ${url}`);
   }
@@ -102,9 +139,14 @@ for (const query of queries) {
 const googleQueries = [
   '감자튀김 할인',
   '감자튀김 이벤트',
-  '감튀 행사',
   '프렌치프라이 신제품',
-  '양념감자 프로모션'
+  '감자튀김 신메뉴',
+  '감튀 굿즈 콜라보',
+  '감자튀김 디핑소스',
+  '감자튀김 시즈닝',
+  '감자튀김 맛집 팝업',
+  '감자튀김 전문점 오픈',
+  '감자튀김 트렌드'
 ];
 
 for (const query of googleQueries) {
@@ -140,7 +182,7 @@ for (const query of googleQueries) {
       const searchText = `${title} ${description}`;
 
       if (!publisher || !fry.test(searchText) || !news.test(searchText)) continue;
-      if (exclude.test(title) || !Number.isFinite(published.getTime())) continue;
+      if (exclude.test(title) || overseasOnly(title) || !Number.isFinite(published.getTime())) continue;
       if (published > now || now - published > 14 * 86400000) continue;
 
       let url;
@@ -169,7 +211,7 @@ for (const query of googleQueries) {
         url,
         summary: title,
         source: `${publisher} (Google 뉴스 경유)`,
-        category: category(title),
+        category: category(title,description),
         publishedAt: published.toISOString(),
         collectedAt: now.toISOString(),
         eventStart: null,
