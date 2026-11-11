@@ -152,7 +152,12 @@ for(const source of officialSources){
     let page;
     try{page=await fetchHtml(candidate.url);}catch(e){continue;}
     if(!hostAllowed(page.url,source))continue;
-    const title=titleOf(page.html,candidate.hint);
+    let title=titleOf(page.html,candidate.hint);
+    if(source.brand==='롯데리아'){
+      const t=plain(page.html).slice(0,13000);
+      const m=t.match(/롯데리아\s+(.{6,90}?)\s+(?:20\d{2}[-./]\d{1,2}[-./]\d{1,2})\s*~/);
+      if(m)title=m[1].trim();
+    }
     if(source.brand==='롯데리아' && checked<=4)console.log('[공식 제목 분석] '+candidate.url+' => '+title);
     const body=page.html.replace(/<(?:header|footer|nav)\b[^>]*>[\s\S]*?<\/(?:header|footer|nav)>/gi,' ');
     if(!relevant(title,body)){if(source.brand==='롯데리아')console.log('[공식 제외] 관련성 부족: '+title);continue;}
