@@ -68,6 +68,20 @@
     node.append(top,title,summary,bottom);
     return node;
   };
+  // 지난 소식은 큰 카드 대신 제목만 표시하는 가로형 링크 목록으로 보여줍니다.
+  const archiveRow=item=>{
+    const node=el('a','radar-archive-row');
+    node.href=item.url;
+    node.id=`post-${item.id}`;
+    node.target='_blank';
+    node.rel='noopener noreferrer';
+    node.title=item.title;
+    const title=el('span','radar-archive-title',item.title);
+    const arrow=el('span','radar-archive-arrow','↗');
+    arrow.setAttribute('aria-hidden','true');
+    node.append(title,arrow);
+    return node;
+  };
   const empty=(container,title,description)=>{
     const node=el('div','radar-empty');
     node.append(el('strong','',title),el('p','',description));
@@ -94,7 +108,7 @@
     if(archive){
       const past=shown.filter(isArchived);
       archive.replaceChildren();
-      if(past.length)past.forEach(item=>archive.append(card(item,false)));
+      if(past.length)past.forEach(item=>archive.append(archiveRow(item)));
       else empty(archive,'보관된 지난 소식이 없어요.','종료일이 확인되거나 발행 후 14일이 지난 소식이 여기에 모입니다.');
       if(archiveCount)archiveCount.textContent=`${past.length}개의 지난 소식`;
     }
