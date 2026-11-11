@@ -60,20 +60,6 @@ const meta = (html,key) => {
   }
   return '';
 };
-const heroImage = (html, base) => {
-  const candidates=[meta(html,'og:image:secure_url'),meta(html,'og:image'),meta(html,'twitter:image')];
-  for(const m of String(html).matchAll(/<img\s+[^>]*>/gi)){
-    const a=attrs(m[0]);
-    if(FRY.test(a.alt||'')||/event|promotion|visual|banner|product|main|thumbnail/i.test(a.class||''))candidates.push(a['data-src'],a.src,a['data-original']);
-  }
-  for(const value of candidates){
-    if(!value)continue;
-    const url=safeUrl(value,base);
-    if(!url||!/^https:/.test(url)||/\.(?:svg|ico)(?:\?|$)|logo|favicon|default|placeholder|sprite/i.test(url))continue;
-    return url;
-  }
-  return null;
-};
 const titleOf = (html,fallback='') => {
   const candidates=[meta(html,'og:title')];
   for(const m of String(html).matchAll(/<h[1-6]\b[^>]*>([\s\S]*?)<\/h[1-6]>/gi))candidates.push(plain(m[1]));
@@ -194,4 +180,4 @@ if(successes===0)console.warn('[공식 수집] 모든 출처 접근 실패: 기�
 data.items=[...items.values()].sort((a,b)=>Date.parse(b.publishedAt||b.eventStart||b.collectedAt||0)-Date.parse(a.publishedAt||a.eventStart||a.collectedAt||0)).slice(0,100);
 data.updatedAt=now.toISOString();
 await fs.writeFile(output,JSON.stringify(data,null,2)+'\n');
-console.log('[공식 수집 결과] 목록 접근 '+successes+'/'+officialSources.length+', 상세 확인 '+checked+', 새 글 '+added+', 허가되지 않은 이미지 노출 차단 '+', 전체 '+data.items.length);
+console.log('[공식 수집 결과] 목록 접근 '+successes+'/'+officialSources.length+', 상세 확인 '+checked+', 새 글 '+added+', 이미지 사용 승인 검사 적용, 전체 '+data.items.length);
