@@ -45,6 +45,17 @@ const queries = [
   '파이브가이즈 감자튀김',
   '다운타우너 감자튀김',
   '바스버거 감자튀김',
+  '감자튀김 무료 증정',
+  '감튀 1+1',
+  '포테이토 쿠폰',
+  '프라이데이 감자튀김',
+  '감자튀김 팝업 행사',
+  '감자튀김 기간 한정',
+  '감자튀김 품절 재출시',
+  '감자튀김 신상 소스',
+  '감자튀김 브랜드 협업',
+  'KFC 프라이 신메뉴',
+  '파파이스 케이준후라이',
 ];
 
 // Bing can return an anti-bot HTML page instead of RSS after many rapid queries.
@@ -133,13 +144,36 @@ const getFeed = async query => {
 
   } finally { clearTimeout(timeout); }
 };
+// Read the actual publisher page while verifying: never infer an image from a search result.
 const verify = async url => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 9000);
   try {
     const response = await fetch(url, {method:'GET', signal:controller.signal, redirect:'follow', headers:{'user-agent':'Mozilla/5.0'}});
-    return response.ok && /text\/html|application\/pdf/.test(response.headers.get('content-type') || '');
-  } catch { return false; }
+    if (!response.ok) return null;
+    const type = response.headers.get('content-type') || '';
+    if (/application\/pdf/i.test(type)) return {imageUrl:null};
+    if (!/text\/html|application\/xhtml/i.test(type)) return null;
+    if (Number(response.headers.get('content-length')||0)>2500000) return {imageUrl:null};
+    const html = (await response.text()).slice(0,2500000);
+    const images=[];
+    for(const tag of html.match(/<meta\s+[^>]*>/gi)||[]){
+      const key=tag.match(/(?:property|name)\s*=\s*["']([^"']+)["']/i)?.[1]?.toLowerCase();
+      if(!['og:image','og:image:secure_url','twitter:image'].includes(key))continue;
+      const image=tag.match(/content\s*=\s*["']([^"']+)["']/i)?.[1];
+      if(image)images.push(image.replace(/&amp;/g,'&'));
+    }
+    let imageUrl=null;
+    for(const raw of images){
+      try{
+        const candidate=new URL(raw,response.url);
+        if(candidate.protocol==='https:'&&!/logo|favicon|sprite|placeholder|default|\.svg(?:$|\?)/i.test(candidate.href)){
+          imageUrl=candidate.href;break;
+        }
+      }catch{}
+    }
+    return {imageUrl};
+  } catch { return null; }
   finally { clearTimeout(timeout); }
 };
 
@@ -170,13 +204,14 @@ for (const query of scheduledQueries) {
     if (found.has(url)) continue;
     console.log(`[검증 시도] ${title}`);
 
-    if (!(await verify(url))) {
+    const verifiedPage = await verify(url);
+    if (!verifiedPage) {
       console.warn(`[원문 접근 실패] ${title}: ${url}`);
       continue;
     }
     const summary = description && fry.test(description) ? description.slice(0, 140) : title;
     const id = crypto.createHash('sha256').update(url).digest('hex').slice(0, 12);
-    found.set(url,{id,title,url,summary,source,category:category(title,description),publishedAt:published.toISOString(),collectedAt:now.toISOString(),eventStart:null,eventEnd:null});
+    found.set(url,{id,title,url,summary,source,category:category(title,description),publishedAt:published.toISOString(),collectedAt:now.toISOString(),eventStart:null,eventEnd:null,...(verifiedPage.imageUrl?{imageUrl:verifiedPage.imageUrl}:{})});
     added++;
     console.log(`Added: ${title} — ${url}`);
   }
@@ -248,7 +283,8 @@ for (const query of googleQueries) {
       if ([...found.values()].some(x => x.title === title)) continue;
 
       if (++checked > 6) break;
-      if (!(await verify(url))) continue;
+      const verifiedPage = await verify(url);
+      if (!verifiedPage) continue;
 
       const id = crypto.createHash('sha256')
         .update(url).digest('hex').slice(0, 12);
@@ -263,7 +299,8 @@ for (const query of googleQueries) {
         publishedAt: published.toISOString(),
         collectedAt: now.toISOString(),
         eventStart: null,
-        eventEnd: null
+        eventEnd: null,
+        ...(verifiedPage.imageUrl?{imageUrl:verifiedPage.imageUrl}:{})
       });
 
       saved++;
