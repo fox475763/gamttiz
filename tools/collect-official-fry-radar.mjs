@@ -72,8 +72,25 @@ const heroImage=(html,base)=>{
   for(const m of String(html).matchAll(/<img\s+[^>]*>/gi)){
     const a=attrs(m[0]);
     if(FRY.test(a.alt||'')||/event|promotion|visual|banner|product|thumbnail/i.test(a.class||'')){
-      candidates.push(a['data-src'],a.src,a['data-original']);
+      candidates.push(a['data-src'],a['data-original'],a['data-lazy-src'],a['data-url'],a.src);
+      const srcset=a['data-srcset']||a.srcset;
+      if(srcset) candidates.push(...srcset.split(',').map(x=>x.trim().split(/\s+/)[0]));
     }
+  }
+  // Structured article/product data can expose thumbnails absent from HTML image tags.
+  for(const block of String(html).matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)){
+    try {
+      const data=JSON.parse(block[1]);
+      const visit=(node,depth=0)=>{
+        if(!node||depth>5)return;
+        if(Array.isArray(node)){node.forEach(x=>visit(x,depth+1));return;}
+        if(typeof node!=='object')return;
+        if(node.image){const imgs=Array.isArray(node.image)?node.image:[node.image];
+          for(const img of imgs)candidates.push(typeof img==='string'?img:img?.url||img?.contentUrl);}
+        if(node.thumbnailUrl)candidates.push(node.thumbnailUrl);
+        for(const k of ['@graph','mainEntity','itemListElement'])if(node[k])visit(node[k],depth+1);
+      };visit(data);
+    } catch {}
   }
   for(const value of candidates){
     if(!value)continue;
@@ -289,7 +306,7 @@ for(const source of officialSources){
   }
 }
 // Enrich existing posts with representative images, if the original page exposes one.
-for(const post of [...items.values()].filter(x=>!x.imageUrl).slice(0,8)){
+for(const post of [...items.values()].filter(x=>!x.imageUrl).slice(0,24)){
   try{
     const page=await fetchHtml(post.url);
     const image=heroImage(page.html,page.url);
