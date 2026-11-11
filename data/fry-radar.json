@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-11T09:53:18.451Z",
+  "updatedAt": "2026-11-11T10:05:13.132Z",
   "items": [
     {
       "id": "lotteria-snack-202611",
@@ -39,6 +39,102 @@
       "eventStart": null,
       "eventEnd": null,
       "imageUrl": "https://wimg.heraldcorp.com/news/cms/2026/08/31/news-p.v1.20260831.52678d2efeb54af2b9176aef02dec86c_P1.png"
+    },
+    {
+      "id": "kfc-doom-fries-20261110",
+      "title": "KFC × 어벤져스 ‘둠프라이’ 한정 출시 — 2027년 1월 4일까지",
+      "url": "https://www.kfckorea.com/promotion/newMenu/detail/1135",
+      "source": "KFC 코리아 공식 이벤트",
+      "category": "new-product",
+      "summary": "KFC가 어벤져스: 둠스데이 협업 감자튀김 메뉴 ‘둠프라이’를 출시했어요. 둠 시리즈 판매 기간은 2026년 11월 10일~2027년 1월 4일. 에버랜드·인천공항T1·잠실야구장 등 일부 매장은 제외되며 조기 종료 가능성이 있어요.",
+      "publishedAt": null,
+      "eventStart": "2026-11-10",
+      "eventEnd": "2027-01-04",
+      "sourceVerification": [
+        "https://health.chosun.com/site/data/html_dir/2026/11/10/2026111001334.html"
+      ],
+      "collectedAt": "2026-11-11T10:05:13.132Z"
+    },
+    {
+      "id": "mcd-kt-fries-set-202611",
+      "title": "맥도날드 감튀 L 포함 세트, KT 멤버십 3,500원 할인",
+      "url": "https://membership.kt.com/discount/benefit/s_DaldalBenefit.do",
+      "source": "KT 멤버십 공식 달.달.혜택",
+      "category": "discount",
+      "summary": "KT 멤버십 11월 혜택으로 더블 맥스파이시 상하이버거 라지 세트(버거+후렌치 후라이 L+음료 L)를 12,100원에서 8,600원에 구매할 수 있어요. 11월 2~30일, 쿠폰 선착순·대상자 및 이용 조건 확인 필수. 빅아치 콤보도 선택 가능하지만 후렌치 후라이 구성은 라지 세트예요.",
+      "publishedAt": null,
+      "eventStart": "2026-11-02",
+      "eventEnd": "2026-11-30",
+      "sourceVerification": [
+        "https://www.mcdonalds.co.kr/kor/",
+        "https://nwww.newsis.com/view/NISX20261101_0003849621"
+      ],
+      "collectedAt": "2026-11-11T10:05:13.132Z"
+    },
+    {
+      "id": "moms-jujutsu-fries-combo-202611",
+      "title": "맘스터치 × 주술회전 콜라보 — 싸이버거 세트와 한정 굿즈",
+      "url": "https://www.cstimes.com/news/articleView.html?idxno=726691",
+      "source": "컨슈머타임스 (맘스터치 발표)",
+      "category": "goods",
+      "summary": "11월 5~29일 ‘주술회전: 시부야 사변’ 협업 세트 3종을 판매해요. 메가 B세트에는 싸이버거 세트·더블불고기버거·치즈볼이, 캐주얼 세트에는 후덕죽 쿵파오싸이버거 세트가 포함돼요. 세트의 케이준양념감자 등 사이드 구성과 굿즈 재고는 주문 시 확인하세요. 매장별 조기 종료 가능.",
+      "publishedAt": "2026-11-04T23:47:00.000Z",
+      "eventStart": "2026-11-05",
+      "eventEnd": "2026-11-29",
+      "sourceVerification": [
+        "https://www.pinpointnews.co.kr/news/articleView.html?idxno=501548",
+        "https://www.diningcode.com/profile.php?rid=SoQlS2jC9rX2"
+      ],
+      "collectedAt": "2026-11-11T10:05:13.132Z"
+    },
+    {
+      "id": "lotteria-lia-lunch-fries-verified-202611",
+      "title": "롯데리아 리아런치 할인 세트 — 포테이토 포함 점심 메뉴",
+      "url": "https://www.lotteeatz.com/event/main/selectEvent/3002",
+      "source": "롯데잇츠 공식 이벤트",
+      "category": "discount",
+      "summary": "롯데잇츠가 리아런치 점심 할인 세트(데리버거 세트 5,600원부터 등)를 오전 10시 30분~오후 2시에 운영한다고 안내하고 있어요. 세트 사이드는 포테이토 등 주문 화면에서 확인하세요. 배달·일부 매장 및 다른 행사 중복 적용 제외. 별도 종료일은 공식 페이지에서 9999년으로 표기돼 있어 실제 종료일 미확인.",
+      "publishedAt": null,
+      "eventStart": null,
+      "eventEnd": null,
+      "kind": "ongoing-menu",
+      "verifiedAt": "2026-11-11T10:05:13.132Z",
+      "sourceVerification": [
+        "https://www.lotteeatz.com/event/main/",
+        "https://www.pullbbang.com/board/boardView.pull?code=17444001"
+      ],
+      "collectedAt": "2026-11-11T10:05:13.132Z"
+    },
+    {
+      "id": "burgerking-alldayking-fries-verified-202611",
+      "title": "버거킹 올데이킹 할인 세트 — 프렌치프라이 포함",
+      "url": "https://pf.kakao.com/_xcBxnxah/113620669",
+      "source": "버거킹 공식 카카오톡 채널",
+      "category": "discount",
+      "summary": "버거킹 공식 올데이킹 소개에는 롱치킨버거·불고기 롱치킨버거 등 세트 메뉴가 있고, 공식 메뉴에서 프렌치프라이(R/L)와 음료 구성도 확인돼요. 과거 공식 안내는 5,900원부터였지만 현재 가격·행사 매장 및 지속 여부는 주문 화면에서 다시 확인해야 해요.",
+      "publishedAt": null,
+      "eventStart": null,
+      "eventEnd": null,
+      "kind": "ongoing-menu",
+      "verifiedAt": "2026-11-11T10:05:13.132Z",
+      "sourceVerification": [
+        "https://web-prd.burgerking.co.kr/menu/main"
+      ],
+      "collectedAt": "2026-11-11T10:05:13.132Z"
+    },
+    {
+      "id": "burgerking-shakingfries-flavors-202611",
+      "title": "버거킹 쉐이킹프라이, 매콤치즈·구운갈릭·스윗어니언 시즈닝",
+      "url": "https://web-prd.burgerking.co.kr/menu/main",
+      "source": "버거킹 공식 메뉴",
+      "category": "sauce",
+      "summary": "버거킹 공식 사이드 메뉴에서 쉐이킹프라이 매콤치즈·구운갈릭·스윗어니언 3종과 각각의 시즈닝을 확인할 수 있어요. 신제품 발표나 할인 행사가 아닌 ‘공식 메뉴 안내’이며, 매장별 판매 여부·가격·종료일은 확인이 필요해요.",
+      "publishedAt": null,
+      "eventStart": null,
+      "eventEnd": null,
+      "kind": "ongoing-menu",
+      "verifiedAt": "2026-11-11T10:05:13.132Z",
+      "collectedAt": "2026-11-11T10:05:13.132Z"
     }
   ]
 }
