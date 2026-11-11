@@ -204,10 +204,15 @@ const indexedOfficialLinks=async source=>{
   }finally{clearTimeout(tid);}
 };
 
+let suppressed={items:[]};
+try{suppressed=JSON.parse(await fs.readFile(new URL('../data/fry-radar-blocked.json',import.meta.url),'utf8'));}catch{}
+const blockedIds=new Set((suppressed.items||[]).map(x=>x.id).filter(Boolean));
+const blockedUrls=new Set((suppressed.items||[]).map(x=>x.url).filter(Boolean));
+const allowedPost=item=>!blockedIds.has(item.id)&&!blockedUrls.has(canonical(item.url));
 let data;
 try {data=JSON.parse(await fs.readFile(output,'utf8'));}catch{data={items:[]};}
 if(!Array.isArray(data.items))data.items=[];
-const items=new Map(data.items.filter(x=>x&&x.url).map(x=>[x.url,x]));
+const items=new Map(data.items.filter(x=>x&&x.url&&allowedPost(x)).map(x=>[x.url,x]));
 const healthFile=new URL('../data/fry-radar-health.json',import.meta.url);
 let health={};try{health=JSON.parse(await fs.readFile(healthFile,'utf8'));}catch{}
 const sourceHealth=[];
@@ -314,7 +319,7 @@ for(const post of [...items.values()].filter(x=>!x.imageUrl).slice(0,24)){
   }catch{}
 }
 if(successes===0)console.warn('[공식 수집] 모든 출처 접근 실패: 기존 데이터는 유지됩니다.');
-data.items=dedupe([...items.values()]).sort((a,b)=>Date.parse(b.publishedAt||b.eventStart||b.collectedAt||0)-Date.parse(a.publishedAt||a.eventStart||a.collectedAt||0)).slice(0,250);
+data.items=dedupe([...items.values()].filter(allowedPost)).sort((a,b)=>Date.parse(b.publishedAt||b.eventStart||b.collectedAt||0)-Date.parse(a.publishedAt||a.eventStart||a.collectedAt||0)).slice(0,250);
 data.updatedAt=now.toISOString();
 await fs.writeFile(output,JSON.stringify(data,null,2)+'\n');
 health.checkedAt=now.toISOString();
