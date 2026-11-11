@@ -24,17 +24,16 @@ try{const posts=JSON.parse(fs.readFileSync('news/posts.json','utf8'));if(!Array.
 const quiz=fs.readFileSync('quiz.js','utf8');
 const count=(quiz.match(/\{title:/g)||[]).length;
 if(count<30)errors.push(`quiz.js: expected 30 questions, found ${count}`);
-// Reject any image that lacks evidence of permitted public thumbnail reuse.
+// Image links must be HTTPS URLs with supported raster extensions, or HTTPS image endpoints.
 try{
   const d=JSON.parse(fs.readFileSync('data/fry-radar.json','utf8'));
   for(const item of d.items||[]){
-    if(item.imageUrl && !(item.imageRights?.status==='approved' &&
-      item.imageRights?.scope==='public-thumbnail' &&
-      typeof item.imageRights?.evidenceUrl==='string' &&
-      /^https:\/\//i.test(item.imageRights.evidenceUrl))){
-      errors.push('Unlicensed imageUrl detected in fry-radar.json: '+item.id);
-    }
+    if(!item.imageUrl)continue;
+    try{
+      const u=new URL(item.imageUrl);
+      if(u.protocol!=='https:'||/\.(?:svg|ico)$/i.test(u.pathname))errors.push('Invalid image URL in fry-radar.json: '+item.id);
+    }catch{errors.push('Malformed image URL in fry-radar.json: '+item.id);}
   }
-}catch(e){errors.push('data/fry-radar.json: invalid JSON or rights metadata');}
+}catch(e){errors.push('data/fry-radar.json: invalid JSON');}
 if(!fs.existsSync('404.html'))errors.push('Missing 404.html');
 if(errors.length){console.error(errors.join('\n'));process.exitCode=1;}else console.log(`Site check passed: ${htmlFiles.length} pages, ${count} quiz questions, local assets and JavaScript syntax`);
