@@ -155,7 +155,7 @@
     if(archive){
       const past=shown.filter(isArchived);
       archive.replaceChildren();
-      if(past.length)past.forEach(item=>archive.append(archiveRow(item));
+      if(past.length)past.forEach(item=>archive.append(archiveRow(item)));
       else empty(archive,'보관된 지난 소식이 없어요.','종료일이 확인되거나 발행 후 14일이 지난 소식이 여기에 모입니다.');
       if(archiveCount)archiveCount.textContent=`${past.length}개의 지난 소식`;
     }
