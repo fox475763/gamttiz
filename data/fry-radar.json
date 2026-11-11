@@ -103,7 +103,8 @@
         "https://www.lotteeatz.com/event/main/",
         "https://www.pullbbang.com/board/boardView.pull?code=17444001"
       ],
-      "collectedAt": "2026-11-11T10:05:13.132Z"
+      "collectedAt": "2026-11-11T10:05:13.132Z",
+      "verificationPhrase": "리아런치"
     },
     {
       "id": "burgerking-alldayking-fries-verified-202611",
@@ -116,11 +117,12 @@
       "eventStart": null,
       "eventEnd": null,
       "kind": "ongoing-menu",
-      "verifiedAt": "2026-11-11T10:05:13.132Z",
+      "verifiedAt": null,
       "sourceVerification": [
         "https://web-prd.burgerking.co.kr/menu/main"
       ],
-      "collectedAt": "2026-11-11T10:05:13.132Z"
+      "collectedAt": "2026-11-11T10:05:13.132Z",
+      "verificationPhrase": "올데이킹"
     },
     {
       "id": "burgerking-shakingfries-flavors-202611",
@@ -133,8 +135,9 @@
       "eventStart": null,
       "eventEnd": null,
       "kind": "ongoing-menu",
-      "verifiedAt": "2026-11-11T10:05:13.132Z",
-      "collectedAt": "2026-11-11T10:05:13.132Z"
+      "verifiedAt": null,
+      "collectedAt": "2026-11-11T10:05:13.132Z",
+      "verificationPhrase": "쉐이킹프라이"
     }
   ]
 }
