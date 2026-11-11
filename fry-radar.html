@@ -26,6 +26,10 @@
       <div class="radar-controls"><label class="radar-search-label"><span>검색</span><input id="radar-search" type="search" placeholder="브랜드, 감자튀김, 행사 검색" autocomplete="off"></label><label><span>카테고리</span><select id="radar-category"><option value="all">전체</option><option value="discount">할인</option><option value="event">이벤트</option><option value="festival">축제</option><option value="new-product">신메뉴</option><option value="goods">굿즈·콜라보</option><option value="sauce">소스·시즈닝</option><option value="place">맛집·팝업</option><option value="trend">감튀 트렌드</option><option value="other">기타</option></select></label><label><span>정렬</span><select id="radar-sort"><option value="newest">최신순</option><option value="oldest">오래된순</option></select></label></div>
       <p id="radar-count" class="radar-count" aria-live="polite"></p>
       <p id="radar-health" class="radar-health" aria-live="polite">수집 경로를 확인하고 있어요.</p>
+      <div class="radar-manage-tools">
+        <button id="radar-manage-toggle" class="radar-manage-toggle" type="button" aria-pressed="false">게시물 삭제 관리</button>
+        <p id="radar-manage-hint" hidden>삭제할 소식의 빨간 <strong>삭제</strong> 버튼을 누르세요. GitHub에서 관리자 로그인 후 <strong>Submit new issue</strong>를 눌러 확정하면 게시판에서 삭제됩니다.</p>
+      </div>
       <div id="radar-list" class="radar-list" aria-live="polite"></div>
     </section>
     <section class="radar-board radar-archive" aria-labelledby="archive-title">
@@ -37,6 +41,15 @@
     </section>
   </main>
   <footer class="radar-footer"><span>© GAMTTIZ</span><a href="news.html">감띠즈 공식 소식 ↗</a><a href="index.html">홈으로 ↑</a></footer>
+  <dialog id="radar-delete-dialog" class="radar-delete-dialog" aria-labelledby="radar-delete-heading">
+    <h2 id="radar-delete-heading">이 소식을 삭제할까요?</h2>
+    <p id="radar-delete-title" class="radar-delete-selected"></p>
+    <p>아래 버튼을 누르면 GitHub에서 삭제 요청 화면이 열립니다. <strong>fox475763</strong> 계정으로 로그인하고 <strong>Submit new issue</strong>를 누르면 실제 삭제됩니다. 삭제된 글은 자동으로 재게시되지 않습니다.</p>
+    <div class="radar-delete-actions">
+      <button id="radar-delete-cancel" type="button">취소</button>
+      <button id="radar-delete-confirm" type="button">GitHub에서 삭제 확정하기</button>
+    </div>
+  </dialog>
   <script src="site-features.js" defer></script><script src="fry-radar.js" defer></script>
 </body>
 </html>
