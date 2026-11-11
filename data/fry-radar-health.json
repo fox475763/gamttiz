@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-11-11T13:15:57.520Z",
+  "checkedAt": "2026-11-11T18:11:31.507Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
     "feedsSucceeded": 30,
     "failedFeeds": 0,
-    "newsCandidates": 103,
+    "newsCandidates": 99,
     "newVerified": 0,
     "availableQueries": 44,
     "attemptedBingQueries": 20,
@@ -29,7 +29,7 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z"
+      "lastReachableAt": "2026-11-11T18:11:31.507Z"
     },
     {
       "brand": "맥도날드",
@@ -47,7 +47,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z",
+      "lastReachableAt": "2026-11-11T18:11:31.507Z",
       "indexedCandidates": 0,
       "browserFallback": true,
       "browserCandidates": 6
@@ -113,7 +113,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z"
+      "lastReachableAt": "2026-11-11T18:11:31.507Z"
     },
     {
       "brand": "노브랜드버거",
@@ -176,7 +176,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z"
+      "lastReachableAt": "2026-11-11T18:11:31.507Z"
     },
     {
       "brand": "다운타우너",
@@ -194,7 +194,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z",
+      "lastReachableAt": "2026-11-11T18:11:31.507Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -214,7 +214,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z",
+      "lastReachableAt": "2026-11-11T18:11:31.507Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -234,7 +234,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z"
+      "lastReachableAt": "2026-11-11T18:11:31.507Z"
     },
     {
       "brand": "파파이스",
@@ -252,7 +252,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T13:15:57.520Z"
+      "lastReachableAt": "2026-11-11T18:11:31.507Z"
     }
   ],
   "summary": {
