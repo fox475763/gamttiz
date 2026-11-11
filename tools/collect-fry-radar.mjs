@@ -97,6 +97,94 @@ for (const query of queries) {
     console.log(`Added: ${title} — ${url}`);
   }
 }
+
+/* Google 뉴스 RSS 수집 */
+const googleQueries = [
+  '감자튀김 할인',
+  '감자튀김 이벤트',
+  '감튀 행사',
+  '프렌치프라이 신제품',
+  '양념감자 프로모션'
+];
+
+for (const query of googleQueries) {
+  try {
+    const endpoint = new URL('https://news.google.com/rss/search');
+    endpoint.searchParams.set('q', query);
+    endpoint.searchParams.set('hl', 'ko');
+    endpoint.searchParams.set('gl', 'KR');
+    endpoint.searchParams.set('ceid', 'KR:ko');
+
+    const response = await fetch(endpoint, {
+      signal: AbortSignal.timeout(12000)
+    });
+
+    if (!response.ok) throw Error(`HTTP ${response.status}`);
+
+    const xml = await response.text();
+    if (!/<rss\b/i.test(xml)) throw Error('RSS 형식 오류');
+
+    feedsSucceeded++;
+
+    const matches = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)];
+    console.log(`[Google 뉴스] ${query}: ${matches.length}건 발견`);
+
+    let checked = 0;
+    let saved = 0;
+
+    for (const [, item] of matches) {
+      const title = field(item, 'title');
+      const description = field(item, 'description');
+      const publisher = field(item, 'source');
+      const published = new Date(field(item, 'pubDate'));
+      const searchText = `${title} ${description}`;
+
+      if (!publisher || !fry.test(searchText) || !news.test(searchText)) continue;
+      if (exclude.test(title) || !Number.isFinite(published.getTime())) continue;
+      if (published > now || now - published > 45 * 86400000) continue;
+
+      let url;
+      try {
+        const link = new URL(field(item, 'link'));
+        if (link.protocol !== 'https:' ||
+            link.hostname !== 'news.google.com' ||
+            !link.pathname.startsWith('/rss/articles/')) continue;
+        url = link.href;
+      } catch {
+        continue;
+      }
+
+      if (found.has(url)) continue;
+      if ([...found.values()].some(x => x.title === title)) continue;
+
+      if (++checked > 6) break;
+      if (!(await verify(url))) continue;
+
+      const id = crypto.createHash('sha256')
+        .update(url).digest('hex').slice(0, 12);
+
+      found.set(url, {
+        id,
+        title,
+        url,
+        summary: title,
+        source: `${publisher} (Google 뉴스 경유)`,
+        category: category(title),
+        publishedAt: published.toISOString(),
+        collectedAt: now.toISOString(),
+        eventStart: null,
+        eventEnd: null
+      });
+
+      saved++;
+      added++;
+    }
+
+    console.log(`[Google 뉴스 저장] ${query}: ${saved}건`);
+  } catch (error) {
+    console.warn(`[Google 뉴스 오류] ${query}: ${error.message}`);
+  }
+}
 if (!feedsSucceeded) throw Error('All RSS feeds failed; preserving previous data.');
 const items = [...found.values()].sort((a,b)=>Date.parse(b.publishedAt)-Date.parse(a.publishedAt)).slice(0,100);
 await fs.writeFile(output,JSON.stringify({updatedAt:now.toISOString(),items},null,2)+'\n');
