@@ -136,6 +136,30 @@ const links = (html, source) => {
   return [...map].slice(0,55).map(([url,hint])=>({url,hint}));
 };
 
+// Fallback: find only brand-owned detail URLs indexed by Bing News RSS.
+// This cannot bypass access restrictions and never treats a search result as verified.
+const indexedOfficialLinks=async source=>{
+  const query=source.brand+' 감자튀김 포테이토 site:'+source.host;
+  const ctl=new AbortController(),tid=setTimeout(()=>ctl.abort(),8500);
+  try{
+    const r=await fetch('https://www.bing.com/news/search?q='+encodeURIComponent(query)+'&format=rss&setlang=ko',{signal:ctl.signal});
+    if(!r.ok)throw Error('RSS HTTP '+r.status);
+    const rss=await r.text();
+    if(!/<rss\b/i.test(rss))return [];
+    const results=[];
+    for(const [,item] of rss.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)){
+      const match=item.match(/<link>([\s\S]*?)<\/link>/i);
+      const url=canonical(decode(match?.[1]||''),source.list);
+      if(!url||!hostAllowed(url,source)||!source.detail.test(new URL(url).pathname+new URL(url).search))continue;
+      const title=plain(item.match(/<title>([\s\S]*?)<\/title>/i)?.[1]);
+      if(!FRY.test(title))continue;
+      results.push({url,hint:title});
+      if(results.length>=12)break;
+    }
+    return results;
+  }finally{clearTimeout(tid);}
+};
+
 let data;
 try {data=JSON.parse(await fs.readFile(output,'utf8'));}catch{data={items:[]};}
 if(!Array.isArray(data.items))data.items=[];
@@ -148,6 +172,8 @@ for(const source of officialSources){
   let candidates=[];
   let accessed=false;
   const diag={brand:source.brand,url:source.list,reachable:false,candidates:0,checked:0,added:0,relevant:0,errors:[],excluded:{unrelated:0,oldOrUnknownDate:0,ended:0,blockedDetail:0,duplicate:0}};
+  const oldStatus=health.sources?.find(x=>x.brand===source.brand);
+  diag.lastReachableAt=oldStatus?.lastReachableAt||null;
   sourceHealth.push(diag);
   for(const listUrl of [source.list,...(source.alternates||[])]){
     try{
@@ -155,11 +181,19 @@ for(const source of officialSources){
       candidates=links(listing.html,{...source,list:listUrl});
       accessed=true;
       diag.reachable=true;
+      diag.lastReachableAt=now.toISOString();
       if(candidates.length)break;
     }catch(e){diag.errors.push(String(e.message).slice(0,120));console.warn('[공식 수집 오류] '+source.brand+': '+e.message);}
   }
-  if(!accessed)continue;
-  successes++;
+  if(candidates.length===0){
+    try{
+      const indexed=await indexedOfficialLinks(source);
+      if(indexed.length){candidates=indexed;diag.indexedFallback=true;}
+      diag.indexedCandidates=indexed.length;
+    }catch(e){diag.errors.push('보조 검색: '+String(e.message).slice(0,100));}
+  }
+  if(!accessed&&!candidates.length)continue;
+  if(accessed)successes++;
   diag.candidates=candidates.length;
   console.log('[공식 목록] '+source.brand+': 상세 후보 '+candidates.length+'건');
   for(const candidate of candidates.slice(0,18)){
