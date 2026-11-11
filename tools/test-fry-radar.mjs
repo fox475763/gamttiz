@@ -32,6 +32,7 @@ test('fries topic relevance and domestic filtering',()=>{
 test('canonicalization avoids duplicate articles',()=>{
   const items=[{title:'감자튀김 할인',url:'https://example.com/a?utm_medium=feed'},{title:'감자튀김 할인',url:'https://example.com/a'},{title:'감자튀김 할인',url:'https://example.com/b'}];
   assert.equal(dedupe(items).length,1);
+  assert.equal(dedupe([...items,{title:'감자튀김 할인',url:'https://another-brand.kr/a'}]).length,2);
 });
 test('HTML entities and CDATA are decoded',()=>{
   assert.equal(cleanText('<![CDATA[감자튀김 &amp; 소스]]>'),'감자튀김 & 소스');
