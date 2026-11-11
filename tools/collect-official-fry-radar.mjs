@@ -174,7 +174,17 @@ for(const source of officialSources){
     }
     if(source.brand==='롯데리아' && checked<=4)console.log('[공식 제목 분석] '+candidate.url+' => '+title);
     const body=page.html.replace(/<(?:header|footer|nav)\b[^>]*>[\s\S]*?<\/(?:header|footer|nav)>/gi,' ');
-    if(!related(title,body)||!koreanRelated(title,page.url)){diag.excluded.unrelated++;if(source.brand==='롯데리아')console.log('[공식 제외] 관련성 부족: '+title);continue;}
+    // Lotte's official detail text often puts fries discounts far from the event heading.
+    // Require a specifically fries-related detail instead of matching global navigation.
+    const scoped=plain(body).slice(0,13000);
+    const lotteOffer=source.brand==='롯데리아' &&
+      /(?:이달의 쿠폰|리아스낵타임|포테이토|양념감자)/.test(title) &&
+      /(?:포테이토|양념감자|감자튀김)/.test(scoped);
+    if(!(related(title,body)||lotteOffer)||!koreanRelated(title,page.url)){
+      diag.excluded.unrelated++;
+      if(source.brand==='롯데리아')console.log('[공식 제외] 관련성 부족: '+title);
+      continue;
+    }
     diag.relevant++;
     const clean=plain(body);
     const matched=clean.indexOf(title);
