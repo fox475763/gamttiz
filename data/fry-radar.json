@@ -37,7 +37,10 @@
         "https://web-prd.burgerking.co.kr/menu/main"
       ],
       "collectedAt": "2026-11-11T10:05:13.132Z",
-      "verificationPhrase": "올데이킹"
+      "verificationPhrase": "올데이킹",
+      "imageUrl": "https://img.insight.co.kr/static/2021/04/26/700/img_20210426113457_l1h0k2a4.webp",
+      "imageNote": "과거 올데이킹 홍보 이미지 (2021년) · 현재 가격·메뉴와 다를 수 있음",
+      "imageSource": "https://www.insight.co.kr/news/335463"
     },
     {
       "id": "burgerking-shakingfries-flavors-202611",
@@ -52,7 +55,10 @@
       "kind": "ongoing-menu",
       "verifiedAt": null,
       "collectedAt": "2026-11-11T10:05:13.132Z",
-      "verificationPhrase": "쉐이킹프라이"
+      "verificationPhrase": "쉐이킹프라이",
+      "imageUrl": "https://cdnweb01.wikitree.co.kr/webdata/editor/202006/01/img_20200601101342_b84478e1.webp",
+      "imageNote": "과거 쉐이킹프라이 홍보 이미지 (2020년) · 현재 가격과 다를 수 있음",
+      "imageSource": "https://www.wikitree.co.kr/articles/537543"
     },
     {
       "id": "kfc-doom-fries-20261110",
@@ -102,7 +108,9 @@
         "https://nwww.newsis.com/view/NISX20261101_0003849621"
       ],
       "collectedAt": "2026-11-11T10:05:13.132Z",
-      "imageUrl": "https://m.kt.com/kt_ci.png"
+      "imageUrl": "https://cliimage.commutil.kr/phpwas/restmb_allidxmake.php?idx=999&nmt=12&pp=002&simg=2024060521161406522204ead079118023320716.jpg",
+      "imageNote": "맥도날드 더블 맥스파이시 상하이 버거 과거 홍보 이미지 (2024년) · 2026년 KT 행사 배너가 아님",
+      "imageSource": "https://www.lawissue.co.kr/view.php?ud=202406052115135103204ead0791_12"
     },
     {
       "id": "lotteria-snack-202611",
