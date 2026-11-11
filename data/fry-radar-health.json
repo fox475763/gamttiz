@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-11-11T09:39:40.587Z",
+  "checkedAt": "2026-11-11T09:42:21.388Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
-    "feedsSucceeded": 43,
+    "feedsSucceeded": 33,
     "failedFeeds": 0,
-    "newsCandidates": 186,
+    "newsCandidates": 183,
     "newVerified": 0,
     "failures": [],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs."
@@ -189,13 +189,49 @@
         "blockedDetail": 0,
         "duplicate": 0
       }
+    },
+    {
+      "brand": "KFC",
+      "url": "https://www.kfckorea.com/promotion/promotionList/A801",
+      "reachable": false,
+      "candidates": 0,
+      "checked": 0,
+      "added": 0,
+      "relevant": 0,
+      "errors": [
+        "HTTP 200 / non-HTML"
+      ],
+      "excluded": {
+        "unrelated": 0,
+        "oldOrUnknownDate": 0,
+        "ended": 0,
+        "blockedDetail": 0,
+        "duplicate": 0
+      }
+    },
+    {
+      "brand": "파파이스",
+      "url": "https://popeyes.co.kr/event",
+      "reachable": true,
+      "candidates": 8,
+      "checked": 8,
+      "added": 0,
+      "relevant": 0,
+      "errors": [],
+      "excluded": {
+        "unrelated": 8,
+        "oldOrUnknownDate": 0,
+        "ended": 0,
+        "blockedDetail": 0,
+        "duplicate": 0
+      }
     }
   ],
   "summary": {
-    "sources": 10,
-    "reachable": 6,
-    "detailCandidates": 33,
-    "detailChecked": 33,
+    "sources": 12,
+    "reachable": 7,
+    "detailCandidates": 41,
+    "detailChecked": 41,
     "newOfficial": 0,
     "photoEnriched": 0,
     "stored": 3,
