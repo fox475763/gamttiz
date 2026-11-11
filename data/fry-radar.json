@@ -11,7 +11,8 @@
       "publishedAt": null,
       "collectedAt": "2026-11-11T08:45:47.611Z",
       "eventStart": "2026-11-01",
-      "eventEnd": "2026-11-30"
+      "eventEnd": "2026-11-30",
+      "imageUrl": "https://img.lotteeatz.com/upload/event/CONTENT_IMG/2026/10/30/20261030171329894_8.jpg"
     },
     {
       "id": "c1fd1181351f",
@@ -23,7 +24,8 @@
       "publishedAt": null,
       "collectedAt": "2026-11-11T09:04:34.300Z",
       "eventStart": "2026-11-01",
-      "eventEnd": "2026-11-30"
+      "eventEnd": "2026-11-30",
+      "imageUrl": "https://img.lotteeatz.com/upload/event/CONTENT_IMG/2026/11/10/20261110142257514_9.jpg"
     },
     {
       "id": "dde5fed2fd71",
@@ -35,7 +37,8 @@
       "publishedAt": "2026-08-31T07:16:00.000Z",
       "collectedAt": "2026-11-11T02:56:29.859Z",
       "eventStart": null,
-      "eventEnd": null
+      "eventEnd": null,
+      "imageUrl": "https://wimg.heraldcorp.com/news/cms/2026/08/31/news-p.v1.20260831.52678d2efeb54af2b9176aef02dec86c_P1.png"
     }
   ]
 }
