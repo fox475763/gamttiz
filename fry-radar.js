@@ -41,6 +41,12 @@
   };
   const statusOf=item=>{
     const now=Date.now();
+    // Evergreen menu info is not a newly published article or an open-ended promotion.
+    // Display it as verified only for 7 days after a successful source check.
+    if(item.kind==='ongoing-menu'){
+      const confirmed=Date.parse(item.verifiedAt||'');
+      return Number.isFinite(confirmed)&&confirmed<=now&&now-confirmed<=7*DAY?'available':'past';
+    }
     const end=eventTime(item.eventEnd,true);
     if(Number.isFinite(end) && end<now)return 'ended';
     const start=eventTime(item.eventStart);
@@ -51,7 +57,7 @@
     if(!Number.isFinite(published)||now-published>MAX_RECENT_DAYS*DAY)return 'past';
     return 'recent';
   };
-  const statusLabels={ended:'종료',past:'지난 기사',upcoming:'예정',ongoing:'진행 중',recent:'기간 미확인'};
+  const statusLabels={ended:'종료',past:'지난 기사',upcoming:'예정',ongoing:'진행 중',available:'운영 확인',recent:'기간 미확인'};
   const isArchived=item=>['ended','past'].includes(statusOf(item));
   // Brand-neutral artwork authored for GAMTTIZ. No copied product photos or trademarks.
   const friesArt=()=>{
@@ -73,7 +79,7 @@
     const top=el('div','radar-card-top');
     const badge=el('span','radar-badge',labels[item.category]||'소식');
     const stateBadge=el('span','radar-status radar-status-'+state,statusLabels[state]);
-    const period=item.eventStart&&item.eventEnd?dateLabel(item.eventStart)+' ~ '+dateLabel(item.eventEnd):dateLabel(item.publishedAt);
+    const period=item.kind==='ongoing-menu'?'확인일 '+dateLabel(item.verifiedAt):(item.eventStart&&item.eventEnd?dateLabel(item.eventStart)+' ~ '+dateLabel(item.eventEnd):dateLabel(item.publishedAt));
     const time=el('time','',period);
     top.append(badge,stateBadge,time);
     const title=el('h3','',item.title);
