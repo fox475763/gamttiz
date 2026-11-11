@@ -19,7 +19,9 @@ const officialSources = [
   {brand:'쉐이크쉑', list:'https://www.shakeshack.kr/', host:'shakeshack.kr', detail:/\/(news|event|promotion|notice)\b/i},
   {brand:'파이브가이즈', list:'https://www.fiveguys.co.kr/모든-소식-보기/', host:'fiveguys.co.kr', detail:/\/(news|blog|stories|article|press|소식|뉴스)\b/i},
   {brand:'다운타우너', list:'https://pf.kakao.com/_feexixj', host:'pf.kakao.com', detail:/\/_feexixj\/contents\/posts\/\d+/i},
-  {brand:'바스버거', list:'https://pf.kakao.com/_AXkns', host:'pf.kakao.com', detail:/\/_AXkns\/contents\/posts\/\d+/i}
+  {brand:'바스버거', list:'https://pf.kakao.com/_AXkns', host:'pf.kakao.com', detail:/\/_AXkns\/contents\/posts\/\d+/i},
+  {brand:'KFC', list:'https://www.kfckorea.com/promotion/promotionList/A801', host:'kfckorea.com', detail:/\/promotion\/(?:promotionList|newMenu)\/detail\/\d+/i},
+  {brand:'파파이스', list:'https://popeyes.co.kr/event', host:'popeyes.co.kr', detail:/\/event\/\d+$/i}
 ];
 
 const decode = str => String(str || '').replace(/&#(x[0-9a-f]+|\d+);/gi, (_, v) => {
