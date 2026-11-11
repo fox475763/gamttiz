@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-11-11T09:43:16.270Z",
+  "checkedAt": "2026-11-11T09:44:10.073Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
     "feedsSucceeded": 43,
     "failedFeeds": 0,
-    "newsCandidates": 186,
+    "newsCandidates": 183,
     "newVerified": 0,
     "failures": [],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs."
@@ -26,7 +26,7 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-11T09:43:16.270Z"
+      "lastReachableAt": "2026-11-11T09:44:10.073Z"
     },
     {
       "brand": "맥도날드",
@@ -44,7 +44,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:43:16.270Z",
+      "lastReachableAt": "2026-11-11T09:44:10.073Z",
       "indexedCandidates": 0
     },
     {
@@ -106,7 +106,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:43:16.270Z"
+      "lastReachableAt": "2026-11-11T09:44:10.073Z"
     },
     {
       "brand": "노브랜드버거",
@@ -167,7 +167,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:43:16.270Z"
+      "lastReachableAt": "2026-11-11T09:44:10.073Z"
     },
     {
       "brand": "다운타우너",
@@ -185,7 +185,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:43:16.270Z",
+      "lastReachableAt": "2026-11-11T09:44:10.073Z",
       "indexedCandidates": 0
     },
     {
@@ -204,7 +204,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:43:16.270Z",
+      "lastReachableAt": "2026-11-11T09:44:10.073Z",
       "indexedCandidates": 0
     },
     {
@@ -244,7 +244,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:43:16.270Z"
+      "lastReachableAt": "2026-11-11T09:44:10.073Z"
     }
   ],
   "summary": {
