@@ -1,0 +1,31 @@
+name: FRY RADAR 게시물 삭제
+description: GitHub 로그인 후 감튀 소식을 선택하여 삭제합니다.
+title: "[FRY DELETE]"
+body:
+  - type: markdown
+    attributes:
+      value: "소식 삭제는 GitHub 저장소 소유자 fox475763만 승인됩니다. 다른 계정으로 제출해도 게시물은 변경되지 않습니다."
+  - type: dropdown
+    id: fry_post
+    attributes:
+      label: 삭제할 소식
+      description: "아래 목록에서 삭제할 글을 하나 선택하세요."
+      options:
+        - "lotteria-lia-lunch-fries-verified-202611 | 롯데리아 리아런치 할인 세트 — 포테이토 포함 점심 메뉴"
+        - "kfc-doom-fries-20261110 | KFC × 어벤져스 ‘둠프라이’ 한정 출시 — 2027년 1월 4일까지"
+        - "moms-jujutsu-fries-combo-202611 | 맘스터치 × 주술회전 콜라보 — 싸이버거 세트와 한정 굿즈"
+        - "mcd-kt-fries-set-202611 | 맥도날드 감튀 L 포함 세트, KT 멤버십 3,500원 할인"
+        - "lotteria-snack-202611 | 롯데리아 11월 리아스낵타임, 포테이토 19% 할인"
+        - "c1fd1181351f | 11월 롯데리아 이달의 쿠폰!"
+        - "dde5fed2fd71 | 중고가 3배 뛴 ‘감튀홀더 세트’…버거 굿즈에 왜 다들 난리야? [언박싱]"
+    validations:
+      required: true
+  - type: checkboxes
+    id: deletion_confirmation
+    attributes:
+      label: 삭제 확인
+      options:
+        - label: "이 글을 삭제하고 향후 자동 재수집도 차단합니다."
+          required: true
+    validations:
+      required: true
