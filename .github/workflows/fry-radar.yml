@@ -1,6 +1,11 @@
 name: Update Fry Radar
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'tools/collect-fry-radar.mjs'
+      - '.github/workflows/fry-radar.yml'
   schedule:
     # GitHub Actions uses UTC. 00:00 UTC is 09:00 in Korea.
     - cron: '0 0 * * *'
