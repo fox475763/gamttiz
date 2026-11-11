@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-11T08:40:52.749Z",
+  "updatedAt": "2026-11-11T08:45:47.611Z",
   "items": [
     {
       "id": "dde5fed2fd71",
@@ -12,6 +12,18 @@
       "collectedAt": "2026-11-11T02:56:29.859Z",
       "eventStart": null,
       "eventEnd": null
+    },
+    {
+      "id": "lotteria-snack-202611",
+      "title": "롯데리아 11월 리아스낵타임, 포테이토 19% 할인",
+      "url": "https://www.lotteeatz.com/event/main/selectEvent/18403",
+      "summary": "11월 1~30일 매일 오후 2~6시 포테이토 2,100원 → 1,700원. 배달·일부 매장 할인 제외, 조기 종료 가능. 롯데리아 공식 안내에서 확인한 행사입니다.",
+      "source": "롯데잇츠 공식 이벤트",
+      "category": "discount",
+      "publishedAt": null,
+      "collectedAt": "2026-11-11T08:45:47.611Z",
+      "eventStart": "2026-11-01",
+      "eventEnd": "2026-11-30"
     }
   ]
 }
