@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
+import {canonical,dedupe,dateRange,FRY as SHARED_FRY,TOPIC as SHARED_TOPIC,related,koreanRelated} from './fry-radar-common.mjs';
 
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
@@ -10,7 +11,7 @@ const TOPIC = /할인|프로모션|행사|이벤트|쿠폰|특가|소식|출시|
 const EXCLUDE = /주가|채용|가맹\s*모집|창업\s*비용|개인정보|매장\s*찾기/i;
 const officialSources = [
   {brand:'롯데리아', list:'https://www.lotteeatz.com/event/main/', host:'lotteeatz.com', detail:/\/event\/main\/selectEvent\/\d+/i},
-  {brand:'맥도날드', list:'https://www.mcdonalds.co.kr/kor/promotion/list', host:'mcdonalds.co.kr', alternates:['https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404'], detail:/\/kor\/promotion\/detail\/[a-z0-9]+/i},
+  {brand:'맥도날드', list:'https://www.mcdonalds.co.kr/kor/promotion/list', host:'mcdonalds.co.kr', alternates:['https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404'], detail:/\/kor\/promotion\/(?:detail\/[a-z\d]+|detail\.do\?seq=\d+)/i},
   {brand:'버거킹', list:'https://www.burgerking.co.kr/event', host:'burgerking.co.kr', alternates:['https://web-prd.burgerking.co.kr/event'], detail:/\/event\/detail\/\d+/i},
   {brand:'맘스터치', list:'https://www.momstouch.co.kr/', host:'momstouch.co.kr', detail:/\/[^?#]*(event|promotion|board|notice|news)[^?#]*/i},
   {brand:'프랭크버거', list:'https://www.frankburger.co.kr/board/index.php?board=event_01&tab=3&type=list', host:'frankburger.co.kr', detail:/\/board\/index\.php\?.*board=event_01.*(?:no=|idx=|seq=|id=)\d+/i},
@@ -121,39 +122,49 @@ const links = (html, source) => {
     if (!map.has(url))map.set(url,plain(hint).slice(0,220));
   };
   for(const m of String(html).matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)){
-    const a=attrs(m[1]);if(a.href)add(a.href,m[2]);
+    const a=attrs(m[1]);
+    if(a.href)add(a.href,m[2]);
+    if(a['data-href'])add(a['data-href'],m[2]);
+    if(a.onclick){for(const hit of a.onclick.matchAll(/(?:https?:\/\/[^'"\s]+|\/kor\/promotion\/detail\/[a-z\d]+|\/event\/detail\/\d+)/gi))add(hit[0],m[2]);}
   }
   for(const m of String(html).matchAll(/(?:https?:\\?\/\\?\/[^\s"'<>()]+|\/event\/main\/selectEvent\/\d+|\/event\/detail\/\d+|\/kor\/promotion\/detail\/[a-z\d]+)/gi)){
     const candidate=m[0].replace(/\\\//g,'/').replace(/&amp;/g,'&');
     add(candidate,html.slice(Math.max(0,m.index-150),m.index+200));
   }
-  return [...map].slice(0,24).map(([url,hint])=>({url,hint}));
+  return [...map].slice(0,55).map(([url,hint])=>({url,hint}));
 };
 
 let data;
 try {data=JSON.parse(await fs.readFile(output,'utf8'));}catch{data={items:[]};}
 if(!Array.isArray(data.items))data.items=[];
 const items=new Map(data.items.filter(x=>x&&x.url).map(x=>[x.url,x]));
+const healthFile=new URL('../data/fry-radar-health.json',import.meta.url);
+let health={};try{health=JSON.parse(await fs.readFile(healthFile,'utf8'));}catch{}
+const sourceHealth=[];
 let checked=0, added=0, successes=0, pictures=0;
 for(const source of officialSources){
   let candidates=[];
   let accessed=false;
+  const diag={brand:source.brand,url:source.list,reachable:false,candidates:0,checked:0,added:0,relevant:0,errors:[],excluded:{unrelated:0,oldOrUnknownDate:0,ended:0,blockedDetail:0,duplicate:0}};
+  sourceHealth.push(diag);
   for(const listUrl of [source.list,...(source.alternates||[])]){
     try{
       const listing=await fetchHtml(listUrl);
       candidates=links(listing.html,{...source,list:listUrl});
       accessed=true;
+      diag.reachable=true;
       if(candidates.length)break;
-    }catch(e){console.warn('[공식 수집 오류] '+source.brand+': '+e.message);}
+    }catch(e){diag.errors.push(String(e.message).slice(0,120));console.warn('[공식 수집 오류] '+source.brand+': '+e.message);}
   }
   if(!accessed)continue;
   successes++;
+  diag.candidates=candidates.length;
   console.log('[공식 목록] '+source.brand+': 상세 후보 '+candidates.length+'건');
   for(const candidate of candidates.slice(0,18)){
     if(checked>=90)break;
-    checked++;
+    checked++;diag.checked++;
     let page;
-    try{page=await fetchHtml(candidate.url);}catch(e){continue;}
+    try{page=await fetchHtml(candidate.url);}catch(e){diag.excluded.blockedDetail++;continue;}
     if(!hostAllowed(page.url,source))continue;
     let title=titleOf(page.html,candidate.hint);
     if(source.brand==='롯데리아'){
@@ -163,17 +174,21 @@ for(const source of officialSources){
     }
     if(source.brand==='롯데리아' && checked<=4)console.log('[공식 제목 분석] '+candidate.url+' => '+title);
     const body=page.html.replace(/<(?:header|footer|nav)\b[^>]*>[\s\S]*?<\/(?:header|footer|nav)>/gi,' ');
-    if(!relevant(title,body)){if(source.brand==='롯데리아')console.log('[공식 제외] 관련성 부족: '+title);continue;}
+    if(!related(title,body)||!koreanRelated(title,page.url)){diag.excluded.unrelated++;if(source.brand==='롯데리아')console.log('[공식 제외] 관련성 부족: '+title);continue;}
+    diag.relevant++;
     const clean=plain(body);
-    const dateRange=rangeOf(clean.slice(0,2600))||rangeOf(candidate.hint);
+    const matched=clean.indexOf(title);
+    const around=matched>=0?clean.slice(Math.max(0,matched-240),matched+1200):clean.slice(0,3500);
+    const dateRange=rangeOf(candidate.hint)||rangeOf(around)||rangeOf(clean.slice(0,3500));
     const datePublished=meta(page.html,'article:published_time')||meta(page.html,'datePublished')||meta(page.html,'pubdate');
     const publishedTime=Date.parse(datePublished||'');
     const endTime=dateRange?Date.parse(dateRange.eventEnd+'T23:59:59+09:00'):NaN;
-    if(dateRange&&endTime<now.getTime()){if(source.brand==='롯데리아')console.log('[공식 제외] 행사 종료: '+title);continue;}
-    if(!dateRange&&(!Number.isFinite(publishedTime)||publishedTime>now.getTime()||now.getTime()-publishedTime>MAX_PUBLISHED_AGE)){if(source.brand==='롯데리아')console.log('[공식 제외] 날짜 확인 불가: '+title);continue;}
+    if(dateRange&&endTime<now.getTime()){diag.excluded.ended++;if(source.brand==='롯데리아')console.log('[공식 제외] 행사 종료: '+title);continue;}
+    if(!dateRange&&(!Number.isFinite(publishedTime)||publishedTime>now.getTime()||now.getTime()-publishedTime>MAX_PUBLISHED_AGE)){diag.excluded.oldOrUnknownDate++;if(source.brand==='롯데리아')console.log('[공식 제외] 날짜 확인 불가: '+title);continue;}
     const image=heroImage(page.html,page.url);
     const current=items.get(page.url)||items.get(candidate.url);
     if(current){
+      diag.excluded.duplicate++;
       if(image&&!current.imageUrl){current.imageUrl=image;pictures++;}
       if(dateRange&&!current.eventEnd){Object.assign(current,dateRange);}
       continue;
@@ -182,7 +197,7 @@ for(const source of officialSources){
     const summary=meta(page.html,'og:description')||meta(page.html,'description')||'감자튀김 관련 공식 소식입니다. 행사 조건은 원문에서 확인해 주세요.';
     const item={id,title,summary:plain(summary).slice(0,180),url:page.url,source:source.brand+' 공식 홈페이지',category:category(title),publishedAt:Number.isFinite(publishedTime)?new Date(publishedTime).toISOString():null,collectedAt:now.toISOString(),eventStart:dateRange?.eventStart||null,eventEnd:dateRange?.eventEnd||null};
     if(image)item.imageUrl=image;
-    items.set(page.url,item);added++;
+    items.set(page.url,item);added++;diag.added++;
     console.log('[공식 등록] '+source.brand+': '+title+' / '+page.url);
   }
 }
@@ -195,7 +210,11 @@ for(const post of [...items.values()].filter(x=>!x.imageUrl).slice(0,8)){
   }catch{}
 }
 if(successes===0)console.warn('[공식 수집] 모든 출처 접근 실패: 기존 데이터는 유지됩니다.');
-data.items=[...items.values()].sort((a,b)=>Date.parse(b.publishedAt||b.eventStart||b.collectedAt||0)-Date.parse(a.publishedAt||a.eventStart||a.collectedAt||0)).slice(0,100);
+data.items=dedupe([...items.values()]).sort((a,b)=>Date.parse(b.publishedAt||b.eventStart||b.collectedAt||0)-Date.parse(a.publishedAt||a.eventStart||a.collectedAt||0)).slice(0,250);
 data.updatedAt=now.toISOString();
 await fs.writeFile(output,JSON.stringify(data,null,2)+'\n');
+health.checkedAt=now.toISOString();
+health.sources=sourceHealth;
+health.summary={sources:sourceHealth.length,reachable:sourceHealth.filter(x=>x.reachable).length,detailCandidates:sourceHealth.reduce((s,x)=>s+x.candidates,0),detailChecked:sourceHealth.reduce((s,x)=>s+x.checked,0),newOfficial:added,photoEnriched:pictures,stored:data.items.length,status:sourceHealth.every(x=>x.reachable&&x.candidates>0)?'ok':'partial'};
+await fs.writeFile(healthFile,JSON.stringify(health,null,2)+'\n');
 console.log('[공식 수집 결과] 목록 접근 '+successes+'/'+officialSources.length+', 상세 확인 '+checked+', 새 글 '+added+', 이미지 추출 '+pictures+', 전체 '+data.items.length);
