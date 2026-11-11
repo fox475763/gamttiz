@@ -81,7 +81,7 @@ for (const query of queries) {
     const published = new Date(field(item,'pubDate'));
     const searchText = `${title} ${description}`;
     if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || !Number.isFinite(published.getTime())) continue;
-    if (published > now || now - published > 120 * 86400000) continue;
+    if (published > now || now - published > 14 * 86400000) continue;
     if (!/[가-힣]/.test(title) || /\.jp$|\.cn$|\.tw$/.test(new URL(url).hostname)) continue;
     if (found.has(url)) continue;
     console.log(`[검증 시도] ${title}`);
@@ -141,7 +141,7 @@ for (const query of googleQueries) {
 
       if (!publisher || !fry.test(searchText) || !news.test(searchText)) continue;
       if (exclude.test(title) || !Number.isFinite(published.getTime())) continue;
-      if (published > now || now - published > 45 * 86400000) continue;
+      if (published > now || now - published > 14 * 86400000) continue;
 
       let url;
       try {
