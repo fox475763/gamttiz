@@ -4,11 +4,16 @@ import crypto from 'node:crypto';
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
 const queries = [
-  '감자튀김 할인 이벤트 한국',
-  '감자튀김 신제품 출시 한국',
-  '프렌치프라이 할인 행사 한국',
-  '감자튀김 축제 행사 한국',
+  '감자튀김 할인',
+  '감자튀김 이벤트',
+  '감자튀김 신제품',
+  '프렌치프라이 프로모션',
+  '후렌치후라이 행사',
+  '양념감자 할인',
+  '감튀 축제',
+  'french fries promotion Korea',
 ];
+
 const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&#(x[\da-f]+|\d+);|&([a-z]+);/gi, (_, numeric, named) => {
   if (numeric) return String.fromCodePoint(parseInt(numeric.replace(/^x/i, ''), numeric.startsWith('x') ? 16 : 10));
   return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[named.toLowerCase()] || `&${named};`;
