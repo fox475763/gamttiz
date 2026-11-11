@@ -3,7 +3,7 @@
   <title>소식 올리기 — GAMTTIZ</title><meta name="robots" content="noindex,nofollow">
   <link rel="icon" href="assets/badge.png"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="site-font.css"><link rel="stylesheet" href="studio-polish.css"><link rel="stylesheet" href="catalog-news.css">
 </head><body><main class="admin-page"><a href="news.html" class="news-back">← 소식 페이지</a><p class="eyebrow">GAMTTIZ / NEWS EDITOR</p>
-  <h1>새 소식 올리기</h1>
+  <h1>소식 관리자</h1>
   <p>현재 사이트의 GitHub 계정으로 글을 올려주세요. 로그인된 계정이 <strong>fox475763</strong>일 때 작성한 소식만 홈페이지와 소식 페이지에 표시됩니다.</p>
   <div class="admin-guide">
     <p><b>01</b> 아래 버튼에서 GitHub에 로그인합니다. 로그인 상태는 GitHub에서 유지하고 로그아웃할 수 있어요.</p>
@@ -13,4 +13,21 @@
   <a class="admin-publish-link" href="https://github.com/fox475763/gamttiz/issues/new?template=gamttiz-news.yml" target="_blank" rel="noopener noreferrer">GitHub에서 소식 작성하기 ↗</a>
   <p class="admin-help"><a href="news.html?refresh=1">게시 상태 확인하기 ↗</a> · 글이 보이지 않으면 GitHub에서 제출이 완료되었는지, 작성 계정이 fox475763인지 확인해 주세요.</p>
   <p class="admin-help">게시자 이름은 글 작성 화면에서 바꿀 수 있습니다. 계정 비밀번호 변경과 로그아웃은 GitHub 계정 설정에서 진행해 주세요.</p>
+  <section class="admin-radar" aria-labelledby="admin-radar-title">
+    <h2 id="admin-radar-title">FRY RADAR 게시물 관리</h2>
+    <p>게시물을 선택해 삭제 요청을 만들 수 있어요. GitHub에서 <strong>fox475763</strong> 계정으로 로그인한 뒤 <strong>Submit new issue</strong>를 누르면 삭제가 진행됩니다. 다른 계정의 요청은 처리되지 않습니다.</p>
+    <p><strong>주의:</strong> 삭제된 글은 자동 수집에서도 다시 게시되지 않습니다. 다시 올리려면 차단 목록을 관리해야 해요.</p>
+    <p id="admin-radar-status" role="status">게시물을 불러오는 중이에요.</p>
+    <div id="admin-radar-posts" class="admin-radar-posts"></div>
+  </section>
+  <style>
+    .admin-radar{margin:3rem 0 1rem;padding-top:2rem;border-top:1px solid #e6d7cc}
+    .admin-radar-posts{display:grid;gap:12px;margin-top:18px}
+    .admin-radar-post{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:14px;border:1px solid #e9d9c8;border-radius:12px}
+    .admin-radar-post strong{display:block;margin-bottom:5px}
+    .admin-radar-post small{display:block;opacity:.7;overflow-wrap:anywhere}
+    .admin-radar-delete{display:inline-block;flex:none;background:#e93636;color:#fff!important;padding:10px 14px;border-radius:8px;font-weight:700;text-decoration:none}
+    @media(max-width:600px){.admin-radar-post{align-items:stretch;flex-direction:column}.admin-radar-delete{text-align:center}}
+  </style>
+  <script src="admin-fry-radar.js" defer></script>
 </main></body></html>
