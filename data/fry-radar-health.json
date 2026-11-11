@@ -1,12 +1,85 @@
 {
-  "checkedAt": "2026-11-11T09:44:10.073Z",
+  "checkedAt": "2026-11-11T09:46:03.312Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
-    "feedsSucceeded": 43,
-    "failedFeeds": 0,
-    "newsCandidates": 183,
+    "feedsSucceeded": 25,
+    "failedFeeds": 18,
+    "newsCandidates": 77,
     "newVerified": 0,
-    "failures": [],
+    "failures": [
+      {
+        "query": "감자튀김 시즈닝",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "치즈프라이 신메뉴",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "감자튀김 맛집",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "감자튀김 전문점 오픈",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "감자튀김 팝업스토어",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "감자튀김 트렌드",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "감자튀김 소비",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "감자튀김 인기",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "맥도날드 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "롯데리아 포테이토",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "버거킹 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "맘스터치 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "프랭크버거 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "노브랜드버거 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "쉐이크쉑 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "파이브가이즈 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "다운타우너 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      },
+      {
+        "query": "바스버거 감자튀김",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      }
+    ],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs."
   },
   "sources": [
@@ -26,26 +99,28 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-11T09:44:10.073Z"
+      "lastReachableAt": "2026-11-11T09:46:03.312Z"
     },
     {
       "brand": "맥도날드",
       "url": "https://www.mcdonalds.co.kr/kor/promotion/list",
       "reachable": true,
-      "candidates": 0,
-      "checked": 0,
+      "candidates": 6,
+      "checked": 6,
       "added": 0,
       "relevant": 0,
       "errors": [],
       "excluded": {
-        "unrelated": 0,
+        "unrelated": 6,
         "oldOrUnknownDate": 0,
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:44:10.073Z",
-      "indexedCandidates": 0
+      "lastReachableAt": "2026-11-11T09:46:03.312Z",
+      "indexedCandidates": 0,
+      "browserFallback": true,
+      "browserCandidates": 6
     },
     {
       "brand": "버거킹",
@@ -57,7 +132,8 @@
       "relevant": 0,
       "errors": [
         "fetch failed",
-        "fetch failed"
+        "fetch failed",
+        "브라우저 보조 수집 실패: browser returned no HTML"
       ],
       "excluded": {
         "unrelated": 0,
@@ -78,7 +154,8 @@
       "added": 0,
       "relevant": 0,
       "errors": [
-        "This operation was aborted"
+        "This operation was aborted",
+        "브라우저 보조 수집 실패: browser returned no HTML"
       ],
       "excluded": {
         "unrelated": 0,
@@ -106,7 +183,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:44:10.073Z"
+      "lastReachableAt": "2026-11-11T09:46:03.312Z"
     },
     {
       "brand": "노브랜드버거",
@@ -118,7 +195,8 @@
       "relevant": 0,
       "errors": [
         "fetch failed",
-        "fetch failed"
+        "fetch failed",
+        "브라우저 보조 수집 실패: browser returned no HTML"
       ],
       "excluded": {
         "unrelated": 0,
@@ -139,7 +217,8 @@
       "added": 0,
       "relevant": 0,
       "errors": [
-        "fetch failed"
+        "fetch failed",
+        "브라우저 보조 수집 실패: browser returned no HTML"
       ],
       "excluded": {
         "unrelated": 0,
@@ -167,7 +246,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:44:10.073Z"
+      "lastReachableAt": "2026-11-11T09:46:03.312Z"
     },
     {
       "brand": "다운타우너",
@@ -185,8 +264,9 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:44:10.073Z",
-      "indexedCandidates": 0
+      "lastReachableAt": "2026-11-11T09:46:03.312Z",
+      "indexedCandidates": 0,
+      "browserCandidates": 0
     },
     {
       "brand": "바스버거",
@@ -204,29 +284,27 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:44:10.073Z",
-      "indexedCandidates": 0
+      "lastReachableAt": "2026-11-11T09:46:03.312Z",
+      "indexedCandidates": 0,
+      "browserCandidates": 0
     },
     {
       "brand": "KFC",
       "url": "https://www.kfckorea.com/promotion/promotionList/A801",
-      "reachable": false,
-      "candidates": 0,
-      "checked": 0,
+      "reachable": true,
+      "candidates": 5,
+      "checked": 5,
       "added": 0,
       "relevant": 0,
-      "errors": [
-        "HTTP 200 / non-HTML"
-      ],
+      "errors": [],
       "excluded": {
-        "unrelated": 0,
+        "unrelated": 5,
         "oldOrUnknownDate": 0,
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": null,
-      "indexedCandidates": 0
+      "lastReachableAt": "2026-11-11T09:46:03.312Z"
     },
     {
       "brand": "파파이스",
@@ -244,14 +322,14 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:44:10.073Z"
+      "lastReachableAt": "2026-11-11T09:46:03.312Z"
     }
   ],
   "summary": {
     "sources": 12,
-    "reachable": 7,
-    "detailCandidates": 41,
-    "detailChecked": 41,
+    "reachable": 8,
+    "detailCandidates": 52,
+    "detailChecked": 52,
     "newOfficial": 0,
     "photoEnriched": 0,
     "stored": 3,
