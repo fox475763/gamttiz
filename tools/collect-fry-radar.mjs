@@ -177,9 +177,14 @@ const verify = async url => {
   finally { clearTimeout(timeout); }
 };
 
+let suppressed={items:[]};
+try{suppressed=JSON.parse(await fs.readFile(new URL('../data/fry-radar-blocked.json',import.meta.url),'utf8'));}catch{}
+const blockedIds=new Set((suppressed.items||[]).map(x=>x.id).filter(Boolean));
+const blockedUrls=new Set((suppressed.items||[]).map(x=>x.url).filter(Boolean));
+const allowedPost=item=>!blockedIds.has(item.id)&&!blockedUrls.has(canonical(item.url));
 let previous;
 try { previous = JSON.parse(await fs.readFile(output, 'utf8')); } catch { previous = {updatedAt:null,items:[]}; }
-const existing = Array.isArray(previous.items) ? previous.items.filter(item => !overseasOnly(item.title || '', item.url)).map(item => ({...item, category:category(item.title || '', item.summary || '')})) : [];
+const existing = Array.isArray(previous.items) ? previous.items.filter(item => allowedPost(item) && !overseasOnly(item.title || '', item.url)).map(item => ({...item, category:category(item.title || '', item.summary || '')})) : [];
 const found = new Map(existing.map(item => [item.url,item]));
 let feedsSucceeded = 0;
 let added = 0;
@@ -201,7 +206,7 @@ for (const query of scheduledQueries) {
     if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || overseasOnly(title,url) || !Number.isFinite(published.getTime())) continue;
     if (published > now || now - published > 14 * 86400000) continue;
     if (!/[가-힣]/.test(title) || /\.jp$|\.cn$|\.tw$/.test(new URL(url).hostname)) continue;
-    if (found.has(url)) continue;
+    if (found.has(url)||blockedUrls.has(url)) continue;
     console.log(`[검증 시도] ${title}`);
 
     const verifiedPage = await verify(url);
@@ -279,7 +284,7 @@ for (const query of googleQueries) {
       }
 
       if (overseasOnly(title,url)) continue;
-      if (found.has(url)) continue;
+      if (found.has(url)||blockedUrls.has(url)) continue;
       if ([...found.values()].some(x => x.title === title)) continue;
 
       if (++checked > 6) break;
@@ -313,7 +318,7 @@ for (const query of googleQueries) {
   }
 }
 if (!feedsSucceeded) console.warn('[RSS 경고] 모든 피드 실패: 기존 게시글을 유지하며 공식 사이트 수집은 계속합니다.');
-const items = dedupe([...found.values()]).sort((a,b)=>
+const items = dedupe([...found.values()].filter(allowedPost)).sort((a,b)=>
   (Date.parse(b.publishedAt || b.eventStart) || 0) - (Date.parse(a.publishedAt || a.eventStart) || 0)
 ).slice(0,250);
 await fs.writeFile(output,JSON.stringify({updatedAt:now.toISOString(),items},null,2)+'\n');
