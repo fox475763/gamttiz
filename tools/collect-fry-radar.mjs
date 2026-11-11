@@ -50,11 +50,11 @@ const overseasOnly = (title, url = '') => {
   catch { return true; }
 
   // 한국어로 번역된 해외 기사도 국내 소식으로 저장하지 않습니다.
-  if (/(?:^|\\.)(?:note\\.com|medium\\.com|reddit\\.com)$/.test(host) ||
-      /\\.(?:jp|cn|tw|hk|sg|uk|de|fr|be|ca|au|th|vn|id|my)$/.test(host)) return true;
+  if (/(?:^|\.)(?:note\.com|medium\.com|reddit\.com)$/.test(host) ||
+      /\.(?:jp|cn|tw|hk|sg|uk|de|fr|be|ca|au|th|vn|id|my)$/.test(host)) return true;
 
   const domestic = /한국|국내|우리나라|서울|부산|대구|인천|광주|대전|울산|제주|경기도|대한민국/i.test(title);
-  const foreignTopic = /세계(?:의|에서|각국)|해외(?:에서|의|발|현지|시장|소식)|\\d+개국|유학생|(?:일본|미국|중국|대만|홍콩|영국|프랑스|벨기에|독일|캐나다|호주|싱가포르|태국)(?:에서|현지|시장|매장|한정|출시|유행|소식)/i.test(title);
+  const foreignTopic = /세계(?:의|에서|각국)|해외(?:에서|의|발|현지|시장|소식)|\d+개국|유학생|(?:일본|미국|중국|대만|홍콩|영국|프랑스|벨기에|독일|캐나다|호주|싱가포르|태국)(?:에서|현지|시장|매장|한정|출시|유행|소식)/i.test(title);
   return foreignTopic && !domestic;
 };
 // 제목의 주제부터 확인해 분류하고, 필요할 때만 설명을 참고합니다.
