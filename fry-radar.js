@@ -1,6 +1,6 @@
 (()=>{
   'use strict';
-  const labels={discount:'할인',event:'이벤트',festival:'축제','new-product':'신제품',other:'기타'};
+  const labels={discount:'할인',event:'이벤트',festival:'축제','new-product':'신메뉴',goods:'굿즈·콜라보',sauce:'소스·시즈닝',place:'맛집·팝업',trend:'감튀 트렌드',other:'기타'};
   const list=document.getElementById('radar-list');
   const archive=document.getElementById('radar-archive-list');
   const preview=document.getElementById('radar-preview-list');
@@ -116,7 +116,7 @@
       preview.replaceChildren();
       const latest=items.filter(item=>!isArchived(item)).sort(byNewest).slice(0,3);
       if(latest.length)latest.forEach(item=>preview.append(card(item,true)));
-      else empty(preview,'최근 감튀 소식을 찾는 중이에요.','새로운 할인·행사·신제품 소식이 검증되면 소개할게요.');
+      else empty(preview,'최근 감튀 소식을 찾는 중이에요.','새로운 국내 감튀 소식이 검증되면 소개할게요.');
     }
     if(list&&location.hash){
       let hash;
