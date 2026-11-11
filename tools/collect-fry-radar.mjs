@@ -182,7 +182,7 @@ for (const query of googleQueries) {
       const searchText = `${title} ${description}`;
 
       if (!publisher || !fry.test(searchText) || !news.test(searchText)) continue;
-      if (exclude.test(title) || overseasOnly(title) || !Number.isFinite(published.getTime())) continue;
+      if (!/[가-힣]/.test(title) || exclude.test(title) || overseasOnly(title) || !Number.isFinite(published.getTime())) continue;
       if (published > now || now - published > 14 * 86400000) continue;
 
       let url;
