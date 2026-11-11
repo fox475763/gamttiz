@@ -77,21 +77,16 @@
     const time=el('time','',period);
     top.append(badge,stateBadge,time);
     const title=el('h3','',item.title);
-    // A source image is visible only after a human verifies the specific public display licence.
-    const rights=item.imageRights;
-    const approved=rights?.status==='approved' &&
-      rights?.scope==='public-thumbnail' &&
-      typeof rights?.evidenceUrl==='string' &&
-      /^https:\/\//i.test(rights.evidenceUrl);
+    // Source thumbnail display, retaining the original GAMTTIZ illustration as fallback.
     const picture=el('div','radar-card-media');
     let imageAdded=false;
-    if(approved && typeof item.imageUrl==='string'){
-      try {
+    if(typeof item.imageUrl==='string'){
+      try{
         const imageUrl=new URL(item.imageUrl);
         if(imageUrl.protocol==='https:'&&!/\.(?:svg|ico)(?:\?|$)/i.test(imageUrl.pathname)){
           const img=el('img','radar-card-image');
           img.src=imageUrl.href;
-          img.alt=(item.source||'원문')+' 허가받은 이미지';
+          img.alt=(item.source||'원문')+' 대표 사진';
           img.loading='lazy';
           img.decoding='async';
           img.referrerPolicy='no-referrer';
