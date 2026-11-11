@@ -94,3 +94,7 @@
 .radar-art-label{position:absolute;left:14px;bottom:10px;font-weight:800;font-size:.62rem;letter-spacing:.14em;color:#70390e}
 .radar-fries-stars{position:absolute;right:17%;top:23%;width:12px;height:12px;border-radius:50%;background:#fff5c6;box-shadow:23px 23px 0 -4px #fff5c6,-29px 42px 0 -5px #fff5c6}
 @media(max-width:540px){.radar-fries-sticks{transform:translateX(-50%) scale(.87);transform-origin:bottom center}.radar-fries-pack{transform:translateX(-50%) scale(.87);transform-origin:bottom center}}
+
+/* Source coverage is visible to visitors; a successful job is not complete brand coverage. */
+.radar-health{color:#68635d;font-size:.82rem;line-height:1.6;margin:4px 0 18px}
+.radar-health-partial{color:#9b4a18}
