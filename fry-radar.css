@@ -69,3 +69,9 @@
 
 /* Time-verified active promotions stay visible even when their announcement is older. */
 .radar-status-ongoing{background:#e7f4e9;color:#236b3c}
+
+/* Original-source image thumbnails; article links and source labels remain visible. */
+.radar-card-media{width:100%;aspect-ratio:16/10;margin-top:16px;overflow:hidden;border-radius:12px;background:#f5f0e9}
+.radar-card-image{width:100%;height:100%;display:block;object-fit:cover}
+.radar-card-media + h3{margin-top:16px}
+@media(max-width:540px){.radar-card-media{aspect-ratio:16/9}}
