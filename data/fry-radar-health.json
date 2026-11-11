@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-11-11T09:42:21.388Z",
+  "checkedAt": "2026-11-11T09:43:16.270Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
-    "feedsSucceeded": 33,
+    "feedsSucceeded": 43,
     "failedFeeds": 0,
-    "newsCandidates": 183,
+    "newsCandidates": 186,
     "newVerified": 0,
     "failures": [],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs."
@@ -25,7 +25,8 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 2
-      }
+      },
+      "lastReachableAt": "2026-11-11T09:43:16.270Z"
     },
     {
       "brand": "맥도날드",
@@ -42,7 +43,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": "2026-11-11T09:43:16.270Z",
+      "indexedCandidates": 0
     },
     {
       "brand": "버거킹",
@@ -62,7 +65,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": null,
+      "indexedCandidates": 0
     },
     {
       "brand": "맘스터치",
@@ -81,7 +86,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": null,
+      "indexedCandidates": 0
     },
     {
       "brand": "프랭크버거",
@@ -98,7 +105,8 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": "2026-11-11T09:43:16.270Z"
     },
     {
       "brand": "노브랜드버거",
@@ -118,7 +126,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": null,
+      "indexedCandidates": 0
     },
     {
       "brand": "쉐이크쉑",
@@ -137,7 +147,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": null,
+      "indexedCandidates": 0
     },
     {
       "brand": "파이브가이즈",
@@ -154,7 +166,8 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": "2026-11-11T09:43:16.270Z"
     },
     {
       "brand": "다운타우너",
@@ -171,7 +184,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": "2026-11-11T09:43:16.270Z",
+      "indexedCandidates": 0
     },
     {
       "brand": "바스버거",
@@ -188,7 +203,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": "2026-11-11T09:43:16.270Z",
+      "indexedCandidates": 0
     },
     {
       "brand": "KFC",
@@ -207,7 +224,9 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": null,
+      "indexedCandidates": 0
     },
     {
       "brand": "파파이스",
@@ -224,7 +243,8 @@
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
-      }
+      },
+      "lastReachableAt": "2026-11-11T09:43:16.270Z"
     }
   ],
   "summary": {
