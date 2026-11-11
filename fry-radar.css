@@ -98,3 +98,7 @@
 /* Source coverage is visible to visitors; a successful job is not complete brand coverage. */
 .radar-health{color:#68635d;font-size:.82rem;line-height:1.6;margin:4px 0 18px}
 .radar-health-partial{color:#9b4a18}
+
+/* Older contextual photos are explicitly labelled, never presented as current promotions. */
+.radar-card-media{position:relative}
+.radar-image-note{position:absolute;right:7px;bottom:7px;left:7px;padding:6px 8px;border-radius:5px;background:rgba(20,20,20,.77);color:#fff;font-size:11px;line-height:1.35;letter-spacing:-.02em}
