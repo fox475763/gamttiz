@@ -14,6 +14,14 @@
   const DAY=86400000;
   const MAX_RECENT_DAYS=14;
   let items=[];
+  let manageMode=false;
+  const manageToggle=document.getElementById('radar-manage-toggle');
+  const manageHint=document.getElementById('radar-manage-hint');
+  const deleteDialog=document.getElementById('radar-delete-dialog');
+  const deleteTitle=document.getElementById('radar-delete-title');
+  const deleteConfirm=document.getElementById('radar-delete-confirm');
+  const deleteCancel=document.getElementById('radar-delete-cancel');
+  let selectedPost=null;
 
   const el=(tag,className,text)=>{
     const node=document.createElement(tag);
@@ -71,6 +79,49 @@
     art.append(stars,fries,pack,el('span','radar-art-label','GAMTTIZ · FRY RADAR'));
     return art;
   };
+  // GitHub Pages is static: the button only initiates a deletion request.
+  // GitHub authenticates the owner and the Actions workflow performs the removal.
+  const requestDeletion=(post)=>{
+    selectedPost=post;
+    if(deleteTitle)deleteTitle.textContent=post.title;
+    if(deleteDialog?.showModal)deleteDialog.showModal();
+    else if(window.confirm('이 소식을 삭제할까요? GitHub에서 최종 제출해야 실제 삭제됩니다.'))openDeletionRequest(post);
+  };
+  const openDeletionRequest=(post)=>{
+    const params=new URLSearchParams({
+      template:'fry-delete.md',
+      title:'[FRY DELETE] '+post.id,
+      body:'POST_ID: '+post.id+'\\n\\n삭제 대상: '+post.title+'\\n출처: '+post.url+'\\n\\nGitHub 관리자 계정으로 Submit new issue를 누르면 삭제 및 재수집 차단을 진행합니다.'
+    });
+    window.open('https://github.com/fox475763/gamttiz/issues/new?'+params.toString(),'_blank','noopener,noreferrer');
+  };
+  const withManageButton=(post,content,archived=false)=>{
+    if(!manageMode)return content;
+    const wrapper=el('div',archived?'radar-manage-archive':'radar-manage-card');
+    const remove=el('button','radar-delete-button','삭제');
+    remove.type='button';
+    remove.setAttribute('aria-label',post.title+' 삭제');
+    remove.addEventListener('click',()=>requestDeletion(post));
+    wrapper.append(content,remove);
+    return wrapper;
+  };
+  if(manageToggle){
+    manageToggle.addEventListener('click',()=>{
+      manageMode=!manageMode;
+      manageToggle.setAttribute('aria-pressed',String(manageMode));
+      manageToggle.textContent=manageMode?'관리 종료':'게시물 삭제 관리';
+      if(manageHint)manageHint.hidden=!manageMode;
+      render();
+    });
+  }
+  deleteCancel?.addEventListener('click',()=>deleteDialog?.close());
+  deleteConfirm?.addEventListener('click',()=>{
+    if(!selectedPost)return;
+    const post=selectedPost;
+    deleteDialog?.close();
+    openDeletionRequest(post);
+  });
+  deleteDialog?.addEventListener('close',()=>{selectedPost=null;});
   const card=(item,home)=>{
     const state=statusOf(item);
     const node=el('a','radar-card'+(isArchived(item)?' radar-card-archived':''));
@@ -148,14 +199,14 @@
     if(list){
       const current=shown.filter(item=>!isArchived(item));
       list.replaceChildren();
-      if(current.length)current.forEach(item=>list.append(card(item,false)));
+      if(current.length)current.forEach(item=>list.append(withManageButton(item,card(item,false))));
       else empty(list,'최근 소식이 없어요.','최근 14일 내 확인된 감튀 소식이 들어오면 여기에 표시할게요.');
       if(count)count.textContent=`${current.length}개의 최근 소식`;
     }
     if(archive){
       const past=shown.filter(isArchived);
       archive.replaceChildren();
-      if(past.length)past.forEach(item=>archive.append(archiveRow(item)));
+      if(past.length)past.forEach(item=>archive.append(withManageButton(item,archiveRow(item),true)));
       else empty(archive,'보관된 지난 소식이 없어요.','종료일이 확인되거나 발행 후 14일이 지난 소식이 여기에 모입니다.');
       if(archiveCount)archiveCount.textContent=`${past.length}개의 지난 소식`;
     }
