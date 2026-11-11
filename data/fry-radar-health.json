@@ -1,0 +1,12 @@
+{
+  "checkedAt": "2026-11-11T09:36:19.231Z",
+  "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
+  "news": {
+    "feedsSucceeded": 43,
+    "failedFeeds": 0,
+    "newsCandidates": 186,
+    "newVerified": 0,
+    "failures": [],
+    "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs."
+  }
+}
