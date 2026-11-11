@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-11-11T09:37:41.834Z",
+  "checkedAt": "2026-11-11T09:39:40.587Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
     "feedsSucceeded": 43,
     "failedFeeds": 0,
-    "newsCandidates": 195,
+    "newsCandidates": 186,
     "newVerified": 0,
     "failures": [],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs."
@@ -17,14 +17,14 @@
       "candidates": 17,
       "checked": 17,
       "added": 0,
-      "relevant": 0,
+      "relevant": 2,
       "errors": [],
       "excluded": {
-        "unrelated": 17,
+        "unrelated": 15,
         "oldOrUnknownDate": 0,
         "ended": 0,
         "blockedDetail": 0,
-        "duplicate": 0
+        "duplicate": 2
       }
     },
     {
