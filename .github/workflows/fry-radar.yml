@@ -71,6 +71,19 @@ jobs:
           done
           echo "ERROR: Failed to publish after 3 attempts."
           exit 1
-      # GitHub Pages already builds automatically after a push to main.
-      # Do not request a duplicate build (it can cancel the newer deployment).
+      # GITHUB_TOKEN commits do not trigger Pages builds automatically.
+      - name: Rebuild GitHub Pages after data change
+        if: steps.publish.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in 1 2 3; do
+            if gh api --method POST "repos/${{ github.repository }}/pages/builds"; then
+              echo "GitHub Pages rebuild requested"
+              exit 0
+            fi
+            sleep $((attempt * 5))
+          done
+          echo "ERROR: Could not request GitHub Pages rebuild."
+          exit 1
 
