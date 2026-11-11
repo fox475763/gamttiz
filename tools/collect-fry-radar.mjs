@@ -4,6 +4,10 @@ import crypto from 'node:crypto';
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
 const queries = [
+  '감튀 할인',
+  '감튀 이벤트',
+  '감튀 신제품',
+  '감튀 프로모션',
   '감자튀김 할인',
   '감자튀김 이벤트',
   '감자튀김 신제품',
