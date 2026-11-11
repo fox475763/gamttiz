@@ -1,85 +1,12 @@
 {
-  "checkedAt": "2026-11-11T09:46:03.312Z",
+  "checkedAt": "2026-11-11T09:49:53.900Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
-    "feedsSucceeded": 25,
-    "failedFeeds": 18,
-    "newsCandidates": 77,
+    "feedsSucceeded": 43,
+    "failedFeeds": 0,
+    "newsCandidates": 182,
     "newVerified": 0,
-    "failures": [
-      {
-        "query": "감자튀김 시즈닝",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "치즈프라이 신메뉴",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "감자튀김 맛집",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "감자튀김 전문점 오픈",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "감자튀김 팝업스토어",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "감자튀김 트렌드",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "감자튀김 소비",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "감자튀김 인기",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "맥도날드 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "롯데리아 포테이토",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "버거킹 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "맘스터치 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "프랭크버거 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "노브랜드버거 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "쉐이크쉑 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "파이브가이즈 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "다운타우너 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "바스버거 감자튀김",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      }
-    ],
+    "failures": [],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs."
   },
   "sources": [
@@ -99,7 +26,7 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z"
+      "lastReachableAt": "2026-11-11T09:49:53.900Z"
     },
     {
       "brand": "맥도날드",
@@ -117,7 +44,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z",
+      "lastReachableAt": "2026-11-11T09:49:53.900Z",
       "indexedCandidates": 0,
       "browserFallback": true,
       "browserCandidates": 6
@@ -183,7 +110,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z"
+      "lastReachableAt": "2026-11-11T09:49:53.900Z"
     },
     {
       "brand": "노브랜드버거",
@@ -246,7 +173,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z"
+      "lastReachableAt": "2026-11-11T09:49:53.900Z"
     },
     {
       "brand": "다운타우너",
@@ -264,7 +191,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z",
+      "lastReachableAt": "2026-11-11T09:49:53.900Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -284,7 +211,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z",
+      "lastReachableAt": "2026-11-11T09:49:53.900Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -304,7 +231,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z"
+      "lastReachableAt": "2026-11-11T09:49:53.900Z"
     },
     {
       "brand": "파파이스",
@@ -322,7 +249,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-11T09:46:03.312Z"
+      "lastReachableAt": "2026-11-11T09:49:53.900Z"
     }
   ],
   "summary": {
