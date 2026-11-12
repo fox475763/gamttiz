@@ -36,12 +36,11 @@ const gallery=document.querySelector('#gallery');
 const dialog=document.querySelector('#detail');
 let current=0;
 products.forEach((p,i)=>{
-  const card=document.createElement('button');card.type='button';card.className='card';card.setAttribute('aria-label',`${p.name} 상세 보기`);
-  const img=document.createElement('img');img.src=p.image;img.alt=`${p.name} — ${p.description}`;img.width=1080;img.height=1350;img.loading='lazy';
+  const card=document.createElement('button');card.type='button';card.className='card friend-carousel-card';card.setAttribute('aria-label',`${p.name} 상세 보기`);
+  const img=document.createElement('img');img.src=p.image;img.alt=`${p.name} — ${p.description}`;img.width=1080;img.height=1350;img.loading='lazy';img.decoding='async';
   const label=document.createElement('span');label.className='card-label';
   const name=document.createElement('span');name.textContent=p.name;
-  const arrow=document.createElement('b');arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');
-  label.append(name,arrow);card.append(img,label);card.addEventListener('click',()=>showDetail(i));gallery?.append(card);
+  label.append(name);card.append(img,label);card.addEventListener('click',()=>showDetail(i));gallery?.append(card);
 });
 function showDetail(index){
   current=index;const p=index===-1?holder:products[index];
