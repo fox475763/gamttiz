@@ -37,7 +37,7 @@
     index=(target+points.length)%points.length;
     track.scrollTo({
       left:points[index],
-      behavior:reducedMotion.matches?'instant':'smooth'
+      behavior:reducedMotion.matches?'auto':'smooth'
     });
     update();
   };
