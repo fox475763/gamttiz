@@ -1,26 +1,6 @@
 {
-  "updatedAt": "2026-11-12T01:08:18.541Z",
+  "updatedAt": "2026-11-12T02:21:07.380Z",
   "items": [
-    {
-      "id": "lotteria-lia-lunch-fries-verified-202611",
-      "title": "롯데리아 리아런치 할인 세트 — 포테이토 포함 점심 메뉴",
-      "url": "https://www.lotteeatz.com/event/main/selectEvent/3002",
-      "source": "롯데잇츠 공식 이벤트",
-      "category": "discount",
-      "summary": "롯데잇츠가 리아런치 점심 할인 세트(데리버거 세트 5,600원부터 등)를 오전 10시 30분~오후 2시에 운영한다고 안내하고 있어요. 세트 사이드는 포테이토 등 주문 화면에서 확인하세요. 배달·일부 매장 및 다른 행사 중복 적용 제외. 별도 종료일은 공식 페이지에서 9999년으로 표기돼 있어 실제 종료일 미확인.",
-      "publishedAt": null,
-      "eventStart": null,
-      "eventEnd": null,
-      "kind": "ongoing-menu",
-      "verifiedAt": "2026-11-11T10:05:13.132Z",
-      "sourceVerification": [
-        "https://www.lotteeatz.com/event/main/",
-        "https://www.pullbbang.com/board/boardView.pull?code=17444001"
-      ],
-      "collectedAt": "2026-11-11T10:05:13.132Z",
-      "verificationPhrase": "리아런치",
-      "imageUrl": "https://img.lotteeatz.com/upload/event/CONTENT_IMG/2026/08/12/202608121620094_3.png"
-    },
     {
       "id": "kfc-doom-fries-20261110",
       "title": "KFC × 어벤져스 ‘둠프라이’ 한정 출시 — 2027년 1월 4일까지",
