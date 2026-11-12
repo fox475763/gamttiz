@@ -1,24 +1,15 @@
 {
-  "checkedAt": "2026-11-12T01:08:18.541Z",
+  "checkedAt": "2026-11-12T10:26:13.446Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
-    "feedsSucceeded": 28,
-    "failedFeeds": 2,
-    "newsCandidates": 94,
+    "feedsSucceeded": 30,
+    "failedFeeds": 0,
+    "newsCandidates": 91,
     "newVerified": 0,
     "availableQueries": 44,
     "attemptedBingQueries": 20,
     "rotatingOverHours": 6,
-    "failures": [
-      {
-        "query": "감자튀김 할인",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      },
-      {
-        "query": "치즈프라이 신메뉴",
-        "reason": "RSS 형식이 아닌 응답입니다."
-      }
-    ],
+    "failures": [],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs. Bing queries are rotated to avoid provider throttling."
   },
   "sources": [
@@ -26,19 +17,19 @@
       "brand": "롯데리아",
       "url": "https://www.lotteeatz.com/event/main/",
       "reachable": true,
-      "candidates": 17,
-      "checked": 17,
+      "candidates": 18,
+      "checked": 18,
       "added": 0,
       "relevant": 2,
       "errors": [],
       "excluded": {
-        "unrelated": 15,
+        "unrelated": 16,
         "oldOrUnknownDate": 0,
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z"
+      "lastReachableAt": "2026-11-12T10:26:13.446Z"
     },
     {
       "brand": "맥도날드",
@@ -56,7 +47,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z",
+      "lastReachableAt": "2026-11-12T10:26:13.446Z",
       "indexedCandidates": 0,
       "browserFallback": true,
       "browserCandidates": 6
@@ -122,7 +113,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z"
+      "lastReachableAt": "2026-11-12T10:26:13.446Z"
     },
     {
       "brand": "노브랜드버거",
@@ -185,7 +176,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z"
+      "lastReachableAt": "2026-11-12T10:26:13.446Z"
     },
     {
       "brand": "다운타우너",
@@ -203,7 +194,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z",
+      "lastReachableAt": "2026-11-12T10:26:13.446Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -223,7 +214,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z",
+      "lastReachableAt": "2026-11-12T10:26:13.446Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -243,7 +234,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z"
+      "lastReachableAt": "2026-11-12T10:26:13.446Z"
     },
     {
       "brand": "파파이스",
@@ -261,17 +252,17 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T01:08:18.541Z"
+      "lastReachableAt": "2026-11-12T10:26:13.446Z"
     }
   ],
   "summary": {
     "sources": 12,
     "reachable": 8,
-    "detailCandidates": 52,
-    "detailChecked": 52,
+    "detailCandidates": 53,
+    "detailChecked": 53,
     "newOfficial": 0,
     "photoEnriched": 0,
-    "stored": 7,
+    "stored": 6,
     "status": "partial"
   }
 }
