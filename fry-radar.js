@@ -135,6 +135,118 @@
     container.append(node);
   };
   const byNewest=(a,b)=>(date(b.publishedAt||b.eventStart)?.getTime()||0)-(date(a.publishedAt||a.eventStart)?.getTime()||0);
+  // The homepage preview is a compact scroll-snap carousel (the full RADAR board is unchanged).
+  const previewPrev=document.getElementById('radar-preview-prev');
+  const previewNext=document.getElementById('radar-preview-next');
+  const previewPosition=document.getElementById('radar-preview-position');
+  const previewCarousel=document.getElementById('radar-preview-carousel');
+  const prefersReducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+  let previewIndex=0;
+  let previewTimer=null;
+
+  const previewCard=item=>{
+    const node=el('a','radar-preview-item');
+    node.href='fry-radar.html#post-'+encodeURIComponent(item.id);
+    const thumb=el('div','radar-preview-thumb');
+    const fallback=()=>{
+      thumb.replaceChildren(el('div','radar-preview-thumb-fallback','🍟'));
+    };
+    if(typeof item.imageUrl==='string'&&validUrl(item.imageUrl)&&item.imageUrl.startsWith('https:')){
+      const img=el('img','');
+      img.src=item.imageUrl;
+      img.alt=(item.source||'원문')+' 이미지';
+      img.loading='lazy';
+      img.decoding='async';
+      img.referrerPolicy='no-referrer';
+      img.addEventListener('error',fallback,{once:true});
+      thumb.append(img);
+      if(item.imageNote)thumb.append(el('span','radar-preview-reference','참고 사진'));
+    }else fallback();
+
+    const content=el('div','radar-preview-item-content');
+    content.append(el('span','radar-preview-item-category',labels[item.category]||'감튀 소식'));
+    content.append(el('h3','',item.title));
+    content.append(el('p','',item.summary||'원문에서 자세한 내용을 확인해 보세요.'));
+    const footer=el('div','radar-preview-item-footer');
+    footer.append(el('span','',item.source||'원문 보기'),el('b','','↗'));
+    content.append(footer);
+    node.append(thumb,content);
+    return node;
+  };
+
+  const previewStops=()=>{
+    if(!preview)return [0];
+    const cards=[...preview.querySelectorAll('.radar-preview-item')];
+    if(!cards.length)return [0];
+    const max=Math.max(0,preview.scrollWidth-preview.clientWidth);
+    const first=cards[0].offsetLeft;
+    const stops=[];
+    for(const card of cards){
+      const position=Math.max(0,Math.min(max,card.offsetLeft-first));
+      if(!stops.length||position-stops[stops.length-1]>40)stops.push(position);
+    }
+    return stops.length?stops:[0];
+  };
+
+  const previewNav=()=>{
+    const total=previewStops().length;
+    previewIndex=Math.min(previewIndex,total-1);
+    if(previewPosition)previewPosition.textContent=total>1?(previewIndex+1)+' / '+total:'1 / 1';
+    if(previewPrev)previewPrev.disabled=total<2;
+    if(previewNext)previewNext.disabled=total<2;
+  };
+  const goToPreview=(index)=>{
+    if(!preview)return;
+    const stops=previewStops();
+    previewIndex=(index+stops.length)%stops.length;
+    preview.scrollTo({left:stops[previewIndex],behavior:prefersReducedMotion?.matches?'auto':'smooth'});
+    previewNav();
+  };
+  const stopPreviewTimer=()=>{
+    if(previewTimer!==null){window.clearInterval(previewTimer);previewTimer=null;}
+  };
+  const startPreviewTimer=()=>{
+    stopPreviewTimer();
+    if(!preview||previewStops().length<2||prefersReducedMotion?.matches)return;
+    previewTimer=window.setInterval(()=>{
+      if(document.hidden||!previewCarousel)return;
+      const bounds=previewCarousel.getBoundingClientRect();
+      if(bounds.bottom<0||bounds.top>window.innerHeight)return;
+      if(previewCarousel.matches(':hover')||previewCarousel.contains(document.activeElement))return;
+      goToPreview(previewIndex+1);
+    },5000);
+  };
+  previewPrev?.addEventListener('click',()=>{goToPreview(previewIndex-1);startPreviewTimer();});
+  previewNext?.addEventListener('click',()=>{goToPreview(previewIndex+1);startPreviewTimer();});
+  preview?.addEventListener('scroll',()=>{
+    const stops=previewStops();
+    const current=preview.scrollLeft;
+    previewIndex=stops.reduce((closest,position,index)=>
+      Math.abs(position-current)<Math.abs(stops[closest]-current)?index:closest,0);
+    previewNav();
+  },{passive:true});
+  if(preview){
+    window.addEventListener('resize',()=>{goToPreview(Math.min(previewIndex,previewStops().length-1));startPreviewTimer();});
+    prefersReducedMotion?.addEventListener?.('change',startPreviewTimer);
+  }
+  const renderPreview=()=>{
+    if(!preview)return;
+    stopPreviewTimer();
+    preview.replaceChildren();
+    const latest=items.filter(item=>!isArchived(item)).sort(byNewest).slice(0,8);
+    if(!latest.length){
+      empty(preview,'최근 감튀 소식을 찾는 중이에요.','새로운 국내 감튀 소식이 검증되면 소개할게요.');
+      if(previewPosition)previewPosition.textContent='0 / 0';
+      if(previewPrev)previewPrev.disabled=true;
+      if(previewNext)previewNext.disabled=true;
+      return;
+    }
+    latest.forEach(item=>preview.append(previewCard(item)));
+    previewIndex=0;
+    preview.scrollLeft=0;
+    window.requestAnimationFrame(()=>{previewNav();startPreviewTimer();});
+  };
+
   const render=()=>{
     const term=(search?.value||'').trim().toLocaleLowerCase();
     const group=category?.value||'all';
@@ -159,12 +271,7 @@
       else empty(archive,'보관된 지난 소식이 없어요.','종료일이 확인되거나 발행 후 14일이 지난 소식이 여기에 모입니다.');
       if(archiveCount)archiveCount.textContent=`${past.length}개의 지난 소식`;
     }
-    if(preview){
-      preview.replaceChildren();
-      const latest=items.filter(item=>!isArchived(item)).sort(byNewest).slice(0,3);
-      if(latest.length)latest.forEach(item=>preview.append(card(item,true)));
-      else empty(preview,'최근 감튀 소식을 찾는 중이에요.','새로운 국내 감튀 소식이 검증되면 소개할게요.');
-    }
+    if(preview)renderPreview();
     if(list&&location.hash){
       let hash;
       try{hash=decodeURIComponent(location.hash.slice(1));}
