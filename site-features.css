@@ -421,3 +421,12 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   .collection .gallery.collection-carousel-track{scroll-behavior:auto}
   .collection .gallery .card.friend-carousel-card{transition:none}
 }
+
+
+/* Seamless, constant-speed friend marquee: never snap or ease between cards. */
+.collection .gallery.collection-carousel-track{
+  scroll-snap-type:none;
+  scroll-behavior:auto;
+  overflow-anchor:none;
+}
+.collection .gallery .card.friend-carousel-card{scroll-snap-align:none}
