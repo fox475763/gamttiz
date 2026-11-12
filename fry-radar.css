@@ -131,36 +131,30 @@
 .radar-footer-admin:hover,.radar-footer-admin:focus-visible{opacity:1;text-decoration:underline}
 
 
-/* Compact, horizontally scrolling FRY RADAR carousel on the homepage only. */
-.radar-preview{padding:clamp(38px,5vw,68px) max(5vw,24px);background:#fff}
-.radar-preview-heading{margin-bottom:18px;gap:14px}
+/* Compact full-photo FRY RADAR carousel on the homepage only. */
+.radar-preview{padding:clamp(34px,4.5vw,56px) max(5vw,24px);background:#fff}
+.radar-preview-heading{margin-bottom:16px;gap:12px}
 .radar-preview-heading .eyebrow{margin-bottom:8px}
 .radar-preview-heading h2{font-size:clamp(1.9rem,3.2vw,2.85rem);line-height:1.15;margin:6px 0 9px}
 .radar-preview-heading p{margin:0;color:#6b6259;font-size:.9rem}
 .radar-preview-carousel{min-width:0}
-.radar-preview-track{position:relative;display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;scrollbar-width:none;padding:4px 2px 10px}
+.radar-preview-track{position:relative;display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;scrollbar-width:none;padding:3px 2px 8px}
 .radar-preview-track::-webkit-scrollbar{display:none}
-.radar-preview-item{display:grid;grid-template-columns:minmax(120px,34%) minmax(0,1fr);flex:0 0 calc((100% - 14px)/2);min-width:0;min-height:158px;overflow:hidden;scroll-snap-align:start;border:1px solid #e7e2d9;border-radius:14px;background:#fffaf4;color:#242321;text-decoration:none;transition:border-color .2s,box-shadow .2s}
-.radar-preview-item:hover,.radar-preview-item:focus-visible{border-color:#e93636;box-shadow:0 8px 24px #281c0b17}
-.radar-preview-thumb{position:relative;min-height:100%;background:#f6e7ca;overflow:hidden}
-.radar-preview-thumb img{display:block;width:100%;height:100%;object-fit:cover}
-.radar-preview-thumb-fallback{height:100%;min-height:158px;display:grid;place-content:center;background:linear-gradient(145deg,#ffd568,#ffb511);font-size:3rem}
-.radar-preview-reference{position:absolute;left:5px;bottom:5px;right:5px;padding:3px 5px;background:#222b;color:#fff;border-radius:3px;font-size:.6rem;text-align:center}
-.radar-preview-item-content{display:flex;flex-direction:column;min-width:0;padding:15px 17px 14px}
-.radar-preview-item-category{align-self:flex-start;color:#b42c29;font-size:.68rem;font-weight:900;letter-spacing:.02em}
-.radar-preview-item h3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:7px 0 7px;font-size:clamp(.95rem,1.4vw,1.08rem);line-height:1.4;letter-spacing:-.02em;word-break:keep-all}
-.radar-preview-item p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:0;color:#6a6057;font-size:.77rem;line-height:1.52}
-.radar-preview-item-footer{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:auto;padding-top:9px;color:#80736a;font-size:.68rem}
-.radar-preview-item-footer span:first-child{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.radar-preview-item-footer b{font-size:1rem;color:#e93636}
-.radar-preview-navigation{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:4px}
+.radar-preview-item{position:relative;display:block;flex:0 0 clamp(215px,27%,300px);height:174px;min-width:0;overflow:hidden;isolation:isolate;scroll-snap-align:start;border:1px solid #e7e2d9;border-radius:12px;background:#ffb511;color:#fff;text-decoration:none;transition:border-color .2s,box-shadow .2s}
+.radar-preview-item:hover,.radar-preview-item:focus-visible{border-color:#e93636;box-shadow:0 8px 24px #281c0b20}
+.radar-preview-thumb{position:absolute;inset:0;background:#f6e7ca;overflow:hidden}
+.radar-preview-image{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.radar-preview-thumb-fallback{width:100%;height:100%;display:grid;place-content:center;background:linear-gradient(145deg,#ffd568,#ffb511);font-size:3.2rem}
+.radar-preview-overlay{position:absolute;inset:auto 0 0;display:flex;align-items:flex-end;min-height:72px;padding:30px 13px 12px;background:linear-gradient(to top,rgba(18,18,18,.78) 0%,rgba(20,20,20,.53) 47%,rgba(20,20,20,0) 100%);pointer-events:none}
+.radar-preview-item h3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:0;color:#fff;font-size:clamp(.86rem,1.1vw,.98rem);font-weight:800;line-height:1.4;letter-spacing:-.025em;word-break:keep-all;text-shadow:0 1px 3px #0005}
+.radar-preview-navigation{display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:2px}
 .radar-preview-position{font-size:.76rem;letter-spacing:.06em;color:#797168;font-variant-numeric:tabular-nums}
 .radar-preview-buttons{display:flex;gap:8px}
-.radar-preview-buttons button{display:grid;place-items:center;width:39px;height:39px;padding:0;border:1px solid #e0d7cb;border-radius:50%;background:#fff;color:#a82c2a;font-size:1.2rem;font-weight:700}
+.radar-preview-buttons button{display:grid;place-items:center;width:36px;height:36px;padding:0;border:1px solid #e0d7cb;border-radius:50%;background:#fff;color:#a82c2a;font-size:1.15rem;font-weight:700}
 .radar-preview-buttons button:hover:not(:disabled){background:#e93636;border-color:#e93636;color:#fff}
 .radar-preview-buttons button:disabled{opacity:.35;cursor:default}
-.radar-preview-loading{flex:1;min-height:126px;display:grid;place-items:center;color:#7d7268;text-align:center}
+.radar-preview-loading{flex:1;min-height:122px;display:grid;place-items:center;color:#7d7268;text-align:center}
 .radar-preview-track>.radar-empty{width:100%;flex:0 0 100%;padding:35px 20px}
-@media(max-width:720px){.radar-preview-item{flex-basis:100%}.radar-preview-track{gap:12px}}
-@media(max-width:440px){.radar-preview-item{grid-template-columns:116px minmax(0,1fr);min-height:146px}.radar-preview-item-content{padding:12px}.radar-preview-item h3{font-size:.96rem;margin:6px 0}.radar-preview-item p{font-size:.72rem}.radar-preview-heading{align-items:flex-start}.radar-preview-navigation{margin-top:0}}
+@media(max-width:720px){.radar-preview-item{flex-basis:min(78%,300px);height:158px}.radar-preview-track{gap:10px}}
+@media(max-width:440px){.radar-preview-item{height:150px}.radar-preview-overlay{padding:25px 11px 10px;min-height:64px}.radar-preview-item h3{font-size:.86rem}.radar-preview-heading{align-items:flex-start}.radar-preview-navigation{margin-top:0}}
 @media(prefers-reduced-motion:reduce){.radar-preview-track{scroll-behavior:auto}.radar-preview-item{transition:none}}
