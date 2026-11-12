@@ -1,83 +1,93 @@
 (()=>{
   'use strict';
   const track=document.getElementById('gallery');
-  const area=document.getElementById('friends-carousel');
+  const viewport=document.querySelector('.collection-carousel-window');
   const previous=document.getElementById('friends-prev');
   const next=document.getElementById('friends-next');
   const counter=document.getElementById('friends-position');
-  if(!track||!area)return;
+  if(!track||!viewport)return;
 
   const originals=Array.from(track.querySelectorAll('.friend-carousel-card'));
-  if(!originals.length)return;
+  if(originals.length<2)return;
 
-  // Repeat the entire 14-friend set. The boundary is visually identical,
-  // so scrolling can wrap without returning visibly to the beginning.
-  for(const source of originals){
-    const copy=source.cloneNode(true);
-    copy.setAttribute('aria-hidden','true');
-    copy.tabIndex=-1;
-    // cloneNode does not copy event listeners; open the original detail view.
-    copy.addEventListener('click',()=>source.click());
-    track.append(copy);
+  // Two identical sequences make the reset at the end of each loop invisible.
+  for(const original of originals){
+    const duplicate=original.cloneNode(true);
+    duplicate.setAttribute('aria-hidden','true');
+    duplicate.tabIndex=-1;
+    // Preserve the full character detail dialog on the repeated cards.
+    duplicate.addEventListener('click',()=>original.click());
+    track.append(duplicate);
   }
 
-  const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
-  const speed=30; // constant, gentle motion in CSS pixels per second
-  let cycleWidth=0;
-  let cardStride=0;
-  let frame=0;
-  let lastTime=0;
+  const speed=32; // steady leftward movement, in CSS pixels per second
+  let animation=null;
+  let duration=0;
+  let step=0;
   let activeIndex=-1;
 
-  function measure(){
-    const first=originals[0];
-    const firstCopy=track.children[originals.length];
-    cycleWidth=firstCopy.offsetLeft-first.offsetLeft;
-    cardStride=originals[1]?.offsetLeft-first.offsetLeft||first.getBoundingClientRect().width;
-    if(cycleWidth>0 && track.scrollLeft>=cycleWidth)
-      track.scrollLeft%=cycleWidth;
-    updateCounter();
-  }
   function updateCounter(){
-    if(!counter||cardStride<=0)return;
-    const index=Math.floor((track.scrollLeft+cardStride/2)/cardStride)%originals.length;
+    if(!counter||!animation||!duration||!step)return;
+    const progress=((Number(animation.currentTime)||0)%duration+duration)%duration;
+    const index=Math.floor((progress*speed/1000+step/2)/step)%originals.length;
     if(index===activeIndex)return;
     activeIndex=index;
     counter.textContent=String(index+1).padStart(2,'0')+' / '+String(originals.length).padStart(2,'0');
   }
-  function wrap(){
-    if(cycleWidth>0 && track.scrollLeft>=cycleWidth)
-      track.scrollLeft=track.scrollLeft%cycleWidth;
-  }
-  function animate(time){
-    if(lastTime){
-      // Browsers throttle background tabs: skip their elapsed time instead of jumping.
-      const elapsed=Math.min((time-lastTime)/1000,0.05);
-      if(!reduceMotion.matches&&cycleWidth>0){
-        track.scrollLeft+=speed*elapsed;
-        wrap();
-        updateCounter();
-      }
-    }
-    lastTime=time;
-    frame=window.requestAnimationFrame(animate);
-  }
-  function jumpBy(direction){
-    if(cardStride<=0||cycleWidth<=0)return;
-    track.scrollLeft=(track.scrollLeft+direction*cardStride+cycleWidth)%cycleWidth;
+
+  function layout(){
+    const first=originals[0];
+    const duplicate=track.children[originals.length];
+    const distance=duplicate.offsetLeft-first.offsetLeft;
+    const spacing=originals[1].offsetLeft-first.offsetLeft;
+    if(!(distance>0)||!(spacing>0))return;
+
+    // Keep the same fractional loop progress through resize/layout changes.
+    const phase=animation&&duration
+      ? (((Number(animation.currentTime)||0)%duration)+duration)%duration/duration
+      : 0;
+    animation?.cancel();
+    duration=distance/speed*1000;
+    step=spacing;
+    animation=track.animate(
+      [{transform:'translate3d(0,0,0)'},{transform:'translate3d(-'+distance+'px,0,0)'}],
+      {duration,iterations:Infinity,easing:'linear'}
+    );
+    animation.currentTime=phase*duration;
     updateCounter();
   }
 
-  previous?.addEventListener('click',()=>jumpBy(-1));
-  next?.addEventListener('click',()=>jumpBy(1));
-  track.addEventListener('scroll',()=>{wrap();updateCounter();},{passive:true});
-  window.addEventListener('resize',measure);
-  document.addEventListener('visibilitychange',()=>{lastTime=0;});
-  // Only the system accessibility preference stops automatic movement.
-  reduceMotion.addEventListener?.('change',()=>{lastTime=0;});
+  function moveOne(direction){
+    if(!animation||!duration||!step)return;
+    const current=Number(animation.currentTime)||0;
+    animation.currentTime=((current+direction*step/speed*1000)%duration+duration)%duration;
+    updateCounter();
+  }
 
-  measure();
-  if(previous)previous.disabled=originals.length<2;
-  if(next)next.disabled=originals.length<2;
-  frame=window.requestAnimationFrame(animate);
+  previous?.addEventListener('click',()=>moveOne(-1));
+  next?.addEventListener('click',()=>moveOne(1));
+
+  // Recalculate distances only when the layout changes, not every animation frame.
+  let pending=false;
+  const scheduleLayout=()=>{
+    if(pending)return;
+    pending=true;
+    requestAnimationFrame(()=>{pending=false;layout();});
+  };
+  window.addEventListener('resize',scheduleLayout);
+  if('ResizeObserver' in window){
+    const observer=new ResizeObserver(scheduleLayout);
+    observer.observe(viewport);
+    observer.observe(originals[0]);
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(!animation)return;
+    if(document.hidden)animation.pause();
+    else animation.play();
+  });
+
+  layout();
+  // Updating only the numeric counter does not affect the smooth animation.
+  window.setInterval(updateCounter,250);
 })();
