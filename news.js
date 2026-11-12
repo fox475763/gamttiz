@@ -60,14 +60,9 @@ newsStatusRow.className = 'news-status-row';
 const newsStatus = document.createElement('span');
 newsStatus.setAttribute('role', 'status');
 newsStatus.textContent = '소식 게시 상태를 확인하는 중이에요.';
-const newsRefresh = document.createElement('button');
-newsRefresh.type = 'button';
-newsRefresh.textContent = '새로 확인 ↻';
-newsRefresh.addEventListener('click', () => renderNews(true));
-newsStatusRow.append(newsStatus, newsRefresh);
+newsStatusRow.append(newsStatus);
 newsRoot.before(newsStatusRow);
 async function renderNews(force = false) {
-  newsRefresh.disabled = true;
   newsStatus.textContent = '새 소식을 확인하는 중이에요.';
   try {
 const posts = await loadNewsPosts({force});
@@ -86,7 +81,7 @@ const posts = await loadNewsPosts({force});
   } catch {
     newsStatus.textContent = '소식 확인에 실패했어요. 다시 확인해 주세요.';
     emptyState('소식을 불러오지 못했어요.');
-  } finally { newsRefresh.disabled = false; }
+  }
 }
 renderNews(new URLSearchParams(location.search).has('refresh'));
 
