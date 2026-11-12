@@ -9,7 +9,7 @@
   <meta property="og:description" content="작은 감자튀김, 저마다의 이야기. 감띠즈 키링 컬렉션을 만나보세요.">
   <link rel="icon" href="assets/badge.png"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="play.css"><link rel="stylesheet" href="quiz.css"><link rel="stylesheet" href="site-font.css"><link rel="stylesheet" href="experience.css">
   <script src="app.js" defer></script><script src="motion.js" defer></script><script src="carousel.js" defer></script><script src="news-source.js" defer></script><script src="home-news.js" defer></script>
-<link rel="stylesheet" href="studio-polish.css"><link rel="stylesheet" href="catalog-news.css"><meta property="og:image" content="https://fox475763.github.io/gamttiz/assets/badge.png"><meta property="og:type" content="website"><meta property="og:site_name" content="GAMTTIZ"><meta property="og:url" content="https://fox475763.github.io/gamttiz/index.html"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="GAMTTIZ — French Fry Lovers"><meta name="twitter:description" content="작은 감자튀김, 저마다의 이야기. 감띠즈의 14가지 친구를 만나보세요."><meta name="twitter:image" content="https://fox475763.github.io/gamttiz/assets/badge.png"><link rel="stylesheet" href="site-features.css?v=20261112friends-loop2"><link rel="stylesheet" href="fry-radar.css"></head>
+<link rel="stylesheet" href="studio-polish.css"><link rel="stylesheet" href="catalog-news.css"><meta property="og:image" content="https://fox475763.github.io/gamttiz/assets/badge.png"><meta property="og:type" content="website"><meta property="og:site_name" content="GAMTTIZ"><meta property="og:url" content="https://fox475763.github.io/gamttiz/index.html"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="GAMTTIZ — French Fry Lovers"><meta name="twitter:description" content="작은 감자튀김, 저마다의 이야기. 감띠즈의 14가지 친구를 만나보세요."><meta name="twitter:image" content="https://fox475763.github.io/gamttiz/assets/badge.png"><link rel="stylesheet" href="site-features.css?v=20261112dots1"><link rel="stylesheet" href="fry-radar.css?v=20261112dots1"></head>
 <body>
   <a class="skip" href="#main">본문으로 건너뛰기</a>
   <header class="header"><a class="wordmark" href="#" aria-label="감띠즈 홈">GAMTTIZ<span>French Fry Lovers</span></a><nav aria-label="주 메뉴"><a href="#collection">Collection</a><a href="play.html">Play</a><a href="products.html">Products</a><a href="news.html">News</a><a href="fry-radar.html">Fry Radar</a><a href="project.html">Project Info</a><a class="nav-social" href="https://www.instagram.com/gamttiz_official/" target="_blank" rel="noopener noreferrer">Instagram ↗</a></nav></header>
@@ -41,20 +41,12 @@
     <section class="home-package" aria-labelledby="home-package-title"><div class="home-package-image"><img src="assets/packaging/box-closed-cutout.png" alt="배경을 제거한 빨간 감띠즈 랜덤박스" loading="lazy" decoding="async"></div><div class="home-package-copy"><p class="eyebrow">SPECIAL KEYRING RANDOM BOX</p><h2 id="home-package-title">어떤 감띠가 나올까?<br><em>한 상자의 설렘.</em></h2><p>감띠즈 키링은 빨간 랜덤박스에 담겨 있어요. 실물 박스부터 14종의 키링까지 제품 페이지에서 살펴보세요.</p><a href="products.html" class="catalog-jump">제품 정보 보기 <span aria-hidden="true">↗</span></a></div></section><section id="fry-radar-preview" class="radar-preview section" aria-labelledby="radar-preview-title"><div class="radar-preview-heading"><div><span class="eyebrow">GAMTTIZ / FRY RADAR</span><h2 id="radar-preview-title">요즘 감튀 소식.</h2><p>감자튀김과 관련된 새 소식을 모아봐요.</p></div><a class="radar-preview-link" href="fry-radar.html">모든 소식 보기 ↗</a></div><div id="radar-preview-carousel" class="radar-preview-carousel" role="region" aria-roledescription="캐러셀" aria-label="요즘 감튀 소식">
   <div id="radar-preview-list" class="radar-preview-track" aria-live="off"><p class="radar-preview-loading">새로운 감튀 소식을 확인하고 있어요.</p></div>
   <div class="radar-preview-navigation">
-    <span id="radar-preview-position" class="radar-preview-position" aria-live="polite">소식 불러오는 중</span>
-    <div class="radar-preview-buttons">
-      <button id="radar-preview-prev" type="button" aria-label="이전 감튀 소식" disabled>←</button>
-      <button id="radar-preview-next" type="button" aria-label="다음 감튀 소식" disabled>→</button>
-    </div>
+    <div id="radar-preview-dots" class="carousel-dots" role="group" aria-label="감튀 소식 선택"></div>
   </div>
 </div></section><section id="collection" class="collection section"><div class="section-heading"><div><p class="eyebrow">FIND YOUR FAVORITE · 14 FRIENDS</p><h2>감띠즈를 소개합니다!</h2></div><p>14종의 아크릴 키링.<br>카드를 눌러 각자의 이야기를 만나보세요.</p></div><div class="collection-tools"><span>ALL FRIENDS <b>14</b></span><button id="random" class="text-button" type="button">오늘의 감띠 뽑기 ↗</button></div><div id="friends-carousel" class="collection-carousel" role="region" aria-roledescription="캐러셀" aria-label="감띠즈 친구 14명">
   <div class="collection-carousel-window"><div id="gallery" class="gallery collection-carousel-track" aria-live="off"></div></div>
   <div class="collection-carousel-navigation">
-    <span id="friends-position" class="collection-carousel-position" aria-live="polite">01 / 14</span>
-    <div class="collection-carousel-buttons">
-      <button id="friends-prev" type="button" aria-label="이전 감띠 보기">←</button>
-      <button id="friends-next" type="button" aria-label="다음 감띠 보기">→</button>
-    </div>
+    <div id="friends-dots" class="carousel-dots" role="group" aria-label="감띠즈 친구 선택"></div>
   </div>
 </div><noscript><p>키링 갤러리를 보려면 브라우저에서 JavaScript를 켜주세요.</p></noscript></section>
 <section id="experiences" class="experience-teaser section"><div class="section-heading"><div><p class="eyebrow">PLAY WITH GAMTTIZ</p><h2>감띠즈와 조금 더 놀아볼까요?</h2></div><p>각 체험을 별도 페이지에서 즐겨보세요.<br>인스타그램에서 바로 열 수도 있어요.</p></div><div class="experience-links"><a href="quiz.html"><span>01 / FRY STYLE</span><strong>감튀 취향 테스트</strong><small>먹는 습관을 고르면 나와 어울리는 감띠가 나타나요.</small><b aria-hidden="true">↗</b></a><a href="combo.html"><span>02 / MY COMBO</span><strong>나만의 감띠 홀더</strong><small>좋아하는 감띠 최대 다섯 명을 홀더에 담아 PNG로 저장해보세요.</small><b aria-hidden="true">↗</b></a></div></section>
@@ -63,5 +55,5 @@
   </main>
   <footer><span>© GAMTTIZ</span><span>French Fry Lovers</span><a href="#">맨 위로 ↑</a></footer>
   <dialog id="detail" aria-labelledby="detail-title"><div class="dialog-top"><span id="detail-count"></span><button id="close" type="button" aria-label="제품 상세 닫기">닫기 ✕</button></div><div class="dialog-content"><img id="detail-image" alt="" decoding="async" loading="lazy"><div class="detail-copy"><p class="eyebrow">GAMTTIZ / FRENCH FRY LOVERS</p><h2 id="detail-title"></h2><p id="detail-english"></p><p id="detail-description"></p><div id="detail-story" class="detail-story"><p id="detail-story-text"></p><p id="detail-quote"></p></div><a id="original" target="_blank" rel="noopener" class="text-button">원본 이미지 열기 ↗</a></div></div><div class="dialog-nav"><button id="previous" type="button">← 이전 감띠</button><button id="next" type="button">다음 감띠 →</button></div></dialog>
-<script src="studio-polish.js" defer></script><script src="site-features.js?v=20261103glass7" defer></script><script src="friends-carousel.js?v=20261112loop2" defer></script><script src="fry-radar.js" defer></script></body></html>
+<script src="studio-polish.js" defer></script><script src="site-features.js?v=20261103glass7" defer></script><script src="friends-carousel.js?v=20261112dots1" defer></script><script src="fry-radar.js?v=20261112dots1" defer></script></body></html>
 
