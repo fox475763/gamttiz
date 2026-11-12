@@ -136,9 +136,7 @@
   };
   const byNewest=(a,b)=>(date(b.publishedAt||b.eventStart)?.getTime()||0)-(date(a.publishedAt||a.eventStart)?.getTime()||0);
   // The homepage preview is a compact scroll-snap carousel (the full RADAR board is unchanged).
-  const previewPrev=document.getElementById('radar-preview-prev');
-  const previewNext=document.getElementById('radar-preview-next');
-  const previewPosition=document.getElementById('radar-preview-position');
+  const previewDots=document.getElementById('radar-preview-dots');
   const previewCarousel=document.getElementById('radar-preview-carousel');
   const prefersReducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
   let previewIndex=0;
@@ -183,11 +181,25 @@
   };
 
   const previewNav=()=>{
-    const total=previewStops().length;
-    previewIndex=Math.min(previewIndex,total-1);
-    if(previewPosition)previewPosition.textContent=total>1?(previewIndex+1)+' / '+total:'1 / 1';
-    if(previewPrev)previewPrev.disabled=total<2;
-    if(previewNext)previewNext.disabled=total<2;
+    const total=preview?.querySelector('.radar-preview-item')?previewStops().length:0;
+    previewIndex=Math.max(0,Math.min(previewIndex,total-1));
+    if(!previewDots)return;
+    if(previewDots.children.length!==total){
+      previewDots.replaceChildren();
+      for(let i=0;i<total;i++){
+        const dot=el('button','carousel-dot');
+        dot.type='button';
+        dot.setAttribute('aria-label',(i+1)+'번째 감튀 소식 보기');
+        dot.setAttribute('aria-pressed','false');
+        dot.addEventListener('click',()=>{goToPreview(i);startPreviewTimer();});
+        previewDots.append(dot);
+      }
+    }
+    [...previewDots.children].forEach((dot,i)=>{
+      const active=i===previewIndex;
+      dot.classList.toggle('is-active',active);
+      dot.setAttribute('aria-pressed',String(active));
+    });
   };
   const goToPreview=(index)=>{
     if(!preview)return;
@@ -206,12 +218,10 @@
       if(document.hidden||!previewCarousel)return;
       const bounds=previewCarousel.getBoundingClientRect();
       if(bounds.bottom<0||bounds.top>window.innerHeight)return;
-      if(previewCarousel.matches(':hover')||previewCarousel.contains(document.activeElement))return;
+      if(previewCarousel.matches(':hover')||preview.contains(document.activeElement))return;
       goToPreview(previewIndex+1);
     },5000);
   };
-  previewPrev?.addEventListener('click',()=>{goToPreview(previewIndex-1);startPreviewTimer();});
-  previewNext?.addEventListener('click',()=>{goToPreview(previewIndex+1);startPreviewTimer();});
   preview?.addEventListener('scroll',()=>{
     const stops=previewStops();
     const current=preview.scrollLeft;
@@ -230,9 +240,7 @@
     const latest=items.filter(item=>!isArchived(item)).sort(byNewest).slice(0,8);
     if(!latest.length){
       empty(preview,'최근 감튀 소식을 찾는 중이에요.','새로운 국내 감튀 소식이 검증되면 소개할게요.');
-      if(previewPosition)previewPosition.textContent='0 / 0';
-      if(previewPrev)previewPrev.disabled=true;
-      if(previewNext)previewNext.disabled=true;
+      previewNav();
       return;
     }
     latest.forEach(item=>preview.append(previewCard(item)));
