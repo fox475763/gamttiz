@@ -430,3 +430,35 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   overflow-anchor:none;
 }
 .collection .gallery .card.friend-carousel-card{scroll-snap-align:none}
+
+
+/* FIX: animate the inner strip, not scrollLeft on a scroll-snapping viewport. */
+.collection-carousel-window{width:100%;min-width:0;overflow:hidden}
+.collection .gallery.collection-carousel-track{
+  position:relative;
+  display:flex;
+  width:max-content;
+  max-width:none;
+  overflow:visible;
+  scroll-snap-type:none;
+  scroll-behavior:auto;
+  overscroll-behavior:auto;
+  padding:5px 0 12px;
+  will-change:transform;
+}
+.collection .gallery .card.friend-carousel-card{scroll-snap-align:none}
+/* Bare arrow controls: same treatment as the FRY RADAR carousel. */
+.collection-carousel-buttons button{
+  width:32px;
+  height:36px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  color:#a82c2a;
+}
+.collection-carousel-buttons button:hover:not(:disabled){
+  background:transparent;
+  border-color:transparent;
+  color:#e93636;
+}
