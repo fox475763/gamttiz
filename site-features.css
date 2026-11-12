@@ -462,3 +462,46 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   border-color:transparent;
   color:#e93636;
 }
+
+
+/* Shared GAMTTIZ pagination: soft-gray dots with a red active pill. */
+.collection .collection-carousel-navigation,
+.radar-preview .radar-preview-navigation{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:10px;
+}
+.carousel-dots{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  max-width:100%;
+  min-height:24px;
+}
+.carousel-dots .carousel-dot{
+  display:block;
+  flex:0 0 7px;
+  width:7px;
+  height:7px;
+  min-height:0;
+  padding:0;
+  border:0;
+  border-radius:999px;
+  background:#d1cfce;
+  box-shadow:none;
+  appearance:none;
+  cursor:pointer;
+  transition:width .25s ease,flex-basis .25s ease,background-color .25s ease;
+}
+.carousel-dots .carousel-dot.is-active{
+  flex-basis:24px;
+  width:24px;
+  background:#e93636;
+}
+.carousel-dots .carousel-dot:hover:not(.is-active){background:#b8b1ae}
+.carousel-dots .carousel-dot:focus-visible{outline:2px solid #e93636;outline-offset:5px}
+@media(prefers-reduced-motion:reduce){
+  .carousel-dots .carousel-dot{transition:none}
+}
