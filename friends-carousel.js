@@ -2,69 +2,82 @@
   'use strict';
   const track=document.getElementById('gallery');
   const area=document.getElementById('friends-carousel');
-  const prev=document.getElementById('friends-prev');
+  const previous=document.getElementById('friends-prev');
   const next=document.getElementById('friends-next');
-  const position=document.getElementById('friends-position');
+  const counter=document.getElementById('friends-position');
   if(!track||!area)return;
 
-  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
-  const detail=document.getElementById('detail');
-  let index=0;
-  let timer=null;
-  const slides=()=>Array.from(track.querySelectorAll('.friend-carousel-card'));
-  const stops=()=>{
-    const cards=slides();
-    if(!cards.length)return [0];
-    const max=Math.max(0,track.scrollWidth-track.clientWidth);
-    const first=cards[0].offsetLeft;
-    const values=[];
-    for(const card of cards){
-      const offset=Math.min(max,Math.max(0,card.offsetLeft-first));
-      if(!values.length||offset-values[values.length-1]>3)values.push(offset);
+  const originals=Array.from(track.querySelectorAll('.friend-carousel-card'));
+  if(!originals.length)return;
+
+  // Repeat the entire 14-friend set. The boundary is visually identical,
+  // so scrolling can wrap without returning visibly to the beginning.
+  for(const source of originals){
+    const copy=source.cloneNode(true);
+    copy.setAttribute('aria-hidden','true');
+    copy.tabIndex=-1;
+    // cloneNode does not copy event listeners; open the original detail view.
+    copy.addEventListener('click',()=>source.click());
+    track.append(copy);
+  }
+
+  const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const speed=30; // constant, gentle motion in CSS pixels per second
+  let cycleWidth=0;
+  let cardStride=0;
+  let frame=0;
+  let lastTime=0;
+  let activeIndex=-1;
+
+  function measure(){
+    const first=originals[0];
+    const firstCopy=track.children[originals.length];
+    cycleWidth=firstCopy.offsetLeft-first.offsetLeft;
+    cardStride=originals[1]?.offsetLeft-first.offsetLeft||first.getBoundingClientRect().width;
+    if(cycleWidth>0 && track.scrollLeft>=cycleWidth)
+      track.scrollLeft%=cycleWidth;
+    updateCounter();
+  }
+  function updateCounter(){
+    if(!counter||cardStride<=0)return;
+    const index=Math.floor((track.scrollLeft+cardStride/2)/cardStride)%originals.length;
+    if(index===activeIndex)return;
+    activeIndex=index;
+    counter.textContent=String(index+1).padStart(2,'0')+' / '+String(originals.length).padStart(2,'0');
+  }
+  function wrap(){
+    if(cycleWidth>0 && track.scrollLeft>=cycleWidth)
+      track.scrollLeft=track.scrollLeft%cycleWidth;
+  }
+  function animate(time){
+    if(lastTime){
+      // Browsers throttle background tabs: skip their elapsed time instead of jumping.
+      const elapsed=Math.min((time-lastTime)/1000,0.05);
+      if(!reduceMotion.matches&&cycleWidth>0){
+        track.scrollLeft+=speed*elapsed;
+        wrap();
+        updateCounter();
+      }
     }
-    return values.length?values:[0];
-  };
-  const update=()=>{
-    const points=stops();
-    index=Math.min(index,points.length-1);
-    if(position)position.textContent=
-      String(index+1).padStart(2,'0')+' / '+String(points.length).padStart(2,'0');
-    if(prev)prev.disabled=points.length<=1;
-    if(next)next.disabled=points.length<=1;
-  };
-  const moveTo=target=>{
-    const points=stops();
-    index=(target+points.length)%points.length;
-    track.scrollTo({
-      left:points[index],
-      behavior:reducedMotion.matches?'auto':'smooth'
-    });
-    update();
-  };
-  const pause=()=>{if(timer!==null){window.clearInterval(timer);timer=null;}};
-  const play=()=>{
-    pause();
-    if(reducedMotion.matches||stops().length<=1)return;
-    timer=window.setInterval(()=>{
-      if(document.hidden||detail?.open||area.matches(':hover')||
-         track.contains(document.activeElement))return;
-      const box=area.getBoundingClientRect();
-      if(box.bottom<=0||box.top>=window.innerHeight)return;
-      moveTo(index+1);
-    },5000);
-  };
+    lastTime=time;
+    frame=window.requestAnimationFrame(animate);
+  }
+  function jumpBy(direction){
+    if(cardStride<=0||cycleWidth<=0)return;
+    track.scrollLeft=(track.scrollLeft+direction*cardStride+cycleWidth)%cycleWidth;
+    updateCounter();
+  }
 
-  prev?.addEventListener('click',()=>{moveTo(index-1);play();});
-  next?.addEventListener('click',()=>{moveTo(index+1);play();});
-  track.addEventListener('scroll',()=>{
-    const points=stops();
-    index=points.reduce((best,current,i)=>
-      Math.abs(current-track.scrollLeft)<Math.abs(points[best]-track.scrollLeft)?i:best,0);
-    update();
-  },{passive:true});
-  window.addEventListener('resize',()=>{moveTo(Math.min(index,stops().length-1));play();});
-  reducedMotion.addEventListener?.('change',play);
+  previous?.addEventListener('click',()=>jumpBy(-1));
+  next?.addEventListener('click',()=>jumpBy(1));
+  track.addEventListener('scroll',()=>{wrap();updateCounter();},{passive:true});
+  window.addEventListener('resize',measure);
+  document.addEventListener('visibilitychange',()=>{lastTime=0;});
+  // Only the system accessibility preference stops automatic movement.
+  reduceMotion.addEventListener?.('change',()=>{lastTime=0;});
 
-  update();
-  play();
+  measure();
+  if(previous)previous.disabled=originals.length<2;
+  if(next)next.disabled=originals.length<2;
+  frame=window.requestAnimationFrame(animate);
 })();
