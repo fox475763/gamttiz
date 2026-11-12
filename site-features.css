@@ -303,3 +303,121 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .gamttiz-lifestyle-disclosure{max-width:1180px;margin:16px auto 0;font-size:.75rem;color:#8c827a}
 @media(max-width:780px){.gamttiz-lifestyle-grid{grid-template-columns:1fr 1fr}.gamttiz-lifestyle-grid figure:first-child{grid-column:1/-1}}
 @media(max-width:540px){.gamttiz-lifestyle-grid{grid-template-columns:1fr}.gamttiz-lifestyle-grid figure:first-child{grid-column:auto}.gamttiz-lifestyle-grid figcaption{padding:13px}}
+
+
+/* FRIENDS CAROUSEL — compact full-bleed character cards, matching the FRY RADAR preview. */
+.collection-carousel{width:100%;min-width:0}
+.collection .gallery.collection-carousel-track{
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:stretch;
+  gap:14px;
+  width:100%;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+  padding:5px 2px 12px;
+}
+.collection .collection-carousel-track::-webkit-scrollbar{display:none}
+.collection .gallery .card.friend-carousel-card{
+  position:relative;
+  display:block;
+  flex:0 0 clamp(160px,19vw,226px);
+  aspect-ratio:4/5;
+  width:auto;
+  min-width:0;
+  height:auto;
+  padding:0;
+  overflow:hidden;
+  isolation:isolate;
+  scroll-snap-align:start;
+  border:1px solid #e4ded5;
+  border-radius:13px;
+  background:#f5eee3;
+  box-shadow:0 4px 14px #281c0b0c;
+  text-align:left;
+  color:#fff;
+}
+.collection .gallery .card.friend-carousel-card:hover,
+.collection .gallery .card.friend-carousel-card:focus-visible{
+  border-color:#e93636;
+  box-shadow:0 10px 28px #281c0b1e;
+  transform:translateY(-3px);
+}
+.collection .gallery .card.friend-carousel-card img{
+  display:block;
+  width:100%;
+  height:100%;
+  aspect-ratio:auto;
+  object-fit:cover;
+  object-position:center;
+  background:#f5eee3;
+}
+.collection .gallery .friend-carousel-card .card-label{
+  position:absolute;
+  inset:auto 0 0;
+  display:flex;
+  align-items:flex-end;
+  min-height:76px;
+  margin:0;
+  padding:32px 14px 13px;
+  border:0;
+  border-radius:0;
+  background:linear-gradient(to top,rgba(18,18,18,.82) 0%,rgba(18,18,18,.47) 55%,rgba(18,18,18,0) 100%);
+  color:#fff;
+  font-size:clamp(.9rem,1.35vw,1.05rem);
+  font-weight:850;
+  line-height:1.4;
+  letter-spacing:-.02em;
+  text-shadow:0 1px 3px #0004;
+  pointer-events:none;
+}
+.collection .gallery .friend-carousel-card .card-label span{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+.collection-carousel-navigation{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:16px;
+  margin-top:5px;
+}
+.collection-carousel-position{
+  color:#797168;
+  font-size:.76rem;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.06em;
+}
+.collection-carousel-buttons{display:flex;gap:8px}
+.collection-carousel-buttons button{
+  display:grid;
+  place-items:center;
+  width:36px;
+  height:36px;
+  padding:0;
+  border:1px solid #e0d7cb;
+  border-radius:50%;
+  background:#fff;
+  color:#a82c2a;
+  font-size:1.15rem;
+  font-weight:700;
+}
+.collection-carousel-buttons button:hover:not(:disabled){background:#e93636;color:#fff;border-color:#e93636}
+.collection-carousel-buttons button:disabled{opacity:.35;cursor:default}
+@media(max-width:720px){
+  .collection .gallery.collection-carousel-track{gap:11px}
+  .collection .gallery .card.friend-carousel-card{flex-basis:clamp(150px,43vw,205px)}
+}
+@media(max-width:440px){
+  .collection .gallery .card.friend-carousel-card{flex-basis:clamp(142px,45vw,190px)}
+  .collection .gallery .friend-carousel-card .card-label{padding:29px 11px 10px;font-size:.91rem;min-height:65px}
+}
+@media(prefers-reduced-motion:reduce){
+  .collection .gallery.collection-carousel-track{scroll-behavior:auto}
+  .collection .gallery .card.friend-carousel-card{transition:none}
+}
