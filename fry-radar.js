@@ -147,30 +147,24 @@
   const previewCard=item=>{
     const node=el('a','radar-preview-item');
     node.href='fry-radar.html#post-'+encodeURIComponent(item.id);
+    if(item.imageNote)node.title=item.imageNote;
     const thumb=el('div','radar-preview-thumb');
-    const fallback=()=>{
-      thumb.replaceChildren(el('div','radar-preview-thumb-fallback','🍟'));
-    };
+    const fallback=()=>thumb.replaceChildren(el('div','radar-preview-thumb-fallback','🍟'));
     if(typeof item.imageUrl==='string'&&validUrl(item.imageUrl)&&item.imageUrl.startsWith('https:')){
-      const img=el('img','');
+      const img=el('img','radar-preview-image');
       img.src=item.imageUrl;
-      img.alt=(item.source||'원문')+' 이미지';
+      img.alt=item.imageNote||'';
       img.loading='lazy';
       img.decoding='async';
       img.referrerPolicy='no-referrer';
       img.addEventListener('error',fallback,{once:true});
       thumb.append(img);
-      if(item.imageNote)thumb.append(el('span','radar-preview-reference','참고 사진'));
     }else fallback();
 
-    const content=el('div','radar-preview-item-content');
-    content.append(el('span','radar-preview-item-category',labels[item.category]||'감튀 소식'));
-    content.append(el('h3','',item.title));
-    content.append(el('p','',item.summary||'원문에서 자세한 내용을 확인해 보세요.'));
-    const footer=el('div','radar-preview-item-footer');
-    footer.append(el('span','',item.source||'원문 보기'),el('b','','↗'));
-    content.append(footer);
-    node.append(thumb,content);
+    // Full-bleed photo with only the headline on a bottom-up translucent fade.
+    const shade=el('div','radar-preview-overlay');
+    shade.append(el('h3','',item.title));
+    node.append(thumb,shade);
     return node;
   };
 
