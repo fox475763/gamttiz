@@ -47,12 +47,21 @@
       <button id="radar-preview-next" type="button" aria-label="다음 감튀 소식" disabled>→</button>
     </div>
   </div>
-</div></section><section id="collection" class="collection section"><div class="section-heading"><div><p class="eyebrow">FIND YOUR FAVORITE · 14 FRIENDS</p><h2>감띠즈를 소개합니다!</h2></div><p>14종의 아크릴 키링.<br>카드를 눌러 각자의 이야기를 만나보세요.</p></div><div class="collection-tools"><span>ALL FRIENDS <b>14</b></span><button id="random" class="text-button" type="button">오늘의 감띠 뽑기 ↗</button></div><div id="gallery" class="gallery"></div><noscript><p>키링 갤러리를 보려면 브라우저에서 JavaScript를 켜주세요.</p></noscript></section>
+</div></section><section id="collection" class="collection section"><div class="section-heading"><div><p class="eyebrow">FIND YOUR FAVORITE · 14 FRIENDS</p><h2>감띠즈를 소개합니다!</h2></div><p>14종의 아크릴 키링.<br>카드를 눌러 각자의 이야기를 만나보세요.</p></div><div class="collection-tools"><span>ALL FRIENDS <b>14</b></span><button id="random" class="text-button" type="button">오늘의 감띠 뽑기 ↗</button></div><div id="friends-carousel" class="collection-carousel" role="region" aria-roledescription="캐러셀" aria-label="감띠즈 친구 14명">
+  <div id="gallery" class="gallery collection-carousel-track" aria-live="off"></div>
+  <div class="collection-carousel-navigation">
+    <span id="friends-position" class="collection-carousel-position" aria-live="polite">01 / 14</span>
+    <div class="collection-carousel-buttons">
+      <button id="friends-prev" type="button" aria-label="이전 감띠 보기">←</button>
+      <button id="friends-next" type="button" aria-label="다음 감띠 보기">→</button>
+    </div>
+  </div>
+</div><noscript><p>키링 갤러리를 보려면 브라우저에서 JavaScript를 켜주세요.</p></noscript></section>
 <section id="experiences" class="experience-teaser section"><div class="section-heading"><div><p class="eyebrow">PLAY WITH GAMTTIZ</p><h2>감띠즈와 조금 더 놀아볼까요?</h2></div><p>각 체험을 별도 페이지에서 즐겨보세요.<br>인스타그램에서 바로 열 수도 있어요.</p></div><div class="experience-links"><a href="quiz.html"><span>01 / FRY STYLE</span><strong>감튀 취향 테스트</strong><small>먹는 습관을 고르면 나와 어울리는 감띠가 나타나요.</small><b aria-hidden="true">↗</b></a><a href="combo.html"><span>02 / MY COMBO</span><strong>나만의 감띠 홀더</strong><small>좋아하는 감띠 최대 다섯 명을 홀더에 담아 PNG로 저장해보세요.</small><b aria-hidden="true">↗</b></a></div></section>
     <section id="guide" class="guide section"><p class="eyebrow">HOW TO ENJOY GAMTTIZ</p><h2>감띠즈와 함께하는 방법.</h2><div class="guide-grid"><article><span>01</span><h3>내 취향으로 고르기</h3><p>14종의 표정과 이야기를 둘러보세요. 제품 카드를 누르면 원본 소개와 설명을 크게 볼 수 있어요.</p></article><article><span>02</span><h3>홀더에 모으기</h3><p>빨간 홀더는 수집한 키링의 보관통이자, 원하는 대로 키링을 걸어 꾸미는 공간이에요.</p><a href="#holder">홀더 살펴보기 ↗</a></article><article><span>03</span><h3>다음 이야기 만나기</h3><p>감띠즈의 새로운 소식과 제품 관련 문의는 공식 인스타그램에서 확인해 주세요.</p><a href="https://www.instagram.com/gamttiz_official/" target="_blank" rel="noopener noreferrer">공식 인스타그램 ↗</a></article></div></section>
     <section class="home-news"><p class="eyebrow">GAMTTIZ / NEWS</p><h2>감띠즈의 새로운 이야기.</h2><a href="news.html" class="catalog-jump">소식 보러가기 <span aria-hidden="true">↗</span></a></section><section class="social section"><p class="eyebrow">LET’S STAY CRISPY</p><h2>작은 취향이 모이는 곳.<br>감띠즈와 함께해요.</h2><a class="button yellow" href="https://www.instagram.com/gamttiz_official/" target="_blank" rel="noopener noreferrer">@gamttiz_official <span>↗</span></a></section>
   </main>
   <footer><span>© GAMTTIZ</span><span>French Fry Lovers</span><a href="#">맨 위로 ↑</a></footer>
   <dialog id="detail" aria-labelledby="detail-title"><div class="dialog-top"><span id="detail-count"></span><button id="close" type="button" aria-label="제품 상세 닫기">닫기 ✕</button></div><div class="dialog-content"><img id="detail-image" alt="" decoding="async" loading="lazy"><div class="detail-copy"><p class="eyebrow">GAMTTIZ / FRENCH FRY LOVERS</p><h2 id="detail-title"></h2><p id="detail-english"></p><p id="detail-description"></p><div id="detail-story" class="detail-story"><p id="detail-story-text"></p><p id="detail-quote"></p></div><a id="original" target="_blank" rel="noopener" class="text-button">원본 이미지 열기 ↗</a></div></div><div class="dialog-nav"><button id="previous" type="button">← 이전 감띠</button><button id="next" type="button">다음 감띠 →</button></div></dialog>
-<script src="studio-polish.js" defer></script><script src="site-features.js?v=20261103glass7" defer></script><script src="fry-radar.js" defer></script></body></html>
+<script src="studio-polish.js" defer></script><script src="site-features.js?v=20261103glass7" defer></script><script src="friends-carousel.js" defer></script><script src="fry-radar.js" defer></script></body></html>
 
