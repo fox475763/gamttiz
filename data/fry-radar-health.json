@@ -1,15 +1,20 @@
 {
-  "checkedAt": "2026-11-12T23:55:27.379Z",
+  "checkedAt": "2026-11-13T07:27:25.091Z",
   "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
   "news": {
-    "feedsSucceeded": 30,
-    "failedFeeds": 0,
-    "newsCandidates": 107,
+    "feedsSucceeded": 29,
+    "failedFeeds": 1,
+    "newsCandidates": 98,
     "newVerified": 0,
     "availableQueries": 44,
     "attemptedBingQueries": 20,
     "rotatingOverHours": 6,
-    "failures": [],
+    "failures": [
+      {
+        "query": "감자튀김 이벤트",
+        "reason": "RSS 형식이 아닌 응답입니다."
+      }
+    ],
     "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs. Bing queries are rotated to avoid provider throttling."
   },
   "sources": [
@@ -29,7 +34,7 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z"
+      "lastReachableAt": "2026-11-13T07:27:25.091Z"
     },
     {
       "brand": "맥도날드",
@@ -47,7 +52,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z",
+      "lastReachableAt": "2026-11-13T07:27:25.091Z",
       "indexedCandidates": 0,
       "browserFallback": true,
       "browserCandidates": 6
@@ -113,7 +118,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z"
+      "lastReachableAt": "2026-11-13T07:27:25.091Z"
     },
     {
       "brand": "노브랜드버거",
@@ -176,7 +181,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z"
+      "lastReachableAt": "2026-11-13T07:27:25.091Z"
     },
     {
       "brand": "다운타우너",
@@ -194,7 +199,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z",
+      "lastReachableAt": "2026-11-13T07:27:25.091Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -214,7 +219,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z",
+      "lastReachableAt": "2026-11-13T07:27:25.091Z",
       "indexedCandidates": 0,
       "browserCandidates": 0
     },
@@ -234,7 +239,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z"
+      "lastReachableAt": "2026-11-13T07:27:25.091Z"
     },
     {
       "brand": "파파이스",
@@ -252,7 +257,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-12T23:55:27.379Z"
+      "lastReachableAt": "2026-11-13T07:27:25.091Z"
     }
   ],
   "summary": {
