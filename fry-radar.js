@@ -68,7 +68,7 @@
     for(let n=0;n<7;n++)fries.append(el('i','radar-fry-stick'));
     const pack=el('div','radar-fries-pack');
     pack.append(el('span','', 'FRY'));
-    art.append(stars,fries,pack,el('span','radar-art-label','GAMTTIZ · FRY RADAR'));
+    art.append(stars,fries,pack,el('span','radar-art-label','GAMTTIZ · Fry Rader'));
     return art;
   };
   const card=(item,home)=>{
