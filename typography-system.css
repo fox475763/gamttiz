@@ -1,0 +1,220 @@
+/* GAMTTIZ — unified typography system (2026.11)
+   Korean legibility first; retain GamttizEN for identity marks and micro-labels.
+   Loaded last on every page to normalize legacy page-specific styles. */
+
+:root {
+  --type-sans: "Wanted Sans Variable", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --type-body-tracking: -.012em;
+  --type-heading-tracking: -.032em;
+  --type-small-tracking: .005em;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  font-family: var(--type-sans);
+  font-size: 1rem;
+  line-height: 1.7;
+  letter-spacing: var(--type-body-tracking);
+  font-kerning: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+button, input, select, textarea {
+  font-family: var(--type-sans);
+  letter-spacing: -.012em;
+}
+:where(main) :is(h1,h2,h3,h4):not(.hero-film) {
+  font-family: var(--type-sans);
+  font-weight: 700;
+  letter-spacing: var(--type-heading-tracking);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+:where(main) h1:not(.hero-film) { line-height: 1.16; letter-spacing: -.04em; }
+:where(main) h2 { line-height: 1.24; }
+:where(main) h3 { line-height: 1.34; letter-spacing: -.025em; }
+:where(main) h4 { line-height: 1.4; letter-spacing: -.018em; }
+:where(main) :is(p, li, dd, blockquote) { line-height: 1.77; }
+:where(main) p { text-wrap: pretty; }
+
+/* Short editorial labels should be tracked out, but not excessively. */
+.eyebrow, .radar-kicker, .quiz-kicker,
+.project-facts dt, .project-ideas article > span,
+.catalog-card-text small {
+  letter-spacing: .085em;
+  line-height: 1.5;
+}
+:where(main) .eyebrow { font-size: clamp(11px, .82vw, 12px); }
+:where(main) :is(.story-number, .project-mark span, .project-font-sample) {
+  line-height: 1.05;
+}
+
+/* Reading text: keep Korean characters comfortably spaced and line lengths manageable. */
+:where(main) :is(
+  .hero-description,
+  .story-copy > p:not(.eyebrow),
+  .holder-copy > p:not(.eyebrow),
+  .section-heading > p,
+  .home-package-copy > p:not(.eyebrow),
+  .home-news-feed-copy > p,
+  .catalog-hero-copy > p:not(.eyebrow),
+  .catalog-section-heading > p,
+  .catalog-holder-copy > p:not(.eyebrow),
+  .news-hero > p:not(.eyebrow),
+  .project-lead,
+  .project-world > p:not(.eyebrow),
+  .project-ideas p,
+  .project-system > div > p:not(.eyebrow),
+  .experience-page .experience-intro > p:last-child,
+  .play-hub > p:not(.eyebrow),
+  .hub-grid p,
+  .quiz-story,
+  .quiz-reason
+) {
+  line-height: 1.78;
+  letter-spacing: -.01em;
+}
+:where(main) :is(
+  .story-copy > p:not(.eyebrow),
+  .holder-copy > p:not(.eyebrow),
+  .project-ideas p,
+  .project-system > div > p:not(.eyebrow)
+) {
+  font-size: clamp(15px, 1.1vw, 16px);
+  color: #595650;
+}
+:where(main) :is(.project-lead, .project-world > p:not(.eyebrow), .news-body) {
+  max-width: 72ch;
+  line-height: 1.86;
+  letter-spacing: -.008em;
+}
+:where(main) .news-body { font-size: clamp(15px, 1.1vw, 17px); }
+:where(main) :is(.radar-hero-inner > p:last-child, .radar-card p) {
+  line-height: 1.72;
+}
+
+/* Main section titles: consistent hierarchy across collection, catalog, project and news. */
+:where(main) :is(
+  .section-heading h2, .radar-preview-heading h2,
+  .home-news-feed h2, .home-news h2, .home-package-copy h2,
+  .catalog-section-heading h2, .news-list-head h2,
+  .project-system h3, .project-subhead h3
+) {
+  letter-spacing: -.032em;
+  line-height: 1.23;
+}
+:where(main) :is(
+  .story-copy h2, .holder-copy h2, .project-world h3,
+  .project-specifications h3, .project-packaging h3
+) {
+  letter-spacing: -.034em;
+  line-height: 1.28;
+}
+:where(main) :is(.catalog-hero h1, .news-hero h1, .radar-hero h1,
+  .experience-page .experience-intro h1, .play-hub > h1) {
+  letter-spacing: -.038em;
+  line-height: 1.15;
+}
+
+/* Cards and controls have less tracking than display text. */
+:where(main) :is(
+  .card-label, .friend-carousel-card .card-label,
+  .radar-preview-item h3, .radar-card h3,
+  .news-card-info h3, .home-news-feed-copy h3,
+  .catalog-card-text strong, .quiz-question
+) {
+  letter-spacing: -.018em;
+  line-height: 1.4;
+}
+:where(main) :is(.news-card-info p, .home-news-feed-copy p, .radar-card p,
+  .catalog-dialog-grid p, .quiz-insight-main > p:last-of-type) {
+  line-height: 1.73;
+}
+:where(main) :is(.button, .catalog-jump, .text-button, .news-create,
+  .quiz-option, .quiz-save, .quiz-share, .quiz-copy,
+  .control-menu-links a, .control-menu-links button) {
+  letter-spacing: -.012em;
+  line-height: 1.42;
+}
+:where(main) :is(.quiz-option, .quiz-evidence li, .quiz-fact p) {
+  line-height: 1.6;
+}
+:where(main) :is(.radar-controls label, .admin-page label) {
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+:where(main) :is(input, textarea, select) { line-height: 1.5; font-size: max(16px, 1em); }
+
+/* Supporting text should be readable but remain visually secondary. */
+:where(main) :is(
+  figcaption, .mockup-studio figcaption, .catalog-caption, .spec-note,
+  .news-card-info small, .radar-card-bottom, .radar-card-top,
+  .project-fonts p, .project-facts dd, .radar-updated
+) {
+  letter-spacing: var(--type-small-tracking);
+  line-height: 1.55;
+}
+:where(main) :is(.mockup-studio figcaption, .packaging-design-grid figcaption,
+  .package-photo-grid figcaption, .studio-photo-grid figcaption) {
+  font-size: clamp(12px, .85vw, 13px);
+}
+:where(main) :is(.news-card-info small, .home-news-feed-copy small,
+  .catalog-caption, .spec-note) {
+  font-size: 12px;
+}
+:where(main) :is(.project-facts dd, .project-fonts p) {
+  line-height: 1.68;
+}
+
+/* Navigation: clear compact text without excessive letter spacing. */
+.header nav, .header nav a {
+  font-family: var(--type-sans);
+  font-weight: 650;
+  letter-spacing: -.005em;
+  line-height: 1.45;
+}
+.header nav a { font-size: clamp(11.5px, .8vw, 13px); }
+.wordmark, .wordmark span, .brand-letters, .brand-subtitle {
+  /* Preserve the custom GAMTTIZ display typography. */
+  font-family: GamttizEN, var(--type-sans);
+}
+.wordmark { letter-spacing: 0; }
+.wordmark span { letter-spacing: .065em; line-height: 1.25; }
+:where(footer) { letter-spacing: .01em; line-height: 1.55; }
+
+@media (max-width: 720px) {
+  :where(main) :is(h1,h2,h3,h4):not(.hero-film) { letter-spacing: -.028em; }
+  :where(main) h1:not(.hero-film) { line-height: 1.19; }
+  :where(main) h2 { line-height: 1.28; }
+  :where(main) h3 { line-height: 1.38; }
+  :where(main) :is(
+    .story-copy > p:not(.eyebrow),
+    .holder-copy > p:not(.eyebrow),
+    .project-ideas p,
+    .project-system > div > p:not(.eyebrow),
+    .catalog-section-heading > p,
+    .news-card-info p,
+    .project-lead,
+    .news-body
+  ) {
+    font-size: 15px;
+    line-height: 1.82;
+  }
+  :where(main) :is(.quiz-option, .quiz-story, .quiz-reason, .hub-grid p) {
+    font-size: 14px;
+    line-height: 1.68;
+  }
+  :where(main) :is(.section-heading > p, .radar-preview-heading p) {
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .header nav a { font-size: 12px; }
+  :where(main) :is(.mockup-studio figcaption, .package-photo-grid figcaption) {
+    font-size: 12px;
+  }
+}
