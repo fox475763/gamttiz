@@ -42,4 +42,9 @@ catalogProducts.forEach(([name, english, description], index) => {
   catalogGrid.append(card);
 });
 document.getElementById('catalog-close').addEventListener('click', () => catalogDialog.close());
-catalogDialog.addEventListener('click', event => { if (event.target === catalogDialog) catalogDialog.close(); });
+catalogDialog.addEventListener('click', event => {
+  if (event.target !== catalogDialog) return;
+  const bounds = catalogDialog.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right ||
+      event.clientY < bounds.top || event.clientY > bounds.bottom) catalogDialog.close();
+});
