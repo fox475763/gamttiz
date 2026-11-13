@@ -1,0 +1,8 @@
+# GAMTTIZ is published as a GitHub Pages project site at /gamttiz/.
+# Robots.txt is only interpreted by crawlers when served at the hostname root (/robots.txt).
+User-agent: *
+Allow: /gamttiz/
+Disallow: /gamttiz/admin.html
+Disallow: /gamttiz/fry-admin.html
+
+Sitemap: https://fox475763.github.io/gamttiz/sitemap.xml
