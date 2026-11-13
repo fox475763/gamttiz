@@ -1,22 +1,9 @@
 /* Shared interface and editorial page system. Original artwork is never transformed. */
 :root{--ed-ink:#252522;--ed-muted:#686863;--ed-line:#e5e4df;--ed-paper:#f8f8f5;--ed-red:#d92e32;--ed-ease:cubic-bezier(.22,1,.36,1)}
-.control-scrim{background:rgba(23,24,22,.28);backdrop-filter:blur(4px)}
-.control-menu,.control-contact,.control-search-results{background:rgba(255,255,253,.97);backdrop-filter:blur(24px);border:1px solid #e5e4df;border-radius:20px;box-shadow:0 24px 80px #15151020;color:var(--ed-ink);text-shadow:none}
-.control-menu::before,.control-contact::before,.control-search::before,.control-search-results::before,.control-trigger::before,.control-trigger::after{display:none}
-.control-trigger{background:#252522;backdrop-filter:none;border:1px solid #ffffff30;box-shadow:0 8px 30px #15151020;text-shadow:none;color:#fff;transition:background .25s,transform .25s}
-.control-trigger:hover{background:var(--ed-red);box-shadow:0 8px 30px #15151025;transform:translateY(-2px)}
-.control-panel-label{color:#777770;text-shadow:none;font-size:10px;letter-spacing:.14em;padding:6px 6px 12px;border-bottom:1px solid var(--ed-line)}
-.control-menu-links a,.control-menu-links button,.control-contact-links a,.control-contact-links button{background:transparent;color:var(--ed-ink);text-shadow:none;box-shadow:none;border:0;border-radius:9px;min-height:42px;font:600 14px var(--type-sans);padding:10px 12px;text-decoration:none;text-align:left;cursor:pointer}
-.control-menu-links .control-menu-subtitle,.control-contact-links a small{color:#777770;text-shadow:none;font-weight:400}
-.control-menu-links a:is(:hover,:focus-visible),.control-menu-links button:is(:hover,:focus-visible),.control-contact-links a:hover,.control-contact-links button:hover{background:#f0f0eb;color:var(--ed-red);text-shadow:none}
-.control-menu-links button.control-menu-search{background:#f4f4f0;color:var(--ed-muted);margin-top:12px}
-.control-menu-links a[aria-current="page"]{background:#fceced;color:var(--ed-red)}
-.control-menu-links .glass-pressed::before,.control-contact-links .glass-pressed::before{display:none}
-.control-contact-links{gap:5px}.control-contact-links a{display:block}.control-contact-links a small{display:block;font-size:12px;margin-top:4px}
-.contact-copy{width:100%}.contact-copy-status{font-size:12px;color:var(--ed-muted);line-height:1.6;margin:10px 12px 0;overflow-wrap:anywhere}
-.control-search{background:#fff;border:1px solid var(--ed-line);box-shadow:0 12px 30px #15151020;backdrop-filter:none}
-.control-search-input{color:var(--ed-ink);text-shadow:none}.control-search-input::placeholder{color:#777770}
-.control-search-input:focus-visible{outline:2px solid var(--ed-red)!important;outline-offset:3px}
+/* The floating menu, search and contact controls keep the original
+   transparent liquid-glass treatment defined in site-features.css. */
+.contact-copy{width:100%}
+.contact-copy-status{font-size:12px;color:#777770;line-height:1.6;margin:10px 12px 0;overflow-wrap:anywhere}
 .refined-page{background:var(--ed-paper);color:var(--ed-ink)}
 .refined-page .header{background:rgba(255,255,253,.94);border-bottom:1px solid var(--ed-line);box-shadow:none;backdrop-filter:blur(16px)}
 .refined-page .header nav a{color:#555550}.refined-page .header nav a[aria-current="page"]{color:var(--ed-red)}
@@ -120,4 +107,4 @@
  .refined-page .site-contact-band{width:calc(100% - 48px);padding:28px;margin-bottom:60px;gap:28px;grid-template-columns:1fr}.refined-page .site-contact-actions{width:100%}
  .refined-page footer{display:grid;grid-template-columns:1fr auto;gap:18px;padding:28px 24px;margin:0;width:100%}.refined-page footer>*{white-space:nowrap}.refined-page footer .site-footer-contact{margin:0}
 }
-@media(prefers-reduced-motion:reduce){.refined-page *, .control-dock *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
+@media(prefers-reduced-motion:reduce){.refined-page *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
