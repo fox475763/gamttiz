@@ -4,7 +4,8 @@
     {title:'홈', description:'감띠즈를 처음부터 둘러보기', url:'index.html', keys:'home gamttiz 감띠즈'},
     {title:'감띠즈 컬렉션', description:'14종의 감띠와 각각의 이야기', url:'index.html#collection', keys:'collection 캐릭터 키링 감띠'},
     {title:'제품 정보', description:'랜덤박스, 키링, 홀더', url:'products.html', keys:'products 랜덤박스 굿즈 제품'},
-    {title:'소식', description:'감띠즈의 새로운 소식과 사진', url:'news.html', keys:'news 공지 게시글'},
+    {title:'공지', description:'감띠즈의 공식 공지와 제작·운영 소식', url:'news.html', keys:'notice news 공지 소식 게시글'},
+    {title:'Fry Rader (감튀 레이더)', description:'감자튀김 할인·이벤트·굿즈 등 외부 소식', url:'fry-radar.html', keys:'fry radar rader 레이더 감튀 소식 할인 이벤트'},
     {title:'감튀 취향 테스트', description:'10개의 질문으로 나의 감띠 찾기', url:'quiz.html', keys:'quiz 테스트 성향'},
     {title:'나만의 감띠 홀더', description:'감띠를 담고 3D 홀더를 돌려보기', url:'combo.html', keys:'combo 체험 3d'},
     {title:'체험 모아보기', description:'감띠즈의 두 가지 체험', url:'play.html', keys:'play 게임'},
@@ -34,7 +35,7 @@
   const menu=make('nav','control-menu'); menu.id='control-menu'; menu.setAttribute('aria-label','컨트롤 메뉴'); menu.setAttribute('aria-hidden','true'); menu.inert=true;
   menu.append(make('span','control-panel-label','GAMTTIZ / MENU'));
   const menuLinks=make('div','control-menu-links');
-  const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Products:'제품',News:'소식','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
+  const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Products:'제품',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
   const addMenuSubtitle=(item)=>{
     const label=item.textContent.trim();
     const translation=menuTranslations[label];
@@ -68,7 +69,7 @@
   let newsLoaded=false;
   async function loadSearchNews(){
     if(newsLoaded)return; newsLoaded=true;
-    try { const posts=typeof loadNewsPosts==='function' ? await loadNewsPosts({force:true}) : await fetch('news/posts.json',{cache:'no-store'}).then(r=>r.json()); if(Array.isArray(posts))posts.forEach(post=>{if(post?.id&&post?.title)pages.push({title:post.title,description:post.excerpt||'소식 보기',url:`news.html?id=${encodeURIComponent(post.id)}`,keys:`news 소식 ${post.body||''}`});}); renderResults(); } catch {}
+    try { const posts=typeof loadNewsPosts==='function' ? await loadNewsPosts({force:true}) : await fetch('news/posts.json',{cache:'no-store'}).then(r=>r.json()); if(Array.isArray(posts))posts.forEach(post=>{if(post?.id&&post?.title)pages.push({title:post.title,description:post.excerpt||'소식 보기',url:`news.html?id=${encodeURIComponent(post.id)}`,keys:`notice news 공지 소식 ${post.body||''}`});}); renderResults(); } catch {}
   }
   function renderResults(){
     const query=normalize(searchInput.value);
