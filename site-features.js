@@ -35,7 +35,7 @@
   const menu=make('nav','control-menu'); menu.id='control-menu'; menu.setAttribute('aria-label','컨트롤 메뉴'); menu.setAttribute('aria-hidden','true'); menu.inert=true;
   menu.append(make('span','control-panel-label','GAMTTIZ / MENU'));
   const menuLinks=make('div','control-menu-links');
-  const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Products:'제품',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
+  const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Products:'제품',Notice:'브랜드 공지',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
   const addMenuSubtitle=(item)=>{
     const label=item.textContent.trim();
     const translation=menuTranslations[label];
@@ -52,8 +52,15 @@
   contact.append(make('span','control-panel-label','CONTACT GAMTTIZ'));
   const contactLinks=make('div','control-contact-links');
   const dm=make('a','','Instagram DM ↗');dm.href='https://ig.me/m/gamttiz_official';dm.target='_blank';dm.rel='noopener noreferrer';dm.append(make('small','','@gamttiz_official'));
-  const mail=make('a','','Gmail ↗');mail.href='mailto:fox475763@gmail.com?subject=GAMTTIZ%20%EB%AC%B8%EC%9D%98';mail.append(make('small','','fox475763@gmail.com'));
-  contactLinks.append(dm,mail);contact.append(contactLinks);
+  const mail=make('a','','Gmail에서 작성 ↗');
+  mail.href='https://mail.google.com/mail/?view=cm&fs=1&to=fox475763%40gmail.com&su=GAMTTIZ%20%EB%AC%B8%EC%9D%98';
+  mail.target='_blank';mail.rel='noopener noreferrer';mail.append(make('small','','fox475763@gmail.com'));
+  const mailApp=make('a','','메일 앱으로 열기 ↗');mailApp.href='mailto:fox475763@gmail.com?subject=GAMTTIZ%20%EB%AC%B8%EC%9D%98';
+  mailApp.append(make('small','','기본 메일 앱 사용'));
+  const copy=make('button','contact-copy','이메일 주소 복사');copy.type='button';
+  const copyStatus=make('p','contact-copy-status');copyStatus.setAttribute('role','status');
+  copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText('fox475763@gmail.com');copyStatus.textContent='이메일 주소를 복사했어요.';}catch{copyStatus.textContent='fox475763@gmail.com — 주소를 선택해 복사해 주세요.';}});
+  contactLinks.append(dm,mail,mailApp,copy);contact.append(contactLinks,copyStatus);
   dock.append(search,menu,contact,trigger);document.body.append(dock);
   // Restart one complete light sweep for every touch or mouse press.
   dock.addEventListener('pointerdown',event=>{
@@ -142,39 +149,7 @@ function setButtonColor(color) {
   lastButtonColor = color;
 }
 
-function updateMenuTextColor() {
-  if (dock.dataset.mode !== 'closed') {
-    setButtonColor('#ffffff');
-    return;
-  }
-
-  const rect = trigger.getBoundingClientRect();
-  const dockVisibility = dock.style.visibility;
-  const scrimVisibility = scrim.style.visibility;
-  dock.style.visibility = 'hidden';
-  scrim.style.visibility = 'hidden';
-
-  let behind;
-  try {
-    behind = document.elementFromPoint(
-      rect.left + rect.width / 2,
-      rect.top + rect.height / 2
-    );
-  } finally {
-    dock.style.visibility = dockVisibility;
-    scrim.style.visibility = scrimVisibility;
-  }
-
-  let isRed = false;
-  for (let el = behind; el; el = el.parentElement) {
-    const rgb = getComputedStyle(el).backgroundColor.match(/[\d.]+/g)?.map(Number);
-    if (!rgb || (rgb[3] ?? 1) < 0.8) continue;
-    const [r, g, b] = rgb;
-    isRed = r > 140 && r > g * 1.45 && r > b * 1.45;
-    break;
-  }
-  setButtonColor(isRed ? '#ffffff' : '#e93636');
-}
+function updateMenuTextColor() { setButtonColor('#ffffff'); }
 
 function scheduleMenuTextColorUpdate() {
   if (colorFrame) return;
