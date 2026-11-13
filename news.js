@@ -55,23 +55,11 @@ function renderDetail(post) {
   newsRoot.replaceChildren(wrap);
   document.title = `${post.title} — GAMTTIZ News`;
 }
-const newsStatusRow = document.createElement('div');
-newsStatusRow.className = 'news-status-row';
-const newsStatus = document.createElement('span');
-newsStatus.setAttribute('role', 'status');
-newsStatus.textContent = '소식 게시 상태를 확인하는 중이에요.';
-newsStatusRow.append(newsStatus);
-newsRoot.before(newsStatusRow);
 async function renderNews(force = false) {
-  newsStatus.textContent = '새 소식을 확인하는 중이에요.';
   try {
 const posts = await loadNewsPosts({force});
   if (!Array.isArray(posts)) throw new Error('Invalid news');
   const valid = posts.filter(post => post && typeof post.id === 'string' && typeof post.title === 'string');
-  const state = window.gamttizNewsState || {};
-  newsStatus.textContent = state.source === 'fallback' || state.source === 'offline'
-    ? 'GitHub 소식을 확인하지 못해 저장된 소식만 보여드려요. 잠시 후 다시 확인해 주세요.'
-    : `게시된 소식 ${valid.length}건 확인 · ${new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit'}).format(state.time || Date.now())} 기준`;
   const wanted = new URLSearchParams(location.search).get('id');
   if (wanted) { const post = valid.find(item => item.id === wanted); post ? renderDetail(post) : emptyState('해당 소식을 찾을 수 없어요.'); return; }
   if (!valid.length) { emptyState('곧 새로운 소식을 전해드릴게요.'); return; }
@@ -79,7 +67,6 @@ const posts = await loadNewsPosts({force});
   valid.sort((a,b) => String(b.date).localeCompare(String(a.date))).forEach((post, i) => list.append(articleNode(post, i)));
   newsRoot.replaceChildren(list);
   } catch {
-    newsStatus.textContent = '소식 확인에 실패했어요. 다시 확인해 주세요.';
     emptyState('소식을 불러오지 못했어요.');
   }
 }

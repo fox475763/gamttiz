@@ -297,7 +297,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .gamttiz-lifestyle-heading>p:last-child{max-width:570px;line-height:1.7;color:#6c625a}
 .gamttiz-lifestyle-grid{max-width:1180px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:0 auto}
 .gamttiz-lifestyle-grid figure{margin:0;min-width:0;overflow:hidden;background:#fff;border-radius:15px;border:1px solid #eae3da}
-.gamttiz-lifestyle-grid img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.gamttiz-lifestyle-grid img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}
 .gamttiz-lifestyle-grid figcaption{display:flex;justify-content:space-between;gap:10px;padding:15px 14px;font-size:.83rem;font-weight:850;letter-spacing:.03em}
 .gamttiz-lifestyle-grid figcaption span{font-size:.67rem;font-weight:650;color:#9a7465;white-space:nowrap}
 .gamttiz-lifestyle-disclosure{max-width:1180px;margin:16px auto 0;font-size:.75rem;color:#8c827a}

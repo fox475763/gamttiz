@@ -175,3 +175,8 @@
   background:transparent;
   color:#e93636;
 }
+
+/* Three latest stories, one compact slide at every viewport size. */
+.radar-preview-carousel{max-width:640px;margin-inline:auto}
+.radar-preview-track .radar-preview-item{flex-basis:100%;height:190px}
+@media(max-width:540px){.radar-preview-track .radar-preview-item{height:168px}}
