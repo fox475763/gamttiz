@@ -82,7 +82,7 @@ button, .button, .text-button, nav a, .card, .hub-grid a, .experience-links a {
 .project { background: var(--cream); padding: clamp(40px, 5vw, 80px) var(--studio-gutter) clamp(80px, 8vw, 130px); }
 .project-top, .project-facts, .project-ideas, .project-system, .project-illustrations, .project-mockups { max-width: 1440px; }
 .project-top { background: #fff; border: 1px solid var(--line); border-radius: 26px; box-shadow: 0 16px 40px #2114070c; }
-.project-top h2 { font-size: clamp(39px, 4vw, 72px); line-height: 1.12; }
+.project-top h1 { font-size: clamp(39px, 4vw, 72px); line-height: 1.12; }
 .project-lead { color: #5f5c56; }
 .project-facts { border: 1px solid var(--line); border-top: 4px solid var(--red); border-radius: 22px; background: #fff; box-shadow: none; }
 .project-ideas article { background: #f0efeb; border: 1px solid var(--line); border-radius: 20px; }
@@ -188,7 +188,7 @@ button, .button, .text-button, nav a, .card, .hub-grid a, .experience-links a {
   .social { width: 90%; padding: 30px 24px; }
   .project { padding: 40px 5% 75px; }
   .project-top { padding: 26px; }
-  .project-top h2 { font-size: clamp(33px, 8vw, 46px); }
+  .project-top h1 { font-size: clamp(33px, 8vw, 46px); }
   .project-facts { padding: 24px; }
   .project-ideas { gap: 15px; }
   .play-hub { padding: 50px 5% 75px; }
