@@ -7,7 +7,7 @@ const prettyDate = value => {
 };
 function emptyState(message) {
   const box = document.createElement('div'); box.className = 'news-empty';
-  const badge = document.createElement('span'); badge.textContent = 'GAMTTIZ NEWS';
+  const badge = document.createElement('span'); badge.textContent = 'GAMTTIZ NOTICE';
   const title = document.createElement('h3'); title.textContent = message;
   const text = document.createElement('p'); text.textContent = '새 소식은 공식 인스타그램에서도 만나볼 수 있어요.';
   const link = document.createElement('a'); link.href = 'https://www.instagram.com/gamttiz_official/'; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = '@gamttiz_official ↗';
@@ -29,7 +29,7 @@ function articleNode(post, index) {
 }
 function renderDetail(post) {
   const wrap = document.createElement('article'); wrap.className = 'news-detail';
-  const back = document.createElement('a'); back.href = 'news.html'; back.className = 'news-back'; back.textContent = '← ALL NEWS';
+  const back = document.createElement('a'); back.href = 'news.html'; back.className = 'news-back'; back.textContent = '← 공지 목록';
   const meta = document.createElement('p'); meta.className = 'eyebrow'; meta.textContent = `GAMTTIZ / ${prettyDate(post.date)}${post.author ? ` · ${post.author}` : ''}`;
   const title = document.createElement('h2'); title.textContent = post.title;
   const body = document.createElement('p'); body.className = 'news-body'; body.textContent = post.body || '';
@@ -53,7 +53,7 @@ function renderDetail(post) {
     if (files.children.length > 1) wrap.append(files);
   }
   newsRoot.replaceChildren(wrap);
-  document.title = `${post.title} — GAMTTIZ News`;
+  document.title = `${post.title} — GAMTTIZ 공지`;
 }
 async function renderNews(force = false) {
   try {
