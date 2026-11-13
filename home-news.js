@@ -1,7 +1,5 @@
 const homeNews = document.querySelector('.home-news');
-const collection = document.getElementById('collection');
-if (homeNews && collection) {
-  collection.insertAdjacentElement('beforebegin', homeNews);
+if (homeNews) {
   homeNews.className = 'home-news-feed';
   const create = (tag, className, content) => {
     const element = document.createElement(tag);
@@ -11,14 +9,14 @@ if (homeNews && collection) {
   };
   const header = create('div', 'home-news-feed-head');
   const heading = create('div');
-  heading.append(create('p', 'eyebrow', 'GAMTTIZ / LATEST NEWS'), create('h2', '', '감띠즈의 새로운 이야기.'));
-  const allNews = create('a', 'home-news-all', '모든 소식 보기 ↗');
+  heading.append(create('p', 'eyebrow', 'GAMTTIZ / OFFICIAL NOTICE'), create('h2', '', '감띠즈 공식 공지.'));
+  const allNews = create('a', 'home-news-all', '모든 공지 보기 ↗');
   allNews.href = 'news.html';
   header.append(heading, allNews);
   const list = create('div', 'home-news-feed-list');
   homeNews.replaceChildren(header, list);
   const showEmpty = () => {
-    const note = create('p', 'home-news-feed-empty', '새로운 소식을 준비하고 있어요. 다음 이야기를 기대해 주세요.');
+    const note = create('p', 'home-news-feed-empty', '새로운 공지를 준비하고 있어요.');
     list.replaceChildren(note);
   };
   loadNewsPosts().then(posts => {
@@ -38,7 +36,7 @@ if (homeNews && collection) {
       } else imageWrap.append(create('span', '', 'GAMTTIZ'));
       const info = create('div', 'home-news-feed-copy');
       const date = new Date(post.date);
-      const dateText = Number.isNaN(date.valueOf()) ? 'NEWS' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
+      const dateText = Number.isNaN(date.valueOf()) ? '공지' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
       info.append(create('small', '', dateText), create('h3', '', post.title), create('p', '', post.excerpt || post.body?.slice(0, 120) || ''), create('b', '', '자세히 보기 ↗'));
       card.append(imageWrap, info); list.append(card);
     }
