@@ -149,7 +149,39 @@ function setButtonColor(color) {
   lastButtonColor = color;
 }
 
-function updateMenuTextColor() { setButtonColor('#ffffff'); }
+function updateMenuTextColor() {
+  if (dock.dataset.mode !== 'closed') {
+    setButtonColor('#ffffff');
+    return;
+  }
+
+  const rect = trigger.getBoundingClientRect();
+  const dockVisibility = dock.style.visibility;
+  const scrimVisibility = scrim.style.visibility;
+  dock.style.visibility = 'hidden';
+  scrim.style.visibility = 'hidden';
+
+  let behind;
+  try {
+    behind = document.elementFromPoint(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2
+    );
+  } finally {
+    dock.style.visibility = dockVisibility;
+    scrim.style.visibility = scrimVisibility;
+  }
+
+  let isRed = false;
+  for (let el = behind; el; el = el.parentElement) {
+    const rgb = getComputedStyle(el).backgroundColor.match(/[\d.]+/g)?.map(Number);
+    if (!rgb || (rgb[3] ?? 1) < 0.8) continue;
+    const [r, g, b] = rgb;
+    isRed = r > 140 && r > g * 1.45 && r > b * 1.45;
+    break;
+  }
+  setButtonColor(isRed ? '#ffffff' : '#e93636');
+}
 
 function scheduleMenuTextColorUpdate() {
   if (colorFrame) return;
@@ -161,6 +193,7 @@ function scheduleMenuTextColorUpdate() {
 
 window.addEventListener('scroll', scheduleMenuTextColorUpdate, { passive: true });
 window.addEventListener('resize', scheduleMenuTextColorUpdate);
+window.addEventListener('load', scheduleMenuTextColorUpdate);
 updateMenuTextColor();
 
 })();
