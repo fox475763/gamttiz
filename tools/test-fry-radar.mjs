@@ -41,6 +41,13 @@ test('date revisions preserve ID and history; ambiguous pages do not overwrite',
   assert.equal(item.eventStatus,'ended-early');
   assert.equal(eventEvidence('<div>일시적인 접속 오류</div>'),null);
   assert.equal(eventEvidence('<main>2026.11.01 ~ 2026.11.10 및 2026.11.20 ~ 2026.11.30</main>').range,null);
+  const legacy='<div class="board-detail-wrap"><div>롯데리아 할인</div>2026.11.01 ~ 2026.11.30</div><div>2026.12.01 ~ 2026.12.31</div>';
+  assert.equal(eventEvidence(legacy,'https://www.lotteeatz.com/event/main/selectEvent/1').range.eventEnd,'2026-11-30');
+  assert.equal(eventEvidence(legacy,'https://unrelated.example/event'),null);
+  const kfc={title:'KFC 둠프라이 행사',eventStart:'2026-11-10',eventEnd:'2027-01-04'};
+  reconcileEvent(kfc,eventEvidence('<main>KFC 둠프라이 행사 11/10(화)~1/6(수)</main>'),'2026-11-16T00:00:00Z');
+  assert.equal(kfc.eventEnd,'2027-01-06');
+  assert.equal(kfc.recheckStatus,'verified');
 });
 import {canonical,cleanText,normalizeTitle,koreanRelated,classify,related,dateOnly,dateRange,eventEndTime,isCurrent,dedupe} from './fry-radar-common.mjs';
 test('canonical URL removes tracking and rejects Google News intermediates',()=>{

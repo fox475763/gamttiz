@@ -321,8 +321,8 @@ await mapLimit([...items.values()],4,async post=>{
   try{
     const page=await fetchHtml(post.url);
     if(canonical(page.url)!==canonical(post.url)){post.recheckStatus='unconfirmed';post.lastCheckedAt=now.toISOString();rechecks.unconfirmed++;return;}
-    if(reconcileEvent(post,eventEvidence(page.html),now.toISOString()))rechecks.changed++;
-    if(post.recheckStatus==='unconfirmed')rechecks.unconfirmed++;
+    if(reconcileEvent(post,eventEvidence(page.html,page.url),now.toISOString()))rechecks.changed++;
+    if(post.recheckStatus!=='verified')rechecks.unconfirmed++;
     const image=heroImage(page.html,page.url);
     if(image&&!post.imageUrl){post.imageUrl=image;pictures++;}
   }catch(e){post.lastCheckedAt=now.toISOString();post.recheckStatus='unavailable';rechecks.unavailable++;}
