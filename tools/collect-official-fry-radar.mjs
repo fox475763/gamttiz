@@ -300,7 +300,7 @@ await mapLimit(officialSources,3,async source=>{
     if(current){
       diag.excluded.duplicate++;
       if(image&&!current.imageUrl){current.imageUrl=image;pictures++;}
-      
+
       continue;
     }
     const id=crypto.createHash('sha256').update(page.url).digest('hex').slice(0,12);
