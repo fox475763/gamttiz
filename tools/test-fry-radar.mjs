@@ -84,3 +84,18 @@ test('HTML entities and CDATA are decoded',()=>{
   assert.equal(cleanText('<![CDATA[감자튀김 &amp; 소스]]>'),'감자튀김 & 소스');
   assert.equal(normalizeTitle(' 감자튀김  할인 - 뉴시스'),'감자튀김 할인');
 });
+
+import {momPromotionUrl,momPromotionLinks,FRY} from './fry-radar-common.mjs';
+test('Mom promotion detail links recognize real desktop and mobile paths, reject impostors',()=>{
+  const base='https://momstouch.co.kr/promotion/list.php';
+  assert.equal(momPromotionUrl('view.php?idx=357&pageNo=1',base),'https://momstouch.co.kr/promotion/view.php?idx=357');
+  assert.equal(momPromotionUrl('/m/promotion/view.php?idx=318',base),'https://momstouch.co.kr/m/promotion/view.php?idx=318');
+  assert.equal(momPromotionUrl('https://unrelated.example/promotion/view.php?idx=999',base),null);
+  assert.equal(momPromotionUrl('list.php?idx=2',base),null);
+  assert.deepEqual(momPromotionLinks('<a href="view.php?idx=357&amp;pageNo=1">행사</a><a href="/m/promotion/view.php?idx=357">중복</a><a href="https://evil.example/promotion/view.php?idx=999">외부</a><script>const link="/promotion/view.php?idx=318";</script>',base).map(x=>new URL(x.url).searchParams.get('idx')),['357','318']);
+});
+test('new fries spelling variants are relevant without matching unrelated fried foods',()=>{
+  for(const title of ['케이준양념감자 할인','프렌치 후라이 쿠폰','컬리 프라이 출시','와플프라이 신메뉴','쉐이킹프라이 행사','트러플 프라이 출시'])assert.equal(FRY.test(title),true,title);
+  assert.equal(FRY.test('치킨 후라이드 할인'),false);
+  assert.equal(related('맘스터치 무료 세트업 행사','무료 세트업 행사에는 케이준양념감자가 포함됩니다'),true);
+});

@@ -4,21 +4,23 @@ import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {canonical,dedupe,dateRange,FRY as SHARED_FRY,TOPIC as SHARED_TOPIC,related,koreanRelated} from './fry-radar-common.mjs';
+import {canonical,dedupe,dateRange,FRY as SHARED_FRY,TOPIC as SHARED_TOPIC,related,koreanRelated,momPromotionUrl,momPromotionLinks} from './fry-radar-common.mjs';
 
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
 const DAY = 86400000;
 const MAX_PUBLISHED_AGE = 14 * DAY;
 const execFileAsync=promisify(execFile);
-const FRY = /감자\s*튀김|감튀|케이준\s*(?:후라이|프라이)|크링클\s*(?:컷)?\s*프라이|양념\s*감자|포테이토|프렌치\s*프라이|후렌치\s*후라이|치즈\s*프라이|프라이즈|프라이드\s*포테이토|french\s*fries/i;
-const TOPIC = /할인|프로모션|행사|이벤트|쿠폰|특가|소식|출시|신메뉴|신제품|굿즈|콜라보|협업|시즈닝|디핑|소스|맛집|팝업|오픈|한정|무료|증정|시즌/i;
+const FRY = SHARED_FRY;
+const TOPIC = SHARED_TOPIC;
 const EXCLUDE = /주가|채용|가맹\s*모집|창업\s*비용|개인정보|매장\s*찾기/i;
 const officialSources = [
   {brand:'롯데리아', list:'https://www.lotteeatz.com/event/main/', host:'lotteeatz.com', detail:/\/event\/main\/selectEvent\/\d+/i},
   {brand:'맥도날드', list:'https://www.mcdonalds.co.kr/kor/promotion/list', host:'mcdonalds.co.kr', alternates:['https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404'], detail:/\/kor\/promotion\/(?:detail\/[a-z\d]+|detail\.do\?seq=\d+)/i},
   {brand:'버거킹', list:'https://www.burgerking.co.kr/event', host:'burgerking.co.kr', alternates:['https://web-prd.burgerking.co.kr/event','https://pf.kakao.com/_xcBxnxah'], channels:['_xcBxnxah'], detail:/\/event\/detail\/\d+|\/_xcBxnxah\/(?:contents\/posts\/)?\d+/i},
-  {brand:'맘스터치', list:'https://www.momstouch.co.kr/', host:'momstouch.co.kr', detail:/\/[^?#]*(event|promotion|board|notice|news)[^?#]*/i},
+  {brand:'맘스터치', list:'https://momstouch.co.kr/promotion/list.php', host:'momstouch.co.kr',
+    alternates:['https://momstouch.co.kr/m/promotion/list.php','https://www.momstouch.co.kr/promotion/list.php','https://order.momstouch.co.kr/momsmall/menu.jsp?menu_cd=001'],
+    detail:/^\/(?:m\/)?promotion\/view\.php\?[^#]*\bidx=\d+|^\/momsmall\/menu_detail\.jsp\?[^#]*\bitem_cd=[a-z\d]+/i},
   {brand:'프랭크버거', list:'https://www.frankburger.co.kr/board/index.php?board=event_01&tab=3&type=list', host:'frankburger.co.kr', detail:/\/board\/index\.php\?.*board=event_01.*(?:no=|idx=|seq=|id=)\d+/i},
   {brand:'노브랜드버거', list:'https://www.shinsegaefood.com/company/pr/news_list.sf', host:'shinsegaefood.com', alternates:['https://www.shinsegaefood.com/company/pr/news_list.sf?pagging=2'], detail:/\/(news|contents|pr|media|press|board)\b|\/\w+\.sf\?/i},
   {brand:'쉐이크쉑', list:'https://www.shakeshack.kr/', host:'shakeshack.kr', hosts:['smdnewsroom.co.kr'], alternates:['https://www.smdnewsroom.co.kr/?s='+encodeURIComponent('쉐이크쉑')], detail:/\/(news|event|promotion|notice)\b|\/(?:spc|쉐이크|%EC%89%90)/i},
@@ -43,7 +45,7 @@ const dateOf = str => {
   return stamp.getUTCFullYear()===y && stamp.getUTCMonth()===mo-1 && stamp.getUTCDate()===d ? stamp.toISOString().slice(0,10) : null;
 };
 const rangeOf = text => {
-  const m=String(text||'').match(/(20\d{2}[-./년]\s*\d{1,2}[-./월]\s*\d{1,2}(?:일)?)\s*(?:~|～|–|—|부터|\s-\s)\s*(20\d{2}[-./년]\s*\d{1,2}[-./월]\s*\d{1,2}(?:일)?)/);
+  const m=String(text||'').replace(/\([월화수목금토일]\)/g,'').match(/(20\d{2}[-./년]\s*\d{1,2}[-./월]\s*\d{1,2}(?:일)?)\s*(?:~|～|–|—|부터|\s-\s)\s*(20\d{2}[-./년]\s*\d{1,2}[-./월]\s*\d{1,2}(?:일)?)/);
   const start=m&&dateOf(m[1]), end=m&&dateOf(m[2]);
   if (!start||!end||start>end||Number(end.slice(0,4))>now.getUTCFullYear()+2)return null;
   return {eventStart:start,eventEnd:end};
@@ -135,6 +137,8 @@ const fetchHtml = async url => {
   return {html:page.text,url:page.url};
 };
 const links = (html, source) => {
+  if(source.brand==='맘스터치'&&new URL(source.list).hostname!=='order.momstouch.co.kr')
+    return momPromotionLinks(html,source.list).slice(0,55);
   const map = new Map();
   const add = (raw,hint='') => {
     const url=safeUrl(raw,source.list);
@@ -178,7 +182,7 @@ const renderOfficialListing=async url=>{
 // Fallback: find only brand-owned detail URLs indexed by Bing News RSS.
 // This cannot bypass access restrictions and never treats a search result as verified.
 const indexedOfficialLinks=async source=>{
-  const query=source.brand+' 감자튀김 포테이토 site:'+source.host;
+  const query=source.brand==='맘스터치'?'맘스터치 프로모션 site:momstouch.co.kr/promotion/view.php':source.brand+' 감자튀김 포테이토 site:'+source.host;
   const ctl=new AbortController(),tid=setTimeout(()=>ctl.abort(),8500);
   try{
     const r=await fetch('https://www.bing.com/news/search?q='+encodeURIComponent(query)+'&format=rss&setlang=ko',{signal:ctl.signal});
@@ -191,8 +195,9 @@ const indexedOfficialLinks=async source=>{
       const url=canonical(decode(match?.[1]||''),source.list);
       if(!url||!hostAllowed(url,source)||!source.detail.test(new URL(url).pathname+new URL(url).search))continue;
       const title=plain(item.match(/<title>([\s\S]*?)<\/title>/i)?.[1]);
-      if(!FRY.test(title))continue;
-      results.push({url,hint:title});
+      if(source.brand!=='맘스터치'&&!FRY.test(title))continue;
+      const normalized=source.brand==='맘스터치'?momPromotionUrl(url,source.list):url;
+      if(normalized)results.push({url:normalized,hint:title});
       if(results.length>=12)break;
     }
     return results;
@@ -219,32 +224,44 @@ await mapLimit(officialSources,3,async source=>{
   const oldStatus=health.sources?.find(x=>x.brand===source.brand);
   diag.lastReachableAt=oldStatus?.lastReachableAt||null;
   sourceHealth.push(diag);
+  if(source.brand==='맘스터치'){diag.promotionReachable=false;diag.orderMenuReachable=false;}
   for(const listUrl of [source.list,...(source.alternates||[])]){
     try{
       const listing=await fetchHtml(listUrl);
-      candidates=links(listing.html,{...source,list:listUrl});
+      if(source.brand==='맘스터치'&&!hostAllowed(listing.url,source))throw Error('unrelated listing redirect');
+      candidates=links(listing.html,{...source,list:listing.url});
+      if(source.brand==='맘스터치'){
+        const route=new URL(listing.url);
+        if(route.hostname==='order.momstouch.co.kr'&&route.pathname==='/momsmall/menu.jsp')diag.orderMenuReachable=true;
+        else if(/^\/(?:m\/)?promotion\/list\.php$/i.test(route.pathname))diag.promotionReachable=true;
+        else throw Error('promotion listing not returned');
+      }
       accessed=true;
       diag.reachable=true;
       diag.lastReachableAt=now.toISOString();
-      diag.collectionUrl=listUrl;
+      diag.collectionUrl=listing.url;
       if(candidates.length)break;
     }catch(e){diag.errors.push(String(e.message).slice(0,120));console.warn('[공식 수집 오류] '+source.brand+': '+e.message);}
   }
-  if(candidates.length===0){
+  if(candidates.length===0||(source.brand==='맘스터치'&&!candidates.some(x=>momPromotionUrl(x.url,source.list)))){
     try{
       const indexed=await indexedOfficialLinks(source);
-      if(indexed.length){candidates=indexed;diag.indexedFallback=true;}
+      if(indexed.length){candidates=source.brand==='맘스터치'?[...indexed,...candidates]:indexed;diag.indexedFallback=true;}
       diag.indexedCandidates=indexed.length;
     }catch(e){diag.errors.push('보조 검색: '+String(e.message).slice(0,100));}
   }
-  if(!candidates.length){
+  if(!candidates.length||(source.brand==='맘스터치'&&!candidates.some(x=>momPromotionUrl(x.url,source.list)))){
     try{
-      const renderUrl=diag.collectionUrl||source.list;
+      const renderUrl=source.brand==='맘스터치'?source.list:diag.collectionUrl||source.list;
       const rendered=await renderOfficialListing(renderUrl);
       const fromBrowser=links(rendered,{...source,list:renderUrl});
       if(fromBrowser.length){
-        candidates=fromBrowser;
+        candidates=source.brand==='맘스터치'?[...fromBrowser,...candidates]:fromBrowser;
         diag.browserFallback=true;
+        if(source.brand==='맘스터치'){
+          if(new URL(renderUrl).hostname==='order.momstouch.co.kr')diag.orderMenuReachable=true;
+          else diag.promotionReachable=true;
+        }
         diag.reachable=true;
         diag.lastReachableAt=now.toISOString();
         accessed=true;
@@ -258,12 +275,13 @@ await mapLimit(officialSources,3,async source=>{
   if(accessed)successes++;
   diag.candidates=candidates.length;
   console.log('[공식 목록] '+source.brand+': 상세 후보 '+candidates.length+'건');
-  for(const candidate of candidates.slice(0,18)){
+  for(const candidate of candidates.slice(0,source.brand==='맘스터치'?30:18)){
 
     checked++;diag.checked++;
     let page;
     try{page=await fetchHtml(candidate.url);}catch(e){diag.excluded.blockedDetail++;continue;}
     if(!hostAllowed(page.url,source))continue;
+    if(source.brand==='맘스터치'&&momPromotionUrl(page.url,source.list))diag.promotionDetailReachable=true;
     let title=titleOf(page.html,candidate.hint);
     if(source.brand==='롯데리아'){
       const t=plain(page.html).slice(0,13000);
@@ -288,7 +306,12 @@ await mapLimit(officialSources,3,async source=>{
     const matched=clean.indexOf(title);
     const around=matched>=0?clean.slice(Math.max(0,matched-240),matched+1200):clean.slice(0,3500);
     const dateRange=rangeOf(around)||rangeOf(clean.slice(0,3500))||rangeOf(candidate.hint);
-    const known=items.get(page.url)||items.get(candidate.url);
+    // The legacy order catalog also includes old, yearless sales text. Do not
+    // publish a regular menu or assume a year from that catalog.
+    if(source.brand==='맘스터치'&&new URL(page.url).hostname==='order.momstouch.co.kr'&&(!dateRange||!TOPIC.test(title))){diag.excluded.oldOrUnknownDate++;continue;}
+    const momId=source.brand==='맘스터치'&&momPromotionUrl(page.url,source.list)?new URL(page.url).searchParams.get('idx'):null;
+    const equivalent=momId?[...items.values()].find(post=>momPromotionUrl(post.url,source.list)&&new URL(post.url).searchParams.get('idx')===momId):null;
+    const known=items.get(page.url)||items.get(candidate.url)||equivalent;
     if(known)known.sourceTitle=title;
     const datePublished=meta(page.html,'article:published_time')||meta(page.html,'datePublished')||meta(page.html,'pubdate');
     const publishedTime=Date.parse(datePublished||'');
@@ -296,7 +319,7 @@ await mapLimit(officialSources,3,async source=>{
     if(dateRange&&endTime<now.getTime()){diag.excluded.ended++;if(source.brand==='롯데리아')console.log('[공식 제외] 행사 종료: '+title);continue;}
     if(!dateRange&&(!Number.isFinite(publishedTime)||publishedTime>now.getTime()||now.getTime()-publishedTime>MAX_PUBLISHED_AGE)){diag.excluded.oldOrUnknownDate++;if(source.brand==='롯데리아')console.log('[공식 제외] 날짜 확인 불가: '+title);continue;}
     const image=heroImage(page.html,page.url);
-    const current=items.get(page.url)||items.get(candidate.url);
+    const current=known;
     if(current){
       diag.excluded.duplicate++;
       if(image&&!current.imageUrl){current.imageUrl=image;pictures++;}
@@ -335,6 +358,6 @@ health.checkedAt=now.toISOString();
 health.sources=sourceHealth;
 health.rechecks=rechecks;
 if(successes>0||health.news?.feedsSucceeded>0)health.lastCompletedAt=new Date().toISOString();
-health.summary={sources:sourceHealth.length,reachable:sourceHealth.filter(x=>x.reachable).length,detailCandidates:sourceHealth.reduce((s,x)=>s+x.candidates,0),detailChecked:sourceHealth.reduce((s,x)=>s+x.checked,0),newOfficial:added,photoEnriched:pictures,stored:data.items.length,status:sourceHealth.every(x=>x.reachable&&x.candidates>0)?'ok':'partial'};
+health.summary={sources:sourceHealth.length,reachable:sourceHealth.filter(x=>x.reachable).length,detailCandidates:sourceHealth.reduce((s,x)=>s+x.candidates,0),detailChecked:sourceHealth.reduce((s,x)=>s+x.checked,0),newOfficial:added,photoEnriched:pictures,stored:data.items.length,status:sourceHealth.every(x=>x.reachable&&x.candidates>0&&(x.brand!=='맘스터치'||x.promotionReachable))?'ok':'partial'};
 await fs.writeFile(healthFile,JSON.stringify(health,null,2)+'\n');
 console.log('[공식 수집 결과] 목록 접근 '+successes+'/'+officialSources.length+', 상세 확인 '+checked+', 새 글 '+added+', 이미지 추출 '+pictures+', 전체 '+data.items.length);

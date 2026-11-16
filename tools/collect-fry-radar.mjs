@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import {fetchText,mapLimit} from './fry-radar-network.mjs';
-import {dedupe} from './fry-radar-common.mjs';
+import {dedupe,FRY as fry} from './fry-radar-common.mjs';
 
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
@@ -61,6 +61,109 @@ const queries = [
 
 const brands=['맥도날드','롯데리아','버거킹','맘스터치','프랭크버거','노브랜드버거','쉐이크쉑','파이브가이즈','다운타우너','바스버거','KFC','파파이스'];
 for(const brand of brands)queries.push(brand+' (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사',brand+' 감자튀김 종료 연장');
+// Additional tightly targeted terms; all are searched during each hourly collection.
+queries.push(
+  "감자튀김 특가",
+  "감자튀김 세일",
+  "감자튀김 1+1",
+  "감자튀김 2+1",
+  "감자튀김 쿠폰",
+  "감자튀김 무료 쿠폰",
+  "감자튀김 가격 인하",
+  "감자튀김 기간 한정 할인",
+  "감자튀김 배달 할인",
+  "감자튀김 포장 할인",
+  "감자튀김 멤버십 할인",
+  "감자튀김 앱 쿠폰",
+  "감자튀김 점심 할인",
+  "감자튀김 사이드 세트 할인",
+  "감자튀김 무료 세트업",
+  "감튀 사이즈업",
+  "감튀 리필 이벤트",
+  "감튀 무한리필",
+  "감자튀김 재출시",
+  "감자튀김 리뉴얼",
+  "감자튀김 신상",
+  "감자튀김 한정 메뉴",
+  "감자튀김 신제품 출시",
+  "감자튀김 냉동 신제품",
+  "냉동 감자튀김 출시",
+  "편의점 감자튀김 신제품",
+  "편의점 감자튀김 할인",
+  "마트 감자튀김 할인",
+  "프렌치프라이 신메뉴",
+  "후렌치 후라이 할인",
+  "후렌치 후라이 쿠폰",
+  "프렌치 후라이 행사",
+  "케이준 양념감자 할인",
+  "케이준 양념감자 쿠폰",
+  "케이준 감자튀김 신메뉴",
+  "웨지감자 신메뉴",
+  "웨지 프라이 출시",
+  "크링클컷 감자튀김 출시",
+  "크링클 프라이 행사",
+  "컬리 프라이 출시",
+  "와플 프라이 출시",
+  "슈스트링 감자튀김",
+  "치즈 감자튀김 신메뉴",
+  "칠리치즈 프라이 출시",
+  "트러플 감자튀김 신메뉴",
+  "트러플 프라이 할인",
+  "갈릭 감자튀김 신메뉴",
+  "허니버터 감자튀김 출시",
+  "고구마 프라이 신메뉴",
+  "감자튀김 토핑 신메뉴",
+  "감자튀김 소스 출시",
+  "감자튀김 양념가루 신제품",
+  "감자튀김 치즈소스",
+  "감자튀김 소스 콜라보",
+  "감자튀김 캐릭터 굿즈",
+  "감튀 키링",
+  "감자튀김 홀더 출시",
+  "감튀 홀더 재출시",
+  "감자튀김 한정판 굿즈",
+  "감자튀김 캐릭터 콜라보",
+  "감자튀김 패키지 콜라보",
+  "감자튀김 푸드 페스티벌",
+  "감자튀김 페스티벌",
+  "감자튀김 푸드트럭",
+  "감자튀김 푸드마켓",
+  "감자튀김 대회",
+  "감자튀김 축제 일정",
+  "감자튀김 팝업 서울",
+  "감자튀김 부산 맛집",
+  "감자튀김 제주 맛집",
+  "감자튀김 경기 맛집",
+  "감자튀김 전문점 신장개업",
+  "감자튀김 맛집 신규 매장",
+  "감자튀김 맛집 추천",
+  "감자튀김 판매량",
+  "감자튀김 소비 트렌드",
+  "감자튀김 인기 순위",
+  "감자튀김 신제품 트렌드",
+  "french fries Korea promotion",
+  "french fries Korea new menu",
+  "french fries Korea festival",
+  "맘스터치 케이준양념감자 할인",
+  "맘스터치 케이준 감자튀김 행사",
+  "맘스터치 무료 세트업 감자튀김",
+  "맘스터치 감튀 쿠폰",
+  "맘스터치 사이드 메뉴 감자튀김",
+  "맘스터치 감자튀김 신제품",
+  "맘스터치 케이준양념감자 콜라보",
+  "맘스터치 감튀 굿즈",
+  "맘스터치 포테이토 프로모션",
+  "맘스피자 감자튀김 행사",
+  "맥도날드 후렌치후라이 쿠폰",
+  "롯데리아 양념감자 신메뉴",
+  "버거킹 쉐이킹프라이 행사",
+  "KFC 감자튀김 할인",
+  "파파이스 케이준 프라이 할인",
+  "프랭크버거 감자튀김 행사",
+  "노브랜드버거 감자튀김 할인",
+  "쉐이크쉑 프라이 신메뉴",
+  "파이브가이즈 프라이 행사"
+);
 const scheduledQueries=[...new Set(queries)];
 console.log('[RSS 일정] 매시간 전체 '+scheduledQueries.length+'개 검색어 검사');
 
@@ -69,8 +172,7 @@ const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/
   return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[named.toLowerCase()] || `&${named};`;
 }).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const field = (xml, tag) => decode(xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'))?.[1]);
-const fry = /감자\s*튀김|감튀|케이준\s*(?:후라이|프라이)|크링클\s*(?:컷)?\s*프라이|프렌치\s*프라이|후렌치\s*후라이(?:즈)?|양념\s*감자|포테이토|치즈\s*프라이|트러플\s*프라이|웨지\s*감자|french\s*fr(?:y|ies)/i;
-const news = /할인|이벤트|행사|축제|신제품|신메뉴|신상|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시|굿즈|홀더|키링|콜라보|협업|컬래버|디핑|소스|시즈닝|맛집|전문점|팝업|오픈|개점|트렌드|문화|유행|인기|화제|소비|조사|통계|선호|순위/i;
+const news = /세트업|사이즈업|리필|페스티벌|푸드트럭|리뉴얼|세일|할인|이벤트|행사|축제|신제품|신메뉴|신상|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시|굿즈|홀더|키링|콜라보|협업|컬래버|디핑|소스|시즈닝|맛집|전문점|팝업|오픈|개점|트렌드|문화|유행|인기|화제|소비|조사|통계|선호|순위/i;
 const exclude = /주가|증시|환율|부동산|정치|대통령|코인|투자|레시피|먹방|칼로리|건강|만드는 법|요리법/i;
 // 해외 기사 자체는 제외하되 해외 브랜드의 국내 출시 소식은 허용합니다.
 const overseasOnly = (title, url = '') => {
@@ -90,11 +192,11 @@ const overseasOnly = (title, url = '') => {
 const category = (title, description = '') => {
   const rules = [
     ['festival', /축제|페스티벌/],
-    ['discount', /할인|쿠폰|특가|가격\s*인하|무료\s*증정/],
+    ['discount', /세일|세트업|사이즈업|할인|쿠폰|특가|가격\s*인하|무료\s*증정/],
     ['goods', /굿즈|감튀\s*홀더|감자튀김\s*홀더|키링|한정판\s*(?:패키지|굿즈)|콜라보|협업|컬래버|기획\s*상품/],
     ['sauce', /디핑|소스|시즈닝|맛가루|양념\s*가루|트러플\s*마요/],
     ['place', /맛집|전문점|팝업|푸드트럭|매장\s*(?:오픈|개점)|(?:오픈|개점)한\s*(?:매장|가게)/],
-    ['new-product', /신메뉴|신제품|신상|신규\s*메뉴|출시|재출시|선보/],
+    ['new-product', /리뉴얼|신메뉴|신제품|신상|신규\s*메뉴|출시|재출시|선보/],
     ['trend', /트렌드|문화|유행|인기|화제|소비|통계|조사|선호|순위|판매량/],
     ['event', /이벤트|행사|프로모션|한정|증정|혜택/]
   ];
@@ -115,7 +217,7 @@ const canonical = raw => {
   } catch { return null; }
 };
 const getFeed = async query => {
-  const {text:xml}=await fetchText(`https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss&setlang=ko`);
+  const {text:xml}=await fetchText(`https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss&setlang=ko`,{timeout:8000,attempts:2});
   if(!/<rss\b/i.test(xml))throw Error('RSS 형식이 아닌 응답입니다.');
   return xml;
 };
@@ -162,7 +264,7 @@ let feedsSucceeded = 0;
 let added = 0;
 let failedFeeds=0, newsCandidates=0;
 const feedFailures=[];
-const feeds=await mapLimit(scheduledQueries,2,async query=>{
+const feeds=await mapLimit(scheduledQueries,3,async query=>{
   try{return {query,xml:await getFeed(query)};}catch(error){return {query,error};}
 });
 const attemptedUrls=new Set();
@@ -210,23 +312,44 @@ const googleQueries = [
   '감자튀김 시즈닝',
   '감자튀김 맛집 팝업',
   '감자튀김 전문점 오픈',
-  '감자튀김 트렌드'
+  '감자튀김 트렌드',
+  "감자튀김 쿠폰",
+  "감자튀김 무료 세트업",
+  "감자튀김 재출시",
+  "후렌치후라이 할인",
+  "케이준양념감자 행사",
+  "감자튀김 페스티벌",
+  "감자튀김 푸드트럭",
+  "감자튀김 편의점 신제품",
+  "냉동 감자튀김 출시",
+  "감자튀김 캐릭터 굿즈",
+  "감자튀김 홀더",
+  "감자튀김 한정 메뉴",
+  "맘스터치 감자튀김 할인",
+  "맘스터치 케이준양념감자",
+  "맘스터치 무료 세트업 행사"
 ];
 
-for (const query of googleQueries) {
+const googleFeeds=await mapLimit(googleQueries,2,async query=>{
   try {
     const endpoint = new URL('https://news.google.com/rss/search');
     endpoint.searchParams.set('q', query);
     endpoint.searchParams.set('hl', 'ko');
     endpoint.searchParams.set('gl', 'KR');
     endpoint.searchParams.set('ceid', 'KR:ko');
-
-    const {text:xml}=await fetchText(endpoint,{attempts:2});
+    const {text:xml}=await fetchText(endpoint,{timeout:8000,attempts:2});
     if (!/<rss\b/i.test(xml)) throw Error('RSS 형식 오류');
-
+    return {query,xml};
+  }catch(error){return {query,error};}
+});
+let googleCandidates=0;
+for (const {query,xml,error} of googleFeeds) {
+  try {
+    if(error)throw error;
     feedsSucceeded++;
 
     const matches = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)];
+    googleCandidates+=matches.length;
     console.log(`[Google 뉴스] ${query}: ${matches.length}건 발견`);
 
     let checked = 0;
@@ -301,7 +424,7 @@ let health={};
 try{health=JSON.parse(await fs.readFile(healthFile,'utf8'));}catch{}
 health.checkedAt=now.toISOString();
 health.schedule='Hourly at :17 KST; stale-run recovery at :47; GitHub scheduling may be delayed';
-health.news={feedsSucceeded,failedFeeds,newsCandidates,newVerified:added,availableQueries:queries.length,attemptedBingQueries:scheduledQueries.length,rotatingOverHours:1,attemptedQueries:scheduledQueries,failures:feedFailures.slice(0,25),note:'Google News RSS publisher redirects are not assumed to be canonical article URLs. All Bing terms are attempted each hour with bounded concurrency and transient-error retries.'};
+health.news={feedsSucceeded,failedFeeds,newsCandidates,googleCandidates,newVerified:added,availableQueries:scheduledQueries.length,attemptedBingQueries:scheduledQueries.length,attemptedGoogleQueries:googleQueries.length,rotatingOverHours:1,attemptedQueries:scheduledQueries,googleQueries,failures:feedFailures.slice(0,25),note:'Google News RSS publisher redirects are not assumed to be canonical article URLs. All Bing terms are attempted each hour with bounded concurrency and transient-error retries.'};
 await fs.writeFile(healthFile,JSON.stringify(health,null,2)+'\n');
 console.log(`Feeds: ${feedsSucceeded}; new verified items: ${added}; total: ${items.length}`);
 
