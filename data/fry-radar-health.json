@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-11-16T00:36:59.826Z",
+  "checkedAt": "2026-11-16T00:39:22.161Z",
   "schedule": "Hourly at :17 KST; stale-run recovery at :47; GitHub scheduling may be delayed",
   "news": {
     "feedsSucceeded": 78,
     "failedFeeds": 0,
-    "newsCandidates": 255,
+    "newsCandidates": 257,
     "newVerified": 0,
     "availableQueries": 68,
     "attemptedBingQueries": 68,
@@ -99,7 +99,7 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://www.lotteeatz.com/event/main/",
       "fallbackQueries": [
         "롯데리아 포테이토",
@@ -127,7 +127,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404",
       "indexedCandidates": 0,
       "browserFallback": true,
@@ -161,7 +161,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://pf.kakao.com/_xcBxnxah",
       "indexedCandidates": 0,
       "browserCandidates": 0,
@@ -218,7 +218,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://www.frankburger.co.kr/board/index.php?board=event_01&tab=3&type=list",
       "fallbackQueries": [
         "프랭크버거 감자튀김",
@@ -231,20 +231,25 @@
       "brand": "노브랜드버거",
       "url": "https://www.shinsegaefood.com/company/pr/news_list.sf",
       "reachable": true,
-      "candidates": 4,
-      "checked": 4,
+      "candidates": 13,
+      "checked": 13,
       "added": 0,
       "relevant": 0,
-      "errors": [],
+      "errors": [
+        "fetch failed",
+        "fetch failed"
+      ],
       "excluded": {
-        "unrelated": 4,
+        "unrelated": 0,
         "oldOrUnknownDate": 0,
         "ended": 0,
-        "blockedDetail": 0,
+        "blockedDetail": 13,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
-      "collectionUrl": "https://www.shinsegaefood.com/company/pr/news_list.sf",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
+      "indexedCandidates": 0,
+      "browserFallback": true,
+      "browserCandidates": 13,
       "fallbackQueries": [
         "노브랜드버거 감자튀김",
         "노브랜드버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
@@ -270,7 +275,7 @@
         "blockedDetail": 10,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://www.smdnewsroom.co.kr/?s=%EC%89%90%EC%9D%B4%ED%81%AC%EC%89%91",
       "fallbackQueries": [
         "쉐이크쉑 감자튀김",
@@ -295,7 +300,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://www.fiveguys.co.kr/모든-소식-보기/",
       "fallbackQueries": [
         "파이브가이즈 감자튀김",
@@ -320,7 +325,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://pf.kakao.com/_feexixj",
       "indexedCandidates": 0,
       "browserCandidates": 0,
@@ -347,7 +352,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://pf.kakao.com/_AXkns",
       "indexedCandidates": 0,
       "browserCandidates": 0,
@@ -374,7 +379,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://www.kfckorea.com/promotion/promotionList/A801",
       "fallbackQueries": [
         "KFC 프라이 신메뉴",
@@ -401,7 +406,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:36:59.826Z",
+      "lastReachableAt": "2026-11-16T00:39:22.161Z",
       "collectionUrl": "https://popeyes.co.kr/event",
       "fallbackQueries": [
         "파파이스 케이준후라이",
@@ -414,8 +419,8 @@
   "summary": {
     "sources": 12,
     "reachable": 11,
-    "detailCandidates": 82,
-    "detailChecked": 74,
+    "detailCandidates": 91,
+    "detailChecked": 83,
     "newOfficial": 0,
     "photoEnriched": 0,
     "stored": 6,
@@ -424,8 +429,8 @@
   "rechecks": {
     "checked": 6,
     "changed": 0,
-    "unavailable": 1,
+    "unavailable": 0,
     "unconfirmed": 3
   },
-  "lastCompletedAt": "2026-11-16T00:38:56.669Z"
+  "lastCompletedAt": "2026-11-16T00:41:03.399Z"
 }
