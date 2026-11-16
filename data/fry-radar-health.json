@@ -1,10 +1,10 @@
 {
-  "checkedAt": "2026-11-16T00:34:48.371Z",
+  "checkedAt": "2026-11-16T00:36:59.826Z",
   "schedule": "Hourly at :17 KST; stale-run recovery at :47; GitHub scheduling may be delayed",
   "news": {
     "feedsSucceeded": 78,
     "failedFeeds": 0,
-    "newsCandidates": 281,
+    "newsCandidates": 255,
     "newVerified": 0,
     "availableQueries": 68,
     "attemptedBingQueries": 68,
@@ -99,7 +99,7 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://www.lotteeatz.com/event/main/",
       "fallbackQueries": [
         "롯데리아 포테이토",
@@ -127,7 +127,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404",
       "indexedCandidates": 0,
       "browserFallback": true,
@@ -161,7 +161,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://pf.kakao.com/_xcBxnxah",
       "indexedCandidates": 0,
       "browserCandidates": 0,
@@ -218,7 +218,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://www.frankburger.co.kr/board/index.php?board=event_01&tab=3&type=list",
       "fallbackQueries": [
         "프랭크버거 감자튀김",
@@ -243,7 +243,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://www.shinsegaefood.com/company/pr/news_list.sf",
       "fallbackQueries": [
         "노브랜드버거 감자튀김",
@@ -270,7 +270,7 @@
         "blockedDetail": 10,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://www.smdnewsroom.co.kr/?s=%EC%89%90%EC%9D%B4%ED%81%AC%EC%89%91",
       "fallbackQueries": [
         "쉐이크쉑 감자튀김",
@@ -295,7 +295,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://www.fiveguys.co.kr/모든-소식-보기/",
       "fallbackQueries": [
         "파이브가이즈 감자튀김",
@@ -320,7 +320,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://pf.kakao.com/_feexixj",
       "indexedCandidates": 0,
       "browserCandidates": 0,
@@ -347,7 +347,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://pf.kakao.com/_AXkns",
       "indexedCandidates": 0,
       "browserCandidates": 0,
@@ -374,7 +374,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://www.kfckorea.com/promotion/promotionList/A801",
       "fallbackQueries": [
         "KFC 프라이 신메뉴",
@@ -401,7 +401,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "lastReachableAt": "2026-11-16T00:36:59.826Z",
       "collectionUrl": "https://popeyes.co.kr/event",
       "fallbackQueries": [
         "파파이스 케이준후라이",
@@ -424,8 +424,8 @@
   "rechecks": {
     "checked": 6,
     "changed": 0,
-    "unavailable": 0,
-    "unconfirmed": 4
+    "unavailable": 1,
+    "unconfirmed": 3
   },
-  "lastCompletedAt": "2026-11-16T00:36:29.190Z"
+  "lastCompletedAt": "2026-11-16T00:38:56.669Z"
 }
