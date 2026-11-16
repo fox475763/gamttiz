@@ -40,6 +40,7 @@
     return Date.parse(value||'');
   };
   const statusOf=item=>{
+    if(item.eventStatus==='ended-early')return 'ended';
     const now=Date.now();
     // Evergreen menu info is not a newly published article or an open-ended promotion.
     // Display it as verified only for 7 days after a successful source check.
@@ -249,6 +250,7 @@
     window.requestAnimationFrame(()=>{previewNav();startPreviewTimer();});
   };
 
+  let initialAnchor=true;
   const render=()=>{
     const term=(search?.value||'').trim().toLocaleLowerCase();
     const group=category?.value||'all';
@@ -274,35 +276,63 @@
       if(archiveCount)archiveCount.textContent=`${past.length}개의 지난 소식`;
     }
     if(preview)renderPreview();
-    if(list&&location.hash){
+    if(initialAnchor&&list&&location.hash){
       let hash;
       try{hash=decodeURIComponent(location.hash.slice(1));}
       catch{hash=location.hash.slice(1);}
       if(hash&&document.getElementById(hash))requestAnimationFrame(()=>document.getElementById(hash)?.scrollIntoView({block:'center'}));
     }
+    initialAnchor=false;
   };
   [search,category,sort].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
-  // Source transparency: distinguish no qualifying posts from pages we could not inspect.
   const healthView=document.getElementById('radar-health');
-  if(healthView){
-    fetch('data/fry-radar-health.json',{cache:'no-store'})
-      .then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();})
-      .then(report=>{
-        const at=report.checkedAt?new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(report.checkedAt)):'시간 미확인';
-        healthView.textContent='최근 검사 '+at;
-      })
-      .catch(()=>{healthView.textContent='검사 시간 확인 불가';});
-  }
-  fetch('data/fry-radar.json',{cache:'no-store'})
-    .then(response=>{if(!response.ok)throw Error(`HTTP ${response.status}`);return response.json();})
-    .then(data=>{
-      items=Array.isArray(data.items)?data.items.filter(item=>item&&item.id&&item.title&&validUrl(item.url)):[];
-      if(updated)updated.textContent=data.updatedAt?`마지막 수집: ${dateLabel(data.updatedAt)}`:'아직 수집된 소식이 없습니다.';
-      render();
-    }).catch(()=>{
-      if(updated)updated.textContent='소식을 불러오지 못했어요. 잠시 후 다시 확인해 주세요.';
-      if(list){list.replaceChildren();empty(list,'소식을 불러오지 못했어요.','잠시 후 새로고침해 주세요.');}
-      if(archive){archive.replaceChildren();empty(archive,'지난 소식을 불러오지 못했어요.','잠시 후 새로고침해 주세요.');}
-      if(preview){preview.replaceChildren();empty(preview,'소식을 불러오지 못했어요.','잠시 후 다시 확인해 주세요.');}
-    });
+  let refreshing=false,loaded=false,lastSignature='';
+  const readJSON=async file=>{
+    const response=await fetch(file+'?v='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(15000)});
+    if(!response.ok)throw Error('HTTP '+response.status);
+    return response.json();
+  };
+  const refresh=async()=>{
+    if(refreshing||document.hidden)return;
+    refreshing=true;
+    try{
+      const [dataResult,healthResult]=await Promise.allSettled([
+        readJSON('data/fry-radar.json'),readJSON('data/fry-radar-health.json')
+      ]);
+      if(healthView&&healthResult.status==='fulfilled'){
+        const at=new Date(healthResult.value.checkedAt);
+        if(Number.isFinite(at.getTime()))healthView.textContent='최근 검사 '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(at);
+      }
+      if(dataResult.status!=='fulfilled')throw Error('data unavailable');
+      const data=dataResult.value;
+      if(!Array.isArray(data.items))throw Error('invalid data');
+      const fresh=data.items.filter(item=>item&&item.id&&item.title&&validUrl(item.url));
+      // Ignore audit timestamps so hourly checks do not reset the carousel.
+      const signature=JSON.stringify(fresh.map(({lastCheckedAt,recheckStatus,eventChanges,...item})=>({...item,displayState:statusOf(item)})));
+      if(signature!==lastSignature){
+        const focused=document.activeElement?.closest('[id]')?.id;
+        const scrollY=window.scrollY;
+        items=fresh;render();
+        if(loaded){
+          if(focused)document.getElementById(focused)?.focus({preventScroll:true});
+          window.scrollTo({top:scrollY,behavior:'instant'});
+        }
+        lastSignature=signature;
+      }
+      loaded=true;
+      if(updated)updated.textContent=data.updatedAt?'마지막 수집: '+dateLabel(data.updatedAt):'아직 수집된 소식이 없습니다.';
+    }catch{
+      // A temporary failure must not erase posts already on screen.
+      if(!loaded){
+        if(updated)updated.textContent='연결을 다시 확인하고 있어요.';
+        for(const target of [list,archive,preview])if(target){target.replaceChildren();empty(target,'소식을 불러오는 중이에요.','잠시 후 자동으로 다시 확인합니다.');}
+      }
+    }finally{refreshing=false;}
+  };
+  window.setInterval(refresh,60000);
+  window.addEventListener('focus',refresh);
+  window.addEventListener('online',refresh);
+  window.addEventListener('pageshow',refresh);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+  refresh();
 })();

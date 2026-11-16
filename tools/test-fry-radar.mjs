@@ -1,9 +1,48 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {canonical,cleanText,normalizeTitle,koreanRelated,classify,related,dateOnly,dateRange,eventEndTime,isCurrent,dedupe,evenKoreaHour} from './fry-radar-common.mjs';
-test('KST even-hour schedule maps to odd UTC hours',()=>{
-  for(let h=0;h<24;h++)assert.equal(evenKoreaHour(h),h%2===1);
+import {fetchText,mapLimit} from './fry-radar-network.mjs';
+import {eventEvidence,reconcileEvent} from './fry-radar-recheck.mjs';
+import {collectionDue} from './fry-radar-schedule.mjs';
+
+test('hourly runs always execute; recovery only runs when stale',()=>{
+  const now=Date.parse('2026-11-16T10:47:00Z');
+  assert.equal(collectionDue('17 * * * *','2026-11-16T10:30:00Z',now),true);
+  assert.equal(collectionDue('47 * * * *','2026-11-16T10:20:00Z',now),false);
+  assert.equal(collectionDue('47 * * * *','2026-11-16T09:20:00Z',now),true);
+  assert.equal(collectionDue('47 * * * *',null,now),true);
 });
+test('retry throttling and network failures, never retry a permanent 404',async()=>{
+  let calls=0;const delays=[];
+  const result=await fetchText('https://example.com',{wait:async n=>delays.push(n),fetcher:async()=>{
+    calls++;if(calls===1)throw Error('network');
+    return calls===2?new Response('',{status:429,headers:{'retry-after':'1'}}):new Response('ok');
+  }});
+  assert.equal(result.text,'ok');assert.equal(calls,3);assert.equal(delays.length,2);
+  calls=0;
+  await assert.rejects(fetchText('https://example.com',{wait:async()=>{},fetcher:async()=>{calls++;return new Response('',{status:404});}}),/404/);
+  assert.equal(calls,1);
+});
+test('bounded work preserves input order',async()=>{
+  let active=0,max=0;
+  assert.deepEqual(await mapLimit([1,2,3,4],2,async n=>{active++;max=Math.max(max,active);await new Promise(r=>setTimeout(r,5));active--;return n*2;}),[2,4,6,8]);
+  assert.equal(max,2);
+});
+test('date revisions preserve ID and history; ambiguous pages do not overwrite',()=>{
+  const item={id:'stable',title:'롯데리아 리아스낵타임 할인',url:'https://example.com/event/1',eventEnd:'2026-11-30'};
+  const evidence=eventEvidence('<main>롯데리아 리아스낵타임 할인 2026.11.01 ~ 2026.12.05 조기 종료될 수 있습니다.</main>');
+  assert.equal(reconcileEvent(item,evidence,'2026-11-16T00:00:00Z'),true);
+  assert.equal(item.id,'stable');assert.equal(item.eventEnd,'2026-12-05');assert.equal(item.eventStatus,undefined);
+  assert.equal(item.eventChanges.length,1);
+  const unrelated=eventEvidence('<main>다른 브랜드 이벤트 2026.11.01 ~ 2026.11.20 본 행사는 조기 종료되었습니다.</main>');
+  assert.equal(reconcileEvent(item,unrelated,'2026-11-16T01:00:00Z'),false);
+  assert.equal(item.eventEnd,'2026-12-05');
+  const ended=eventEvidence('<main>롯데리아 리아스낵타임 할인 본 행사는 조기 종료되었습니다.</main>');
+  assert.equal(reconcileEvent(item,ended,'2026-11-16T02:00:00Z'),true);
+  assert.equal(item.eventStatus,'ended-early');
+  assert.equal(eventEvidence('<div>일시적인 접속 오류</div>'),null);
+  assert.equal(eventEvidence('<main>2026.11.01 ~ 2026.11.10 및 2026.11.20 ~ 2026.11.30</main>').range,null);
+});
+import {canonical,cleanText,normalizeTitle,koreanRelated,classify,related,dateOnly,dateRange,eventEndTime,isCurrent,dedupe} from './fry-radar-common.mjs';
 test('canonical URL removes tracking and rejects Google News intermediates',()=>{
   assert.equal(canonical('https://example.kr/post?utm_source=foo&id=12#anchor'),'https://example.kr/post?id=12');
   assert.equal(canonical('https://news.google.com/rss/articles/abc'),null);

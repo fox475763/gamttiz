@@ -7,6 +7,9 @@ on:
       - 'tools/collect-fry-radar.mjs'
       - 'tools/collect-official-fry-radar.mjs'
       - 'tools/fry-radar-common.mjs'
+      - 'tools/fry-radar-network.mjs'
+      - 'tools/fry-radar-recheck.mjs'
+      - 'tools/fry-radar-schedule.mjs'
       - 'tools/test-fry-radar.mjs'
       - 'tools/test-fry-delete.mjs'
       - 'tools/fry-delete-common.mjs'
@@ -14,9 +17,9 @@ on:
       - 'data/fry-radar.json'
       - '.github/workflows/fry-radar.yml'
   schedule:
-    # Every even Korean hour: 00, 02, 04, ... 22 KST = odd UTC hours.
-    # GitHub Actions may delay queued runs, including those scheduled on :00.
-    - cron: '0 1-23/2 * * *'
+    # Avoid the busy top of the hour. :47 only recovers stale/failed runs.
+    - cron: '17 * * * *'
+    - cron: '47 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -30,7 +33,7 @@ concurrency:
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,19 +42,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Skip recovery when a recent collection completed
+        id: due
+        env:
+          RADAR_SCHEDULE: ${{ github.event.schedule }}
+        run: node tools/fry-radar-schedule.mjs >> "$GITHUB_OUTPUT"
       - name: Test Fry Radar parsing and date rules
+        if: steps.due.outputs.run == 'true'
         run: node --test tools/test-fry-radar.mjs
       - name: Test deletion authorization
+        if: steps.due.outputs.run == 'true'
         run: node --test tools/test-fry-delete.mjs
       - name: Collect verified fry news
-        run: node tools/collect-fry-radar.mjs
+        if: steps.due.outputs.run == 'true'
+        run: |
+          node tools/collect-fry-radar.mjs || { sleep 5; node tools/collect-fry-radar.mjs; }
       - name: Collect official brand promotions and preview images
-        run: node tools/collect-official-fry-radar.mjs
+        if: steps.due.outputs.run == 'true'
+        run: |
+          node tools/collect-official-fry-radar.mjs || { sleep 5; node tools/collect-official-fry-radar.mjs; }
       - name: Refresh authenticated deletion choices
+        if: steps.due.outputs.run == 'true'
         run: node tools/sync-fry-delete-template.mjs
       - name: Check site
+        if: steps.due.outputs.run == 'true'
         run: node tools/check-site.mjs
       - name: Publish updated data
+        if: steps.due.outputs.run == 'true'
         id: publish
         shell: bash
         run: |
@@ -95,3 +112,10 @@ jobs:
           echo "ERROR: Could not request GitHub Pages rebuild."
           exit 1
 
+      - name: Preserve collection diagnostics
+        if: always() && steps.due.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: fry-radar-diagnostics-${{ github.run_id }}
+          path: data/fry-radar-health.json
+          retention-days: 14

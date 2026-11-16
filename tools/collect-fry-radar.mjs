@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
+import {fetchText,mapLimit} from './fry-radar-network.mjs';
 import {dedupe} from './fry-radar-common.mjs';
 
 const output = new URL('../data/fry-radar.json', import.meta.url);
@@ -58,34 +59,17 @@ const queries = [
   '파파이스 케이준후라이',
 ];
 
-// Bing can return an anti-bot HTML page instead of RSS after many rapid queries.
-// Keep an eight-topic core on every two-hour run and rotate the remaining topics.
-// Every rotating term is attempted within three runs (six hours).
-const coreQueries=[
-  '감자튀김 할인',
-  '감자튀김 이벤트',
-  '감자튀김 신메뉴',
-  '감자튀김 굿즈',
-  '감자튀김 디핑소스',
-  '감자튀김 맛집',
-  '감자튀김 트렌드',
-  '감자튀김 축제'
-];
-const rotatingQueries=queries.filter(q=>!coreQueries.includes(q));
-const runSlot=Math.floor(now.getTime()/(2*60*60*1000));
-const rotationCount=Math.min(12,rotatingQueries.length);
-const scheduledQueries=[
-  ...coreQueries,
-  ...Array.from({length:rotationCount},(_,i)=>rotatingQueries[(runSlot*rotationCount+i)%rotatingQueries.length])
-];
-console.log('[RSS 일정] 총 '+queries.length+'개 검색어 중 이번 실행 '+scheduledQueries.length+'개 (핵심 '+coreQueries.length+', 순환 '+rotationCount+')');
+const brands=['맥도날드','롯데리아','버거킹','맘스터치','프랭크버거','노브랜드버거','쉐이크쉑','파이브가이즈','다운타우너','바스버거','KFC','파파이스'];
+for(const brand of brands)queries.push(brand+' (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사',brand+' 감자튀김 종료 연장');
+const scheduledQueries=[...new Set(queries)];
+console.log('[RSS 일정] 매시간 전체 '+scheduledQueries.length+'개 검색어 검사');
 
 const decode = value => String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&#(x[\da-f]+|\d+);|&([a-z]+);/gi, (_, numeric, named) => {
   if (numeric) return String.fromCodePoint(parseInt(numeric.replace(/^x/i, ''), numeric.startsWith('x') ? 16 : 10));
   return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[named.toLowerCase()] || `&${named};`;
 }).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 const field = (xml, tag) => decode(xml.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'))?.[1]);
-const fry = /감자\s*튀김|감튀|프렌치\s*프라이|후렌치\s*후라이(?:즈)?|양념\s*감자|포테이토|치즈\s*프라이|트러플\s*프라이|웨지\s*감자|french\s*fr(?:y|ies)/i;
+const fry = /감자\s*튀김|감튀|케이준\s*(?:후라이|프라이)|크링클\s*(?:컷)?\s*프라이|프렌치\s*프라이|후렌치\s*후라이(?:즈)?|양념\s*감자|포테이토|치즈\s*프라이|트러플\s*프라이|웨지\s*감자|french\s*fr(?:y|ies)/i;
 const news = /할인|이벤트|행사|축제|신제품|신메뉴|신상|출시|증정|무료|프로모션|한정|쿠폰|특가|혜택|판매|선보|재출시|굿즈|홀더|키링|콜라보|협업|컬래버|디핑|소스|시즈닝|맛집|전문점|팝업|오픈|개점|트렌드|문화|유행|인기|화제|소비|조사|통계|선호|순위/i;
 const exclude = /주가|증시|환율|부동산|정치|대통령|코인|투자|레시피|먹방|칼로리|건강|만드는 법|요리법/i;
 // 해외 기사 자체는 제외하되 해외 브랜드의 국내 출시 소식은 허용합니다.
@@ -131,31 +115,19 @@ const canonical = raw => {
   } catch { return null; }
 };
 const getFeed = async query => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 12000);
-  try {
-    const response = await fetch(`https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss&setlang=ko`, {signal:controller.signal, headers:{'user-agent':'GAMTTIZ-Fry-Radar/1.0 (+https://fox475763.github.io/gamttiz/)'}});
-    if (!response.ok) throw Error(`RSS ${response.status}`);
-    const xml = await response.text();
-    if (!/<rss\b/i.test(xml)) {
-      throw new Error('RSS 형식이 아닌 응답입니다.');
-    }
-    return xml;
-
-  } finally { clearTimeout(timeout); }
+  const {text:xml}=await fetchText(`https://www.bing.com/news/search?q=${encodeURIComponent(query)}&format=rss&setlang=ko`);
+  if(!/<rss\b/i.test(xml))throw Error('RSS 형식이 아닌 응답입니다.');
+  return xml;
 };
 // Read the actual publisher page while verifying: never infer an image from a search result.
 const verify = async url => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 9000);
   try {
-    const response = await fetch(url, {method:'GET', signal:controller.signal, redirect:'follow', headers:{'user-agent':'Mozilla/5.0'}});
-    if (!response.ok) return null;
-    const type = response.headers.get('content-type') || '';
-    if (/application\/pdf/i.test(type)) return {imageUrl:null};
-    if (!/text\/html|application\/xhtml/i.test(type)) return null;
-    if (Number(response.headers.get('content-length')||0)>2500000) return {imageUrl:null};
-    const html = (await response.text()).slice(0,2500000);
+    const page=await fetchText(url,{timeout:9000,attempts:2});
+    if(!canonical(page.url))return null;
+    const response={url:page.url};
+    if(/application\/pdf/i.test(page.type))return {imageUrl:null,url:page.url};
+    if(!/text\/html|application\/xhtml/i.test(page.type))return null;
+    const html=page.text;
     const images=[];
     for(const tag of html.match(/<meta\s+[^>]*>/gi)||[]){
       const key=tag.match(/(?:property|name)\s*=\s*["']([^"']+)["']/i)?.[1]?.toLowerCase();
@@ -172,9 +144,9 @@ const verify = async url => {
         }
       }catch{}
     }
-    return {imageUrl};
+    return {imageUrl,url:canonical(page.url)};
   } catch { return null; }
-  finally { clearTimeout(timeout); }
+
 };
 
 let suppressed={items:[]};
@@ -190,9 +162,13 @@ let feedsSucceeded = 0;
 let added = 0;
 let failedFeeds=0, newsCandidates=0;
 const feedFailures=[];
-for (const query of scheduledQueries) {
-  let xml;
-  try { xml = await getFeed(query); feedsSucceeded++; } catch (error) { failedFeeds++;feedFailures.push({query,reason:error.message}); console.warn(`${query}: ${error.message}`); continue; }
+const feeds=await mapLimit(scheduledQueries,2,async query=>{
+  try{return {query,xml:await getFeed(query)};}catch(error){return {query,error};}
+});
+const attemptedUrls=new Set();
+for (const {query,xml,error} of feeds) {
+  if(error){failedFeeds++;feedFailures.push({query,reason:error.message});continue;}
+  feedsSucceeded++;
   newsCandidates += (xml.match(/<item\b/gi) || []).length;
   console.log(`[RSS 검색] ${query}: ${(xml.match(/<item\b/gi) || []).length}건 발견`);
   for (const match of xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)) {
@@ -206,7 +182,8 @@ for (const query of scheduledQueries) {
     if (!url || !fry.test(searchText) || !news.test(searchText) || exclude.test(title) || overseasOnly(title,url) || !Number.isFinite(published.getTime())) continue;
     if (published > now || now - published > 14 * 86400000) continue;
     if (!/[가-힣]/.test(title) || /\.jp$|\.cn$|\.tw$/.test(new URL(url).hostname)) continue;
-    if (found.has(url)||blockedUrls.has(url)) continue;
+    if (found.has(url)||blockedUrls.has(url)||attemptedUrls.has(url)) continue;
+    attemptedUrls.add(url);
     console.log(`[검증 시도] ${title}`);
 
     const verifiedPage = await verify(url);
@@ -244,13 +221,7 @@ for (const query of googleQueries) {
     endpoint.searchParams.set('gl', 'KR');
     endpoint.searchParams.set('ceid', 'KR:ko');
 
-    const response = await fetch(endpoint, {
-      signal: AbortSignal.timeout(12000)
-    });
-
-    if (!response.ok) throw Error(`HTTP ${response.status}`);
-
-    const xml = await response.text();
+    const {text:xml}=await fetchText(endpoint,{attempts:2});
     if (!/<rss\b/i.test(xml)) throw Error('RSS 형식 오류');
 
     feedsSucceeded++;
@@ -289,7 +260,9 @@ for (const query of googleQueries) {
 
       if (++checked > 6) break;
       const verifiedPage = await verify(url);
-      if (!verifiedPage) continue;
+      if (!verifiedPage?.url) continue;
+      url=verifiedPage.url;
+      if(found.has(url)||blockedUrls.has(url)||overseasOnly(title,url))continue;
 
       const id = crypto.createHash('sha256')
         .update(url).digest('hex').slice(0, 12);
@@ -314,6 +287,7 @@ for (const query of googleQueries) {
 
     console.log(`[Google 뉴스 저장] ${query}: ${saved}건`);
   } catch (error) {
+    failedFeeds++;feedFailures.push({query,provider:'Google',reason:error.message});
     console.warn(`[Google 뉴스 오류] ${query}: ${error.message}`);
   }
 }
@@ -326,8 +300,8 @@ const healthFile = new URL('../data/fry-radar-health.json', import.meta.url);
 let health={};
 try{health=JSON.parse(await fs.readFile(healthFile,'utf8'));}catch{}
 health.checkedAt=now.toISOString();
-health.schedule='KST every 2 hours (00,02,...,22); GitHub execution can be delayed';
-health.news={feedsSucceeded,failedFeeds,newsCandidates,newVerified:added,availableQueries:queries.length,attemptedBingQueries:scheduledQueries.length,rotatingOverHours:6,failures:feedFailures.slice(0,25),note:'Google News RSS publisher redirects are not assumed to be canonical article URLs. Bing queries are rotated to avoid provider throttling.'};
+health.schedule='Hourly at :17 KST; stale-run recovery at :47; GitHub scheduling may be delayed';
+health.news={feedsSucceeded,failedFeeds,newsCandidates,newVerified:added,availableQueries:queries.length,attemptedBingQueries:scheduledQueries.length,rotatingOverHours:1,attemptedQueries:scheduledQueries,failures:feedFailures.slice(0,25),note:'Google News RSS publisher redirects are not assumed to be canonical article URLs. All Bing terms are attempted each hour with bounded concurrency and transient-error retries.'};
 await fs.writeFile(healthFile,JSON.stringify(health,null,2)+'\n');
 console.log(`Feeds: ${feedsSucceeded}; new verified items: ${added}; total: ${items.length}`);
 

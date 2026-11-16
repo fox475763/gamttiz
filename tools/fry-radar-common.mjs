@@ -1,6 +1,6 @@
 // Shared, dependency-free checks for the FRY RADAR collectors.
 export const DAY = 86_400_000;
-export const FRY = /감자\s*튀김|감튀|감튀홀더|양념\s*감자|포테이토|프렌치\s*프라이|후렌치\s*후라이|치즈\s*프라이|프라이즈|웨지\s*감자|french\s*fr(?:y|ies)/i;
+export const FRY = /감자\s*튀김|감튀|케이준\s*(?:후라이|프라이)|크링클\s*(?:컷)?\s*프라이|감튀홀더|양념\s*감자|포테이토|프렌치\s*프라이|후렌치\s*후라이|치즈\s*프라이|프라이즈|웨지\s*감자|french\s*fr(?:y|ies)/i;
 export const TOPIC = /할인|쿠폰|이벤트|행사|축제|프로모션|신제품|신메뉴|신상|출시|선보|굿즈|홀더|콜라보|협업|시즈닝|소스|디핑|팝업|전문점|오픈|맛집|한정|무료|증정|판매|트렌드|소비|문화|화제/i;
 export const EXCLUDE = /주가|증시|환율|부동산|정치|대통령|투자|암호화폐|코인|채용|가맹\s*모집|창업\s*비용|개인정보|먹방|만드는 법|레시피/i;
 export const FOREIGN = /(?:해외|외국|세계\s*각국|유학생|[1-9]\d*개국)(?:에서|의|발|현지|시장|소식|을|에게)?|(?:일본|미국|중국|대만|홍콩|영국|프랑스|벨기에|독일|캐나다|호주|싱가포르|태국)(?:에서|현지|시장|매장|한정|출시|유행|소식)/i;
@@ -79,4 +79,4 @@ export function dedupe(items){
   }
   return [...byUrl.values()];
 }
-export const evenKoreaHour = utcHour => (utcHour+9)%2===0;
+
