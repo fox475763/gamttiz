@@ -1,16 +1,86 @@
 {
-  "checkedAt": "2026-11-15T23:13:48.437Z",
-  "schedule": "KST every 2 hours (00,02,...,22); GitHub execution can be delayed",
+  "checkedAt": "2026-11-16T00:34:48.371Z",
+  "schedule": "Hourly at :17 KST; stale-run recovery at :47; GitHub scheduling may be delayed",
   "news": {
-    "feedsSucceeded": 30,
+    "feedsSucceeded": 78,
     "failedFeeds": 0,
-    "newsCandidates": 94,
+    "newsCandidates": 281,
     "newVerified": 0,
-    "availableQueries": 44,
-    "attemptedBingQueries": 20,
-    "rotatingOverHours": 6,
+    "availableQueries": 68,
+    "attemptedBingQueries": 68,
+    "rotatingOverHours": 1,
+    "attemptedQueries": [
+      "감튀 할인",
+      "감튀 이벤트",
+      "감자튀김 할인",
+      "감자튀김 이벤트",
+      "감자튀김 프로모션",
+      "양념감자 할인",
+      "감자튀김 축제",
+      "감자튀김 신메뉴",
+      "양념감자 신메뉴",
+      "프렌치프라이 신제품",
+      "감자튀김 굿즈",
+      "감튀홀더 굿즈",
+      "감자튀김 콜라보",
+      "프렌치프라이 한정판",
+      "감자튀김 디핑소스",
+      "감자튀김 시즈닝",
+      "치즈프라이 신메뉴",
+      "감자튀김 맛집",
+      "감자튀김 전문점 오픈",
+      "감자튀김 팝업스토어",
+      "감자튀김 트렌드",
+      "감자튀김 소비",
+      "감자튀김 인기",
+      "맥도날드 감자튀김",
+      "롯데리아 포테이토",
+      "버거킹 감자튀김",
+      "맘스터치 감자튀김",
+      "프랭크버거 감자튀김",
+      "노브랜드버거 감자튀김",
+      "쉐이크쉑 감자튀김",
+      "파이브가이즈 감자튀김",
+      "다운타우너 감자튀김",
+      "바스버거 감자튀김",
+      "감자튀김 무료 증정",
+      "감튀 1+1",
+      "포테이토 쿠폰",
+      "프라이데이 감자튀김",
+      "감자튀김 팝업 행사",
+      "감자튀김 기간 한정",
+      "감자튀김 품절 재출시",
+      "감자튀김 신상 소스",
+      "감자튀김 브랜드 협업",
+      "KFC 프라이 신메뉴",
+      "파파이스 케이준후라이",
+      "맥도날드 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "맥도날드 감자튀김 종료 연장",
+      "롯데리아 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "롯데리아 감자튀김 종료 연장",
+      "버거킹 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "버거킹 감자튀김 종료 연장",
+      "맘스터치 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "맘스터치 감자튀김 종료 연장",
+      "프랭크버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "프랭크버거 감자튀김 종료 연장",
+      "노브랜드버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "노브랜드버거 감자튀김 종료 연장",
+      "쉐이크쉑 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "쉐이크쉑 감자튀김 종료 연장",
+      "파이브가이즈 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "파이브가이즈 감자튀김 종료 연장",
+      "다운타우너 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "다운타우너 감자튀김 종료 연장",
+      "바스버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "바스버거 감자튀김 종료 연장",
+      "KFC (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "KFC 감자튀김 종료 연장",
+      "파파이스 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+      "파파이스 감자튀김 종료 연장"
+    ],
     "failures": [],
-    "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs. Bing queries are rotated to avoid provider throttling."
+    "note": "Google News RSS publisher redirects are not assumed to be canonical article URLs. All Bing terms are attempted each hour with bounded concurrency and transient-error retries."
   },
   "sources": [
     {
@@ -29,7 +99,17 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z"
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://www.lotteeatz.com/event/main/",
+      "fallbackQueries": [
+        "롯데리아 포테이토",
+        "롯데리아 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "롯데리아 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": [
+        "https://www.lotteeatz.com/event/main/selectEvent/18403",
+        "https://www.lotteeatz.com/event/main/selectEvent/18281"
+      ]
     },
     {
       "brand": "맥도날드",
@@ -47,23 +127,32 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z",
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404",
       "indexedCandidates": 0,
       "browserFallback": true,
-      "browserCandidates": 6
+      "browserCandidates": 6,
+      "fallbackQueries": [
+        "맥도날드 감자튀김",
+        "맥도날드 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "맥도날드 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": [
+        "https://membership.kt.com/discount/benefit/s_DaldalBenefit.do",
+        "https://biz.heraldcorp.com/article/10857008"
+      ]
     },
     {
       "brand": "버거킹",
       "url": "https://www.burgerking.co.kr/event",
-      "reachable": false,
+      "reachable": true,
       "candidates": 0,
       "checked": 0,
       "added": 0,
       "relevant": 0,
       "errors": [
         "fetch failed",
-        "fetch failed",
-        "브라우저 보조 수집 실패: browser returned no HTML"
+        "fetch failed"
       ],
       "excluded": {
         "unrelated": 0,
@@ -72,8 +161,16 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": null,
-      "indexedCandidates": 0
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://pf.kakao.com/_xcBxnxah",
+      "indexedCandidates": 0,
+      "browserCandidates": 0,
+      "fallbackQueries": [
+        "버거킹 감자튀김",
+        "버거킹 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "버거킹 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     },
     {
       "brand": "맘스터치",
@@ -84,7 +181,7 @@
       "added": 0,
       "relevant": 0,
       "errors": [
-        "This operation was aborted",
+        "The operation was aborted due to timeout",
         "브라우저 보조 수집 실패: browser returned no HTML"
       ],
       "excluded": {
@@ -95,7 +192,15 @@
         "duplicate": 0
       },
       "lastReachableAt": null,
-      "indexedCandidates": 0
+      "indexedCandidates": 0,
+      "fallbackQueries": [
+        "맘스터치 감자튀김",
+        "맘스터치 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "맘스터치 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": [
+        "https://www.cstimes.com/news/articleView.html?idxno=726691"
+      ]
     },
     {
       "brand": "프랭크버거",
@@ -113,52 +218,66 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z"
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://www.frankburger.co.kr/board/index.php?board=event_01&tab=3&type=list",
+      "fallbackQueries": [
+        "프랭크버거 감자튀김",
+        "프랭크버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "프랭크버거 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     },
     {
       "brand": "노브랜드버거",
-      "url": "https://www.shinsegaefood.co.kr/main.sf",
-      "reachable": false,
-      "candidates": 0,
-      "checked": 0,
+      "url": "https://www.shinsegaefood.com/company/pr/news_list.sf",
+      "reachable": true,
+      "candidates": 4,
+      "checked": 4,
       "added": 0,
       "relevant": 0,
-      "errors": [
-        "fetch failed",
-        "fetch failed",
-        "브라우저 보조 수집 실패: browser returned no HTML"
-      ],
+      "errors": [],
       "excluded": {
-        "unrelated": 0,
+        "unrelated": 4,
         "oldOrUnknownDate": 0,
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": null,
-      "indexedCandidates": 0
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://www.shinsegaefood.com/company/pr/news_list.sf",
+      "fallbackQueries": [
+        "노브랜드버거 감자튀김",
+        "노브랜드버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "노브랜드버거 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     },
     {
       "brand": "쉐이크쉑",
       "url": "https://www.shakeshack.kr/",
-      "reachable": false,
-      "candidates": 0,
-      "checked": 0,
+      "reachable": true,
+      "candidates": 26,
+      "checked": 18,
       "added": 0,
       "relevant": 0,
       "errors": [
-        "fetch failed",
-        "브라우저 보조 수집 실패: browser returned no HTML"
+        "fetch failed"
       ],
       "excluded": {
-        "unrelated": 0,
+        "unrelated": 8,
         "oldOrUnknownDate": 0,
         "ended": 0,
-        "blockedDetail": 0,
+        "blockedDetail": 10,
         "duplicate": 0
       },
-      "lastReachableAt": null,
-      "indexedCandidates": 0
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://www.smdnewsroom.co.kr/?s=%EC%89%90%EC%9D%B4%ED%81%AC%EC%89%91",
+      "fallbackQueries": [
+        "쉐이크쉑 감자튀김",
+        "쉐이크쉑 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "쉐이크쉑 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     },
     {
       "brand": "파이브가이즈",
@@ -176,7 +295,14 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z"
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://www.fiveguys.co.kr/모든-소식-보기/",
+      "fallbackQueries": [
+        "파이브가이즈 감자튀김",
+        "파이브가이즈 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "파이브가이즈 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     },
     {
       "brand": "다운타우너",
@@ -194,9 +320,16 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z",
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://pf.kakao.com/_feexixj",
       "indexedCandidates": 0,
-      "browserCandidates": 0
+      "browserCandidates": 0,
+      "fallbackQueries": [
+        "다운타우너 감자튀김",
+        "다운타우너 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "다운타우너 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     },
     {
       "brand": "바스버거",
@@ -214,9 +347,16 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z",
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://pf.kakao.com/_AXkns",
       "indexedCandidates": 0,
-      "browserCandidates": 0
+      "browserCandidates": 0,
+      "fallbackQueries": [
+        "바스버거 감자튀김",
+        "바스버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "바스버거 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     },
     {
       "brand": "KFC",
@@ -234,7 +374,16 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z"
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://www.kfckorea.com/promotion/promotionList/A801",
+      "fallbackQueries": [
+        "KFC 프라이 신메뉴",
+        "KFC (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "KFC 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": [
+        "https://www.kfckorea.com/promotion/newMenu/detail/1135"
+      ]
     },
     {
       "brand": "파파이스",
@@ -243,26 +392,40 @@
       "candidates": 8,
       "checked": 8,
       "added": 0,
-      "relevant": 0,
+      "relevant": 1,
       "errors": [],
       "excluded": {
-        "unrelated": 8,
-        "oldOrUnknownDate": 0,
+        "unrelated": 7,
+        "oldOrUnknownDate": 1,
         "ended": 0,
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-15T23:13:48.437Z"
+      "lastReachableAt": "2026-11-16T00:34:48.371Z",
+      "collectionUrl": "https://popeyes.co.kr/event",
+      "fallbackQueries": [
+        "파파이스 케이준후라이",
+        "파파이스 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
+        "파파이스 감자튀김 종료 연장"
+      ],
+      "fallbackArticles": []
     }
   ],
   "summary": {
     "sources": 12,
-    "reachable": 8,
-    "detailCandidates": 52,
-    "detailChecked": 52,
+    "reachable": 11,
+    "detailCandidates": 82,
+    "detailChecked": 74,
     "newOfficial": 0,
     "photoEnriched": 0,
     "stored": 6,
     "status": "partial"
-  }
+  },
+  "rechecks": {
+    "checked": 6,
+    "changed": 0,
+    "unavailable": 0,
+    "unconfirmed": 4
+  },
+  "lastCompletedAt": "2026-11-16T00:36:29.190Z"
 }
