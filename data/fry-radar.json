@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-18T02:57:16.821Z",
+  "updatedAt": "2026-11-18T10:46:34.706Z",
   "items": [
     {
       "id": "kfc-doom-fries-20261110",
@@ -16,7 +16,7 @@
       ],
       "collectedAt": "2026-11-11T10:05:13.132Z",
       "imageUrl": "https://www.kfckorea.com/nas/event/2026/11/04/SRTzLnqmgoHg.jpg",
-      "lastCheckedAt": "2026-11-18T02:57:16.821Z",
+      "lastCheckedAt": "2026-11-18T10:46:34.706Z",
       "recheckStatus": "verified"
     },
     {
@@ -35,7 +35,7 @@
       ],
       "collectedAt": "2026-11-11T10:05:13.132Z",
       "imageUrl": "https://www.cstimes.com/news/photo/202611/726691_648193_4725.jpg",
-      "lastCheckedAt": "2026-11-18T02:57:16.821Z",
+      "lastCheckedAt": "2026-11-18T10:46:34.706Z",
       "recheckStatus": "identity-only"
     },
     {
@@ -56,7 +56,7 @@
       "imageUrl": "https://cliimage.commutil.kr/phpwas/restmb_allidxmake.php?idx=999&nmt=12&pp=002&simg=2024060521161406522204ead079118023320716.jpg",
       "imageNote": "맥도날드 더블 맥스파이시 상하이 버거 과거 홍보 이미지 (2024년) · 2026년 KT 행사 배너가 아님",
       "imageSource": "https://www.lawissue.co.kr/view.php?ud=202406052115135103204ead0791_12",
-      "lastCheckedAt": "2026-11-18T02:57:16.821Z",
+      "lastCheckedAt": "2026-11-18T10:46:34.706Z",
       "recheckStatus": "unconfirmed"
     },
     {
@@ -72,7 +72,7 @@
       "eventEnd": "2026-11-30",
       "imageUrl": "https://img.lotteeatz.com/upload/event/CONTENT_IMG/2026/10/30/20261030171329894_8.jpg",
       "sourceTitle": "오후 2시부터 6시까지! 리아스낵타임",
-      "lastCheckedAt": "2026-11-18T02:57:16.821Z",
+      "lastCheckedAt": "2026-11-18T10:46:34.706Z",
       "recheckStatus": "verified"
     },
     {
@@ -88,7 +88,7 @@
       "eventEnd": "2026-11-30",
       "imageUrl": "https://img.lotteeatz.com/upload/event/CONTENT_IMG/2026/11/10/20261110142257514_9.jpg",
       "sourceTitle": "11월 롯데리아 이달의 쿠폰!",
-      "lastCheckedAt": "2026-11-18T02:57:16.821Z",
+      "lastCheckedAt": "2026-11-18T10:46:34.706Z",
       "recheckStatus": "verified"
     },
     {
@@ -103,7 +103,7 @@
       "eventStart": null,
       "eventEnd": null,
       "imageUrl": "https://wimg.heraldcorp.com/news/cms/2026/08/31/news-p.v1.20260831.52678d2efeb54af2b9176aef02dec86c_P1.png",
-      "lastCheckedAt": "2026-11-18T02:57:16.821Z",
+      "lastCheckedAt": "2026-11-18T10:46:34.706Z",
       "recheckStatus": "identity-only"
     }
   ]
