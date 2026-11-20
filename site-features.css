@@ -661,3 +661,28 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 @media(prefers-reduced-motion:reduce) {
   .control-dock .control-contact-links .contact-copy { transition: none; }
 }
+
+/* Consistent left-side navigation pictograms; the existing liquid glass is unchanged. */
+.control-menu-links > :is(a,button) {
+  justify-content: flex-start;
+  gap: 9px;
+}
+.control-menu-links > :is(a,button) > svg.control-menu-icon {
+  display: block;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  pointer-events: none;
+}
+.control-menu-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+  row-gap: 3px;
+  min-width: 0;
+}
+.control-menu-title { min-width: 0; overflow-wrap: anywhere; }
+.control-menu-text .control-menu-subtitle { white-space: normal; overflow-wrap: anywhere; }

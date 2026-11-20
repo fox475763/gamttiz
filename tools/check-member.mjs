@@ -105,8 +105,8 @@ test('Every main page uses the original bottom-right Menu without local repositi
   for(const file of ['license.css','license-wallet.css','license-gallery.css','member.css','editorial.css']){
     assert.doesNotMatch(src(file),/\.control-dock\b/,file+' should inherit the common anchor');
   }
-  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261121contact1'));
-  assert.ok(src('member-sw.js').includes('site-features.css?v=20261121contact1'));
+  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261121icons1'));
+  assert.ok(src('member-sw.js').includes('site-features.css?v=20261121icons1'));
 });
 
 test('Menu glass frame and scrolling content are separate and selection stays brand red',()=>{
@@ -136,4 +136,13 @@ test('Current menu selection follows Home, Collection and Member deep links with
   assert.match(css,/\.control-menu::before,\.control-contact::before,\.control-search::before,\.control-trigger::before\{border-width:2px;background:conic-gradient/);
   assert.match(css,/\.control-contact-links :is\(a,button\)::before\s*,/);
   assert.ok(js.includes("navigator.clipboard.writeText("));
+});
+
+test('All navigation entries have accessible, decorative outline icons',()=>{
+  const js=src('site-features.js'),css=src('site-features.css');
+  const icons=js.slice(js.indexOf('const menuIcons='),js.indexOf('const addMenuSubtitle='));
+  for(const label of ['Home','Collection','Play','Member','MY ID','Products','Notice','Project Info','Instagram','Contact','Search']) assert.ok(icons.includes(label),label+' icon missing');
+  assert.match(js,/class="control-menu-icon"[^>]*aria-hidden="true" focusable="false"/);
+  assert.match(css,/svg\.control-menu-icon\s*\{[^}]*flex: 0 0 18px/);
+  assert.doesNotMatch(js,/menuSearch\.insertAdjacentHTML/);
 });

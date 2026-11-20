@@ -27,6 +27,12 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      await trigger.waitFor({state:'visible',timeout:5000});
      await trigger.click();
      const shell=page.locator('.control-menu').first();
+     const iconLayout=await shell.locator('.control-menu-links > :is(a,button)').evaluateAll(items=>items.map(item=>{
+       const icons=item.querySelectorAll('svg.control-menu-icon'),label=item.querySelector('.control-menu-text');
+       const box=icons[0]?.getBoundingClientRect(),text=label?.getBoundingClientRect();
+       return icons.length===1&&icons[0].getAttribute('aria-hidden')==='true'&&box.width===18&&box.right<=text.left;
+     }));
+     assert.ok(iconLayout.length>=11&&iconLayout.every(Boolean),filename+' menu icon layout');
      const bounds=await shell.boundingBox(),t=await trigger.boundingBox();
      assert.ok(bounds && t,filename+' menu bounds');
      assert.ok(bounds.x>=-1&&bounds.y>=-2&&bounds.x+bounds.width<=viewport.width+1,filename+' menu clipped at '+viewport.width);

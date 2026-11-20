@@ -50,17 +50,37 @@
   menu.append(menuScroll);
   const menuLinks=make('div','control-menu-links');
   const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Member:'멤버 전용','MY ID':'나의 라이센스',Products:'제품',Notice:'브랜드 공지',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
+  // Decorative outline icons are embedded locally, so no icon font or extra request is needed.
+  const menuIcons={
+    Home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+    Collection:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    Play:'<path d="M7 7h10c2 0 3.3 1.2 3.8 3.1l1 4.7a2.6 2.6 0 0 1-4.5 2.2L15 14H9l-2.3 3A2.6 2.6 0 0 1 2.2 14.8l1-4.7A3.8 3.8 0 0 1 7 7Z"/><path d="M8 9v5m-2.5-2.5h5M16 10v.1M19 12.5v.1"/>',
+    Member:'<circle cx="10" cy="8" r="3.5"/><path d="M3 20v-2a7 7 0 0 1 14 0v2H3Zm14-15a3.5 3.5 0 0 1 0 7m2 2a5 5 0 0 1 2 4v2"/>',
+    'MY ID':'<rect x="2.5" y="5" width="19" height="14" rx="2"/><circle cx="8" cy="10" r="2"/><path d="M4.5 16a3.5 3.5 0 0 1 7 0M14 10h4.5M14 14h4.5"/>',
+    Products:'<path d="m3 7 9-4 9 4v10l-9 4-9-4V7Zm0 0 9 4 9-4M12 11v10M7.5 5 16.5 9"/>',
+    Notice:'<path d="M4 10h5l10-5v14L9 14H4a2 2 0 0 1-2-2v0a2 2 0 0 1 2-2Zm2 4 2 6h3l-2-6M21 10v4"/>',
+    'Project Info':'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+    Instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
+    Contact:'<path d="M20 16a2 2 0 0 1-2 2H9l-5 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8m-8 4h5"/>',
+    Search:'<circle cx="10.8" cy="10.8" r="6.2"/><path d="m15.5 15.5 5 5"/>',
+    'Fry Rader':'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12 18.4 5.6M12 12h.01"/>'
+  };
   const addMenuSubtitle=(item)=>{
     const label=item.textContent.trim();
     const translation=menuTranslations[label];
-    if(translation)item.append(make('small','control-menu-subtitle',translation));
+    const iconName=({News:'Notice','공지':'Notice','Fry Radar':'Fry Rader'})[label]||label;
+    const artwork=menuIcons[iconName]||menuIcons['Project Info'];
+    const text=make('span','control-menu-text');
+    text.append(make('span','control-menu-title',label));
+    if(translation)text.append(make('small','control-menu-subtitle',translation));
+    item.replaceChildren(text);
+    item.insertAdjacentHTML('afterbegin','<svg class="control-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+artwork+'</svg>');
     return item;
   };
   const home=make('a','','Home');home.href='index.html';menuLinks.append(addMenuSubtitle(home));
   nav?.querySelectorAll('a').forEach(link=>{const item=link.cloneNode(true);item.removeAttribute('class');item.textContent=item.textContent.replace(/\s*↗\s*$/u,'');menuLinks.append(addMenuSubtitle(item));});
   const menuContact=make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
   const menuSearch=make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
-  menuSearch.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>');
   menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menuScroll.append(menuLinks);
   function syncCurrentMenuLink(){
     const current=new URL(location.href),normalized=url=>url.pathname.replace(/\/$/,'/index.html');
