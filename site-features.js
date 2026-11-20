@@ -1,5 +1,6 @@
 (() => {
   const page = location.pathname.split('/').pop() || 'index.html';
+  if(page==='license.html'&&new URLSearchParams(location.search).get('wallet')==='1')return;
   const pages = [
     {title:'홈', description:'감띠즈를 처음부터 둘러보기', url:'index.html', keys:'home gamttiz 감띠즈'},
     {title:'감띠즈 컬렉션', description:'14종의 감띠와 각각의 이야기', url:'index.html#collection', keys:'collection 캐릭터 키링 감띠'},
@@ -201,5 +202,43 @@ window.addEventListener('resize', scheduleMenuTextColorUpdate);
 window.addEventListener('load', scheduleMenuTextColorUpdate);
 updateMenuTextColor();
 
+// The wallet is intentionally mobile-only, without changing the existing dock.
+const walletMedia=matchMedia('(max-width: 900px) and (pointer: coarse)');
+if(walletMedia.matches){
+  const css=make('link');css.rel='stylesheet';css.href='license-wallet.css?v=20261120wallet2';document.head.append(css);
+  const walletBar=make('button','gtz-wallet-bar');walletBar.type='button';walletBar.setAttribute('aria-label','나의 라이센스 카드 열기');walletBar.setAttribute('aria-expanded','false');
+  const sheet=make('section','gtz-wallet-sheet');sheet.setAttribute('role','dialog');sheet.setAttribute('aria-modal','true');sheet.setAttribute('aria-label','나의 라이센스');sheet.hidden=true;
+  const backdrop=make('button','gtz-wallet-backdrop');backdrop.type='button';backdrop.setAttribute('aria-label','라이센스 닫기');
+  const content=make('div','gtz-wallet-content'),handle=make('div','gtz-wallet-handle'),title=make('p','gtz-wallet-title','MY LICENSE');
+  const close=make('button','gtz-wallet-close','×');close.type='button';close.setAttribute('aria-label','닫기');
+  const frame=make('iframe','gtz-wallet-frame');frame.title='나의 감띠즈 라이센스 카드';
+  const detail=make('a','gtz-wallet-detail','MY ID 페이지 ↗');detail.href='license.html';
+  content.append(handle,title,close,frame,detail);sheet.append(backdrop,content);document.body.append(walletBar,sheet);
+  let open=false,sheetTimer=0;
+  function hasCard(){try{const r=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null');return !!(r?.name&&r?.number);}catch{return false;}}
+  function sync(){walletBar.hidden=!hasCard();if(!hasCard()&&open)hide();}
+  function show(){
+    if(open||!hasCard())return;open=true;clearTimeout(sheetTimer);sheet.hidden=false;
+    frame.src='license.html?wallet=1';walletBar.setAttribute('aria-expanded','true');
+    document.body.classList.add('gtz-wallet-open');requestAnimationFrame(()=>{if(open){sheet.classList.add('is-open');close.focus({preventScroll:true});}});
+  }
+  function hide(){
+    if(!open)return;open=false;sheet.classList.remove('is-open');walletBar.setAttribute('aria-expanded','false');
+    document.body.classList.remove('gtz-wallet-open');if(!walletBar.hidden)walletBar.focus({preventScroll:true});
+    sheetTimer=setTimeout(()=>{if(!open){sheet.hidden=true;frame.removeAttribute('src');}},320);
+  }
+  function swipe(el,up,action){
+    let start=null;
+    el.addEventListener('pointerdown',e=>{if(!e.isPrimary)return;start={id:e.pointerId,y:e.clientY,x:e.clientX};el.setPointerCapture(e.pointerId);});
+    el.addEventListener('pointerup',e=>{if(!start||start.id!==e.pointerId)return;const dy=e.clientY-start.y,dx=e.clientX-start.x;start=null;if((up?-dy:dy)>28&&Math.abs(dy)>Math.abs(dx))action();});
+    el.addEventListener('pointercancel',()=>{start=null;});
+  }
+  swipe(walletBar,true,show);swipe(handle,false,hide);walletBar.addEventListener('click',show);close.addEventListener('click',hide);backdrop.addEventListener('click',hide);
+  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&open)hide();});
+  window.addEventListener('storage',e=>{if(e.key==='gamttiz-my-license-v1')sync();});
+  window.addEventListener('gamttiz:license-change',sync);window.addEventListener('pageshow',sync);sync();
+}
+
 })();
+
 

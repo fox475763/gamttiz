@@ -1,0 +1,19 @@
+.gtz-wallet-bar,.gtz-wallet-sheet{display:none}
+@media(max-width:900px) and (pointer:coarse){
+  .gtz-wallet-bar{display:block;position:fixed;z-index:9998;left:50%;bottom:calc(5px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:154px;height:28px;border:0;padding:0;background:transparent;touch-action:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .gtz-wallet-bar::before{content:"";display:block;position:absolute;left:12px;right:12px;bottom:8px;height:5px;border-radius:999px;background:rgba(65,35,28,.48);box-shadow:0 0 1px 1px #ffffff64;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .gtz-wallet-bar[hidden],.gtz-wallet-sheet[hidden]{display:none!important}
+  .gtz-wallet-open{overflow:hidden!important}
+  .gtz-wallet-sheet{display:block;position:fixed;inset:0;z-index:2147483640;isolation:isolate}
+  .gtz-wallet-backdrop{position:absolute;inset:0;width:100%;height:100%;border:0;background:#17020080;backdrop-filter:blur(7px);opacity:0;transition:opacity .28s ease}
+  .gtz-wallet-content{position:absolute;bottom:0;left:0;right:0;height:min(88dvh,720px);display:flex;flex-direction:column;align-items:center;background:#fff9ef;border-radius:28px 28px 0 0;padding:0 12px calc(15px + env(safe-area-inset-bottom,0px));box-shadow:0 -14px 70px #16000050;transform:translateY(105%);transition:transform .34s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+  .gtz-wallet-sheet.is-open .gtz-wallet-content{transform:translateY(0)}
+  .gtz-wallet-sheet.is-open .gtz-wallet-backdrop{opacity:1}
+  .gtz-wallet-handle{width:100%;height:25px;flex:none;touch-action:none;display:grid;place-items:center}
+  .gtz-wallet-handle::after{content:"";height:4px;width:40px;border-radius:999px;background:#85000045}
+  .gtz-wallet-title{font:600 11px/1.4 Arial,sans-serif;letter-spacing:.23em;color:#850000;margin:2px 0 7px}
+  .gtz-wallet-close{position:absolute;right:16px;top:16px;height:36px;width:36px;background:#8500000e;border:0;border-radius:50%;color:#850000;font-size:26px;line-height:1;cursor:pointer}
+  .gtz-wallet-frame{border:0;width:100%;flex:1;min-height:0;background:transparent}
+  .gtz-wallet-detail{font-size:12px;color:#850000;text-decoration:none;padding:8px}
+}
+@media(prefers-reduced-motion:reduce){.gtz-wallet-backdrop,.gtz-wallet-content{transition:none}}
