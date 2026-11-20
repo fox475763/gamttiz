@@ -8,23 +8,24 @@ const script=fs.readFileSync(new URL(path,root),'utf8');
 const wallet=script.slice(script.indexOf('const walletMedia='),script.lastIndexOf('})();'));
 const KEY='gamttiz-license-shake-enabled-v1',LICENSE='gamttiz-my-license-v1';
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-function createPage(storage,permission='granted'){
-  const elements=[];let clock=0,count=0,requests=0,interaction=false,mode=permission;
+function createPage(storage,permission='granted',activationKnown=false,withMount=true){
+  const elements=[],timers=new Map();let clock=0,count=0,requests=0,interaction=false,mode=permission,prompts=0;
   class El{
     constructor(cls=''){this.cls=cls;this.children=[];this.attrs={};this.events=new Map();this.classes=new Set();this.classList={add:c=>this.classes.add(c),remove:c=>this.classes.delete(c),contains:c=>this.classes.has(c),toggle:(c,b)=>b?this.classes.add(c):this.classes.delete(c)};this.contentWindow={postMessage(){}};elements.push(this);}
     append(...children){this.children.push(...children);}
     setAttribute(k,v){this.attrs[k]=v;}
     addEventListener(k,f){this.events.set(k,f);}
+    removeEventListener(k,f){if(this.events.get(k)===f)this.events.delete(k);}
     fire(k,e={}){return this.events.get(k)?.(e);}
     getBoundingClientRect(){return {height:600};}
   }
   const doc=new El(),win=new El(),mount=new El(),body=new El(),html=new El();
-  doc.getElementById=id=>id==='license-shake-setting-mount'?mount:null;doc.hidden=false;doc.body=body;doc.documentElement=html;
-  win.DeviceMotionEvent={requestPermission:async()=>{requests++;if(mode==='gesture'&&!interaction)throw Error('NotAllowedError');return mode==='denied'?'denied':'granted';}};
-  const ctx={window:win,document:doc,navigator:{maxTouchPoints:5},location:{origin:'https://example.com'},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},make:(tag,cls)=>new El(cls),dock:{dataset:{mode:'closed'}},setMode(){},matchMedia:q=>({matches:!q.includes('reduced'),addEventListener(){}}),performance:{now:()=>clock},setTimeout:()=>++count,clearTimeout(){}};
+  doc.getElementById=id=>id==='license-shake-setting-mount'&&withMount?mount:null;doc.hidden=false;doc.body=body;doc.documentElement=html;
+  win.DeviceMotionEvent={requestPermission:async()=>{requests++;if(mode==='gesture'){if(!interaction)throw Error('NotAllowedError');prompts++;}return mode==='denied'?'denied':'granted';}};
+  const ctx={window:win,document:doc,navigator:{maxTouchPoints:5,...(activationKnown?{userActivation:{get isActive(){return interaction}}}:{})},location:{origin:'https://example.com'},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},make:(tag,cls)=>new El(cls),dock:{dataset:{mode:'closed'}},setMode(){},matchMedia:q=>({matches:!q.includes('reduced'),addEventListener(){}}),performance:{now:()=>clock},setTimeout:(fn,ms)=>{timers.set(++count,{fn,ms});return count},clearTimeout:id=>timers.delete(id)};
   vm.runInNewContext(wallet,ctx);
   const one=c=>elements.find(e=>e.cls===c);
-  return {button:one('gtz-shake-button'),reconnect:one('gtz-shake-reconnect'),sheet:one('gtz-wallet-sheet'),status:one('gtz-shake-status'),win,doc,get requests(){return requests},setPermission:p=>{mode=p},tap:async()=>{interaction=true;await doc.fire('click',{isTrusted:true,target:{closest:()=>null}});interaction=false;},press:async control=>{interaction=true;await control.fire('click');interaction=false;},shake:()=>{clock+=150;win.fire('devicemotion',{acceleration:{x:18,y:0,z:0}});clock+=150;win.fire('devicemotion',{acceleration:{x:-18,y:0,z:0}});}};
+  return {button:one('gtz-shake-button'),reconnect:one('gtz-shake-reconnect'),recovery:one('gtz-shake-recovery'),sheet:one('gtz-wallet-sheet'),status:one('gtz-shake-status'),win,doc,get requests(){return requests},get prompts(){return prompts},setPermission:p=>{mode=p},tap:async()=>{interaction=true;await doc.fire('click',{isTrusted:true,target:{closest:()=>null}});interaction=false;},press:async control=>{interaction=true;await control.fire('click');interaction=false;},runWatchdog:async()=>{for(const [id,t] of [...timers])if(t.ms===1200){timers.delete(id);await t.fn();}},shake:()=>{clock+=150;win.fire('devicemotion',{acceleration:{x:18,y:0,z:0}});clock+=150;win.fire('devicemotion',{acceleration:{x:-18,y:0,z:0}});}};
 }
 const saved=()=>new Map([[LICENSE,JSON.stringify({name:'감띠',number:'GTZ - 0001'})]]);
 test('activation survives destruction and reconstruction of the page',async()=>{
@@ -53,4 +54,21 @@ test('issuance animation, page lifecycle and arbitrary taps never request permis
 test('no license and active Member measurement tools suppress shake activation',async()=>{
   const store=new Map([[KEY,'1']]);const noCard=createPage(store);await tick();assert.equal(noCard.requests,0);noCard.shake();assert.ok(!noCard.sheet.classes.has('is-open'));
   const licensed=saved();licensed.set(KEY,'1');const page=createPage(licensed);await tick();page.win.GTZMember={active:'level'};page.shake();assert.ok(!page.sheet.classes.has('is-open'));
+});
+test('cold Safari launch reuses a grant silently; no permission popup',async()=>{
+  const store=saved();store.set(KEY,'1');const page=createPage(store,'granted',true,false);
+  await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);
+  page.shake();assert.ok(page.sheet.classes.has('is-open'));assert.equal(page.recovery.hidden,true);assert.equal(store.get(KEY),'1');
+});
+test('expired Safari permission shows recovery only after missing sensor events',async()=>{
+  const store=saved();store.set(KEY,'1');const page=createPage(store,'gesture',true,false);
+  await page.tap();assert.equal(page.requests,0);assert.equal(page.recovery.hidden,true);
+  await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);assert.equal(page.recovery.hidden,false);assert.equal(store.get(KEY),'1');
+  await page.press(page.recovery);assert.equal(page.requests,2);assert.equal(page.prompts,1);page.shake();assert.ok(page.sheet.classes.has('is-open'));assert.equal(page.recovery.hidden,true);
+});
+test('foreground recovery re-arms and does not ask during issuance',async()=>{
+  const store=saved();store.set(KEY,'1');const page=createPage(store,'gesture',true,false);
+  page.doc.body.classList.add('license-animating');await page.runWatchdog();assert.equal(page.requests,0);
+  page.doc.body.classList.remove('license-animating');page.doc.hidden=true;page.doc.fire('visibilitychange');page.doc.hidden=false;page.doc.fire('visibilitychange');
+  await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);assert.equal(page.recovery.hidden,false);
 });

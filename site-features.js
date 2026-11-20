@@ -224,8 +224,11 @@ const walletMedia=matchMedia('(max-width: 900px)');
   shakeSettings.append(shakeButton,shakeReconnect,shakeStatus);
   const shakeMount=document.getElementById('license-shake-setting-mount');
   if(shakeMount)shakeMount.append(shakeSettings);
+  const recovery=make('button','gtz-shake-recovery','카드 센서 다시 연결');recovery.type='button';recovery.hidden=true;
+  document.body.append(recovery);
   const shakeKey='gamttiz-license-shake-enabled-v1';
   let enabled=false,sensorSeen=false,sessionAllowed=false,requesting=false,open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,lastExists=null;
+  let recoveryTimer=0,recoveryNeeded=false,silentAttempted=false,silentPending=false,recoveryEpoch=0;
   let gravity=null,firstHit=null,lastHit=-Infinity,lastOpened=-Infinity;
   try{enabled=localStorage.getItem(shakeKey)==='1';}catch{}
   const reducedWallet=matchMedia('(prefers-reduced-motion: reduce)');
@@ -235,21 +238,26 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function toolActive(){return ['pocket','level'].includes(window.GTZMember?.active);}
   function hasCard(){try{const r=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null');return !!(r?.name&&r?.number);}catch{return false;}}
   function remember(value){enabled=value;try{localStorage.setItem(shakeKey,value?'1':'0');}catch{}}
-  function restorePreference(){try{const saved=localStorage.getItem(shakeKey)==='1';if(saved!==enabled){enabled=saved;sensorSeen=false;sessionAllowed=false;firstHit=null;gravity=null;shakeStatus.textContent='';}}catch{}}
+  function clearRecovery(){clearTimeout(recoveryTimer);recoveryTimer=0;recoveryNeeded=false;recoveryEpoch++;silentPending=false;}
+  function resetSensor(){clearRecovery();silentAttempted=false;sensorSeen=false;sessionAllowed=false;firstHit=null;gravity=null;shakeStatus.textContent='';}
+  function restorePreference(){try{const saved=localStorage.getItem(shakeKey)==='1';if(saved!==enabled){enabled=saved;resetSensor();}}catch{}}
+  function mayRecover(){return enabled&&mobile()&&hasCard()&&canMotion()&&needsPermission()&&!document.hidden&&!toolActive()&&!document.body.classList.contains('license-animating');}
   function updateSetting(){
     shakeSettings.hidden=!mobile()||!hasCard();
     shakeButton.disabled=requesting||!canMotion();
     // A saved preference is independent of whether the new document has received sensor data.
     shakeButton.textContent=requesting?'센서 권한 확인 중…':enabled?'흔들어 카드 열기 끄기':'흔들어 카드 열기 켜기';
     shakeButton.setAttribute('aria-pressed',String(enabled));
-    shakeReconnect.hidden=!enabled||sensorSeen||sessionAllowed||!needsPermission();
+    shakeReconnect.hidden=!enabled||sensorSeen||(!recoveryNeeded&&sessionAllowed)||!needsPermission();
     shakeReconnect.disabled=requesting;
+    recovery.hidden=!!shakeMount||!mayRecover()||!recoveryNeeded||sensorSeen||presented;
+    recovery.disabled=requesting;
     if(!canMotion())shakeStatus.textContent='이 브라우저는 움직임 센서를 지원하지 않아요. MY ID 메뉴를 이용해주세요.';
     else if(enabled&&!sensorSeen&&!sessionAllowed&&!requesting&&!shakeStatus.textContent)shakeStatus.textContent=needsPermission()?'활성화 설정이 저장되어 있어요. 연결이 필요하면 센서 권한 다시 연결을 눌러주세요.':'휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
   }
   async function connectSensor(){
     if(requesting||!mobile()||!hasCard()||!canMotion()||toolActive()||document.body.classList.contains('license-animating'))return;
-    const wasEnabled=enabled;
+    const wasEnabled=enabled;clearRecovery();silentAttempted=true;
     requesting=true;updateSetting();
     try{
       // Permission is requested exclusively from explicit shake controls,
@@ -258,28 +266,56 @@ const walletMedia=matchMedia('(max-width: 900px)');
       if(permission!=='granted')throw new Error('sensor permission not granted');
       if(wasEnabled&&!enabled)return;
       remember(true);sessionAllowed=true;gravity=null;firstHit=null;warm();
+      watchSensor();
       shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
     }catch{
       if(!wasEnabled)remember(false);
-      sessionAllowed=false;
+      sessionAllowed=false;recoveryNeeded=enabled;
       shakeStatus.textContent=enabled?'흔들기 설정은 켜져 있어요. 센서 권한을 다시 연결해주세요.':'동작 센서 권한을 허용해야 흔들기 기능을 사용할 수 있어요.';
     }
-    finally{requesting=false;updateSetting();}
+    finally{requesting=false;updateSetting();if(sessionAllowed&&!sensorSeen)watchSensor();}
+  }
+  function watchSensor(){
+    if(recoveryTimer||requesting||silentPending||sensorSeen||!mayRecover())return;
+    recoveryTimer=setTimeout(async()=>{
+      recoveryTimer=0;
+      if(sensorSeen||requesting||!mayRecover())return;
+      // Only check an existing grant WITHOUT transient activation. A new
+      // permission prompt is forbidden without that activation by WebKit.
+      // If Safari discarded the grant the call rejects; show a deliberate
+      // one-tap reconnect instead of requesting permission on arbitrary taps.
+      if(!silentAttempted&&navigator.userActivation?.isActive===false){
+        silentAttempted=true;silentPending=true;
+        const epoch=recoveryEpoch;
+        try{
+          const result=await window.DeviceMotionEvent.requestPermission();
+          if(epoch!==recoveryEpoch||!mayRecover())return;
+          if(result==='granted'){sessionAllowed=true;silentPending=false;watchSensor();return;}
+        }catch{}
+        finally{if(epoch===recoveryEpoch)silentPending=false;}
+        if(epoch!==recoveryEpoch)return;
+      }
+      if(!mayRecover()||sensorSeen)return;
+      recoveryNeeded=true;sessionAllowed=false;
+      shakeStatus.textContent='흔들기 설정은 유지됐어요. Safari 센서 권한을 다시 연결해주세요.';
+      updateSetting();
+    },1200);
   }
   shakeButton.addEventListener('click',()=>{
     if(!mobile()||!hasCard()||!canMotion()||requesting||document.body.classList.contains('license-animating'))return;
     if(enabled){
-      remember(false);sensorSeen=false;sessionAllowed=false;firstHit=null;gravity=null;
+      remember(false);resetSensor();
       shakeStatus.textContent='흔들기 기능을 껐어요.';updateSetting();return;
     }
     return connectSensor();
   });
   shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
+  recovery.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
   function notifyFrame(active){if(frameStarted)frame.contentWindow?.postMessage({type:'gamttiz-wallet-visibility',active},location.origin);}
   frame.addEventListener('load',()=>notifyFrame(presented));
   function startFrame(){
     if(frameStarted||!mobile())return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120detail4';
+    frameStarted=true;frame.src='license.html?wallet=1&v=20261120reopen5';
   }
   function warm(){
     if(frameStarted||warmTimer||!enabled||!hasCard()||!mobile())return;
@@ -291,11 +327,11 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      frame.src='license.html?wallet=1&v=20261120detail4';
+      frame.src='license.html?wallet=1&v=20261120reopen5';
     }
     lastExists=exists;updateSetting();
-    if(!mobile()||!exists){if(presented)settle(false);return;}
-    if(exists)warm();
+    if(!mobile()||!exists||!enabled){clearRecovery();updateSetting();if(presented&&!exists)settle(false);return;}
+    if(exists){warm();watchSensor();}
   }
   function present(){
     clearTimeout(sheetTimer);sheetTimer=0;if(presented)return;
@@ -326,7 +362,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
       if(!gravity){gravity=raw.slice();return;}
       a=raw.map((x,i)=>x-gravity[i]);gravity=gravity.map((x,i)=>x*.88+raw[i]*.12);
     }
-    if(!sensorSeen){sensorSeen=true;sessionAllowed=true;shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';updateSetting();}
+    if(!sensorSeen){sensorSeen=true;sessionAllowed=true;clearRecovery();shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';updateSetting();}
     if(!lastExists||open||presented||document.body.classList.contains('license-animating'))return;
     const now=performance.now(),power=Math.hypot(...a);
     if(now-lastOpened<2200||power<11||now-lastHit<85)return;
@@ -339,11 +375,16 @@ const walletMedia=matchMedia('(max-width: 900px)');
     }else if(now-firstHit.time>450)firstHit={a,power,time:now};
   }
   window.addEventListener('devicemotion',motion,{passive:true});
-  document.addEventListener('visibilitychange',()=>{firstHit=null;gravity=null;if(!document.hidden){restorePreference();sync();}});
+  function resumeSensors(){
+    restorePreference();resetSensor();
+    window.removeEventListener?.('devicemotion',motion);
+    window.addEventListener('devicemotion',motion,{passive:true});sync();
+  }
+  document.addEventListener('visibilitychange',()=>{firstHit=null;gravity=null;if(document.hidden){clearRecovery();updateSetting();}else resumeSensors();});
   close.addEventListener('click',()=>settle(false));backdrop.addEventListener('click',()=>settle(false));
   window.addEventListener('keydown',e=>{if(e.key==='Escape'&&presented)settle(false);});
   window.addEventListener('storage',e=>{if(e.key===shakeKey||e.key===null)restorePreference();if(e.key==='gamttiz-my-license-v1'||e.key===shakeKey||e.key===null)sync();});
-  window.addEventListener('gamttiz:license-change',sync);window.addEventListener('pageshow',()=>{restorePreference();sync();});
+  window.addEventListener('gamttiz:license-change',sync);window.addEventListener('pageshow',e=>{if(e.persisted)resumeSensors();else{restorePreference();sync();}});
   window.addEventListener('hashchange',sync);
   sheet.hidden=false;sheet.inert=true;sheet.setAttribute('aria-hidden','true');
   if(walletMedia.addEventListener)walletMedia.addEventListener('change',sync);
