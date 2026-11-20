@@ -250,7 +250,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   const backdrop=make('button','gtz-wallet-backdrop');backdrop.type='button';backdrop.setAttribute('aria-label','라이센스 닫기');
   const content=make('div','gtz-wallet-content'),title=make('p','gtz-wallet-title','MY LICENSE');
   const close=make('button','gtz-wallet-close','×');close.type='button';close.setAttribute('aria-label','닫기');
-  const frame=make('iframe','gtz-wallet-frame');frame.title='나의 감띠즈 라이센스 카드';
+  const frame=make('iframe','gtz-wallet-frame');frame.title='나의 감띠즈 라이센스 카드';frame.loading='lazy';
   const detail=make('a','gtz-wallet-detail','MY ID 페이지 ↗');detail.href='license.html';
   content.append(title,close,frame,detail);sheet.append(backdrop,content);document.body.append(sheet);
   const shakeSettings=make('div','gtz-shake-setting');shakeSettings.hidden=true;
@@ -345,23 +345,18 @@ const walletMedia=matchMedia('(max-width: 900px)');
   frame.addEventListener('load',()=>notifyFrame(presented));
   function startFrame(){
     if(frameStarted||!mobile())return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120reopen6';
+    frameStarted=true;frame.src='license.html?wallet=1&v=20261120reopen7';
   }
-  function warm(){
-    if(frameStarted||warmTimer||!enabled||!hasCard()||!mobile())return;
-    warmTimer=setTimeout(()=>{
-      warmTimer=0;if(document.body.classList.contains('license-animating')){warm();return;}
-      if(typeof requestIdleCallback==='function')requestIdleCallback(startFrame,{timeout:1800});else startFrame();
-    },700);
-  }
+  function warm(){/* Do not pre-render the full animated license in a hidden iframe. */}
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      frame.src='license.html?wallet=1&v=20261120reopen6';
+      if(presented)frame.src='license.html?wallet=1&v=20261120reopen7';
+      else{frame.removeAttribute('src');frameStarted=false;}
     }
     lastExists=exists;updateSetting();
     if(!mobile()||!exists||!enabled){clearRecovery();updateSetting();if(presented&&!exists)settle(false);return;}
-    if(exists){warm();watchSensor();}
+    if(exists){watchSensor();}
   }
   function present(){
     clearTimeout(sheetTimer);sheetTimer=0;if(presented)return;
@@ -384,7 +379,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   }
   function vector(v){return v&&[v.x,v.y,v.z].every(Number.isFinite)?[v.x,v.y,v.z]:null;}
   function motion(e){
-    if(!enabled||!mobile()||document.hidden)return;
+    if(!enabled||!mobile()||document.hidden||presented||open)return;
     let a=vector(e.acceleration);
     if(!a){
       const raw=vector(e.accelerationIncludingGravity);if(!raw)return;
@@ -392,7 +387,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
       a=raw.map((x,i)=>x-gravity[i]);gravity=gravity.map((x,i)=>x*.88+raw[i]*.12);
     }
     if(!sensorSeen){sensorSeen=true;sessionAllowed=true;clearRecovery();shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';updateSetting();}
-    if(!lastExists||open||presented||document.body.classList.contains('license-animating'))return;
+    if(!lastExists||document.body.classList.contains('license-animating'))return;
     const now=performance.now(),power=Math.hypot(...a);
     if(now-lastOpened<2200||power<11||now-lastHit<85)return;
     lastHit=now;
