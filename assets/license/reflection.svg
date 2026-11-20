@@ -2,19 +2,23 @@
   <title>Softly curved warm studio reflections</title>
   <defs>
     <filter id="halo" filterUnits="userSpaceOnUse" x="-70" y="-70" width="860" height="1285" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="19"/>
+      <feGaussianBlur stdDeviation="22"/>
     </filter>
     <filter id="soft" filterUnits="userSpaceOnUse" x="-70" y="-70" width="860" height="1285" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="7.5"/>
+      <feGaussianBlur stdDeviation="10"/>
     </filter>
     <filter id="crest" filterUnits="userSpaceOnUse" x="-70" y="-70" width="860" height="1285" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="3.5"/>
+      <feGaussianBlur stdDeviation="5"/>
     </filter>
     <linearGradient id="warm" x1="0" y1="0" x2="0.3" y2="1">
       <stop stop-color="#e3ae57" stop-opacity=".30"/>
-      <stop offset=".28" stop-color="#ffe0a8" stop-opacity=".78"/>
-      <stop offset=".54" stop-color="#fff1ca" stop-opacity=".95"/>
+      <stop offset=".14" stop-color="#f2c783" stop-opacity=".52"/>
+      <stop offset=".28" stop-color="#ffe0a8" stop-opacity=".76"/>
+      <stop offset=".42" stop-color="#ffebbc" stop-opacity=".90"/>
+      <stop offset=".54" stop-color="#fff1ca" stop-opacity=".93"/>
+      <stop offset=".68" stop-color="#ffe9b5" stop-opacity=".82"/>
       <stop offset=".82" stop-color="#ffdf9c" stop-opacity=".65"/>
+      <stop offset=".92" stop-color="#efc178" stop-opacity=".48"/>
       <stop offset="1" stop-color="#e2aa50" stop-opacity=".30"/>
     </linearGradient>
   </defs>
@@ -33,7 +37,7 @@
     <path d="M295 1320 C581 1045 445 385 837 -180" stroke-width="20" opacity=".47"/>
   </g>
   <g fill="none" stroke="#fff1c8" filter="url(#crest)" stroke-linecap="round">
-    <path d="M-111 1320 C207 1030 92 380 489 -180" stroke-width="5.5" opacity=".55"/>
-    <path d="M96 1320 C393 1040 254 400 660 -180" stroke-width="9" opacity=".60"/>
+    <path d="M-111 1320 C207 1030 92 380 489 -180" stroke-width="5.5" opacity=".49"/>
+    <path d="M96 1320 C393 1040 254 400 660 -180" stroke-width="9" opacity=".54"/>
   </g>
 </svg>

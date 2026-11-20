@@ -267,7 +267,7 @@
   inset:0;z-index:3;border-radius:inherit;transform:none!important;
   background-size:240% 240%;background-repeat:no-repeat;background-position:50% 50%;
   /* Keep the earlier gold sweep, with gently curved and feathered streaks. */
-  background-image:url("assets/license/reflection.svg?v=20261121curve1");
+  background-image:url("assets/license/reflection.svg?v=20261121curve2");
   opacity:.44;animation:license-surface-idle 8s ease-in-out infinite alternate;will-change:opacity;
 }
 @keyframes license-surface-idle{
