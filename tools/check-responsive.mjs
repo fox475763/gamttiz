@@ -66,6 +66,14 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      if(filename==='collection.html'){
        assert.equal(await page.locator('.dex-tile').count(),20);
        assert.equal(await page.locator('.dex-unknown').count(),6);
+       const dial=page.locator('#dex-grid');
+       assert.equal(await dial.evaluate(el=>getComputedStyle(el).scrollSnapType),'y mandatory');
+       await page.locator('#dex-dial-down').click();
+       await page.waitForFunction(()=>document.querySelector('#dex-dial-number').textContent==='NO. 02');
+       assert.equal(await page.locator('.is-dial-current').count(),1);
+       assert.equal(await page.locator('#dex-detail').evaluate(el=>el.open),false);
+       await page.locator('#dex-dial-up').click();
+       await page.waitForFunction(()=>document.querySelector('#dex-dial-number').textContent==='NO. 01');
        await page.locator('.dex-unknown').first().click();
        assert.equal(await page.locator('#dex-profile h2').textContent(),'???');
        assert.equal(await page.locator('#dex-detail').evaluate(el=>el.open),true);

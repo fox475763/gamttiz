@@ -74,3 +74,41 @@ test('GAMTTIZ DEX uses existing editorial palette and has no collection-record p
  assert.match(css,/--dex-red:var\(--gtz-red,#e93636\)/);
  assert.doesNotMatch(css,/dex-overview|dex-progress/);
 });
+
+test('Vertical dial lays out horizontal rows, snaps at the center and retains details',()=>{
+ const html=src('collection.html'),css=src('national-dex.css'),js=src('dex-dial.js');
+ assert.match(html,/id="dex-grid"[^>]*tabindex="0"/);
+ assert.match(html,/dex-dial\.js\?/);
+ assert.match(css,/scroll-snap-type:y mandatory/);
+ assert.match(css,/scroll-snap-align:center/);
+ assert.match(css,/dex-dial \.dex-tile\{[\s\S]*?grid-template-columns:/);
+ assert.match(css,/is-dial-current/);assert.match(js,/prefers-reduced-motion/);
+});
+test('Dial follows scroll center, skips hidden rows, resets filters and navigates without opening details',()=>{
+ const nodes={},queue=[];
+ class El {
+   constructor(id){this.id=id;this.children=[];this.dataset={};this.hidden=false;this.scrollTop=0;this.attrs={};this.classes=new Set();this.classList={add:k=>this.classes.add(k),remove:k=>this.classes.delete(k),toggle:(k,v)=>v?this.classes.add(k):this.classes.delete(k)};this.events={};}
+   addEventListener(k,f){this.events[k]=f;}
+   emit(k,e={}){this.events[k]?.(e);}
+   setAttribute(k,v){this.attrs[k]=v;}
+   removeAttribute(k){delete this.attrs[k];}
+   getBoundingClientRect(){if(this.id==='dex-grid')return{top:0,height:400};const visible=nodes['dex-grid'].children.filter(x=>!x.hidden),i=visible.indexOf(this);return{top:155+i*100-nodes['dex-grid'].scrollTop,height:90};}
+   scrollTo({top}){this.scrollTop=top;this.emit('scroll');}
+   focus(){doc.activeElement=this;}
+   querySelector(){return this.children.find(x=>x.classes.has('is-selected')&&!x.hidden);}
+ }
+ for(const id of ['dex-grid','dex-dial-up','dex-dial-down','dex-dial-number','dex-detail','dex-search','dex-sort','.dex-dial'])nodes[id]=new El(id);
+ const grid=nodes['dex-grid'],shell=nodes['.dex-dial'],filter=new El('filter');
+ for(let id=1;id<=20;id++){const b=new El('row'+id);b.dataset.friendId=String(id);grid.children.push(b);}
+ const doc={querySelector:s=>nodes[s.startsWith('#')?s.slice(1):s],querySelectorAll:()=>[filter],activeElement:null};
+ let seq=0;const flush=()=>{while(queue.length)queue.shift()();};
+ const env=vm.createContext({document:doc,GTZFriends:ctx.GTZFriends,matchMedia:()=>({matches:true}),requestAnimationFrame:f=>{queue.push(f);return ++seq;},window:{}});
+ vm.runInContext(src('dex-dial.js'),env);flush();
+ assert.equal(nodes['dex-dial-number'].textContent,'NO. 01');assert.equal(nodes['dex-dial-up'].disabled,true);
+ nodes['dex-dial-down'].emit('click');flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 02');
+ grid.scrollTop=500;grid.emit('scroll');flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 06');
+ assert.equal(grid.children.filter(b=>b.classes.has('is-dial-current')).length,1);
+ grid.children.forEach((b,i)=>b.hidden=i<14);filter.emit('click');flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 15');
+ grid.emit('keydown',{key:'End',preventDefault(){}});flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 20');assert.equal(nodes['dex-dial-down'].disabled,true);
+ grid.children.forEach(b=>b.hidden=true);filter.emit('click');flush();assert.equal(shell.hidden,true);
+});

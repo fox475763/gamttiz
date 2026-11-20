@@ -119,3 +119,82 @@
 }
 @media(max-width:350px){.dex-page .national-dex{padding-left:13px;padding-right:13px}.dex-page .dex-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dex-page .dex-tools{grid-template-columns:1fr}.dex-page .dex-sort select{width:100%}.dex-page .dex-modal-index span{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.dex-page .dex-detail[open]{animation:none}.dex-page .dex-tile,.dex-page .dex-tile img,.dex-page .dex-tile-info>svg{transition:none}}
+
+/* Vertical dial – a single horizontal entry per detent, with native scroll inertia. */
+.dex-page .dex-dial{
+  --dial-height:clamp(350px,55dvh,520px);--dial-row:90px;--dial-gap:10px;
+  max-width:900px;margin:0 auto;min-width:0;
+}
+.dex-page .dex-dial .dex-grid{
+  display:flex;flex-direction:column;align-items:stretch;gap:var(--dial-gap);
+  height:var(--dial-height);min-height:0;overflow-x:hidden;overflow-y:auto;
+  padding:calc((var(--dial-height) - var(--dial-row))/2) 12px;
+  scroll-snap-type:y mandatory;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;touch-action:pan-y;
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 11%,#000 89%,transparent);
+  mask-image:linear-gradient(to bottom,transparent,#000 11%,#000 89%,transparent);
+}
+.dex-page .dex-dial .dex-grid::-webkit-scrollbar{display:none}
+.dex-page .dex-dial .dex-grid:focus-visible{outline:2px solid var(--dex-red);outline-offset:-2px}
+.dex-page .dex-dial .dex-tile{
+  flex:0 0 var(--dial-row);width:100%;height:var(--dial-row);min-height:0;
+  display:grid;grid-template-columns:clamp(66px,12%,100px) clamp(76px,15%,124px) minmax(0,1fr);
+  align-items:center;justify-content:initial;gap:clamp(12px,2vw,26px);
+  padding:9px clamp(14px,3vw,28px);border-radius:21px;scroll-snap-align:center;
+  scroll-snap-stop:normal;
+  transform:scale(.975);opacity:.83;
+  background:linear-gradient(147deg,#ffffffc7,#ffffff4a 58%,#eeeee88c);
+  box-shadow:inset 0 1px 2px #fff,0 4px 12px #2523210c;
+  transition:transform .22s cubic-bezier(.22,1,.36,1),opacity .2s,box-shadow .2s,background .2s;
+}
+.dex-page .dex-dial .dex-tile.is-dial-near{transform:scale(.99);opacity:.93}
+.dex-page .dex-dial .dex-tile.is-dial-far{transform:scale(.96);opacity:.71}
+.dex-page .dex-dial .dex-tile.is-dial-current{
+  transform:scale(1);opacity:1;
+  background:linear-gradient(145deg,#fffffff5,#ffffff80 52%,#f8e6e55c);
+  box-shadow:0 0 0 1px #e9363655,inset 0 1px 2px #fff,0 6px 20px #25232116;
+}
+.dex-page .dex-dial .dex-tile.is-dial-current::before{border-width:2px}
+.dex-page .dex-dial .dex-tile.is-dial-current .dex-tile-no,.dex-page .dex-dial .dex-tile.is-dial-current .dex-tile-info>svg{color:var(--dex-red)}
+.dex-page .dex-dial .dex-tile-top{display:flex;align-items:center;justify-content:flex-start;gap:9px;flex-wrap:nowrap}
+.dex-page .dex-dial .dex-tile-no{font-size:clamp(11px,1.4vw,15px);letter-spacing:.035em;white-space:nowrap}
+.dex-page .dex-dial .dex-tile-state{width:6px;height:6px;flex:none}
+.dex-page .dex-dial .dex-tile-portrait{width:100%;height:calc(var(--dial-row) - 18px);aspect-ratio:auto;margin:0;border-radius:12px}
+.dex-page .dex-dial .dex-tile-portrait img{height:92%;width:94%;object-fit:contain;filter:drop-shadow(0 4px 4px #25232119)}
+.dex-page .dex-dial .dex-tile-info{gap:12px}
+.dex-page .dex-dial .dex-tile-info>span{gap:5px;min-width:0}
+.dex-page .dex-dial .dex-tile-info strong{font-size:clamp(17px,2.1vw,23px);line-height:1.2}
+.dex-page .dex-dial .dex-tile-info small{font-size:12px;line-height:1.3}
+.dex-page .dex-dial .dex-tile-info>svg{flex:0 0 20px;width:20px;height:20px}
+.dex-page .dex-dial .dex-unknown .dex-tile-mark{font-size:clamp(26px,4vw,40px)}
+.dex-page .dex-dial .dex-unknown:not(.is-dial-current){background:linear-gradient(145deg,#ffffff80,#deded82b 70%,#fff5)}
+@media(hover:hover){
+  .dex-page .dex-dial .dex-tile:hover{transform:scale(1);opacity:1;box-shadow:inset 0 1px 3px #fff,0 6px 16px #25232116}
+  .dex-page .dex-dial .dex-tile:hover img{transform:none}
+}
+.dex-page .dex-dial .dex-tile:active{transform:scale(.975)}
+.dex-page .dex-dial-controls{display:flex;justify-content:center;align-items:center;gap:14px;margin:5px auto 0}
+.dex-page .dex-dial-controls button{
+  display:grid;place-items:center;width:44px;height:44px;border-radius:50%;padding:0;
+  color:#686863;border:1px solid #fff;background:linear-gradient(145deg,#fff9,#fff2);
+  box-shadow:inset 0 1px 2px #fffc,0 3px 8px #25232114;
+}
+.dex-page .dex-dial-controls button:disabled{opacity:.38;cursor:default}
+.dex-page .dex-dial-controls button:not(:disabled):hover{color:var(--dex-red);background:#fff9}
+.dex-page .dex-dial-controls button svg{width:23px;height:23px}
+.dex-page #dex-dial-number{min-width:66px;text-align:center;font-size:12px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:.07em;color:var(--dex-red)}
+@media(max-width:700px){
+  .dex-page .dex-dial{--dial-height:clamp(320px,52dvh,440px);--dial-row:80px;--dial-gap:8px}
+  .dex-page .dex-dial .dex-grid{padding-inline:5px}
+  .dex-page .dex-dial .dex-tile{grid-template-columns:65px 65px minmax(0,1fr);gap:10px;padding:8px 12px;border-radius:18px}
+  .dex-page .dex-dial .dex-tile-no{font-size:11px}
+  .dex-page .dex-dial .dex-tile-top{gap:5px}
+  .dex-page .dex-dial .dex-tile-info strong{font-size:17px}
+  .dex-page .dex-dial .dex-tile-info small{font-size:11px}
+  .dex-page .dex-dial .dex-tile-info>svg{flex-basis:16px;width:16px;height:16px}
+}
+@media(max-width:350px){
+  .dex-page .dex-dial .dex-tile{grid-template-columns:57px 48px minmax(0,1fr);gap:7px;padding-inline:10px}
+  .dex-page .dex-dial .dex-tile-info strong{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){.dex-page .dex-dial .dex-tile{transition:none;transform:none}.dex-page .dex-dial .dex-tile:hover{transform:none}}
