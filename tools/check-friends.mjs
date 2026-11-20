@@ -135,13 +135,14 @@ test('Daily fry pick replaces the roulette with independent selectable fries',()
  assert.match(css,/touch-action:none/);assert.match(css,/fry-extract/);assert.match(css,/fry-character-in/);
  assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.equal((html.match(/class="fry-holder-vector" viewBox="0 0 480 480"/g)||[]).length,2);assert.doesNotMatch(html,/holder-fbx-render/);assert.match(html,/class="fry-holder-face"/);assert.match(css,/fry-holder-face\{pointer-events:visiblePainted\}/);assert.match(css,/is-preview:not\(:disabled\) \.fry-stick/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
 });
-test('Fry drag, 14 unique random draws, reload, legacy migration and Korea-date reset',async()=>{
+test('Fry drag, 14 unique random draws, fresh reload and back navigation, legacy migration and Korea-date reset',async()=>{
   let today='2026-11-21',randomCalls=0;
   const storage=new Map();
   class El {
     constructor(){this.children=[];this.events={};this.hidden=false;this.disabled=false;this.classes=new Set();this.classList={add:(...k)=>k.forEach(c=>this.classes.add(c)),remove:(...k)=>k.forEach(c=>this.classes.delete(c)),toggle:(k,v)=>v?this.classes.add(k):this.classes.delete(k)};this.style={setProperty(){},removeProperty(){}};}
     append(b){this.children.push(b);}
     setAttribute(){}
+    removeAttribute(k){delete this[k];}
     setPointerCapture(){}
     addEventListener(k,fn){this.events[k]=fn;}
     emit(k,e={}){return this.events[k]?.(e);}
@@ -152,7 +153,8 @@ test('Fry drag, 14 unique random draws, reload, legacy migration and Korea-date 
     const nodes=Object.fromEntries(ids.map(id=>[id,new El()]));
     const doc={querySelector:s=>nodes[s.slice(1)],createElement:()=>new El(),addEventListener(){}};
     const localStorage={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
-    const m=vm.createContext({document:doc,GTZFriends:{...ctx.GTZFriends,dayKey:()=>today},GTZProfile:ctx.GTZProfile,localStorage,Math:fakeMath,matchMedia:q=>({matches:q.includes('reduced')})});
+    const events={};nodes.pageEvent=(k,e={})=>events[k]?.(e);
+    const m=vm.createContext({window:{addEventListener(k,fn){events[k]=fn;}},document:doc,GTZFriends:{...ctx.GTZFriends,dayKey:()=>today},GTZProfile:ctx.GTZProfile,localStorage,Math:fakeMath,matchMedia:q=>({matches:q.includes('reduced')})});
     vm.runInContext(src('daily-draw.js'),m);return nodes;
   };
   const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
@@ -171,7 +173,7 @@ test('Fry drag, 14 unique random draws, reload, legacy migration and Korea-date 
   nodes['draw-replay'].emit('click');assert.equal(nodes['draw-profile'].hidden,true);assert.equal(randomCalls,1);
   const another=fries[4];another.emit('pointerdown',point);another.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(nodes['fry-reveal-name'].textContent,name);
   assert.equal(randomCalls,2);
-  const second=JSON.parse(storage.get(key)),reload=run();assert.equal(reload['fry-reveal-name'].textContent,characters[second.id-1].name);
+  const second=JSON.parse(storage.get(key)),reload=run();assert.equal(reload['fry-reveal-name'].textContent,'');assert.equal(reload['draw-profile'].hidden,true);assert.ok(reload['fry-stack'].children.every(f=>!f.disabled&&!f.classes.has('is-picked')));
   assert.equal(second.remaining.length,12);
   const seen=new Set([saved.id,second.id]);
   for(let i=0;i<12;i++){
@@ -181,8 +183,11 @@ test('Fry drag, 14 unique random draws, reload, legacy migration and Korea-date 
   assert.equal(seen.size,14);assert.equal(randomCalls,14);assert.equal(JSON.parse(storage.get(key)).remaining.length,0);
   const last=JSON.parse(storage.get(key)).id;
   reload['draw-replay'].emit('click');const next=reload['fry-stack'].children[1];next.emit('pointerdown',point);next.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,last);assert.equal(JSON.parse(storage.get(key)).remaining.length,13);
-  storage.set(key,JSON.stringify({date:today,id:7}));const old=run();assert.equal(old['fry-reveal-name'].textContent,characters[6].name);
+  storage.set(key,JSON.stringify({date:today,id:7}));const old=run();assert.equal(old['fry-reveal-name'].textContent,'');assert.equal(old['draw-profile'].hidden,true);
   old['draw-replay'].emit('click');const legacyFry=old['fry-stack'].children[0];legacyFry.emit('pointerdown',point);legacyFry.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,7);assert.equal(JSON.parse(storage.get(key)).remaining.length,12);
+  old.pageEvent('pagehide');old.pageEvent('pageshow',{persisted:true});assert.equal(old['draw-profile'].hidden,true);assert.equal(old['fry-reveal-name'].textContent,'');assert.equal(old['draw-placeholder'].hidden,false);assert.equal(old['draw-replay'].hidden,true);assert.ok(old['fry-stack'].children.every(f=>!f.disabled&&!f.classes.has('is-picked')));
+  // Leaving during extraction must not let a queued animation restore the old result.
+  legacyFry.emit('pointerdown',point);legacyFry.emit('pointermove',{...point,clientY:25});old.pageEvent('pagehide');old.pageEvent('pageshow',{persisted:true});await flush();assert.equal(old['draw-profile'].hidden,true);assert.equal(old['fry-reveal'].hidden,true);
   today='2026-11-22';old['draw-replay'].emit('click');const keyboard=old['fry-stack'].children[0];for(let i=0;i<3;i++)keyboard.emit('keydown',{key:'ArrowUp',preventDefault(){}});await flush();assert.equal(JSON.parse(storage.get(key)).date,today);
 });
 

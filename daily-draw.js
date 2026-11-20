@@ -5,7 +5,7 @@
   // Five straight rectangular sticks sit within the original five-slot 3D holder.
   const shapes=[[31,40,0,7.8],[40.5,44,0,7.8],[50,46,0,7.8],[59.5,43,0,7.8],[69,39,0,7.8]];
   const allIds=characters.map(c=>c.id);
-  let date=dayKey(),selected=0,selectedSlot=0,remaining=[...allIds],busy=false,drag=null,keyboardPull=null;
+  let date=dayKey(),selected=0,selectedSlot=0,remaining=[...allIds],busy=false,drag=null,keyboardPull=null,generation=0;
   const fries=shapes.map(([x,len,tilt,width],i)=>{
     const el=document.createElement('button');el.type='button';el.className='fry-choice';
     el.setAttribute('aria-label',(i+1)+'번째 감자튀김. 위로 당기기. 키보드는 위쪽 방향키.');
@@ -38,7 +38,8 @@
     replay.hidden=true;
   }
   function waiting(message){
-    clearChoice();profile.hidden=true;placeholder.hidden=false;result.classList.remove('is-revealed');
+    generation++;busy=false;clearChoice();profile.hidden=true;profile.innerHTML='';placeholder.hidden=false;result.classList.remove('is-revealed');
+    revealImage.removeAttribute('src');revealName.textContent='';
     status.textContent=message||'감튀 하나를 잡고 위로 쭉 당겨보세요.';
   }
   function showResult(id,animate=false){
@@ -49,21 +50,25 @@
     replay.hidden=false;status.textContent='오늘의 감띠는 '+c.name+'!';
     if(animate&&matchMedia('(max-width: 780px)').matches){result.focus({preventScroll:true});result.scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});}
   }
+  // Retain only the draw history for the non-repeating random bag, never restore the result UI.
+  function restoreBag(){
+    date=dayKey();const saved=getSaved();selected=saved?.id||0;selectedSlot=0;remaining=saved?.remaining??[...allIds];updateDate();
+  }
   function resetDay(){
-    const today=dayKey();if(date===today)return;date=today;const saved=getSaved();selected=saved?.id||0;selectedSlot=saved?.slot||0;remaining=saved?.remaining??[...allIds];updateDate();
-    waiting('새로운 하루! 감튀를 잡고 위로 당겨보세요.');if(selected)showResult(selected);
+    if(date===dayKey())return;restoreBag();
+    waiting('새로운 하루! 감튀를 잡고 위로 당겨보세요.');
   }
   const pause=ms=>reduced.matches?Promise.resolve():new Promise(resolve=>setTimeout(resolve,ms));
   async function start(slot,pull=0,x=0){
     if(busy)return;resetDay();selected=choose();selectedSlot=slot;
-    save();busy=true;clearChoice();status.textContent='감튀가 쏙! 어떤 감띠일까요?';
+    save();busy=true;const run=++generation;clearChoice();status.textContent='감튀가 쏙! 어떤 감띠일까요?';
     profile.hidden=true;placeholder.hidden=false;result.classList.remove('is-revealed');hint.hidden=true;
     fries.forEach((f,i)=>{f.disabled=true;f.classList.toggle('is-picked',i===selectedSlot);});
     setPull(fries[selectedSlot],pull,x);stage.classList.add('is-pulling');
-    await pause(630);
+    await pause(630);if(run!==generation)return;
     const c=characters[selected-1];revealImage.src=image(c.id);revealName.textContent=c.name;revealStage.hidden=false;
     stage.classList.remove('is-pulling');stage.classList.add('is-revealing');
-    await pause(820);
+    await pause(820);if(run!==generation)return;
     busy=false;showResult(selected,true);
   }
   fries.forEach((f,i)=>{
@@ -105,6 +110,9 @@
   });
   // Replay only restores the carton; the user must physically pull another fry.
   replay.addEventListener('click',()=>{if(busy)return;resetDay();waiting('감튀를 다시 잡고 당겨 새로운 감띠를 만나보세요.');});
-  updateDate();const saved=getSaved();if(saved){selected=saved.id;selectedSlot=saved.slot;remaining=saved.remaining;showResult(selected);}
+  restoreBag();waiting();
+  // Browser back/forward cache can keep the old DOM alive; clear it on exit and re-entry.
+  window.addEventListener('pagehide',()=>waiting());
+  window.addEventListener('pageshow',e=>{if(e.persisted){restoreBag();waiting();}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!busy)resetDay();});
 })();

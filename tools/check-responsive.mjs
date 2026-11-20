@@ -111,14 +111,16 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        await page.locator('#draw-profile h2').waitFor({state:'visible'});
        const picked=await page.locator('#draw-profile h2').textContent();
        await page.reload();
-       assert.equal(await page.locator('#draw-profile h2').textContent(),picked);
-       assert.equal(await page.locator('.fry-choice.is-picked').count(),1);
-       assert.equal(await page.locator('#fry-reveal-name').textContent(),picked);
-       await page.locator('#draw-replay').click();
+       assert.equal(await page.locator('.fry-choice.is-picked').count(),0);
+       assert.equal(await page.locator('#fry-reveal-name').textContent(),'');
+       assert.equal(await page.locator('#draw-replay').evaluate(el=>el.hidden),true);
        assert.equal(await page.locator('#draw-profile').evaluate(el=>el.hidden),true);
        await fry.scrollIntoViewIfNeeded();await dragFry();
        await page.locator('#draw-profile h2').waitFor({state:'visible'});
        assert.notEqual(await page.locator('#draw-profile h2').textContent(),picked);
+       await page.goto(base+'play.html');await page.goBack();
+       assert.equal(await page.locator('#draw-profile').evaluate(el=>el.hidden),true);
+       assert.equal(await page.locator('.fry-choice.is-picked').count(),0);
      }
    }
    await context.close();
