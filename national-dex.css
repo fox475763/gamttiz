@@ -223,3 +223,7 @@
  .dex-page #dex-profile .profile-face-inset.is-dual{width:86px}
  .dex-page #dex-profile .profile-lore h3{font-size:18px}
 }
+
+/* Start the catalog at entry 01 without the former half-viewport blank spacer. */
+.dex-page .dex-dial .dex-grid{padding-top:12px;scroll-padding-top:12px;scroll-snap-type:y proximity}
+.dex-page .dex-dial .dex-tile{scroll-snap-align:start}
