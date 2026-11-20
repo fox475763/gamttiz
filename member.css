@@ -211,9 +211,6 @@
 .member-tile:hover .member-radar-sweep{transform:rotate(90deg)}
 /* Fry Rader: retain the full board and carousel; align its surfaces to Member. */
 .member-page .radar-tool .member-tool-head{max-width:660px}
-.member-radar-featured{margin:0 0 26px;padding:18px}
-.member-radar-featured .radar-preview-carousel{max-width:none}
-.member-radar-featured .radar-preview-track .radar-preview-item{height:clamp(180px,26vw,256px)}
 .member-page .radar-tool .radar-board{max-width:none;width:100%;padding:20px 0 45px;margin:0;background:transparent}
 .member-page .radar-tool .radar-board-heading{padding-bottom:16px;gap:10px;border-color:#dcd7cb}
 .member-page .radar-tool .radar-board-heading h2{font-size:clamp(24px,4vw,36px);color:var(--mem-ink);margin:4px 0 0;letter-spacing:-.04em}
@@ -245,5 +242,5 @@
  .member-page .radar-tool .radar-archive .radar-list{grid-template-columns:1fr}
  .member-page .radar-tool .radar-controls :is(input,select){font-size:16px}
 }
-@media(max-width:540px){.member-page .radar-tool .radar-list{grid-template-columns:1fr}.member-radar-featured{padding:12px}.member-page .radar-tool .radar-card{padding:15px}}
+@media(max-width:540px){.member-page .radar-tool .radar-list{grid-template-columns:1fr}.member-page .radar-tool .radar-card{padding:15px}}
 @media(prefers-reduced-motion:reduce){.member-radar-sweep{transition:none!important}}

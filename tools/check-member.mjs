@@ -47,7 +47,7 @@ test('Member UI controls and offline versions stay in sync',()=>{
   }
   assert.ok(!html.includes("member-pocket.js"));
   assert.ok(!html.includes('data-member-view="pocket"'));
-  for(const id of ["radar-list","radar-archive-list","radar-preview-list","radar-admin"])assert.ok(html.includes(`id="${id}"`));
+  for(const id of ["radar-list","radar-archive-list","radar-admin"])assert.ok(html.includes(`id="${id}"`));
   assert.match(html,/id="level-start" type="button" aria-pressed="false"/);
   assert.match(html,/id="level-board" data-mode="flat"/);
   assert.equal((html.match(/id="level-start"/g)||[]).length,1);
@@ -92,4 +92,32 @@ test('Radar only fetches when authorized and active; leaving aborts requests',()
   active=true;registered.enter();assert.equal(requests.length,2);
   active=false;registered.leave();assert.ok(requests.every(r=>r.signal.aborted));
   listeners.online();assert.equal(requests.length,2);
+});
+
+test('Home restores the preview only and uses the Member route for full results',()=>{
+  const home=src('index.html'),member=src('member.html');
+  for(const id of ['radar-preview-carousel','radar-preview-list','radar-preview-dots']){
+    assert.ok(home.includes('id="'+id+'"'));
+    assert.ok(!member.includes('id="'+id+'"'));
+  }
+  assert.match(home,/href="member\.html#radar"/);
+  assert.ok(!home.includes('id="radar-list"'));
+  const requests=[],listeners={};
+  const el={addEventListener(){},querySelectorAll:()=>[]};
+  const ids=new Set(['fry-radar-preview','radar-preview-list']);
+  const window={addEventListener(name,fn){listeners[name]=fn},setInterval:()=>1,clearInterval(){}};
+  vm.runInNewContext(src('fry-radar.js'),{window,document:{getElementById:id=>ids.has(id)?el:null,addEventListener(){},hidden:false},location:{hash:''},fetch:(url,opt)=>{requests.push({url,signal:opt.signal});return new Promise(()=>{})},setTimeout:()=>1,clearTimeout(){},clearInterval(){},AbortController});
+  assert.equal(requests.length,1);assert.match(requests[0].url,/data\/fry-radar\.json/);
+  listeners.pagehide();assert.ok(requests[0].signal.aborted);
+  assert.ok(src('fry-radar.js').includes("node.href='member.html#post-'"));
+});
+test('Every main page uses the original bottom-right Menu without local repositioning',()=>{
+  const shared=src('site-features.css');
+  assert.match(shared,/\.control-dock\{position:fixed;top:auto;left:auto;right:22px;bottom:calc\(22px/);
+  assert.match(shared,/@media\(max-width:520px\)\{\.control-dock\{right:14px;bottom:calc\(14px/);
+  for(const file of ['license.css','license-wallet.css','license-gallery.css','member.css','editorial.css']){
+    assert.doesNotMatch(src(file),/\.control-dock\b/,file+' should inherit the common anchor');
+  }
+  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261120dock1'));
+  assert.ok(src('member-sw.js').includes('site-features.css?v=20261120dock1'));
 });

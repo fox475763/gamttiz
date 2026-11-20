@@ -5,8 +5,11 @@
   const archive=document.getElementById('radar-archive-list');
   const preview=document.getElementById('radar-preview-list');
   const member=window.GTZMember;
-  if(!member||!list||!archive)return;
-  const isActive=()=>member.isActive('radar');
+  // The home carousel is a public preview only. The full board stays license-gated.
+  const homePreview=!!document.getElementById('fry-radar-preview')&&!!preview&&!list&&!archive;
+  if(!homePreview&&(!member||!list||!archive))return;
+  let homeRunning=false;
+  const isActive=()=>homePreview?homeRunning:member.isActive('radar');
   const search=document.getElementById('radar-search');
   const category=document.getElementById('radar-category');
   const sort=document.getElementById('radar-sort');
@@ -137,7 +140,7 @@
     container.append(node);
   };
   const byNewest=(a,b)=>(date(b.publishedAt||b.eventStart)?.getTime()||0)-(date(a.publishedAt||a.eventStart)?.getTime()||0);
-  // Member-only featured carousel: the latest three verified stories.
+  // Home carousel: the latest three verified stories.
   const previewDots=document.getElementById('radar-preview-dots');
   const previewCarousel=document.getElementById('radar-preview-carousel');
   const prefersReducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -146,7 +149,7 @@
 
   const previewCard=item=>{
     const node=el('a','radar-preview-item');
-    node.href='#post-'+encodeURIComponent(item.id);
+    node.href='member.html#post-'+encodeURIComponent(item.id);
     if(item.imageNote)node.title=item.imageNote;
     const thumb=el('div','radar-preview-thumb');
     const fallback=()=>thumb.replaceChildren(el('div','radar-preview-thumb-fallback','🍟'));
@@ -325,7 +328,7 @@
         const focused=document.activeElement?.closest('[id]')?.id;
         const scrollY=window.scrollY;
         items=fresh;render(true);
-        if(loaded){
+        if(loaded&&!homePreview){
           if(focused)document.getElementById(focused)?.focus({preventScroll:true});
           window.scrollTo({top:scrollY,behavior:'instant'});
         }
@@ -343,16 +346,17 @@
     }finally{refreshing=false;if(epoch!==generation&&isActive())refresh();}
   };
   function enter(){
+    if(homePreview)homeRunning=true;
     const hash=location.hash.slice(1);
-    if(hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';render();}}
+    if(!homePreview&&hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';render();}}
     revealAnchor();if(!timer)timer=window.setInterval(refresh,60000);
     if(loaded)startPreviewTimer();refresh();
   }
-  function leave(){generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
-  member.register('radar',{enter,leave});
+  function leave(){if(homePreview)homeRunning=false;generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
+  if(homePreview)enter();else member.register('radar',{enter,leave});
   window.addEventListener('focus',refresh);
   window.addEventListener('online',refresh);
-  window.addEventListener('pageshow',refresh);
+  window.addEventListener('pageshow',homePreview?enter:refresh);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
   window.addEventListener('pagehide',leave);
 })();
