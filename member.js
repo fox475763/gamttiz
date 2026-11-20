@@ -1,20 +1,29 @@
 (() => {
   'use strict';
   const M=GTZMemberModel,$=id=>document.getElementById(id),views=[...document.querySelectorAll('[data-member-view]')];
-  const handlers=new Map();let id=null,active=null,installEvent=null;
+  const handlers=new Map();let id=null,active=null,installEvent=null,shownView=null;
   const route=()=>{const name=location.hash.slice(1);return views.some(v=>v.dataset.memberView===name)?name:'hub';};
   function sync(){
     const next=M.readLicense(localStorage),previous=active,previousId=id;
     id=next;active=next?route():null;
     $('member-locked').hidden=!!next;$('member-unlocked').hidden=!next;
     views.forEach(view=>view.hidden=view.dataset.memberView!==active);
-    if(next)$('member-greeting').textContent=next.name;
+    if(next){
+      $('member-greeting').textContent=next.name;
+      if($('member-avatar').getAttribute('src')!==M.art(next.character))$('member-avatar').src=M.art(next.character);
+    }
+    const view=next?views.find(v=>v.dataset.memberView===active):$('member-locked');
+    if(view!==shownView){
+      shownView?.classList.remove('is-entering');
+      view?.classList.add('is-entering');
+      shownView=view;
+    }
     if(previous&&(previous!==active||!next||M.petKey(previousId)!==M.petKey(next)))handlers.get(previous)?.leave?.();
     if(active)handlers.get(active)?.enter?.(next);
     document.title=(active==='pocket'?'GAMTTIZ POCKET':active==='level'?'GAMTTIZ LEVEL':'Member · 감띠즈 멤버')+' — GAMTTIZ';
   }
   window.GTZMember={get license(){return id;},get active(){return active;},register(name,handler){handlers.set(name,handler);if(active===name)handler.enter?.(id);},isActive:name=>active===name&&!!M.readLicense(localStorage)};
-  window.addEventListener('hashchange',()=>{sync();window.scrollTo({top:0,behavior:'auto'});});
+  window.addEventListener('hashchange',()=>{sync();shownView?.querySelector('h1[tabindex]')?.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});});
   window.addEventListener('storage',e=>{if(e.key===M.KEY||e.key===null)sync();});
   window.addEventListener('gamttiz:license-change',sync);window.addEventListener('pageshow',sync);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync();});
@@ -46,3 +55,4 @@
   sync();
   if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('member-sw.js',{scope:'./'}).catch(()=>{});
 })();
+

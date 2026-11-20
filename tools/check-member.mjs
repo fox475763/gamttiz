@@ -50,3 +50,38 @@ test('Member HTML contains all implementation targets and install entry',()=>{
   assert.equal(manifest.display,'standalone');
   assert.equal(manifest.start_url,'./member.html#pocket');
 });
+test('Member UI controls and offline versions stay in sync',()=>{
+  const html=src('member.html'),sw=src('member-sw.js'),version=/const VERSION='([^']+)'/.exec(sw)[1];
+  for(const file of ['member.css','member-model.js','member.js','member-pocket.js','member-level.js','member.webmanifest']){
+    assert.ok(html.includes(file+'?v='+version),file+' must match the offline cache version');
+  }
+  assert.match(html,/id="pocket-motion" aria-pressed="false"/);
+  assert.match(html,/id="level-start" type="button" aria-pressed="false"/);
+  assert.match(html,/id="level-board" data-mode="flat"/);
+  assert.equal((html.match(/id="level-start"/g)||[]).length,1);
+  assert.equal((html.match(/id="member-avatar"/g)||[]).length,1);
+  assert.match(src('member.css'),/prefers-reduced-motion:reduce/);
+});
+test('Member navigation reveals only the authorized view and animates route changes',()=>{
+  class Element {
+    constructor(name){this.dataset={memberView:name};this.hidden=true;this.textContent='';this.attributes={};this.listeners={};this.classes=new Set();this.classList={add:c=>this.classes.add(c),remove:c=>this.classes.delete(c)};}
+    getAttribute(k){return this.attributes[k]??null}
+    set src(s){this.attributes.src=s}
+    addEventListener(type,fn){this.listeners[type]=fn}
+    querySelector(){return {focus(){}}}
+  }
+  const ids=new Map(),get=id=>{if(!ids.has(id))ids.set(id,new Element());return ids.get(id)};
+  const pages=['hub','pocket','level'].map(n=>new Element(n)),listeners={};
+  const location={hash:'#pocket'},data=new Map([[M.KEY,JSON.stringify(sample)]]);
+  const window={addEventListener:(name,fn)=>listeners[name]=fn,scrollTo(){},isSecureContext:false};
+  vm.runInNewContext(src('member.js'),{GTZMemberModel:M,document:{getElementById:get,querySelectorAll:()=>pages,addEventListener(){},title:''},location,localStorage:{getItem:k=>data.get(k)||null},navigator:{},window});
+  assert.equal(window.GTZMember.active,'pocket');
+  assert.equal(get('member-avatar').getAttribute('src'),M.art(sample.character));
+  assert.equal(pages[1].hidden,false);assert.equal(pages[0].hidden,true);
+  assert.ok(pages[1].classes.has('is-entering'));
+  location.hash='#level';listeners.hashchange();
+  assert.equal(window.GTZMember.active,'level');assert.equal(pages[1].hidden,true);assert.equal(pages[2].hidden,false);
+  assert.ok(pages[2].classes.has('is-entering'));assert.ok(!pages[1].classes.has('is-entering'));
+  data.delete(M.KEY);listeners.pageshow();assert.equal(get('member-locked').hidden,false);assert.equal(get('member-unlocked').hidden,true);assert.ok(pages.every(p=>p.hidden));
+});
+
