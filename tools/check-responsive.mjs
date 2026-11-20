@@ -12,6 +12,54 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const base='http://127.0.0.1:'+server.address().port+'/';
 const pages=['index.html','member.html','license.html','play.html','collection.html','draw.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar'];
 const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2026-11-20T00:00:00Z',character:0};
+for(const engine of [chromium,webkit])test('Shake opens a mobile 3D license with working face changes: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
+   await context.addInitScript(({license})=>{
+     localStorage.setItem('gamttiz-my-license-v1',JSON.stringify(license));
+     localStorage.setItem('gamttiz-license-shake-enabled-v1','1');
+   },{license});
+   await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+   const page=await context.newPage();
+   await page.goto(base+'index.html',{waitUntil:'domcontentloaded'});
+   const card=page.locator('.gtz-wallet-rotator'),turn=page.locator('.gtz-wallet-turn');
+   const assertFace=async side=>{
+     try{await page.waitForFunction(side=>{
+       const card=document.querySelector('.gtz-wallet-rotator');if(!card||card.dataset.side!==side)return false;
+       const imgs=[...card.querySelectorAll('img')];
+       return imgs.length===2&&imgs.every(i=>i.complete&&i.naturalWidth>0)&&imgs.filter(i=>getComputedStyle(i).display!=='none').length===1&&
+         getComputedStyle(imgs[side==='front'?0:1]).display!=='none'&&new DOMMatrixReadOnly(getComputedStyle(card.querySelector('.gtz-wallet-rotator-inner')).transform).isIdentity;
+     },side,{timeout:10000});}catch(error){console.log('wallet diagnostics',await page.locator('.gtz-wallet-frame').evaluate(el=>({text:el.textContent,side:el.querySelector('.gtz-wallet-rotator')?.dataset.side,transform:el.querySelector('.gtz-wallet-rotator-inner')?.style.transform,images:[...el.querySelectorAll('img')].map(i=>({complete:i.complete,width:i.naturalWidth,display:getComputedStyle(i).display,hidden:i.hidden}))})));throw error;}
+   };
+   const fire=async x=>page.evaluate(x=>{
+     const e=new Event('devicemotion');Object.defineProperty(e,'acceleration',{value:{x,y:0,z:0}});window.dispatchEvent(e);
+   },x);
+   const shake=async()=>{
+     await fire(18);await page.waitForTimeout(150);await fire(-18);
+     await turn.waitFor({state:'visible'});
+     await assertFace('front');
+     await page.waitForTimeout(450);
+   };
+   await shake();
+   assert.equal(await page.locator('.gtz-wallet-sheet').getAttribute('aria-hidden'),'false');
+   const b=await card.boundingBox();assert.ok(b&&b.height>200&&b.y>=0&&b.y+b.height<844);
+   let x=b.x+b.width/2,y=b.y+b.height/2;
+   assert.equal(await page.evaluate(({x,y})=>document.elementFromPoint(x,y).className,{x,y}),'gtz-wallet-rotator');
+   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+45,y-25,{steps:5});
+   await page.waitForFunction(()=>!new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.gtz-wallet-rotator-inner')).transform).isIdentity);
+   await page.mouse.move(x+110,y-25,{steps:5});await page.mouse.up();
+   await assertFace('back');
+   await card.tap();await assertFace('front');
+   await turn.tap();await assertFace('back');
+   await turn.tap();await assertFace('front');
+   await page.locator('.gtz-wallet-close').tap();
+   await page.waitForFunction(()=>!document.querySelector('.gtz-wallet-sheet').classList.contains('is-visible'));
+   await page.waitForTimeout(2250);await shake();
+   await context.close();
+ }finally{await browser.close();}
+});
+
 for(const engine of [chromium,webkit])test('Responsive menu, page widths and member paths: '+engine.name(),{timeout:180000},async()=>{
  const browser=await engine.launch();
  try{
@@ -167,54 +215,6 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
    }
    await context.close();
  }
- }finally{await browser.close();}
-});
-
-for(const engine of [chromium,webkit])test('Shake opens a mobile 3D license with working face changes: '+engine.name(),{timeout:45000},async()=>{
- const browser=await engine.launch();
- try{
-   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
-   await context.addInitScript(({license})=>{
-     localStorage.setItem('gamttiz-my-license-v1',JSON.stringify(license));
-     localStorage.setItem('gamttiz-license-shake-enabled-v1','1');
-   },{license});
-   await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
-   const page=await context.newPage();
-   await page.goto(base+'index.html',{waitUntil:'domcontentloaded'});
-   const card=page.locator('.gtz-wallet-rotator'),turn=page.locator('.gtz-wallet-turn');
-   const assertFace=async side=>{
-     await page.waitForFunction(side=>{
-       const card=document.querySelector('.gtz-wallet-rotator');if(!card||card.dataset.side!==side)return false;
-       const imgs=[...card.querySelectorAll('img')];
-       return imgs.length===2&&imgs.every(i=>i.complete&&i.naturalWidth>0)&&imgs.filter(i=>getComputedStyle(i).display!=='none').length===1&&
-         getComputedStyle(imgs[side==='front'?0:1]).display!=='none'&&card.querySelector('.gtz-wallet-rotator-inner').style.transform==='rotateX(0.000deg) rotateY(0.000deg)';
-     },side);
-   };
-   const fire=async x=>page.evaluate(x=>{
-     const e=new Event('devicemotion');Object.defineProperty(e,'acceleration',{value:{x,y:0,z:0}});window.dispatchEvent(e);
-   },x);
-   const shake=async()=>{
-     await fire(18);await page.waitForTimeout(150);await fire(-18);
-     await turn.waitFor({state:'visible'});
-     await assertFace('front');
-     await page.waitForTimeout(450);
-   };
-   await shake();
-   assert.equal(await page.locator('.gtz-wallet-sheet').getAttribute('aria-hidden'),'false');
-   const b=await card.boundingBox();assert.ok(b&&b.height>200&&b.y>=0&&b.y+b.height<844);
-   let x=b.x+b.width/2,y=b.y+b.height/2;
-   assert.equal(await page.evaluate(({x,y})=>document.elementFromPoint(x,y).className,{x,y}),'gtz-wallet-rotator');
-   await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+45,y-25,{steps:5});
-   await page.waitForFunction(()=>document.querySelector('.gtz-wallet-rotator-inner').style.transform!=='rotateX(0.000deg) rotateY(0.000deg)');
-   await page.mouse.move(x+110,y-25,{steps:5});await page.mouse.up();
-   await assertFace('back');
-   await card.tap();await assertFace('front');
-   await turn.tap();await assertFace('back');
-   await turn.tap();await assertFace('front');
-   await page.locator('.gtz-wallet-close').tap();
-   await page.waitForFunction(()=>!document.querySelector('.gtz-wallet-sheet').classList.contains('is-visible'));
-   await page.waitForTimeout(2250);await shake();
-   await context.close();
  }finally{await browser.close();}
 });
 
