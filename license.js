@@ -55,8 +55,11 @@
     // effects. Only angle-responsive reflections are visible until settled.
     flip.classList.toggle('is-motion-light',lightingActive);
     for(const layer of glossFaces){if(!layer)continue;
-      layer.style.transform=`translate3d(${(dx*44).toFixed(2)}%,${(-dy*56).toFixed(2)}%,0) rotate(${(pose.pitch*.28).toFixed(2)}deg)`;
-      layer.style.opacity=reduced.matches||!lightingActive?'0.000':intensity.toFixed(3);
+      // Move the gradient inside the stationary, full-size surface. A translated
+      // rectangle can expose its edges when tilted (especially in Safari).
+      layer.style.backgroundPosition=`${(50+dx*43).toFixed(2)}% ${(50-dy*76).toFixed(2)}%`;
+      layer.style.animation=lightingActive?'none':'';
+      layer.style.opacity=lightingActive?(reduced.matches?'0.000':intensity.toFixed(3)):'';
     }
   }
   function animate(time){

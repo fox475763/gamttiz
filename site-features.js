@@ -202,40 +202,72 @@ window.addEventListener('resize', scheduleMenuTextColorUpdate);
 window.addEventListener('load', scheduleMenuTextColorUpdate);
 updateMenuTextColor();
 
-// The wallet is intentionally mobile-only, without changing the existing dock.
+// Shake-to-open is a mobile-only wallet and uses explicit sensor consent.
 const walletMedia=matchMedia('(max-width: 900px)');
 {
-  const walletBar=make('button','gtz-wallet-bar');walletBar.type='button';walletBar.hidden=true;walletBar.setAttribute('aria-label','위로 밀어 나의 라이센스 카드 열기');walletBar.setAttribute('aria-expanded','false');
   const sheet=make('section','gtz-wallet-sheet');sheet.setAttribute('role','dialog');sheet.setAttribute('aria-modal','true');sheet.setAttribute('aria-label','나의 라이센스');sheet.hidden=true;
   const backdrop=make('button','gtz-wallet-backdrop');backdrop.type='button';backdrop.setAttribute('aria-label','라이센스 닫기');
-  const content=make('div','gtz-wallet-content'),handle=make('div','gtz-wallet-handle'),title=make('p','gtz-wallet-title','MY LICENSE');
+  const content=make('div','gtz-wallet-content'),title=make('p','gtz-wallet-title','MY LICENSE');
   const close=make('button','gtz-wallet-close','×');close.type='button';close.setAttribute('aria-label','닫기');
   const frame=make('iframe','gtz-wallet-frame');frame.title='나의 감띠즈 라이센스 카드';
   const detail=make('a','gtz-wallet-detail','MY ID 페이지 ↗');detail.href='license.html';
-  content.append(handle,title,close,frame,detail);sheet.append(backdrop,content);document.body.append(walletBar,sheet);
-  let open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,gesture=null,dragFrame=0,lastExists=null;
+  content.append(title,close,frame,detail);sheet.append(backdrop,content);document.body.append(sheet);
+  const shakeSettings=make('div','gtz-shake-setting');shakeSettings.hidden=true;
+  const shakeButton=make('button','gtz-shake-button','흔들기 카드 열기 켜기');shakeButton.type='button';
+  const shakeStatus=make('p','gtz-shake-status');shakeStatus.setAttribute('role','status');
+  shakeSettings.append(shakeButton,shakeStatus);menu.append(shakeSettings);
+  const shakeKey='gamttiz-license-shake-enabled-v1';
+  let enabled=false,sensorSeen=false,requesting=false,open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,lastExists=null;
+  let gravity=null,firstHit=null,lastHit=-Infinity,lastOpened=-Infinity;
+  try{enabled=localStorage.getItem(shakeKey)==='1';}catch{}
   const reducedWallet=matchMedia('(prefers-reduced-motion: reduce)');
+  function mobile(){return walletMedia.matches&&(matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0);}
+  function canMotion(){return typeof window.DeviceMotionEvent!=='undefined';}
   function hasCard(){try{const r=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null');return !!(r?.name&&r?.number);}catch{return false;}}
+  function remember(value){enabled=value;try{localStorage.setItem(shakeKey,value?'1':'0');}catch{}}
+  function updateSetting(){
+    shakeSettings.hidden=!mobile();
+    shakeButton.disabled=requesting||!canMotion();
+    shakeButton.textContent=enabled&&sensorSeen?'흔들기 카드 열기 끄기':enabled?'흔들기 기능 다시 활성화':'흔들기 카드 열기 켜기';
+    shakeButton.setAttribute('aria-pressed',String(enabled&&sensorSeen));
+    if(!canMotion())shakeStatus.textContent='이 브라우저는 움직임 센서를 지원하지 않아요. MY ID 메뉴를 이용해주세요.';
+  }
+  shakeButton.addEventListener('click',async()=>{
+    if(!mobile()||!canMotion()||requesting)return;
+    if(enabled&&sensorSeen){
+      remember(false);sensorSeen=false;firstHit=null;gravity=null;
+      shakeStatus.textContent='흔들기 기능을 껐어요.';updateSetting();return;
+    }
+    requesting=true;updateSetting();
+    try{
+      // Safari requires this call synchronously within a user activation.
+      const permission=typeof window.DeviceMotionEvent.requestPermission==='function'?await window.DeviceMotionEvent.requestPermission():'granted';
+      if(permission!=='granted'){remember(false);shakeStatus.textContent='동작 센서 권한을 허용해야 흔들기 기능을 사용할 수 있어요.';return;}
+      remember(true);sensorSeen=false;gravity=null;firstHit=null;warm();
+      shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
+    }catch{remember(false);shakeStatus.textContent='센서 권한을 확인할 수 없어요. Safari에서 다시 허용해주세요.';}
+    finally{requesting=false;updateSetting();}
+  });
   function notifyFrame(active){if(frameStarted)frame.contentWindow?.postMessage({type:'gamttiz-wallet-visibility',active},location.origin);}
   frame.addEventListener('load',()=>notifyFrame(presented));
   function startFrame(){
-    if(frameStarted||!walletMedia.matches)return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120royal10';
+    if(frameStarted||!mobile())return;
+    frameStarted=true;frame.src='license.html?wallet=1&v=20261120shake11';
   }
   function warm(){
-    if(frameStarted||warmTimer||!hasCard())return;
+    if(frameStarted||warmTimer||!enabled||!hasCard()||!mobile())return;
     warmTimer=setTimeout(()=>{
       warmTimer=0;if(document.body.classList.contains('license-animating')){warm();return;}
       if(typeof requestIdleCallback==='function')requestIdleCallback(startFrame,{timeout:1800});else startFrame();
     },700);
   }
   function sync(){
-    const exists=hasCard();walletBar.hidden=!walletMedia.matches;
+    const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      frame.src='license.html?wallet=1&v=20261120royal10';
+      frame.src='license.html?wallet=1&v=20261120shake11';
     }
-    lastExists=exists;
-    if(!walletMedia.matches){if(presented)settle(false);return;}
+    lastExists=exists;updateSetting();
+    if(!mobile()||!exists){if(presented)settle(false);return;}
     if(exists)warm();
   }
   function present(){
@@ -243,68 +275,47 @@ const walletMedia=matchMedia('(max-width: 900px)');
     presented=true;sheet.classList.add('is-visible');
     document.documentElement.classList.add('gtz-wallet-open');startFrame();notifyFrame(true);
   }
-  function applyDrag(offset,height){
-    content.style.transform=`translate3d(0,${offset.toFixed(1)}px,0)`;
-    backdrop.style.opacity=String(Math.max(0,Math.min(1,1-offset/height)));
-  }
   function settle(next){
-    if(next&&!walletMedia.matches)next=false;
+    if(next&&(!mobile()||!hasCard()))return;
     if(next&&!presented){present();content.getBoundingClientRect();}
     if(!presented)return;
-    if(dragFrame){cancelAnimationFrame(dragFrame);dragFrame=0;}
-    if(gesture?.active){applyDrag(gesture.offset,gesture.height);content.getBoundingClientRect();}
-    gesture=null;open=next;
-    sheet.classList.remove('is-dragging');sheet.classList.toggle('is-open',next);
-    content.style.transform='';backdrop.style.opacity='';
-    walletBar.setAttribute('aria-expanded',String(next));sheet.setAttribute('aria-hidden',String(!next));sheet.inert=!next;
+    open=next;sheet.classList.toggle('is-open',next);
+    sheet.setAttribute('aria-hidden',String(!next));sheet.inert=!next;
     clearTimeout(sheetTimer);
-    if(next){notifyFrame(true);return;}
-    notifyFrame(false);
+    if(next){if(dock.dataset.mode!=='closed')setMode(dock.dataset.mode);notifyFrame(true);return;}
+    lastOpened=performance.now();firstHit=null;notifyFrame(false);
     sheetTimer=setTimeout(()=>{
-      if(!open&&!gesture){
-        presented=false;sheet.classList.remove('is-visible');document.documentElement.classList.remove('gtz-wallet-open');
-      }
+      if(!open){presented=false;sheet.classList.remove('is-visible');document.documentElement.classList.remove('gtz-wallet-open');}
       sheetTimer=0;
     },reducedWallet.matches?0:440);
   }
-  function bindSwipe(el,fromOpen){
-    el.addEventListener('pointerdown',e=>{
-      if(!e.isPrimary||e.button!==0||gesture||!walletMedia.matches||fromOpen!==open)return;
-      const height=Math.max(1,content.getBoundingClientRect().height);
-      gesture={id:e.pointerId,fromOpen,x:e.clientX,y:e.clientY,lastY:e.clientY,lastTime:performance.now(),velocity:0,height,offset:fromOpen?0:height,active:false};
-      el.setPointerCapture(e.pointerId);
-    });
-    el.addEventListener('pointermove',e=>{
-      const g=gesture;if(!g||g.id!==e.pointerId)return;
-      const dy=e.clientY-g.y,dx=e.clientX-g.x,now=performance.now(),step=now-g.lastTime;
-      if(step>0)g.velocity=(e.clientY-g.lastY)/step;
-      g.lastY=e.clientY;g.lastTime=now;
-      if(!g.active){
-        if(Math.abs(dy)<8||Math.abs(dy)<Math.abs(dx)||(g.fromOpen?dy<=0:dy>=0))return;
-        g.active=true;present();sheet.classList.add('is-dragging');
-      }
-      g.offset=Math.max(0,Math.min(g.height,(g.fromOpen?0:g.height)+dy));
-      if(!dragFrame)dragFrame=requestAnimationFrame(()=>{dragFrame=0;if(gesture?.active)applyDrag(gesture.offset,gesture.height);});
-    });
-    const finish=(e,cancelled=false)=>{
-      const g=gesture;if(!g||g.id!==e.pointerId)return;
-      const dy=e.clientY-g.y,dx=e.clientX-g.x,distance=g.fromOpen?dy:-dy;
-      const velocity=g.fromOpen?g.velocity:-g.velocity;
-      const qualifies=!cancelled&&distance>Math.abs(dx)&&(distance>=52||(distance>=28&&velocity>.35&&performance.now()-g.lastTime<100));
-      if(!g.active&&!qualifies){gesture=null;return;}
-      settle(qualifies?!g.fromOpen:g.fromOpen);
-    };
-    el.addEventListener('pointerup',e=>finish(e));el.addEventListener('pointercancel',e=>finish(e,true));el.addEventListener('lostpointercapture',e=>finish(e,true));
+  function vector(v){return v&&[v.x,v.y,v.z].every(Number.isFinite)?[v.x,v.y,v.z]:null;}
+  function motion(e){
+    if(!enabled||!mobile()||document.hidden)return;
+    let a=vector(e.acceleration);
+    if(!a){
+      const raw=vector(e.accelerationIncludingGravity);if(!raw)return;
+      if(!gravity){gravity=raw.slice();return;}
+      a=raw.map((x,i)=>x-gravity[i]);gravity=gravity.map((x,i)=>x*.88+raw[i]*.12);
+    }
+    if(!sensorSeen){sensorSeen=true;updateSetting();}
+    if(!lastExists||open||presented||document.body.classList.contains('license-animating'))return;
+    const now=performance.now(),power=Math.hypot(...a);
+    if(now-lastOpened<2200||power<11||now-lastHit<85)return;
+    lastHit=now;
+    if(firstHit&&now-firstHit.time>1000)firstHit=null;
+    if(!firstHit){firstHit={a,power,time:now};return;}
+    const similarity=a.reduce((sum,x,i)=>sum+x*firstHit.a[i],0)/(power*firstHit.power);
+    if(similarity<-.35&&now-firstHit.time>=85){
+      firstHit=null;lastOpened=now;settle(true);
+    }else if(now-firstHit.time>450)firstHit={a,power,time:now};
   }
-  bindSwipe(walletBar,false);bindSwipe(handle,true);
-  // Touch/click alone never opens the wallet. Keyboard/assistive activation remains accessible.
-  walletBar.addEventListener('click',e=>{if(e.detail===0&&!gesture)settle(true);});
+  window.addEventListener('devicemotion',motion,{passive:true});
+  document.addEventListener('visibilitychange',()=>{firstHit=null;gravity=null;});
   close.addEventListener('click',()=>settle(false));backdrop.addEventListener('click',()=>settle(false));
   window.addEventListener('keydown',e=>{if(e.key==='Escape'&&presented)settle(false);});
-  window.addEventListener('storage',e=>{if(e.key==='gamttiz-my-license-v1')sync();});
+  window.addEventListener('storage',e=>{if(e.key==='gamttiz-my-license-v1')sync();if(e.key===shakeKey){try{enabled=localStorage.getItem(shakeKey)==='1';}catch{}updateSetting();}});
   window.addEventListener('gamttiz:license-change',sync);window.addEventListener('pageshow',sync);
-  // The stylesheet is linked in the document head; no asynchronous load-event
-  // or existing membership is required to make the mobile handle visible.
   sheet.hidden=false;sheet.inert=true;sheet.setAttribute('aria-hidden','true');
   if(walletMedia.addEventListener)walletMedia.addEventListener('change',sync);
   else if(walletMedia.addListener)walletMedia.addListener(sync);

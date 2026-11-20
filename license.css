@@ -259,6 +259,30 @@
   visibility:hidden;opacity:0!important;animation-play-state:paused!important;
 }
 
+/* The artwork's reflection is exactly one full-face layer. Do not transform
+   the overlay box itself: its boundary must never sweep across the card.
+   Idle and interactive states both use this layer, never stacked effects. */
+.license-face::before,.license-face::after{content:none!important;display:none!important;animation:none!important}
+.license-motion-gloss{
+  inset:0;z-index:3;border-radius:inherit;transform:none!important;
+  background-size:240% 240%;background-repeat:no-repeat;background-position:50% 50%;
+  background-image:linear-gradient(118deg,
+    transparent 2%,#e2ad3e0a 5%,#f8d48a55 8%,#ffeac798 10%,#e8b45632 12%,transparent 16%,
+    transparent 20%,#f5d39028 22%,#fff4d5b4 23.5%,#e6bd6b30 25%,transparent 28%,
+    transparent 33%,#e4a95c12 36%,#f8d88d62 39%,#fff1c4bd 43%,#f6cb7070 46%,#cc8c3420 50%,transparent 54%,
+    transparent 59%,#f1c36a42 61%,#fff2c9ae 62.2%,#ecc05c37 64%,transparent 67%,
+    transparent 73%,#d7a0451a 75%,#f9d28162 79%,#ffeec4a2 82%,#e9b55743 85%,transparent 90%,transparent 100%);
+  opacity:.44;animation:license-surface-idle 8s ease-in-out infinite alternate;will-change:opacity;
+}
+@keyframes license-surface-idle{
+  0%{background-position:12% 24%;opacity:.35}
+  48%{opacity:.70}
+  100%{background-position:88% 76%;opacity:.44}
+}
+.license-flip.is-motion-light .license-motion-gloss{animation:none}
+.license-animating .license-motion-gloss,.license-wallet-inactive .license-motion-gloss,.license-page-inactive .license-motion-gloss{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.license-motion-gloss{display:block;animation:none;opacity:.25}.license-flip.is-motion-light .license-motion-gloss{opacity:0}}
+
 /* One premium stationery system for both application and issued state.
    Keep the site-wide menu and the original card artwork untouched. */
 body.license-page:not(.license-wallet-view){
