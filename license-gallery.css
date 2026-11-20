@@ -1,4 +1,4 @@
-/* MY ID — geometric white-and-gold gallery. Confined to issued cards. */
+/* MY ID — white-and-gold gallery, with floating gold dust. */
 .license-ambient,.license-issued-eyebrow{display:none}
 .license-page.has-license{
   --gallery-ink:#292720;--gallery-muted:#57534c;--gallery-accent:#a8792f;
@@ -22,7 +22,7 @@ body.license-page.has-license:not(.license-wallet-view) .license-main{
 .license-geometry{
   position:absolute;display:block;inset:0;overflow:hidden;pointer-events:none;
 }
-.license-geo-orbit,.license-geo-plane,.license-geo-marker{
+.license-geo-orbit,.license-geo-particle{
   position:absolute;display:block;transform-origin:center;pointer-events:none;
 }
 /* Large concentric precision rings, with one restrained gold arc. */
@@ -38,37 +38,27 @@ body.license-page.has-license:not(.license-wallet-view) .license-main{
   inset:0;border:2px solid transparent;border-top-color:#b38a3caa;border-right-color:#d4b66c62;
   transform:rotate(24deg);
 }
-/* A softly illuminated, angular gold plane and an offset fine frame. */
-.license-geo-plane{
-  width:clamp(290px,48vw,640px);aspect-ratio:1.12;left:-17%;top:45%;
-  border:1px solid #bf9f5640;background:linear-gradient(140deg,#ffffff18 0%,#e0c27d26 58%,#c19b4c17 100%);
-  animation:license-geo-plane 21s ease-in-out -4s infinite alternate;
+/* Individual tiny particles, not a tiled texture; transform/opacity only. */
+.license-geo-particle{
+  left:var(--x);top:var(--y);width:var(--size);height:var(--size);border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#fff6d7 0%,#e1bd6d 38%,#b48b36 82%);
+  box-shadow:0 0 5px #d8b15e45;
+  opacity:var(--alpha,.58);
+  animation:license-particle-drift var(--duration,18s) ease-in-out var(--delay,0s) infinite alternate;
 }
-.license-geo-plane::after{
-  content:"";position:absolute;inset:-22px 22px 22px -22px;border:1px solid #b99d6559;
-}
-/* One small card-red accent; never a full red wash. */
-.license-geo-marker{
-  width:clamp(13px,2.4vw,26px);aspect-ratio:1;left:11%;top:19%;
-  border:1px solid #8f222877;background:#a32d2d1c;
-  animation:license-geo-marker 16s ease-in-out -2s infinite alternate;
-}
+.license-geo-particle:nth-of-type(4n){background:#b99a56;box-shadow:none}
 @keyframes license-geo-orbit{
   0%{transform:translate3d(-6%,1%,0) rotate(-36deg)}
   100%{transform:translate3d(13%,12%,0) rotate(64deg)}
 }
-@keyframes license-geo-plane{
-  0%{transform:translate3d(-8%,-12%,0) rotate(29deg)}
-  100%{transform:translate3d(22%,14%,0) rotate(43deg)}
-}
-@keyframes license-geo-marker{
-  0%{transform:translate3d(-12px,-18px,0) rotate(34deg)}
-  100%{transform:translate3d(30px,36px,0) rotate(110deg)}
+@keyframes license-particle-drift{
+  0%{transform:translate3d(0,0,0) scale(.8);opacity:calc(var(--alpha,.58) * .6)}
+  48%{transform:translate3d(calc(var(--dx,18px) * .4),calc(var(--dy,-45px) * .45),0) scale(1.08);opacity:var(--alpha,.58)}
+  100%{transform:translate3d(var(--dx,18px),var(--dy,-45px),0) scale(.9);opacity:calc(var(--alpha,.58) * .72)}
 }
 @media(max-width:760px){
   .license-geo-orbit{right:-41%;top:4%;width:clamp(360px,104vw,500px)}
-  .license-geo-plane{left:-44%;top:47%;width:clamp(310px,82vw,460px)}
-  .license-geo-marker{left:12%;top:20%}
+  .license-geo-particle:nth-of-type(n+27){display:none}
 }
 .license-page.has-license .license-layout,.license-page.has-license .license-heading{position:relative;z-index:1}
 .license-page.has-license:not(.license-wallet-view) .license-heading{margin:0 auto clamp(26px,4vw,46px);text-align:center}
@@ -175,12 +165,10 @@ body.license-page.has-license:not(.license-wallet-view) .license-main{
   .license-page.has-license:not(.license-wallet-view) .license-preview{gap:17px}
   .license-page.has-license:not(.license-wallet-view) .license-layout{gap:18px}
 }
-.license-page-inactive :is(.license-geo-orbit,.license-geo-plane,.license-geo-marker),.license-wallet-inactive :is(.license-geo-orbit,.license-geo-plane,.license-geo-marker),.license-animating :is(.license-geo-orbit,.license-geo-plane,.license-geo-marker){animation-play-state:paused}
+.license-page-inactive :is(.license-geo-orbit,.license-geo-particle),.license-wallet-inactive :is(.license-geo-orbit,.license-geo-particle),.license-animating :is(.license-geo-orbit,.license-geo-particle){animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){
-  .license-geo-orbit,.license-geo-plane,.license-geo-marker{animation:none!important}
+  .license-geo-orbit,.license-geo-particle{animation:none!important}
   .license-geo-orbit{transform:rotate(12deg)}
-  .license-geo-plane{transform:rotate(34deg)}
-  .license-geo-marker{transform:rotate(45deg)}
   .license-page.has-license:not(.license-wallet-view) .license-heading,.license-page.has-license:not(.license-wallet-view) .license-heading h1{animation:none!important}
   .license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button,.license-link){transition:none!important;transform:none!important}
 }
