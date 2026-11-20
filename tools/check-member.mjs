@@ -29,10 +29,12 @@ test('Member HTML contains all implementation targets and install entry',()=>{
   assert.equal(manifest.start_url,'./member.html#hub');
 });
 test('Member UI controls and offline versions stay in sync',()=>{
-  const html=src('member.html'),sw=src('member-sw.js'),version=/const VERSION='([^']+)'/.exec(sw)[1];
+  const html=src('member.html'),sw=src('member-sw.js'),version=/const VERSION='([^']+)'/.exec(sw)[1],walletVersion=/const WALLET_VERSION='([^']+)'/.exec(sw)[1];
   for(const file of ['member.css','member-model.js','member.js','fry-radar.js','fry-radar.css','member.webmanifest']){
-    assert.ok(html.includes(file+'?v='+version),file+' must match the offline cache version');
+    assert.ok(html.includes(file+'?v='+(file==='member.js'?walletVersion:version)),file+' must match the offline cache version');
   }
+  assert.ok(html.includes('site-features.js?v='+walletVersion));
+  assert.ok(sw.includes('site-features.js?v=${WALLET_VERSION}'));
   assert.ok(!html.includes("member-pocket.js"));
   assert.ok(!html.includes('data-member-view="pocket"'));
   for(const id of ["radar-list","radar-archive-list","radar-admin"])assert.ok(html.includes(`id="${id}"`));
@@ -105,8 +107,9 @@ test('Every main page uses the original bottom-right Menu without local repositi
   for(const file of ['license.css','license-wallet.css','license-gallery.css','member.css','editorial.css']){
     assert.doesNotMatch(src(file),/\.control-dock\b/,file+' should inherit the common anchor');
   }
-  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261121icons1'));
-  assert.ok(src('member-sw.js').includes('site-features.css?v=20261121icons1'));
+  const cssVersion=/site-features\.css\?v=[^\"']+/.exec(src('member.html'))[0];
+  for(const page of ['index','member','license','combo','products','play','project','quiz','news','collection','draw'])assert.ok(src(page+'.html').includes(cssVersion));
+  assert.ok(src('member-sw.js').includes(cssVersion));
 });
 
 test('Menu glass frame and scrolling content are separate and selection stays brand red',()=>{

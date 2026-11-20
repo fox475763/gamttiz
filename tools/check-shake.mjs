@@ -13,6 +13,7 @@ function createPage(storage,permission='granted',activationKnown=false,withMount
   class El{
     constructor(cls=''){this.cls=cls;this.children=[];this.attrs={};this.events=new Map();this.classes=new Set();this.classList={add:c=>this.classes.add(c),remove:c=>this.classes.delete(c),contains:c=>this.classes.has(c),toggle:(c,b)=>b?this.classes.add(c):this.classes.delete(c)};this.contentWindow={postMessage(){}};elements.push(this);}
     append(...children){this.children.push(...children);}
+    replaceChildren(...children){this.children=children;}
     setAttribute(k,v){this.attrs[k]=v;}
     addEventListener(k,f){this.events.set(k,f);}
     removeEventListener(k,f){if(this.events.get(k)===f)this.events.delete(k);}
@@ -20,7 +21,7 @@ function createPage(storage,permission='granted',activationKnown=false,withMount
     getBoundingClientRect(){return {height:600};}
   }
   const doc=new El(),win=new El(),mount=new El(),body=new El(),html=new El();
-  doc.getElementById=id=>id==='license-shake-setting-mount'&&withMount?mount:null;doc.hidden=false;doc.body=body;doc.documentElement=html;
+  doc.getElementById=id=>id==='license-shake-setting-mount'&&withMount?mount:null;doc.hidden=false;doc.body=body;doc.documentElement=html;doc.head=new El();doc.createElement=tag=>new El(tag);
   win.DeviceMotionEvent={requestPermission:async()=>{requests++;if(mode==='gesture'){if(!interaction)throw Error('NotAllowedError');prompts++;}return mode==='denied'?'denied':'granted';}};
   const ctx={window:win,document:doc,navigator:{maxTouchPoints:5,...(activationKnown?{userActivation:{get isActive(){return interaction}}}:{})},location:{origin:'https://example.com'},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},make:(tag,cls)=>new El(cls),dock:{dataset:{mode:'closed'}},setMode(){},matchMedia:q=>({matches:!q.includes('reduced'),addEventListener(){}}),performance:{now:()=>clock},setTimeout:(fn,ms)=>{timers.set(++count,{fn,ms});return count},clearTimeout:id=>timers.delete(id)};
   vm.runInNewContext(wallet,ctx);

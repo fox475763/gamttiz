@@ -414,7 +414,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
     // actual card faces, so GPU backface bugs cannot obscure the other face.
     const frontCanvas=document.createElement('canvas'),canvas=document.createElement('canvas');
     for(const c of [frontCanvas,canvas]){c.width=540;c.height=859;}
-    let yaw=0,pitch=0,targetYaw=0,targetPitch=0,raf=0,lastFrame=0,drag=null,ready=false,frontArt,backArt;
+    let yaw=0,pitch=0,targetYaw=0,targetPitch=0,raf=0,lastFrame=0,drag=null,ready=false,frontArt,backArt,lastGestureAt=-Infinity;
     const events=new AbortController();
     const on=(el,type,fn,options={})=>el.addEventListener(type,fn,{...options,signal:events.signal});
     disposeWallet=()=>{events.abort();if(raf)cancelAnimationFrame(raf);raf=0;drag=null;ready=false;};
@@ -459,7 +459,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
     }
     function finish(id,x,y,cancel=false){
       if(!drag||drag.id!==id)return;
-      const d=drag;drag=null;
+      const d=drag;drag=null;lastGestureAt=performance.now();
       const moved=d.moved||Math.abs(x-d.x)>6||Math.abs(y-d.y)>6;
       const end=cancel?Math.round(d.yaw/180)*180:moved?Math.round((d.yaw+(x-d.x)*1.12)/180)*180:Math.round(d.yaw/180)*180+180;
       setTarget(end,0);
@@ -486,7 +486,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
     }
     on(turn,'click',flipCard);
     on(rotator,'keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard();}});
-    on(rotator,'click',e=>{if(e.detail===0)flipCard();});
+    on(rotator,'click',e=>{if(e.detail===0&&performance.now()-lastGestureAt>350)flipCard();});
     paintPose(performance.now());
     const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
     const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
