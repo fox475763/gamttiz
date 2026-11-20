@@ -1,6 +1,7 @@
 (()=>{'use strict';
   const {characters,number,facePortrait}=GTZFriends;
   const slots=20,grid=document.querySelector('#dex-grid'),search=document.querySelector('#dex-search'),sort=document.querySelector('#dex-sort'),detail=document.querySelector('#dex-detail'),profile=document.querySelector('#dex-profile'),prev=document.querySelector('#dex-prev'),next=document.querySelector('#dex-next'),close=document.querySelector('#dex-close'),current=document.querySelector('#dex-current'),count=document.querySelector('#dex-result-count');
+  const detailScroll=document.querySelector('#dex-detail-scroll')||detail;
   const filters=[...document.querySelectorAll('[data-dex-filter]')],buttons=[];
   let selected=0,activeFilter='all';
   function fromLocation(){const m=location.hash.match(/^#friend-(\d{1,2})$/);const n=m?Number(m[1]):Number(new URLSearchParams(location.search).get('friend'));return Number.isInteger(n)&&n>=1&&n<=slots?n:0;}
@@ -21,7 +22,7 @@
     prev.disabled=id===1;next.disabled=id===slots;
     if(update){const url=new URL(location.href);url.searchParams.delete('friend');url.hash='friend-'+number(id);history.replaceState(null,'',url);}
     if(!detail.open)detail.showModal();
-    detail.scrollTop=0;
+    detailScroll.scrollTop=0;
   }
   function filter(){
     const q=search.value.trim().toLowerCase().replace(/^no\.?\s*|^#/,'');let visible=0;

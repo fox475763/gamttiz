@@ -237,3 +237,37 @@ test('Play icons stay flat and the geometric Motion layer loops behind the game 
  assert.match(css,/var\(--ed-paper,#f8f8f5\)/);
  assert.match(css,/\.play-page \.play-geo\{animation:none!important/);
 });
+
+test('Canonical liquid glass is scoped to existing page surfaces and leaves the menu alone',()=>{
+ const css=src('liquid-glass.css'),js=src('liquid-glass.js');
+ for(const page of ['play.html','collection.html','draw.html','member.html','license.html']){
+   const html=src(page);assert.match(html,/liquid-glass\.css\?v=/);assert.match(html,/liquid-glass\.js\?v=/);
+ }
+ assert.match(css,/rgba\(255,255,255,\.16\),rgba\(255,255,255,\.015\) 48%,rgba\(255,255,255,\.06\)/);
+ assert.match(css,/backdrop-filter:blur\(5px\) saturate\(1\.2\)/);
+ assert.match(css,/animation:gtz-liquid-turn 11s linear infinite/);
+ assert.match(css,/mask-composite:exclude;pointer-events:none/);
+ assert.match(css,/animation-play-state:paused/);
+ assert.match(js,/IntersectionObserver/);
+ assert.doesNotMatch(css,/\.control-(?:trigger|search|dock|menu|contact)/);
+ assert.doesNotMatch(js,/\.control-(?:trigger|search|dock|menu|contact)/);
+ assert.doesNotMatch(css,/\.license-flip|\.license-art|\.license-front|\.license-back/);
+ assert.match(src('collection.html'),/id="dex-detail-scroll"/);
+ assert.equal((src('member.html').match(/class="radar-glass-field"/g)||[]).length,4);
+ assert.match(src('friend-dex.js'),/detailScroll\.scrollTop=0/);
+});
+
+test('Glass visibility observer animates only visible surfaces and handles dynamically created cards',()=>{
+ const observed=[],callbacks={},made=()=>({nodeType:1,matches:()=>true,querySelectorAll:()=>[],classes:new Set(),classList:{toggle(k,on){on?this.owner.classes.add(k):this.owner.classes.delete(k)}}});
+ const a=made(),b=made();a.classList.owner=a;b.classList.owner=b;
+ const document={nodeType:9,body:{},querySelectorAll:()=>[a]};
+ class IntersectionObserver{constructor(cb){callbacks.intersect=cb}observe(el){observed.push(el)}}
+ class MutationObserver{constructor(cb){callbacks.mutate=cb}observe(){}}
+ const sandbox=vm.createContext({window:{IntersectionObserver,MutationObserver},IntersectionObserver,MutationObserver,document,matchMedia:()=>({matches:false})});
+ vm.runInContext(src('liquid-glass.js'),sandbox);
+ assert.equal(observed.length,1);
+ callbacks.intersect([{target:a,isIntersecting:true}]);assert.ok(a.classes.has('gtz-liquid-visible'));
+ callbacks.intersect([{target:a,isIntersecting:false}]);assert.ok(!a.classes.has('gtz-liquid-visible'));
+ callbacks.mutate([{addedNodes:[b]}]);assert.equal(observed.length,2);
+ callbacks.mutate([{addedNodes:[b]}]);assert.equal(observed.length,2);
+});

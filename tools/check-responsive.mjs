@@ -63,6 +63,16 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      await trigger.click();
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
      assert.ok(overflow<=2,filename+' horizontal overflow '+overflow+'px at '+viewport.width);
+     if(['play.html','collection.html','draw.html','member.html#radar'].includes(filename)){
+       const target=filename==='play.html'?'.hub-grid>a':filename==='collection.html'?'.dex-toolbar':filename==='draw.html'?'.draw-machine':'.radar-glass-field';
+       const material=await page.locator(target).first().evaluate(el=>({
+         blur:getComputedStyle(el).backdropFilter,
+         edge:getComputedStyle(el,'::before').backgroundImage,
+         animation:getComputedStyle(el,'::before').animationName,
+         border:getComputedStyle(el).borderTopWidth
+       }));
+       assert.ok(material.blur.includes('blur(5px)')&&material.edge.includes('conic-gradient')&&material.animation==='none'&&material.border==='0px',filename+' canonical glass');
+     }
      if(filename==='play.html'){
        const cards=page.locator('.hub-grid>a');
        assert.equal(await cards.count(),3);
