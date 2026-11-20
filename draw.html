@@ -12,20 +12,44 @@
 <link rel="stylesheet" href="license-wallet.css?v=20261120reopen6">
 <link rel="stylesheet" href="ui-system.css?v=20261121radar2">
 <link rel="stylesheet" href="friends-experience.css?v=1">
-<link rel="stylesheet" href="fry-pick.css?v=20261121a">
+<link rel="stylesheet" href="fry-pick.css?v=20261121pull2">
 <script src="friends-data.js?v=1" defer></script><script src="friends-profile.js?v=1" defer></script></head>
 <body class="experience-page refined-page daily-page"><a class="skip" href="#main">본문으로 건너뛰기</a><header class="header experience-header"><a class="wordmark" href="index.html" aria-label="감띠즈 홈">GAMTTIZ<span>French Fry Lovers</span></a><nav aria-label="주 메뉴"><a href="collection.html">Collection</a><a href="play.html">Play</a><a href="member.html">Member</a><a href="license.html">MY ID</a><a href="products.html">Products</a><a href="news.html">Notice</a><a href="project.html">Project Info</a><a class="nav-social" href="https://www.instagram.com/gamttiz_official/" target="_blank" rel="noopener noreferrer">Instagram ↗</a></nav></header>
 <main id="main" class="fx-main"><div class="fx-top"><a href="play.html" class="fx-back">← Play로 돌아가기</a><span>GAMTTIZ / PLAY / 03</span></div>
 <section class="fx-heading"><p class="eyebrow">DAILY GAMTTI PICK</p><h1>오늘의 감띠 뽑기.</h1><p>14명의 감띠 중 오늘 당신과 함께할 친구는 누구일까요?<br>감튀 하나를 골라 위로 뽑고, 오늘의 감띠가 전해 주는 이야기를 만나보세요.</p></section>
 <div class="daily-layout"><section class="draw-machine" aria-label="감자튀김 뽑기 게임">
 <div class="draw-machine-top"><span>GAMTTIZ<br>DAILY FRY PICK</span><span id="draw-date"></span></div>
-<div class="fry-stage" id="fry-stage" aria-label="빨간 감자튀김 용기에서 감튀를 선택하세요">
+<div class="fry-stage" id="fry-stage" aria-label="감자튀김을 집고 위로 당겨 뽑는 게임">
 <div class="fry-stage-light" aria-hidden="true"></div><div class="fry-floor" aria-hidden="true"></div>
-<div class="fry-pack fry-pack-back" aria-hidden="true"><svg viewBox="0 0 320 220" preserveAspectRatio="none"><defs><linearGradient id="fry-back-color" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a62323"/><stop offset=".55" stop-color="#d1443a"/><stop offset="1" stop-color="#781c20"/></linearGradient><linearGradient id="fry-inside" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8e2424"/><stop offset="1" stop-color="#471719"/></linearGradient></defs><path d="M5 20Q160-13 315 20L280 198Q160 221 40 198Z" fill="url(#fry-back-color)" stroke="#ad3433" stroke-width="2"/><path d="M8 22Q160-7 312 22Q160 70 8 22Z" fill="url(#fry-inside)" stroke="#f47764" stroke-width="2"/></svg></div>
+<div class="fry-pack fry-pack-back" aria-hidden="true"><svg viewBox="0 0 360 300" preserveAspectRatio="none"><defs>
+<linearGradient id="fry-back-color" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f6c6a4"/><stop offset=".45" stop-color="#ffe5bd"/><stop offset="1" stop-color="#b87b50"/></linearGradient>
+<linearGradient id="fry-inside" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#dcb48e"/><stop offset=".37" stop-color="#b47e55"/><stop offset=".76" stop-color="#692e24"/><stop offset="1" stop-color="#401d1b"/></linearGradient>
+<linearGradient id="fry-back-outer" x1="0" y1="0" x2="1" y2=".8"><stop stop-color="#e13936"/><stop offset=".65" stop-color="#b12027"/><stop offset="1" stop-color="#841720"/></linearGradient>
+</defs><path d="M7 67Q9 37 29 30Q180-7 331 30Q351 37 353 67L313 260Q180 281 47 260Z" fill="url(#fry-back-outer)" stroke="#a72229" stroke-width="1.2"/>
+<path d="M12 67Q14 42 33 35Q180 0 327 35Q346 42 348 67L308 255Q180 274 52 255Z" fill="url(#fry-back-color)"/>
+<path d="M17 69Q180 30 343 69L304 250Q180 268 56 250Z" fill="url(#fry-inside)"/>
+<path d="M14 64Q180 18 346 64" fill="none" stroke="#fff3da" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
+<path d="M31 78L65 241M329 78L295 241" fill="none" stroke="#77442f" stroke-width="1.7" opacity=".42"/></svg></div>
 <div id="fry-stack" class="fry-stack" role="group" aria-label="뽑을 감자튀김 선택"></div>
-<div class="fry-pack fry-pack-front" aria-hidden="true"><svg viewBox="0 0 320 220" preserveAspectRatio="none"><defs><linearGradient id="fry-front-color" x1="0" y1="0" x2="1" y2=".75"><stop stop-color="#f75b50"/><stop offset=".33" stop-color="#e93636"/><stop offset=".77" stop-color="#d0262c"/><stop offset="1" stop-color="#a91f26"/></linearGradient><linearGradient id="fry-side-shade" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#8f1421" stop-opacity=".35"/><stop offset="1" stop-color="#8f1421" stop-opacity="0"/></linearGradient></defs><path d="M5 20Q160 66 315 20L282 190Q279 202 266 206Q160 223 54 206Q42 203 38 190Z" fill="url(#fry-front-color)" stroke="#c72a30" stroke-width="1.5"/><path d="M5 20L38 190Q42 203 54 206L73 209L42 35Z" fill="url(#fry-side-shade)"/><path d="M9 23Q160 66 311 23" fill="none" stroke="#ff9b86" stroke-width="2" stroke-linecap="round" opacity=".8"/><path d="M42 195Q160 214 278 195" fill="none" stroke="#8f1421" opacity=".3" stroke-width="2"/></svg><div class="fry-pack-logo"><strong>GAMTTIZ</strong><small>FRENCH FRY LOVERS</small></div></div>
+<div class="fry-pack fry-pack-front" aria-hidden="true"><svg viewBox="0 0 360 300" preserveAspectRatio="none"><defs>
+<linearGradient id="fry-front-color" x1="0" y1="0" x2="1" y2=".65"><stop stop-color="#dc302e"/><stop offset=".16" stop-color="#ef4941"/><stop offset=".43" stop-color="#e93636"/><stop offset=".72" stop-color="#d62a30"/><stop offset="1" stop-color="#b31d28"/></linearGradient>
+<linearGradient id="fry-left-fold" x1="0" y1="0" x2="1" y2=".3"><stop stop-color="#a71c25"/><stop offset=".6" stop-color="#d52e30"/><stop offset="1" stop-color="#ea4841"/></linearGradient>
+<linearGradient id="fry-right-fold" x1="0" y1="0" x2="1" y2=".6"><stop stop-color="#e23b38"/><stop offset="1" stop-color="#931721"/></linearGradient>
+<linearGradient id="fry-bottom-shade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6e101c" stop-opacity="0"/><stop offset="1" stop-color="#6e101c" stop-opacity=".36"/></linearGradient>
+<filter id="fry-paper-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".76" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+<clipPath id="fry-front-clip"><path d="M7 66Q31 78 64 88C104 102 122 134 180 137C238 134 256 102 296 88Q329 78 353 66L314 252Q311 265 296 270Q180 287 64 270Q49 265 46 252Z"/></clipPath>
+</defs>
+<path class="fry-front-face" d="M7 66Q31 78 64 88C104 102 122 134 180 137C238 134 256 102 296 88Q329 78 353 66L314 252Q311 265 296 270Q180 287 64 270Q49 265 46 252Z" fill="url(#fry-front-color)" stroke="#be282c" stroke-width="1.2"/>
+<path d="M7 66Q31 78 64 88L86 275L64 270Q49 265 46 252Z" fill="url(#fry-left-fold)"/>
+<path d="M296 88Q329 78 353 66L314 252Q311 265 296 270L274 275Z" fill="url(#fry-right-fold)"/>
+<path d="M46 237Q180 263 314 237L314 252Q311 265 296 270Q180 287 64 270Q49 265 46 252Z" fill="url(#fry-bottom-shade)"/>
+<path d="M65 91L86 270M295 91L274 270" stroke="#9b182329" stroke-width="1.1" fill="none"/>
+<path d="M8 66Q31 78 64 88C104 102 122 134 180 137C238 134 256 102 296 88Q329 78 352 66" fill="none" stroke="#fff0d6" stroke-width="3.1" stroke-linecap="round"/>
+<path d="M9 69Q31 81 64 91C104 105 122 137 180 140C238 137 256 105 296 91Q329 81 351 69" fill="none" stroke="#ff8c73" stroke-width="1.5" opacity=".8"/>
+<rect x="0" y="0" width="360" height="300" filter="url(#fry-paper-grain)" clip-path="url(#fry-front-clip)" opacity=".09" style="mix-blend-mode:multiply"/>
+</svg><div class="fry-pack-logo"><strong>GAMTTIZ</strong><small>FRENCH FRY LOVERS</small></div></div>
 <div class="fry-reveal" id="fry-reveal" aria-hidden="true" hidden><div class="fry-halo"></div><div class="fry-ring"></div><div class="fry-sparkles"><i></i><i></i><i></i><i></i><i></i><i></i></div><img id="fry-reveal-image" alt=""><span id="fry-reveal-name"></span></div>
-<span class="fry-pull-hint" id="fry-pull-hint" aria-hidden="true">↑ &nbsp; 하나를 골라 위로 당겨보세요</span></div>
-<div class="draw-control"><button id="draw-button" type="button">감튀 하나 뽑기 <span aria-hidden="true">↑</span></button><p id="draw-status" role="status" aria-live="polite">감튀를 직접 누르거나 위로 당겨보세요.</p></div></section>
+<span class="fry-pull-hint" id="fry-pull-hint" aria-hidden="true">↑ &nbsp; 감튀를 잡고 위로 쭉 당겨보세요</span></div>
+<div class="draw-control"><p id="draw-status" role="status" aria-live="polite">감튀 하나를 잡고 위로 쭉 당겨보세요.</p><button id="draw-replay" class="draw-replay" type="button" hidden>다시 당겨보기 ↻</button></div></section>
 <section id="draw-result" class="draw-result" tabindex="-1" aria-label="오늘의 감띠 결과"><div id="draw-placeholder" class="draw-placeholder"><div class="draw-mystery" aria-hidden="true">?</div><p class="fx-kicker">TODAY'S FRIEND</p><h2>누가 나올까요?</h2><p>감튀를 뽑으면 오늘의 감띠와<br>특별한 메시지가 공개됩니다.</p></div><div id="draw-profile" hidden></div></section></div>
-<p class="fx-footnote">하루 한 번 새로운 감띠를 만나세요. 같은 날에는 동일한 결과를 다시 감상할 수 있어요. 날짜 기준은 한국 시간입니다.</p><noscript><p>뽑기를 이용하려면 JavaScript를 켜주세요.</p></noscript></main><footer><span>© GAMTTIZ</span><span>French Fry Lovers</span><a href="#">맨 위로 ↑</a></footer><script src="site-features.js?v=20261121fry1" defer></script><script src="daily-draw.js?v=20261121fry1" defer></script></body></html>
+<p class="fx-footnote">하루 한 번 새로운 감띠를 만나세요. 같은 날에는 동일한 결과를 다시 감상할 수 있어요. 날짜 기준은 한국 시간입니다.</p><noscript><p>뽑기를 이용하려면 JavaScript를 켜주세요.</p></noscript></main><footer><span>© GAMTTIZ</span><span>French Fry Lovers</span><a href="#">맨 위로 ↑</a></footer><script src="site-features.js?v=20261121fry1" defer></script><script src="daily-draw.js?v=20261121pull2" defer></script></body></html>

@@ -118,7 +118,7 @@ test('Daily fry pick replaces the roulette with independent selectable fries',()
  assert.match(html,/id="fry-stack"/);assert.doesNotMatch(html,/룰렛|draw-wheel|wheel-slot/);
  assert.match(html,/fry-pick\.css/);assert.doesNotMatch(play,/룰렛/);
  assert.match(css,/touch-action:none/);assert.match(css,/fry-extract/);assert.match(css,/fry-character-in/);
- assert.match(js,/pointermove/);assert.match(js,/d\.pull>=40/);
+ assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.match(html,/fry-front-face/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
 });
 test('Fry drag, replay, old saved result migration and Korea-date reset',async()=>{
   let today='2026-11-21',randomCalls=0;
@@ -133,7 +133,7 @@ test('Fry drag, replay, old saved result migration and Korea-date reset',async()
   }
   const fakeMath=Object.create(Math);fakeMath.random=()=>{randomCalls++;return .25;};
   const run=()=>{
-    const ids=['fry-stack','fry-stage','fry-reveal','fry-reveal-image','fry-reveal-name','fry-pull-hint','draw-button','draw-status','draw-date','draw-result','draw-placeholder','draw-profile'];
+    const ids=['fry-stack','fry-stage','fry-reveal','fry-reveal-image','fry-reveal-name','fry-pull-hint','draw-replay','draw-status','draw-date','draw-result','draw-placeholder','draw-profile'];
     const nodes=Object.fromEntries(ids.map(id=>[id,new El()]));
     const doc={querySelector:s=>nodes[s.slice(1)],createElement:()=>new El(),addEventListener(){}};
     const localStorage={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
@@ -142,18 +142,21 @@ test('Fry drag, replay, old saved result migration and Korea-date reset',async()
   };
   const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
   const key='gamttiz-daily-draw-v1',nodes=run(),fries=nodes['fry-stack'].children;
-  assert.equal(fries.length,7);
+  assert.equal(fries.length,9);
   const first=fries[2],point={isPrimary:true,button:0,pointerId:1,clientX:80,clientY:120};
+  first.emit('click',{detail:1});assert.equal(storage.has(key),false);
+  first.emit('pointerdown',point);first.emit('pointerup',point);assert.equal(storage.has(key),false);
   first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:110});first.emit('pointercancel',point);
   assert.equal(storage.has(key),false);
-  first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:55});first.emit('pointerup',{...point,clientY:55});
+  first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:25});first.emit('pointerup',{...point,clientY:55});
   await flush();
   const saved=JSON.parse(storage.get(key));assert.equal(saved.slot,2);assert.equal(saved.id,4);
   const name=nodes['fry-reveal-name'].textContent;assert.equal(name,characters[3].name);
   assert.equal(nodes['draw-profile'].hidden,false);assert.equal(fries.filter(f=>f.classes.has('is-picked')).length,1);
-  nodes['draw-button'].emit('click');await flush();assert.equal(nodes['fry-reveal-name'].textContent,name);
+  nodes['draw-replay'].emit('click');assert.equal(nodes['draw-profile'].hidden,true);assert.equal(randomCalls,1);
+  const another=fries[4];another.emit('pointerdown',point);another.emit('pointermove',{...point,clientY:25});await flush();assert.equal(nodes['fry-reveal-name'].textContent,name);
   assert.equal(randomCalls,1);
   const reload=run();assert.equal(reload['fry-reveal-name'].textContent,name);
   storage.set(key,JSON.stringify({date:today,id:7}));const old=run();assert.equal(old['fry-reveal-name'].textContent,characters[6].name);
-  today='2026-11-22';old['draw-button'].emit('click');await flush();assert.equal(JSON.parse(storage.get(key)).date,today);
+  today='2026-11-22';old['draw-replay'].emit('click');const keyboard=old['fry-stack'].children[0];for(let i=0;i<3;i++)keyboard.emit('keydown',{key:'ArrowUp',preventDefault(){}});await flush();assert.equal(JSON.parse(storage.get(key)).date,today);
 });

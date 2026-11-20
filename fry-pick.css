@@ -98,3 +98,55 @@
   .daily-page .fry-choice{width:clamp(24px,10.6%,35px)}
 }
 @media(prefers-reduced-motion:reduce){.daily-page .fry-stage *{animation:none!important;transition:none!important}}
+
+/* Folded, matte paper carton with a deep scooped front and a raised back wall. */
+.fry-stage{aspect-ratio:1.02;max-width:490px}
+.fry-stage-light{background:radial-gradient(ellipse at 50% 54%,#fff 10%,#fff5e4a8 36%,transparent 73%)}
+.fry-floor{left:15%;right:13%;bottom:5%;height:10%;filter:blur(7px);background:radial-gradient(ellipse,#46302566,transparent 72%)}
+.fry-pack{left:10%;width:80%;height:57%;bottom:7%}
+.fry-pack-back{filter:drop-shadow(0 7px 6px #72232214)}
+.fry-pack-front{filter:drop-shadow(0 9px 9px #50231d27)}
+.fry-pack-front svg{pointer-events:none}
+.fry-pack-front .fry-front-face{pointer-events:visiblePainted}
+.fry-pack-logo{top:61%;left:19%;right:19%;transform:none;text-shadow:none}
+.fry-pack-logo strong{font-size:clamp(19px,4.5vw,39px);letter-spacing:-.04em}
+.fry-pack-logo small{font-size:clamp(5px,1.1vw,9px);margin-top:5px}
+.daily-page .fry-choice{
+  --pull-x:0px;bottom:28%;width:clamp(23px,var(--fry-width,9%),43px);
+  transform:translate(calc(-50% + var(--pull-x)),var(--pull)) rotate(var(--tilt));transform-origin:50% 92%;
+}
+.daily-page .fry-choice .fry-stick{
+  border-radius:4px;clip-path:polygon(0 3.5%,12% 0,83% .9%,100% 4%,97% 100%,3% 100%);
+  background:linear-gradient(90deg,#ba7625 0%,#e9b24d 8%,#f5cd71 24%,#f9d883 43%,#efc16a 67%,#d3973a 87%,#a96624 100%);
+  box-shadow:inset 1px 1px 2px #ffeab0c0,inset -2px -1px 3px #a6652240;
+}
+.daily-page .fry-stick::before{height:8%;background:linear-gradient(160deg,#fff0b0,#e2aa49 65%,#b8782c);clip-path:polygon(0 38%,15% 0,82% 5%,100% 40%,83% 81%,10% 80%)}
+.daily-page .fry-stick::after{inset:6% 0 0;opacity:.75;background:
+  radial-gradient(ellipse at 18% 15%,#a66d2f55 0 1px,transparent 2px),
+  radial-gradient(ellipse at 66% 35%,#bc7c2e66 0 1px,transparent 2px),
+  radial-gradient(ellipse at 24% 54%,#b77b3150 0 1px,transparent 2px),
+  radial-gradient(ellipse at 75% 81%,#97612455 0 1px,transparent 2px),
+  linear-gradient(92deg,transparent 5%,#ffebaa6b 19%,transparent 37%,#a86b2650 86%,transparent 95%);
+}
+.daily-page .fry-choice:nth-child(2n) .fry-stick{background:linear-gradient(90deg,#ad6522,#e1a445 10%,#f3c975 28%,#f7cd69 62%,#d99c3d 84%,#a56626)}
+.daily-page .fry-choice:nth-child(3n) .fry-stick{background:linear-gradient(90deg,#cf8c38,#fbe19a 16%,#f6d17a 47%,#eab65c 75%,#b57a31)}
+.daily-page .fry-choice:nth-child(4n) .fry-stick{clip-path:polygon(0 5%,14% 0,87% .5%,100% 5%,95% 55%,99% 100%,4% 100%,1% 42%)}
+.daily-page .fry-choice:nth-child(5n) .fry-stick{clip-path:polygon(0 5%,10% 0,87% 1.2%,100% 6%,98% 48%,93% 100%,1% 100%)}
+/* Hover is an affordance, not an activation. Drag tracks the user's finger/mouse. */
+@media(hover:hover){.daily-page .fry-choice:hover:not(:disabled):not(.is-dragging){transform:translate(-50%,-5px) rotate(var(--tilt));filter:brightness(1.045)}}
+.daily-page .fry-choice:active,.daily-page .fry-choice.is-dragging{
+  transform:translate(calc(-50% + var(--pull-x)),var(--pull)) rotate(calc(var(--tilt) * .35));
+}
+.daily-page .fry-choice.is-dragging{transition:none;cursor:grabbing;filter:drop-shadow(0 4px 6px #72451e37) brightness(1.04)}
+.fry-stage.is-grabbing .fry-choice:not(.is-dragging){filter:brightness(.96)}
+.fry-stage.is-grabbing .fry-pull-hint{color:#d92e32}
+@keyframes fry-extract{
+  0%{transform:translate(calc(-50% + var(--pull-x)),var(--pull)) rotate(calc(var(--tilt) * .35));opacity:1;filter:brightness(1)}
+  55%{transform:translate(-50%,-135px) rotate(-7deg) scale(1.04);opacity:1;filter:brightness(1.13) drop-shadow(0 0 13px #ffdc6c87)}
+  100%{transform:translate(-50%,-180px) rotate(4deg) scale(.89);opacity:0;filter:brightness(1.3)}
+}
+.daily-page .draw-control{margin-top:14px}
+.daily-page #draw-status{margin:0;color:#706a63;min-height:1.6em;font-size:13px}
+.daily-page .draw-control .draw-replay{margin:11px auto 0;width:auto;min-height:44px;padding:8px 18px;border-radius:99px;font-size:13px;color:#c92d30;border:1px solid #dbd9d4;background:linear-gradient(145deg,#fff9,#fff2);box-shadow:inset 0 1px 2px #fff,0 3px 9px #2523210c}
+.daily-page .draw-control .draw-replay:hover{color:#e93636;background:#fff}
+@media(max-width:390px){.daily-page .fry-choice{width:clamp(22px,var(--fry-width,9%),33px)}.fry-pack-logo strong{font-size:clamp(18px,6.6vw,28px)}}
