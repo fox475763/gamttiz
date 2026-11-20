@@ -1,7 +1,7 @@
 /* Only Member's static UI is cached; no license or personal data is stored here. */
-const CACHE='gamttiz-member-20261120-v6';
-const VERSION='20261120member2';
-const paths=['member.html','member.webmanifest','member-icon.svg','assets/badge.png','style.css','refinement.css','site-font.css','experience.css','studio-polish.css','catalog-news.css','site-features.css?v=20261113flow2','typography-system.css?v=20261113a','editorial.css?v=20261113glassrestore','license-wallet.css?v=20261120reopen6','site-features.js?v=20261120reopen6',...['member.css','member-model.js','member.js','member-pocket.js','member-level.js'].map(p=>`${p}?v=${VERSION}`),...Array.from({length:14},(_,i)=>`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`)];
+const CACHE='gamttiz-member-20261120-v7';
+const VERSION='20261120member3';
+const paths=['member.html','member.webmanifest','member-icon.svg','assets/badge.png','style.css','refinement.css','site-font.css','experience.css','studio-polish.css','catalog-news.css','site-features.css?v=20261113flow2','typography-system.css?v=20261113a','editorial.css?v=20261113glassrestore','license-wallet.css?v=20261120reopen6','site-features.js?v=20261120member3',...['member.css','member-model.js','member.js','member-level.js','fry-radar.css','fry-radar.js'].map(p=>`${p}?v=${VERSION}`),...Array.from({length:14},(_,i)=>`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`)];
 paths.push(`member.webmanifest?v=${VERSION}`);
 const urls=new Set(paths.map(p=>new URL(p,self.registration.scope).href));
 const memberURL=new URL('member.html',self.registration.scope).href;

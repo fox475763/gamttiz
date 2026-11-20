@@ -1,10 +1,10 @@
 {
   "id": "./member.html",
-  "name": "GAMTTIZ POCKET",
+  "name": "GAMTTIZ MEMBER",
   "short_name": "감띠즈",
   "lang": "ko",
-  "description": "감띠즈 멤버 전용 디지털 홀더와 수평·각도계",
-  "start_url": "./member.html#pocket",
+  "description": "감띠즈 멤버 전용 감튀 레이더와 수평·각도계",
+  "start_url": "./member.html#hub",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f6f5f2",

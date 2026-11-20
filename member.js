@@ -2,7 +2,8 @@
   'use strict';
   const M=GTZMemberModel,$=id=>document.getElementById(id),views=[...document.querySelectorAll('[data-member-view]')];
   const handlers=new Map();let id=null,active=null,installEvent=null,shownView=null;
-  const route=()=>{const name=location.hash.slice(1);return views.some(v=>v.dataset.memberView===name)?name:'hub';};
+  const route=()=>{const name=location.hash.slice(1);if(name.startsWith('post-')||name==='radar-admin')return 'radar';return views.some(v=>v.dataset.memberView===name)?name:'hub';};
+  const sameLicense=(a,b)=>a?.number===b?.number&&a?.issuedAt===b?.issuedAt&&a?.character===b?.character;
   function sync(){
     const next=M.readLicense(localStorage),previous=active,previousId=id;
     id=next;active=next?route():null;
@@ -18,9 +19,9 @@
       view?.classList.add('is-entering');
       shownView=view;
     }
-    if(previous&&(previous!==active||!next||M.petKey(previousId)!==M.petKey(next)))handlers.get(previous)?.leave?.();
+    if(previous&&(previous!==active||!next||!sameLicense(previousId,next)))handlers.get(previous)?.leave?.();
     if(active)handlers.get(active)?.enter?.(next);
-    document.title=(active==='pocket'?'GAMTTIZ POCKET':active==='level'?'GAMTTIZ LEVEL':'Member · 감띠즈 멤버')+' — GAMTTIZ';
+    document.title=(active==='radar'?'FRY RADER':active==='level'?'GAMTTIZ LEVEL':'Member · 감띠즈 멤버')+' — GAMTTIZ';
   }
   window.GTZMember={get license(){return id;},get active(){return active;},register(name,handler){handlers.set(name,handler);if(active===name)handler.enter?.(id);},isActive:name=>active===name&&!!M.readLicense(localStorage)};
   window.addEventListener('hashchange',()=>{sync();shownView?.querySelector('h1[tabindex]')?.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});});
@@ -30,7 +31,7 @@
   $('member-backup').addEventListener('click',()=>{
     const current=M.readLicense(localStorage);if(!current)return sync();
     try{
-      const data={format:'gamttiz-member-backup',version:1,license:current,pocket:M.pet(JSON.parse(localStorage.getItem(M.petKey(current))||'null'),current)};
+      const data={format:'gamttiz-member-backup',version:1,license:current};
       const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
       const a=document.createElement('a');a.href=url;a.download='GAMTTIZ-member-backup.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
       $('member-backup-status').textContent='백업 파일을 저장했어요. 개인 기기에 보관하고 홈 화면 앱에서 불러오세요.';
@@ -44,7 +45,6 @@
       if(data.format!=='gamttiz-member-backup'||data.version!==1||!restored)throw Error();
       if(M.readLicense(localStorage)){sync();return;}
       const current=Number(localStorage.getItem(M.COUNTER)||0),count=Math.max(Number.isSafeInteger(current)&&current>=0?current:0,M.serial(restored.number));
-      if(data.pocket)localStorage.setItem(M.petKey(restored),JSON.stringify(M.pet(data.pocket,restored)));
       localStorage.setItem(M.COUNTER,String(count));localStorage.setItem(M.KEY,JSON.stringify(restored));
       window.dispatchEvent(new Event('gamttiz:license-change'));sync();
     }catch{$('member-lock-status').textContent='올바른 감띠즈 백업 파일을 선택해주세요. (파일은 이 기기에만 저장됩니다.)';}

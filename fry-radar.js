@@ -4,7 +4,9 @@
   const list=document.getElementById('radar-list');
   const archive=document.getElementById('radar-archive-list');
   const preview=document.getElementById('radar-preview-list');
-  if(!list&&!archive&&!preview)return;
+  const member=window.GTZMember;
+  if(!member||!list||!archive)return;
+  const isActive=()=>member.isActive('radar');
   const search=document.getElementById('radar-search');
   const category=document.getElementById('radar-category');
   const sort=document.getElementById('radar-sort');
@@ -72,11 +74,10 @@
     art.append(stars,fries,pack,el('span','radar-art-label','GAMTTIZ · Fry Rader'));
     return art;
   };
-  const card=(item,home)=>{
+  const card=item=>{
     const state=statusOf(item);
     const node=el('a','radar-card'+(isArchived(item)?' radar-card-archived':''));
-    node.href=home?`fry-radar.html#post-${encodeURIComponent(item.id)}`:item.url;
-    if(!home){node.id=`post-${item.id}`;node.target='_blank';node.rel='noopener noreferrer';}
+    node.href=item.url;node.id=`post-${item.id}`;node.target='_blank';node.rel='noopener noreferrer';
     const top=el('div','radar-card-top');
     const badge=el('span','radar-badge',labels[item.category]||'소식');
     const stateBadge=el('span','radar-status radar-status-'+state,statusLabels[state]);
@@ -136,7 +137,7 @@
     container.append(node);
   };
   const byNewest=(a,b)=>(date(b.publishedAt||b.eventStart)?.getTime()||0)-(date(a.publishedAt||a.eventStart)?.getTime()||0);
-  // The homepage preview is a compact scroll-snap carousel (the full RADAR board is unchanged).
+  // Member-only featured carousel: the latest three verified stories.
   const previewDots=document.getElementById('radar-preview-dots');
   const previewCarousel=document.getElementById('radar-preview-carousel');
   const prefersReducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -145,7 +146,7 @@
 
   const previewCard=item=>{
     const node=el('a','radar-preview-item');
-    node.href='fry-radar.html#post-'+encodeURIComponent(item.id);
+    node.href='#post-'+encodeURIComponent(item.id);
     if(item.imageNote)node.title=item.imageNote;
     const thumb=el('div','radar-preview-thumb');
     const fallback=()=>thumb.replaceChildren(el('div','radar-preview-thumb-fallback','🍟'));
@@ -203,7 +204,7 @@
     });
   };
   const goToPreview=(index)=>{
-    if(!preview)return;
+    if(!preview||!isActive())return;
     const stops=previewStops();
     previewIndex=(index+stops.length)%stops.length;
     preview.scrollTo({left:stops[previewIndex],behavior:prefersReducedMotion?.matches?'auto':'smooth'});
@@ -214,9 +215,9 @@
   };
   const startPreviewTimer=()=>{
     stopPreviewTimer();
-    if(!preview||previewStops().length<2||prefersReducedMotion?.matches)return;
+    if(!isActive()||!preview||previewStops().length<2||prefersReducedMotion?.matches)return;
     previewTimer=window.setInterval(()=>{
-      if(document.hidden||!previewCarousel)return;
+      if(!isActive()||document.hidden||!previewCarousel)return;
       const bounds=previewCarousel.getBoundingClientRect();
       if(bounds.bottom<0||bounds.top>window.innerHeight)return;
       if(previewCarousel.matches(':hover')||preview.contains(document.activeElement))return;
@@ -250,8 +251,19 @@
     window.requestAnimationFrame(()=>{previewNav();startPreviewTimer();});
   };
 
-  let initialAnchor=true;
-  const render=()=>{
+  let lastAnchor='';
+  const revealAnchor=()=>{
+    if(!isActive())return;
+    let hash;try{hash=decodeURIComponent(location.hash.slice(1));}catch{hash=location.hash.slice(1);}
+    if(!(hash.startsWith('post-')||hash==='radar-admin')){lastAnchor='';return;}
+    if(hash===lastAnchor)return;
+    const target=document.getElementById(hash);if(!target)return;
+    lastAnchor=hash;if(hash==='radar-admin')target.open=true;
+    const originalHash=location.hash;
+    requestAnimationFrame(()=>{if(isActive()&&location.hash===originalHash)target.scrollIntoView({block:'center'});});
+  };
+  const render=(updatePreview=false)=>{
+    if(!isActive())return;
     const term=(search?.value||'').trim().toLocaleLowerCase();
     const group=category?.value||'all';
     const order=sort?.value||'newest';
@@ -264,7 +276,7 @@
     if(list){
       const current=shown.filter(item=>!isArchived(item));
       list.replaceChildren();
-      if(current.length)current.forEach(item=>list.append(card(item,false)));
+      if(current.length)current.forEach(item=>list.append(card(item)));
       else empty(list,'최근 소식이 없어요.','최근 14일 내 확인된 감튀 소식이 들어오면 여기에 표시할게요.');
       if(count)count.textContent=`${current.length}개의 최근 소식`;
     }
@@ -275,34 +287,30 @@
       else empty(archive,'보관된 지난 소식이 없어요.','종료일이 확인되거나 발행 후 14일이 지난 소식이 여기에 모입니다.');
       if(archiveCount)archiveCount.textContent=`${past.length}개의 지난 소식`;
     }
-    if(preview)renderPreview();
-    if(initialAnchor&&list&&location.hash){
-      let hash;
-      try{hash=decodeURIComponent(location.hash.slice(1));}
-      catch{hash=location.hash.slice(1);}
-      if(hash&&document.getElementById(hash))requestAnimationFrame(()=>document.getElementById(hash)?.scrollIntoView({block:'center'}));
-    }
-    initialAnchor=false;
+    if(updatePreview===true&&preview)renderPreview();
+    revealAnchor();
   };
   [search,category,sort].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
   const healthView=document.getElementById('radar-health');
-  let refreshing=false,loaded=false,lastSignature='';
+  let refreshing=false,loaded=false,lastSignature='',timer=0,generation=0;
+  const controllers=new Set();
   const readJSON=async file=>{
-    const controller=new AbortController();
+    const controller=new AbortController();controllers.add(controller);
     const timeout=setTimeout(()=>controller.abort(),15000);
     try{
       const response=await fetch(file+'?v='+Date.now(),{cache:'no-store',signal:controller.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       return await response.json();
-    }finally{clearTimeout(timeout);}
+    }finally{clearTimeout(timeout);controllers.delete(controller);}
   };
   const refresh=async()=>{
-    if(refreshing||document.hidden)return;
-    refreshing=true;
+    if(refreshing||document.hidden||!isActive())return;
+    refreshing=true;const epoch=generation;
     try{
       const [dataResult,healthResult]=await Promise.allSettled([
         readJSON('data/fry-radar.json'),healthView?readJSON('data/fry-radar-health.json'):Promise.resolve(null)
       ]);
+      if(epoch!==generation||!isActive())return;
       if(healthView&&healthResult.status==='fulfilled'){
         const at=new Date(healthResult.value.checkedAt);
         if(Number.isFinite(at.getTime()))healthView.textContent='최근 검사 '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(at);
@@ -316,7 +324,7 @@
       if(signature!==lastSignature){
         const focused=document.activeElement?.closest('[id]')?.id;
         const scrollY=window.scrollY;
-        items=fresh;render();
+        items=fresh;render(true);
         if(loaded){
           if(focused)document.getElementById(focused)?.focus({preventScroll:true});
           window.scrollTo({top:scrollY,behavior:'instant'});
@@ -327,16 +335,24 @@
       if(updated)updated.textContent=data.updatedAt?'마지막 수집: '+dateLabel(data.updatedAt):'아직 수집된 소식이 없습니다.';
     }catch{
       // A temporary failure must not erase posts already on screen.
+      if(epoch!==generation||!isActive())return;
       if(!loaded){
         if(updated)updated.textContent='연결을 다시 확인하고 있어요.';
         for(const target of [list,archive,preview])if(target){target.replaceChildren();empty(target,'소식을 불러오는 중이에요.','잠시 후 자동으로 다시 확인합니다.');}
       }
-    }finally{refreshing=false;}
+    }finally{refreshing=false;if(epoch!==generation&&isActive())refresh();}
   };
-  window.setInterval(refresh,60000);
+  function enter(){
+    const hash=location.hash.slice(1);
+    if(hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';render();}}
+    revealAnchor();if(!timer)timer=window.setInterval(refresh,60000);
+    if(loaded)startPreviewTimer();refresh();
+  }
+  function leave(){generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
+  member.register('radar',{enter,leave});
   window.addEventListener('focus',refresh);
   window.addEventListener('online',refresh);
   window.addEventListener('pageshow',refresh);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
-  refresh();
+  window.addEventListener('pagehide',leave);
 })();
