@@ -222,3 +222,16 @@ test('Play game cards use three matching vector icons and shared light glass wit
  assert.match(css,/prefers-reduced-motion:reduce/);
  assert.match(css,/\.hub-card-head\{display:flex;align-items:center/);
 });
+
+test('Play icons stay flat and the geometric Motion layer loops behind the game cards',()=>{
+ const html=src('play.html'),css=src('play-hub.css');
+ assert.equal((html.match(/class="hub-symbol"/g)||[]).length,3);
+ assert.match(html,/class="play-geometry" aria-hidden="true"/);
+ for(const shape of ['fries','rings','mid','holder','orbit','dots'])assert.match(html,new RegExp('play-geo-'+shape));
+ assert.match(css,/\.play-page \.play-geometry\{[^}]*pointer-events:none/);
+ assert.match(css,/\.play-page \.hub-icon>svg\{[^}]*filter:none/);
+ assert.match(css,/background:var\(--icon-paper\);border:0;box-shadow:none/);
+ assert.match(css,/animation:play-fry-drift 14s ease-in-out infinite/);
+ assert.match(css,/animation:play-orbit-spin 30s linear infinite/);
+ assert.match(css,/\.play-page \.play-geo\{animation:none!important/);
+});
