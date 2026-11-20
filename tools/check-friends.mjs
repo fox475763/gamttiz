@@ -118,7 +118,7 @@ test('Daily fry pick replaces the roulette with independent selectable fries',()
  assert.match(html,/id="fry-stack"/);assert.doesNotMatch(html,/룰렛|draw-wheel|wheel-slot/);
  assert.match(html,/fry-pick\.css/);assert.doesNotMatch(play,/룰렛/);
  assert.match(css,/touch-action:none/);assert.match(css,/fry-extract/);assert.match(css,/fry-character-in/);
- assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.match(html,/fry-front-face/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
+ assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.match(html,/fry-holder-render/);assert.equal((html.match(/src="assets\/holder-fbx-render\.png"/g)||[]).length,2);assert.match(css,/clip-path:polygon/);assert.match(css,/is-preview:not\(:disabled\) \.fry-stick/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
 });
 test('Fry drag, replay, old saved result migration and Korea-date reset',async()=>{
   let today='2026-11-21',randomCalls=0;
@@ -142,10 +142,10 @@ test('Fry drag, replay, old saved result migration and Korea-date reset',async()
   };
   const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
   const key='gamttiz-daily-draw-v1',nodes=run(),fries=nodes['fry-stack'].children;
-  assert.equal(fries.length,9);
+  assert.equal(fries.length,5);
   const first=fries[2],point={isPrimary:true,button:0,pointerId:1,clientX:80,clientY:120};
   first.emit('click',{detail:1});assert.equal(storage.has(key),false);
-  first.emit('pointerdown',point);first.emit('pointerup',point);assert.equal(storage.has(key),false);
+  first.emit('pointerdown',point);assert.equal(first.classes.has('is-preview'),true);assert.equal(fries.filter(f=>f.classes.has('is-preview')).length,1);first.emit('pointerup',point);assert.equal(first.classes.has('is-preview'),false);assert.equal(storage.has(key),false);
   first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:110});first.emit('pointercancel',point);
   assert.equal(storage.has(key),false);
   first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:25});first.emit('pointerup',{...point,clientY:55});
@@ -159,4 +159,11 @@ test('Fry drag, replay, old saved result migration and Korea-date reset',async()
   const reload=run();assert.equal(reload['fry-reveal-name'].textContent,name);
   storage.set(key,JSON.stringify({date:today,id:7}));const old=run();assert.equal(old['fry-reveal-name'].textContent,characters[6].name);
   today='2026-11-22';old['draw-replay'].emit('click');const keyboard=old['fry-stack'].children[0];for(let i=0;i<3;i++)keyboard.emit('keydown',{key:'ArrowUp',preventDefault(){}});await flush();assert.equal(JSON.parse(storage.get(key)).date,today);
+});
+
+test('Rectangular sticks are contained inside the rendered holder at rest',()=>{
+ const js=src('daily-draw.js'),m=js.match(/const shapes=(\[\[.*?\]\]);/);
+ assert.ok(m);const sticks=JSON.parse(m[1]);assert.equal(sticks.length,5);
+ for(const [x,len,tilt,w] of sticks){assert.equal(tilt,0);assert.ok(x-w/2>=26&&x+w/2<=74);assert.ok(100-28-len>=23);assert.ok(100-28-len<39);}
+ const css=src('fry-pick.css');assert.match(css,/bottom:28%/);assert.match(css,/translateY\(-12px\)/);assert.doesNotMatch(css,/fry-stick::before|fry-stick::after/);
 });

@@ -2,8 +2,8 @@
   const {characters,image,dayKey}=GTZFriends;
   const stack=document.querySelector('#fry-stack'),stage=document.querySelector('#fry-stage'),revealStage=document.querySelector('#fry-reveal'),revealImage=document.querySelector('#fry-reveal-image'),revealName=document.querySelector('#fry-reveal-name'),hint=document.querySelector('#fry-pull-hint'),replay=document.querySelector('#draw-replay'),status=document.querySelector('#draw-status'),dateLabel=document.querySelector('#draw-date'),result=document.querySelector('#draw-result'),placeholder=document.querySelector('#draw-placeholder'),profile=document.querySelector('#draw-profile');
   const key='gamttiz-daily-draw-v1',reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  // Different lengths, widths and lean angles create a natural pile of fries.
-  const shapes=[[18,46,-15,8.6],[26,55,-11,8.9],[33.5,49,-7,9.3],[42,61,-4,9.2],[50,54,1,9.6],[58.5,59,5,8.6],[67,48,8,9.1],[75,54,12,8.5],[82,44,15,8.7]];
+  // Five straight rectangular sticks sit within the original five-slot 3D holder.
+  const shapes=[[31,40,0,7.8],[40.5,44,0,7.8],[50,46,0,7.8],[59.5,43,0,7.8],[69,39,0,7.8]];
   let date=dayKey(),selected=0,selectedSlot=0,busy=false,drag=null,keyboardPull=null;
   const fries=shapes.map(([x,len,tilt,width],i)=>{
     const el=document.createElement('button');el.type='button';el.className='fry-choice';
@@ -18,7 +18,7 @@
   function updateDate(){dateLabel.textContent=date.replaceAll('-',' . ');}
   function threshold(){return Math.max(55,Math.min(93,Math.round((stage.clientHeight||300)*.23)));}
   function setPull(f,pull,x=0){f.style.setProperty('--pull',-Math.max(0,pull)+'px');f.style.setProperty('--pull-x',Math.max(-19,Math.min(19,x))+'px');}
-  function resetPull(f){f.classList.remove('is-dragging');f.style.removeProperty('--pull');f.style.removeProperty('--pull-x');}
+  function resetPull(f){f.classList.remove('is-dragging','is-preview');f.style.removeProperty('--pull');f.style.removeProperty('--pull-x');}
   function clearChoice(){
     drag=null;keyboardPull=null;stage.classList.remove('is-pulling','is-revealing','is-revealed','is-grabbing');revealStage.hidden=true;hint.hidden=false;
     fries.forEach(f=>{f.classList.remove('is-picked');resetPull(f);f.disabled=false;});
@@ -58,20 +58,21 @@
       if(busy||f.disabled||!e.isPrimary||e.button!==0)return;
       if(keyboardPull){resetPull(fries[keyboardPull.slot]);keyboardPull=null;}
       drag={slot:i,id:e.pointerId,y:e.clientY,x:e.clientX,pull:0,dx:0};
-      f.classList.add('is-dragging');stage.classList.add('is-grabbing');status.textContent='잡았어요! 위로 당겨주세요.';
+      f.classList.add('is-preview');stage.classList.add('is-grabbing');status.textContent='잡았어요! 위로 당겨주세요.';
       try{f.setPointerCapture(e.pointerId);}catch{}
     });
     f.addEventListener('pointermove',e=>{
       if(!drag||drag.slot!==i||drag.id!==e.pointerId)return;
       const d=drag;d.pull=Math.max(0,d.y-e.clientY);d.dx=e.clientX-d.x;
-      setPull(f,d.pull,d.dx);
-      if(d.pull>=threshold()){drag=null;start(i,Math.min(d.pull,115),d.dx);}
+      f.classList.remove('is-preview');f.classList.add('is-dragging');
+      setPull(f,d.pull+12,d.dx);
+      if(d.pull>=threshold()){drag=null;start(i,Math.min(d.pull+12,127),d.dx);}
     });
     function release(e,cancel=false){
       if(!drag||drag.slot!==i||drag.id!==e.pointerId)return;
       const d=drag;drag=null;stage.classList.remove('is-grabbing');
       const pull=Math.max(d.pull,d.y-e.clientY);
-      if(!cancel&&pull>=threshold()){start(i,Math.min(pull,115),d.dx);return;}
+      if(!cancel&&pull>=threshold()){start(i,Math.min(pull+12,127),d.dx);return;}
       resetPull(f);status.textContent='감튀 하나를 잡고 위로 쭉 당겨보세요.';
     }
     f.addEventListener('pointerup',e=>release(e));
