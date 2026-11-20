@@ -686,3 +686,12 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 }
 .control-menu-title { min-width: 0; overflow-wrap: anywhere; }
 .control-menu-text .control-menu-subtitle { white-space: normal; overflow-wrap: anywhere; }
+
+/* Site-wide page transition: restrained frosted veil, independent of Menu glass. */
+.gtz-page-veil{position:fixed;inset:0;z-index:2147483000;pointer-events:none;opacity:0;visibility:hidden;background:linear-gradient(112deg,rgba(247,247,245,.86),rgba(255,255,255,.58) 52%,rgba(241,240,237,.86));-webkit-backdrop-filter:blur(0px);backdrop-filter:blur(0px);transition:opacity .25s cubic-bezier(.22,1,.36,1),-webkit-backdrop-filter .25s,backdrop-filter .25s,visibility 0s linear .25s}
+.gtz-page-veil::after{content:"";position:absolute;inset:0;background:linear-gradient(108deg,transparent 35%,rgba(255,255,255,.48) 49%,transparent 64%);opacity:.55;transform:translateX(-45%);transition:transform .45s cubic-bezier(.22,1,.36,1)}
+html.gtz-page-leaving .gtz-page-veil{opacity:1;visibility:visible;pointer-events:auto;-webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);transition-delay:0s}
+html.gtz-page-leaving .gtz-page-veil::after{transform:translateX(45%)}
+@keyframes gtz-page-arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+html.gtz-page-arriving body>main,html.gtz-page-arriving body>.main,html.gtz-page-arriving body>.license-main{animation:gtz-page-arrive .4s cubic-bezier(.22,1,.36,1) both}
+@media(prefers-reduced-motion:reduce){.gtz-page-veil,.gtz-page-veil::after{transition:none!important}.gtz-page-veil{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}html.gtz-page-arriving body>main,html.gtz-page-arriving body>.main,html.gtz-page-arriving body>.license-main{animation:none!important}}
