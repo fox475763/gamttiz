@@ -15,20 +15,17 @@
   let record = null, selected = 0, editing = true, isBack = false, ready = false, saving = false, renderVersion = 0;
   let frontImage, backImage, yaw=0, drag=null, ignoreClick=false, exportFiles=null;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
-  const pose={yaw:0,pitch:0,x:50,y:50,foil:.14}, goal={...pose};
+  const pose={yaw:0,pitch:0}, goal={...pose};
   let motionFrame=0,lastFrame=0;
   function paint(){
     flip.style.setProperty('--yaw',pose.yaw.toFixed(3)+'deg');
     flip.style.setProperty('--pitch',pose.pitch.toFixed(3)+'deg');
-    flip.style.setProperty('--light-x',pose.x.toFixed(2)+'%');
-    flip.style.setProperty('--light-y',pose.y.toFixed(2)+'%');
-    flip.style.setProperty('--foil',pose.foil.toFixed(3));
   }
   function animate(time){
     const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
     lastFrame=time;const weight=1-Math.exp(-dt/(drag?48:94));let moving=false;
     for(const key of Object.keys(goal)){
-      const delta=goal[key]-pose[key],threshold=key==='foil'?.002:.05;
+      const delta=goal[key]-pose[key],threshold=.05;
       if(Math.abs(delta)>threshold){pose[key]+=delta*weight;moving=true;}else pose[key]=goal[key];
     }
     paint();
@@ -121,6 +118,7 @@
   function viewEdit(value) {
     editing = value;
     document.body.classList.toggle('has-license',!!record&&!editing);
+    $('license-heading-title').textContent=record&&!editing?'WELCOME':'MY ID';
     form.hidden = !editing; $('license-actions').hidden = editing;
     $('license-badge').textContent = record && !editing ? 'MY LICENSE' : record ? 'EDIT PREVIEW' : 'PREVIEW';
     $('license-panel-title').textContent = editing&&record?'라이센스 수정':'라이센스 만들기';
@@ -142,25 +140,24 @@
     radio.addEventListener('change',()=>{setSelected(index);setSide(true);render();});
   });
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-  function light(e){
+  function pointerPosition(e){
     const r=flip.getBoundingClientRect(),x=clamp((e.clientX-r.left)/r.width,0,1),y=clamp((e.clientY-r.top)/r.height,0,1);
-    moveTo({x:x*100,y:y*100,foil:.30+Math.min(.30,(Math.abs(x-.5)+Math.abs(y-.5))*.42)});
     return {x,y};
   }
-  function resetLight(){flip.classList.remove('is-tracking','is-dragging');moveTo({foil:.14,pitch:0,yaw,x:50,y:50});}
+  function resetPose(){flip.classList.remove('is-tracking','is-dragging');moveTo({pitch:0,yaw});}
   flip.addEventListener('pointerdown',e=>{
     if(e.button!==0||drag)return;
     ignoreClick=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:pose.yaw,pitch:pose.pitch,moved:false};
-    flip.setPointerCapture(e.pointerId);flip.classList.add('is-dragging');light(e);
+    flip.setPointerCapture(e.pointerId);flip.classList.add('is-dragging');
   });
   flip.addEventListener('pointermove',e=>{
     if(drag&&drag.id!==e.pointerId)return;
-    const {x,y}=light(e);
     if(drag){
       const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
       if(Math.hypot(dx,dy)>7)drag.moved=true;
       moveTo({yaw:drag.yaw+dx*1.12,pitch:clamp(drag.pitch-dy*.48,-33,33)});
     }else if(e.pointerType==='mouse'||e.pointerType==='pen'){
+      const {x,y}=pointerPosition(e);
       flip.classList.add('is-tracking');moveTo({yaw:yaw+(x-.5)*30,pitch:(.5-y)*28});
     }
   });
@@ -168,11 +165,11 @@
     if(!drag||drag.id!==e.pointerId)return;
     const d=drag;drag=null;ignoreClick=d.moved||cancel;
     if(d.moved&&!cancel){const target=Math.round((d.yaw+(e.clientX-d.x)*1.12)/180)*180;setSide(Math.abs(target/180)%2===1,target);}
-    resetLight();
+    resetPose();
     if(flip.hasPointerCapture(e.pointerId))flip.releasePointerCapture(e.pointerId);
   }
   flip.addEventListener('pointerup',e=>finishDrag(e));flip.addEventListener('pointercancel',e=>finishDrag(e,true));flip.addEventListener('lostpointercapture',e=>finishDrag(e,true));
-  flip.addEventListener('pointerleave',()=>{if(!drag)resetLight();});
+  flip.addEventListener('pointerleave',()=>{if(!drag)resetPose();});
   flip.addEventListener('click',e=>{if(ignoreClick&&e.detail!==0){ignoreClick=false;return;}ignoreClick=false;setSide(!isBack);}); $('license-turn').addEventListener('click',()=>setSide(!isBack));
   input.addEventListener('input',()=>{$('license-submit').disabled=!ready||saving||!cleanName(input.value);setSide(true);render();});
   form.addEventListener('submit',async event=>{
@@ -184,17 +181,24 @@
       const old=record||restore();
       const next={version:1,name,character:selected,number:old?.number||number(),issuedAt:old?.issuedAt||new Date().toISOString()};
       localStorage.setItem(KEY,JSON.stringify(next));record=next;
-      if(!old)$('license-issuing').hidden=false;
+      let loading=null;
+      const overlay=$('license-issuing');
+      if(!old){
+        overlay.classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');
+        overlay.hidden=false;
+        loading=new Promise(resolve=>setTimeout(resolve,reduced.matches?250:2350));
+      }
       await viewEdit(false);setSide(!old?false:true);changed();
       if(!old){
-        const overlay=$('license-issuing');
-        await new Promise(resolve=>setTimeout(resolve,matchMedia('(prefers-reduced-motion: reduce)').matches?250:2350));
-        overlay.hidden=true;$('license-celebration').hidden=false;
+        await loading;
+        overlay.classList.add('is-signing');$('license-signature').setAttribute('aria-hidden','false');
+        await new Promise(resolve=>setTimeout(resolve,reduced.matches?500:2650));
+        overlay.hidden=true;overlay.classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');$('license-celebration').hidden=false;
         status('');
-        document.querySelector('.license-preview').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+        document.querySelector('.license-heading').scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'start'});
       }else status('');
     }
-    catch { $('license-issuing').hidden=true;status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
+    catch { $('license-issuing').hidden=true;$('license-issuing').classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
     finally {saving=false;$('license-submit').disabled=!ready||!cleanName(input.value);}
   });
   $('license-edit').addEventListener('click',()=>{viewEdit(true);setSide(true);status('');input.focus();});
@@ -257,5 +261,6 @@
     drawTemplate(fctx,frontImage);drawTemplate(bctx,backImage);ready=true;viewEdit(!record);
   }).catch(()=>status('카드 이미지를 불러오지 못했어요. 잠시 후 다시 접속해주세요.'));
 })();
+
 
 

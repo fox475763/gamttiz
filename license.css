@@ -17,17 +17,21 @@
 @media(prefers-reduced-motion:reduce){.license-flip-inner{transition:none}}
 
 /* Interactive foil layered over the original, unmodified card artwork. */
-.license-flip{--yaw:0deg;--pitch:0deg;--light-x:50%;--light-y:50%;--foil:.14;touch-action:none;user-select:none;perspective:1050px}
+.license-flip{--yaw:0deg;--pitch:0deg;--paper-thickness:.9px;--paper-half:.45px;touch-action:none;user-select:none;perspective:1050px}
 .license-flip .license-flip-inner,.license-flip.is-back .license-flip-inner{transform:rotateX(var(--pitch)) rotateY(var(--yaw));transition:none;will-change:transform}
 .license-flip.is-dragging .license-flip-inner{transition:none;cursor:grabbing}
-.license-flip .license-front{transform:translateZ(.65px)}
-.license-flip .license-back{transform:rotateY(180deg) translateZ(.65px)}
-.license-flip-inner::before,.license-flip-inner::after{content:"";position:absolute;top:3%;bottom:3%;width:1.3px;background:linear-gradient(#d8a34b,#6c310d,#f3c86b);transform:rotateY(90deg);pointer-events:none}
-.license-flip-inner::before{left:0}.license-flip-inner::after{right:0}
-.license-face::before,.license-face::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;mix-blend-mode:screen}
+.license-flip .license-front{transform:translateZ(var(--paper-half))}
+.license-flip .license-back{transform:rotateY(180deg) translateZ(var(--paper-half))}
+/* A real sub-pixel paper edge, on all four planes, behind the card artwork. */
+.license-paper-core{position:absolute;inset:0;border-radius:5%;background:#bd8a45;transform:translateZ(0);pointer-events:none}
+.license-edge{position:absolute;pointer-events:none;background:linear-gradient(90deg,#754014,#dfb568 51%,#8d5223)}
+.license-edge-left,.license-edge-right{top:5%;bottom:5%;width:var(--paper-thickness);transform:translateX(-50%) rotateY(90deg)}
+.license-edge-left{left:0}.license-edge-right{left:100%}
+.license-edge-top,.license-edge-bottom{left:5%;right:5%;height:var(--paper-thickness);background:linear-gradient(0deg,#754014,#dfb568 51%,#8d5223);transform:translateY(-50%) rotateX(90deg)}
+.license-edge-top{top:0}.license-edge-bottom{top:100%}
+.license-face::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;mix-blend-mode:screen}
 /* A slow, soft gold reflection runs across the foil even at rest. */
 .license-face::before{background:linear-gradient(119deg,transparent 17%,#ad68130c 32%,#d99a3330 40%,#ffdf8b66 49%,#f5ca5b42 56%,#ba7c1e10 66%,transparent 82%);background-size:300% 300%;background-position:10% 50%;opacity:.48;animation:license-gold-drift 12s ease-in-out infinite alternate}
-.license-face::after{background:radial-gradient(ellipse at var(--light-x) var(--light-y),#fff0ad88 0%,#f2bd4d45 21%,#c88b2520 43%,transparent 75%),linear-gradient(117deg,transparent 16%,#d69a2720 33%,#ffe39b6b 48%,#e7aa3c36 60%,transparent 83%);background-size:100% 100%,220% 220%;background-position:center,var(--light-x) var(--light-y);opacity:var(--foil)}
 @keyframes license-gold-drift{0%{background-position:4% 22%;opacity:.29}45%{opacity:.50}100%{background-position:96% 77%;opacity:.34}}
 .license-downloads{grid-template-columns:1fr}
 .license-celebration{margin:5px 0 0;color:#850000;font-size:14px;font-weight:700;text-align:center}
@@ -94,5 +98,28 @@
 @media(max-width:760px){.license-heading{margin-bottom:18px}.license-layout{gap:15px}.license-preview{position:static;padding:0}.license-panel{padding:19px}.license-page.has-license .license-flip{width:min(82vw,300px)}.license-page.has-license .license-layout{gap:14px}}
 .license-page.license-wallet-view.has-license .license-flip{width:min(78vw,300px,calc((100dvh - 45px) * 1080 / 1718))}
 @media(prefers-reduced-motion:reduce){.license-face::before{animation:none;opacity:.32}}
+
+/* The issued state welcomes the member in quietly shimmering gold. */
+.license-page.has-license .license-heading h1{display:inline-block;color:#c18b2a;letter-spacing:.045em;line-height:1.16}
+@supports ((background-clip:text) or (-webkit-background-clip:text)){
+  .license-page.has-license .license-heading h1{background:linear-gradient(112deg,#8b5919 4%,#b88124 26%,#f7d675 43%,#fff0b4 49%,#cb982c 57%,#895715 81%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;filter:drop-shadow(0 2px 9px #d7ab3940);animation:license-welcome-gold 6.5s ease-in-out infinite alternate}
+}
+@keyframes license-welcome-gold{from{background-position:5% 50%}to{background-position:95% 50%}}
+.license-forge-stage{display:grid;width:100%;min-height:125px;align-items:center}
+.license-forge-stage>div{grid-area:1/1}
+.license-forge-message{display:grid;justify-items:center;gap:10px;transition:opacity .25s ease,transform .25s ease}
+.license-signature{display:grid;justify-items:center;gap:1px;opacity:0;visibility:hidden;pointer-events:none}
+.license-signature-ink{display:block;width:min(86%,300px);height:auto;overflow:visible;filter:drop-shadow(0 0 5px #f6c35b35)}
+.license-signature-ink path{stroke-dasharray:1 1;stroke-dashoffset:1}
+.license-signature-confirm{font:600 10px/1.5 Arial,sans-serif;letter-spacing:.24em;color:#ebc77e;opacity:0}
+.license-issuing.is-signing .license-forge-message{opacity:0;transform:translateY(-5px)}
+.license-issuing.is-signing .license-signature{opacity:1;visibility:visible}
+.license-issuing.is-signing .license-signature-ink path{animation:license-write var(--write) var(--start) linear both}
+.license-issuing.is-signing .license-signature-confirm{animation:license-sign-confirm .35s 1.98s ease both}
+@keyframes license-write{to{stroke-dashoffset:0}}
+@keyframes license-sign-confirm{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-height:600px){.license-issuing-inner{gap:9px}.license-forge-card{width:min(35vw,150px,calc((100dvh - 220px)*1080/1718))}.license-forge-stage{min-height:110px}.license-signature-ink{width:min(80%,250px)}}
+@media(prefers-reduced-motion:reduce){.license-page.has-license .license-heading h1{animation:none;background-position:50% 50%}.license-forge-message{transition:none}.license-issuing.is-signing .license-signature-ink path{animation:none;stroke-dashoffset:0}.license-issuing.is-signing .license-signature-confirm{animation:none;opacity:1}}
+
 
 
