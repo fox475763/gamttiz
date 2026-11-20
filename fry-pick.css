@@ -92,3 +92,10 @@
 .daily-page .draw-control .draw-replay:hover{color:#e93636;background:#fff}
 .daily-page .draw-result{min-width:0}
 @media(prefers-reduced-motion:reduce){.daily-page .fry-stage *{animation:none!important;transition:none!important}}
+
+/* Keep the native page scroll outside the interactive machine, but never let
+   a vertical fry-pull become Safari's page pan or rubber-band gesture. */
+@media (pointer:coarse){
+ .daily-page .fry-stage,.daily-page .fry-stack,.daily-page .fry-choice{touch-action:none!important;-webkit-user-select:none;user-select:none}
+ .daily-page .fry-stage{overscroll-behavior:contain}
+}
