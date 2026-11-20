@@ -21,7 +21,8 @@
   const fctx=front.getContext('2d'),bctx=back.getContext('2d');
   if(previewScale<1){for(const ctx of [fctx,bctx])ctx.setTransform(previewScale,0,0,previewScale,0,0);}
   const cardInner=flip.querySelector('.license-flip-inner');
-  const backArt=$('license-back-art');
+  let backArt=$('license-back-art');
+  let previewKey='',fontRevision=0;
   const glossFaces=[$('license-gloss-front'),$('license-gloss-back')];
   // Mobile WebKit can drop a canvas or backface in a preserve-3d stack.
   // Paint one image plane at a time, with the same perspective and drag motion.
@@ -201,6 +202,24 @@
     if(typeof requestIdleCallback==='function')requestIdleCallback(task,{timeout:900});
     else setTimeout(task,80);
   }
+  // Decode the replacement offscreen, then swap a fresh image plane. Safari
+  // sometimes retains the previous raster when src changes inside a 3D layer.
+  async function commitPreview(data,seq){
+    if(!backArt)return;
+    if(typeof backArt.replaceWith!=='function'){
+      backArt.src=data;return;
+    }
+    const next=new Image();
+    next.id='license-back-art';next.className='license-art license-art-composed';
+    next.alt='라이센스 뒷면';next.width=back.width;next.height=back.height;
+    await new Promise((resolve,reject)=>{
+      next.onload=resolve;next.onerror=()=>reject(Error('Card preview decode failed'));
+      next.src=data;
+    });
+    if(typeof next.decode==='function'){try{await next.decode();}catch{/* load already succeeded */}}
+    if(seq!==renderVersion)return;
+    backArt.replaceWith(next);backArt=next;
+  }
   async function render() {
     const seq = ++renderVersion;
     exportFiles=null;$('download-both').disabled=true;
@@ -212,11 +231,17 @@
     try {
       const sprite = await image(imagePath(index));
       if (seq !== renderVersion) return;
-      drawBack(bctx,sprite,name,member,index,issuedAt);
-      // A regular image is much more reliable than a live canvas inside a
-      // transformed layer on iOS. Keep the original template as its fallback.
-      if(backArt)backArt.src=back.toDataURL('image/png');
       $('license-card-details').textContent = `${name || '이름 미입력'}, ${names[index]}, ${member}, 발급일 ${issuedDate(issuedAt)}`;
+      // The application no longer shows a live preview. Do not encode PNGs
+      // for every typed letter or each profile swipe.
+      if(editing)return;
+      const key=JSON.stringify([name,member,index,issuedAt,fontRevision]);
+      if(key!==previewKey){
+        drawBack(bctx,sprite,name,member,index,issuedAt);
+        await commitPreview(back.toDataURL('image/png'),seq);
+        if(seq!==renderVersion)return;
+        previewKey=key;
+      }
       // Never encode full-size files during the forging/signing animation.
       if(!editing&&record&&!wallet&&$('license-issuing').hidden)scheduleExport(seq,sprite,name,member,index,issuedAt);
     } catch { if(seq === renderVersion) status('감띠 이미지를 불러오지 못했어요. 다시 시도해주세요.'); }
@@ -361,11 +386,14 @@
         await loading;
         overlay.classList.add('is-signing');$('license-signature').setAttribute('aria-hidden','false');
         await new Promise(resolve=>setTimeout(resolve,reduced.matches?500:2650));
+        // Finish the latest image decode before revealing the issued screen.
+        await render();
         overlay.hidden=true;overlay.classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');$('license-celebration').hidden=false;
         document.body.classList.remove('license-animating');
         render();
         status('');
-        document.querySelector('.license-heading').scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'start'});
+        if(typeof window.scrollTo==='function')window.scrollTo({top:0,behavior:'instant'});
+        else document.querySelector('.license-heading').scrollIntoView({behavior:'auto',block:'start'});
       }else status('');
     }
     catch { document.body.classList.remove('license-animating');$('license-issuing').hidden=true;$('license-issuing').classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
@@ -429,7 +457,7 @@
     frontImage=f;backImage=b;
     drawTemplate(fctx,frontImage);drawTemplate(bctx,backImage);ready=true;viewEdit(!record);
     // Font fetching must never delay the artwork or prevent the card appearing.
-    try{document.fonts.load('600 46px "Wanted Sans Variable"').then(()=>render()).catch(()=>{});}catch{}
+    try{document.fonts.load('600 46px "Wanted Sans Variable"').then(()=>{fontRevision++;render();}).catch(()=>{});}catch{}
   }).catch(()=>status('카드 이미지를 불러오지 못했어요. 잠시 후 다시 접속해주세요.'));
 })();
 

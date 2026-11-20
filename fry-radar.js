@@ -288,16 +288,20 @@
   const healthView=document.getElementById('radar-health');
   let refreshing=false,loaded=false,lastSignature='';
   const readJSON=async file=>{
-    const response=await fetch(file+'?v='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(15000)});
-    if(!response.ok)throw Error('HTTP '+response.status);
-    return response.json();
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),15000);
+    try{
+      const response=await fetch(file+'?v='+Date.now(),{cache:'no-store',signal:controller.signal});
+      if(!response.ok)throw Error('HTTP '+response.status);
+      return await response.json();
+    }finally{clearTimeout(timeout);}
   };
   const refresh=async()=>{
     if(refreshing||document.hidden)return;
     refreshing=true;
     try{
       const [dataResult,healthResult]=await Promise.allSettled([
-        readJSON('data/fry-radar.json'),readJSON('data/fry-radar-health.json')
+        readJSON('data/fry-radar.json'),healthView?readJSON('data/fry-radar-health.json'):Promise.resolve(null)
       ]);
       if(healthView&&healthResult.status==='fulfilled'){
         const at=new Date(healthResult.value.checkedAt);

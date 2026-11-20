@@ -156,7 +156,7 @@ function resize() {
   camera.updateProjectionMatrix();
   renderer.setSize(width, height, false);
 }
-new ResizeObserver(resize).observe(tray);
+if('ResizeObserver' in window)new ResizeObserver(resize).observe(tray);else window.addEventListener('resize',resize);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -168,7 +168,8 @@ controls.maxPolarAngle = 2.05;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 controls.autoRotate = !reducedMotion.matches;
 controls.autoRotateSpeed = .45;
-reducedMotion.addEventListener('change', event => { controls.autoRotate = !event.matches; });
+const changeMotion = event => { controls.autoRotate = !event.matches; };
+if(reducedMotion.addEventListener)reducedMotion.addEventListener('change',changeMotion);else reducedMotion.addListener?.(changeMotion);
 controls.target.set(0, .044, 0);
 camera.position.set(0, .072, .205);
 controls.update();
@@ -327,16 +328,18 @@ loader.load('assets/holder-fbx.glb', gltf => {
   status.textContent = '3D 화면을 불러오지 못했어요. 원래 조합 화면을 이용해 주세요.';
 });
 
-let previous = 0;
-let visible = true;
-new IntersectionObserver(entries => { visible = entries[0]?.isIntersecting ?? true; }).observe(tray);
-function animate(time) {
-  requestAnimationFrame(animate);
-  if (!visible) { previous = time; return; }
-  const delta = previous ? (time - previous) / 1000 : 0;
-  previous = time;
-  controls.update(Math.min(delta, .05));
-  renderer.render(scene, camera);
+let previous=0, frame=0;
+let visible=true;
+function syncFrame(){
+  if(visible&&!document.hidden){if(!frame)frame=requestAnimationFrame(animate);}
+  else{if(frame)cancelAnimationFrame(frame);frame=0;previous=0;}
 }
-requestAnimationFrame(animate);
-
+function animate(time){
+  frame=0;if(!visible||document.hidden)return;
+  const delta=previous?(time-previous)/1000:0;previous=time;
+  controls.update(Math.min(delta,.05));renderer.render(scene,camera);
+  frame=requestAnimationFrame(animate);
+}
+if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting??true;syncFrame();}).observe(tray);
+document.addEventListener('visibilitychange',syncFrame);
+syncFrame();

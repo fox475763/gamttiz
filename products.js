@@ -23,7 +23,7 @@ catalogProducts.forEach(([name, english, description], index) => {
   card.type = 'button'; card.className = 'catalog-card';
   card.setAttribute('aria-label', `${name} 제품 정보 보기`);
   const img = document.createElement('img');
-  img.src = image; img.alt = `${name} 키링 제품 사진`; img.loading = 'lazy';
+  img.src = image; img.alt = `${name} 키링 제품 사진`; img.loading = 'lazy'; img.decoding = 'async';
   const text = document.createElement('span'); text.className = 'catalog-card-text';
   const num = document.createElement('small'); num.textContent = `No. ${number}`;
   const title = document.createElement('strong'); title.textContent = name;

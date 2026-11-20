@@ -7,6 +7,9 @@ const errors=[];
 const htmlFiles=fs.readdirSync(root).filter(name=>name.endsWith('.html'));
 for(const file of htmlFiles){
   const html=fs.readFileSync(file,'utf8');
+  const ids=[...html.matchAll(/\bid=["']([^"']+)["']/g)].map(m=>m[1]);
+  for(const id of new Set(ids))if(ids.filter(value=>value===id).length>1)errors.push(`${file}: duplicate id ${id}`);
+  if(!/<meta\s+name=["']viewport["']/i.test(html))errors.push(`${file}: missing responsive viewport`);
   for(const [,attr,target] of html.matchAll(/\b(src|href)=["']([^"']+)["']/g)){
     if(target.startsWith('#')||/^(?:https?:|mailto:|data:|javascript:|\/)/i.test(target))continue;
     const local=decodeURIComponent(target.split(/[?#]/)[0]);
@@ -14,10 +17,23 @@ for(const file of htmlFiles){
     if(!fs.existsSync(path.join(root,local)))errors.push(`${file}: missing ${attr} ${local}`);
   }
 }
+for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.css'))){
+  const css=fs.readFileSync(file,'utf8');
+  for(const [,target] of css.matchAll(/url\(\s*["']?([^"'()]+)["']?\s*\)/g)){
+    const local=target.trim().split(/[?#]/)[0];
+    if(!local||/^(?:https?:|data:|\/)/i.test(local))continue;
+    if(!fs.existsSync(path.join(root,decodeURIComponent(local))))errors.push(`${file}: missing CSS asset ${local}`);
+  }
+}
+// These paths are generated at runtime rather than listed directly in HTML.
+for(let i=1;i<=14;i++){
+  const n=String(i).padStart(2,'0');
+  for(const asset of [`assets/keyring-${n}.png`,`assets/illustrations/friend-${n}.svg`,`assets/illustrations-3d/friend-${n}.png`])if(!fs.existsSync(path.join(root,asset)))errors.push(`Missing character asset ${asset}`);
+}
 for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.js'))){
   try{execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});}catch(error){errors.push(`${file}: JavaScript syntax error\n${error.stderr?.toString()||''}`);}
 }
-for(const file of ['tools/check-site.mjs','tools/sync-news.mjs','tools/collect-fry-radar.mjs','tools/collect-official-fry-radar.mjs']){
+for(const file of fs.readdirSync(path.join(root,'tools')).filter(name=>name.endsWith('.mjs')).map(name=>'tools/'+name)){
   try{execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});}catch(error){errors.push(`${file}: JavaScript syntax error\n${error.stderr?.toString()||''}`);}
 }
 try{const posts=JSON.parse(fs.readFileSync('news/posts.json','utf8'));if(!Array.isArray(posts))errors.push('news/posts.json: expected an array');}catch{errors.push('news/posts.json: invalid JSON');}

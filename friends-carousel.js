@@ -22,6 +22,15 @@
   let duration=0;
   let step=0;
   let activeIndex=-1;
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+  let visible=true, dotTimer=0;
+  function syncMotion(){
+    if(!animation)return;
+    const running=visible&&!document.hidden&&!reduced.matches;
+    if(running){animation.play();if(!dotTimer)dotTimer=setInterval(updateDots,200);}
+    else {animation.pause();clearInterval(dotTimer);dotTimer=0;}
+    updateDots();
+  }
 
   const dotButtons=originals.map((_,i)=>{
     const dot=document.createElement('button');
@@ -52,7 +61,8 @@
     const duplicate=track.children[originals.length];
     const distance=duplicate.offsetLeft-first.offsetLeft;
     const spacing=originals[1].offsetLeft-first.offsetLeft;
-    if(!(distance>0)||!(spacing>0))return;
+    if(!(distance>0)||!(spacing>0)||typeof track.animate!=='function')return;
+    if(animation&&Math.abs(duration-distance/speed*1000)<1&&step===spacing){syncMotion();return;}
 
     const phase=animation&&duration
       ? (((Number(animation.currentTime)||0)%duration)+duration)%duration/duration
@@ -66,7 +76,7 @@
     );
     activeIndex=-1;
     animation.currentTime=phase*duration;
-    updateDots();
+    syncMotion();
   }
 
   function jumpTo(index){
@@ -87,13 +97,9 @@
     observer.observe(viewport);
     observer.observe(originals[0]);
   }
-  document.addEventListener('visibilitychange',()=>{
-    if(!animation)return;
-    if(document.hidden)animation.pause();
-    else animation.play();
-  });
-
+  document.addEventListener('visibilitychange',syncMotion);
+  if(reduced.addEventListener)reduced.addEventListener('change',syncMotion);
+  else reduced.addListener?.(syncMotion);
+  if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;syncMotion();}).observe(viewport);
   layout();
-  // Update the current red dot while the strip continues moving.
-  window.setInterval(updateDots,200);
 })();

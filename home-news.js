@@ -31,7 +31,9 @@ if (homeNews) {
       const imagePath = Array.isArray(post.images) ? post.images[0] : '';
       const imageWrap = create('div', 'home-news-feed-media');
       if (typeof imagePath === 'string' && (/^assets\/news\/[a-zA-Z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(imagePath) || issueMedia(imagePath))) {
-        const image = create('img'); image.src = imagePath; image.alt = `${post.title} 사진`; image.loading = 'lazy';
+        const image = create('img'); image.alt = `${post.title} 사진`; image.loading = 'lazy'; image.decoding = 'async';
+        image.addEventListener('error',()=>imageWrap.replaceChildren(create('span','','GAMTTIZ')),{once:true});
+        image.src = imagePath;
         imageWrap.append(image);
       } else imageWrap.append(create('span', '', 'GAMTTIZ'));
       const info = create('div', 'home-news-feed-copy');
