@@ -65,3 +65,12 @@ test('National index interaction: filter, exact number search, sort, detail navi
  sort.value='desc';sort.emit('change');assert.match(grid.children[0].attrs['aria-label'],/No\. 20/);
  location.href='https://example.test/gamttiz/collection.html#friend-15';location.hash='#friend-15';eventMap.hashchange();assert.equal(detail.open,true);assert.match(profile.innerHTML,/\?\?\?/);
 });
+
+test('GAMTTIZ DEX uses existing editorial palette and has no collection-record panel',()=>{
+ const html=src('collection.html'),css=src('national-dex.css');
+ assert.doesNotMatch(html,/COLLECTION RECORD|dex-overview|전국도감|NATIONAL INDEX/);
+ assert.match(html,/<h2 id="dex-library-title">감띠즈 도감<\/h2>/);
+ assert.match(css,/background:var\(--ed-paper,#f8f8f5\)/);
+ assert.match(css,/--dex-red:var\(--gtz-red,#e93636\)/);
+ assert.doesNotMatch(css,/dex-overview|dex-progress/);
+});
