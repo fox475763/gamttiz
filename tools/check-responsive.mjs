@@ -68,10 +68,24 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        assert.equal(await page.locator('.dex-unknown').count(),6);
        await page.locator('.dex-unknown').first().click();
        assert.equal(await page.locator('#dex-profile h2').textContent(),'???');
+       assert.equal(await page.locator('#dex-detail').evaluate(el=>el.open),true);
+       await page.locator('#dex-close').click();
+       await page.locator('[data-dex-filter="unknown"]').click();
+       assert.equal(await page.locator('.dex-tile:visible').count(),6);
+       await page.locator('[data-dex-filter="all"]').click();
+       await page.locator('#dex-sort').selectOption('desc');
+       assert.match(await page.locator('.dex-tile').first().getAttribute('aria-label'),/No\. 20/);
        await page.locator('#dex-search').fill('빙빙이');
        assert.equal(await page.locator('.dex-tile:visible').count(),1);
        await page.locator('.dex-tile:visible').click();
        assert.equal(await page.locator('#dex-profile h2').textContent(),'빙빙이');
+       await page.locator('#dex-next').click();
+       assert.equal(await page.locator('#dex-current').textContent(),'NO. 08 / 20');
+       await page.keyboard.press('Escape');
+       assert.equal(await page.locator('#dex-detail').evaluate(el=>el.open),false);
+       await page.goto(base+'collection.html#friend-14');
+       assert.match(await page.locator('#dex-current').textContent(),/NO\. 14/);
+       await page.locator('#dex-close').click();
      }
      if(filename==='draw.html'){
        assert.equal(await page.locator('.wheel-slot').count(),14);
