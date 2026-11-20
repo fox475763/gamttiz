@@ -172,3 +172,18 @@ body.license-page.has-license:not(.license-wallet-view) .license-main{
   .license-page.has-license:not(.license-wallet-view) .license-heading,.license-page.has-license:not(.license-wallet-view) .license-heading h1{animation:none!important}
   .license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button,.license-link){transition:none!important;transform:none!important}
 }
+
+/* The animated glass owns ::before; the member pictogram must be a real flex item.
+   This avoids the pseudo-element becoming an absolutely positioned glass rim on iOS. */
+.license-page.has-license:not(.license-wallet-view) .license-member-link::before{content:none!important}
+.license-page.has-license:not(.license-wallet-view) .license-member-link .license-member-icon{
+ display:block;position:static;flex:0 0 19px;width:19px;height:19px;min-width:19px;
+ background:currentColor;-webkit-mask:var(--gallery-icon) center/contain no-repeat;
+ mask:var(--gallery-icon) center/contain no-repeat;transform:none;pointer-events:none;
+}
+.license-page.has-license:not(.license-wallet-view) .license-member-link .license-member-text{
+ display:block;flex:0 1 auto;min-width:0;line-height:1.35;text-align:center;
+}
+@media(max-width:780px){
+ .license-page.has-license:not(.license-wallet-view) .license-member-link{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;min-width:0;overflow:hidden}
+}
