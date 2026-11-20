@@ -8,6 +8,7 @@
   const $ = id => document.getElementById(id);
   const form = $('license-form'), input = $('license-name'), friends = $('license-friends');
   const oathChecks = Array.from({length:5},(_,i)=>$('license-oath-'+(i+1)));
+  const oathAll = $('license-oath-all');
   const flip = $('license-flip'), front = $('license-front'), back = $('license-back');
   const W = 1080, H = 1718, CROP_Y = 101;
   const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -256,6 +257,7 @@
     form.hidden = !editing; $('license-actions').hidden = editing;
     $('license-oath').hidden = !!record;
     oathChecks.forEach(check=>{check.disabled=!!record;});
+    oathAll.disabled=!!record;syncOathAll();
     $('license-badge').textContent = record && !editing ? 'MY LICENSE' : record ? 'EDIT PREVIEW' : 'PREVIEW';
     $('license-panel-title').textContent = editing&&record?'라이센스 정보 수정':'라이센스 발급 신청서';
     $('license-submit').textContent = record?'수정 내용 저장':'라이센스 발급 신청';
@@ -269,7 +271,13 @@
   }
   function acceptedOath(){return !!record||oathChecks.every(check=>check.checked);}
   function updateSubmit(){$('license-submit').disabled=!ready||saving||!cleanName(input.value)||!acceptedOath();}
-  function resetOath(){oathChecks.forEach(check=>{check.checked=false;});}
+  function syncOathAll(){
+    const count=oathChecks.filter(check=>check.checked).length;
+    oathAll.checked=count===oathChecks.length;
+    oathAll.indeterminate=count>0&&count<oathChecks.length;
+    $('license-oath-count').textContent=count+' / '+oathChecks.length;
+  }
+  function resetOath(){oathChecks.forEach(check=>{check.checked=false;});syncOathAll();}
   if(!wallet)names.forEach((name,index)=>{
     const label=document.createElement('label'); label.className='license-friend';
     const radio=document.createElement('input'); radio.type='radio'; radio.name='character'; radio.value=String(index); radio.setAttribute('aria-label',name); radio.checked=index===0;
@@ -327,7 +335,9 @@
   flip.addEventListener('pointerleave',()=>{if(!drag)resetPose();});
   flip.addEventListener('click',e=>{if(ignoreClick&&e.detail!==0){ignoreClick=false;return;}ignoreClick=false;setSide(!isBack);}); $('license-turn').addEventListener('click',()=>setSide(!isBack));
   input.addEventListener('input',()=>{updateSubmit();render();});
-  oathChecks.forEach(check=>check.addEventListener('change',()=>{updateSubmit();if(acceptedOath())status('');}));
+  function oathChanged(){syncOathAll();updateSubmit();if(acceptedOath())status('');}
+  oathChecks.forEach(check=>check.addEventListener('change',oathChanged));
+  oathAll.addEventListener('change',()=>{oathChecks.forEach(check=>{check.checked=oathAll.checked;});oathChanged();});
   form.addEventListener('submit',async event=>{
     event.preventDefault(); if(!ready || saving) return;
     const name = cleanName(input.value); if(!name){status('이름을 입력해주세요.');input.focus();return;}
