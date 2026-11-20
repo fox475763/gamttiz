@@ -53,6 +53,6 @@
   $('member-install').addEventListener('click',async()=>{if(!installEvent)return;try{await installEvent.prompt();}finally{installEvent=null;$('member-install').hidden=true;}});
   window.addEventListener('appinstalled',()=>{$('member-install').hidden=true;});
   sync();
-  if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('member-sw.js',{scope:'./'}).catch(()=>{});
+  if('serviceWorker'in navigator&&window.isSecureContext)navigator.serviceWorker.register('member-sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{});
 })();
 

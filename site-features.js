@@ -341,20 +341,25 @@ const walletMedia=matchMedia('(max-width: 900px)');
     return connectSensor();
   });
   shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
-  // Render the exact issued license artwork on one small canvas, without
-  // mounting the entire license page in an iframe or running 3D animations.
+  // Use the same mobile-safe rendering model as MY ID: one visible, decoded
+  // image plane in perspective. Never stack live canvas textures in 3D.
   const walletStyle=document.createElement('style');
-  walletStyle.textContent='.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:12px 6px;background:transparent!important;border:0!important;box-shadow:none!important}.gtz-wallet-lite-card{display:block;width:min(72vw,290px);height:auto;aspect-ratio:1080/1718;border-radius:12px;box-shadow:0 12px 28px #0003;background:#780708}.gtz-wallet-lite-error{font-size:13px;color:#7d1616;text-align:center;padding:30px 12px}';
-  walletStyle.textContent+=`
-.gtz-wallet-rotator{position:relative;width:min(72vw,290px);aspect-ratio:1080/1718;touch-action:none;user-select:none;-webkit-user-select:none;perspective:1200px;-webkit-perspective:1200px;cursor:grab;flex:none}
+  walletStyle.textContent=`
+.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:0;padding:8px 6px;background:transparent!important;border:0!important;box-shadow:none!important}
+.gtz-wallet-lite-error,.gtz-wallet-loading{font-size:13px;color:#7d1616;text-align:center;padding:12px}
+.gtz-wallet-rotator{position:relative;width:min(72vw,290px);width:min(72vw,290px,calc((88dvh - 154px)*.62864));aspect-ratio:1080/1718;touch-action:none!important;user-select:none;-webkit-user-select:none;perspective:1000px;-webkit-perspective:1000px;cursor:grab;flex:none}
 .gtz-wallet-rotator:active{cursor:grabbing}
-.gtz-wallet-rotator-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d!important;-webkit-transform-style:preserve-3d!important;transform:rotateY(180deg);-webkit-transform:rotateY(180deg);will-change:transform}
-.gtz-wallet-face{position:absolute;inset:0;width:100%!important;height:100%!important;border-radius:12px;backface-visibility:hidden!important;-webkit-backface-visibility:hidden!important;box-shadow:0 12px 28px #0003;display:block!important;object-fit:cover}
-.gtz-wallet-face-front{transform:rotateY(0deg)!important;-webkit-transform:rotateY(0deg)!important}
-.gtz-wallet-face-back{transform:rotateY(180deg)!important;-webkit-transform:rotateY(180deg)!important}
-.gtz-wallet-turn{border:1px solid #c7a67d;border-radius:100px;padding:9px 19px;color:#7b171b;background:#fff9ef;font-size:12px;font-weight:600;cursor:pointer}
-.gtz-wallet-hint{font-size:12px;color:#7d6a60;margin:0;text-align:center}
+.gtz-wallet-rotator-inner{position:absolute;inset:0;transform-style:flat;-webkit-transform-style:flat;pointer-events:none;will-change:transform}
+.gtz-wallet-plane{position:absolute;inset:0;border-radius:12px;overflow:hidden;background:#780708;box-shadow:0 12px 28px #0003,0 0 0 .5px #ad7539;pointer-events:none!important}
+.gtz-wallet-plane img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:fill;pointer-events:none!important;-webkit-user-drag:none}
+.gtz-wallet-plane img[hidden]{display:none!important}
+.gtz-wallet-shine{position:absolute;inset:0;border-radius:inherit;background-image:url("assets/license/reflection.svg?v=20261121curve2");background-size:240% 240%;background-position:50% 50%;mix-blend-mode:screen;pointer-events:none;opacity:.44;animation:gtz-wallet-idle 8s ease-in-out infinite alternate}
+@keyframes gtz-wallet-idle{0%{background-position:15% 26%;opacity:.15}100%{background-position:85% 73%;opacity:.44}}
+.gtz-wallet-turn{border:1px solid #c7a67d;border-radius:100px;padding:9px 19px;color:#7b171b;background:#fff9ef;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;flex:none}
+.gtz-wallet-hint{font-size:12px;color:#7d6a60;margin:0;text-align:center;flex:none}
+@media(prefers-reduced-motion:reduce){.gtz-wallet-shine{animation:none!important;opacity:0}}
 `;document.head.append(walletStyle);
+  let disposeWallet=()=>{};
   const friendNames=['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
   const qrMatrix=[
     '111111100101010011111011101111111',
@@ -395,62 +400,99 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function startFrame(){
     if(!mobile())return;
     let data;try{data=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null')}catch{}
-    frame.replaceChildren();frameStarted=true;
+    disposeWallet();frame.replaceChildren();frameStarted=true;
     if(!data||!Number.isInteger(data.character)||data.character<0||data.character>=friendNames.length)return;
-    const rotator=make('div','gtz-wallet-rotator');const inner=make('div','gtz-wallet-rotator-inner');
-    const frontCanvas=document.createElement('canvas');frontCanvas.className='gtz-wallet-face gtz-wallet-face-front';frontCanvas.width=540;frontCanvas.height=859;frontCanvas.setAttribute('aria-label','라이센스 앞면');
-    const canvas=document.createElement('canvas');canvas.className='gtz-wallet-face gtz-wallet-face-back';canvas.width=540;canvas.height=859;canvas.setAttribute('aria-label','라이센스 뒷면 '+data.name);
-    inner.append(frontCanvas,canvas);rotator.append(inner);frame.append(rotator);
-    const turn=make('button','gtz-wallet-turn','카드 뒤집기 ↻');turn.type='button';frame.append(turn,make('p','gtz-wallet-hint','카드를 좌우로 드래그하거나 탭해서 돌려보세요.'));
-    // Real two-sided 3D card, with continuous drag rotation and a lightweight
-    // canvas texture for each side. No iframe, no repeated canvas painting.
-    let yaw=180,pitch=0,targetYaw=180,targetPitch=0,raf=0,drag=null;
-    const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-    function paintPose(){
+    const rotator=make('div','gtz-wallet-rotator');
+    const inner=make('div','gtz-wallet-rotator-inner'),plane=make('div','gtz-wallet-plane');
+    const shine=make('div','gtz-wallet-shine');
+    const loading=make('p','gtz-wallet-loading','라이센스 준비 중…');
+    const turn=make('button','gtz-wallet-turn','↻ 뒷면 보기');turn.type='button';turn.disabled=true;
+    rotator.setAttribute('role','button');rotator.tabIndex=0;rotator.setAttribute('aria-label','라이센스 카드 뒷면 보기');
+    rotator.setAttribute('aria-pressed','false');rotator.setAttribute('aria-busy','true');
+    inner.append(plane);rotator.append(inner);frame.append(rotator,loading,turn,make('p','gtz-wallet-hint','카드를 좌우로 드래그하거나 탭해서 돌려보세요.'));
+    // Canvases only compose the artwork OFFSCREEN. Decoded images are the
+    // actual card faces, so GPU backface bugs cannot obscure the other face.
+    const frontCanvas=document.createElement('canvas'),canvas=document.createElement('canvas');
+    for(const c of [frontCanvas,canvas]){c.width=540;c.height=859;}
+    let yaw=0,pitch=0,targetYaw=0,targetPitch=0,raf=0,lastFrame=0,drag=null,ready=false,frontArt,backArt;
+    const events=new AbortController();
+    const on=(el,type,fn,options={})=>el.addEventListener(type,fn,{...options,signal:events.signal});
+    disposeWallet=()=>{events.abort();if(raf)cancelAnimationFrame(raf);raf=0;drag=null;ready=false;};
+    function paintPose(time){
       raf=0;
-      yaw+=(targetYaw-yaw)*.28;
-      pitch+=(targetPitch-pitch)*.28;
-      if(Math.abs(targetYaw-yaw)<.12)yaw=targetYaw;
-      if(Math.abs(targetPitch-pitch)<.12)pitch=targetPitch;
-      const transform='rotateX('+pitch.toFixed(2)+'deg) rotateY('+yaw.toFixed(2)+'deg)';
+      const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
+      lastFrame=time;const weight=reducedWallet.matches?1:1-Math.exp(-dt/(drag?48:94));
+      yaw+=(targetYaw-yaw)*weight;pitch+=(targetPitch-pitch)*weight;
+      if(Math.abs(targetYaw-yaw)<.05)yaw=targetYaw;
+      if(Math.abs(targetPitch-pitch)<.05)pitch=targetPitch;
+      // Normalize each half-turn exactly like license.js on mobile WebKit.
+      const half=Math.floor((yaw+90)/180),back=Math.abs(half%2)===1,angle=yaw-half*180;
+      rotator.dataset.side=back?'back':'front';
+      if(frontArt&&backArt){frontArt.hidden=back;backArt.hidden=!back;}
+      const transform='rotateX('+pitch.toFixed(3)+'deg) rotateY('+angle.toFixed(3)+'deg)';
       inner.style.transform=transform;inner.style.webkitTransform=transform;
-      if(yaw!==targetYaw||pitch!==targetPitch)raf=requestAnimationFrame(paintPose);
+      const moving=!!drag||Math.abs(yaw-targetYaw)>.05||Math.abs(pitch)>.05||Math.abs(angle)>.05;
+      const dx=Math.sin(angle*Math.PI/180),dy=Math.sin(pitch*Math.PI/180);
+      shine.style.backgroundPosition=(50+dx*43).toFixed(2)+'% '+(50-dy*76).toFixed(2)+'%';
+      shine.style.animation=moving?'none':'';
+      shine.style.opacity=moving?(reducedWallet.matches?'0':Math.min(.92,Math.abs(dx)*.83+Math.abs(dy)*1.55).toFixed(3)):'';
+      if(yaw!==targetYaw||pitch!==targetPitch)raf=requestAnimationFrame(paintPose);else lastFrame=0;
     }
-    function schedulePose(){if(!raf)raf=requestAnimationFrame(paintPose)}
-    function setTarget(y,p=0){targetYaw=y;targetPitch=p;schedulePose()}
-    function flipCard(){setTarget(Math.round(targetYaw/180)*180+180,0)}
-    turn.addEventListener('click',flipCard);
-    rotator.addEventListener('pointerdown',e=>{
-      if(drag)return;
-      drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:targetYaw,pitch:targetPitch};
-      try{rotator.setPointerCapture(e.pointerId)}catch{}
-    });
-    rotator.addEventListener('pointermove',e=>{
-      if(!drag||drag.id!==e.pointerId)return;
-      const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
-      setTarget(drag.yaw+dx*.85,Math.max(-18,Math.min(18,drag.pitch-dy*.16)));
-    });
-    function finish(e,cancel){
-      if(!drag||drag.id!==e.pointerId)return;
-      const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
-      const tapped=Math.abs(dx)<9&&Math.abs(dy)<9;
-      const finalYaw=cancel?drag.yaw:tapped?Math.round(drag.yaw/180)*180+180:Math.round(targetYaw/180)*180;
-      drag=null;
-      setTarget(finalYaw,0);
-      try{if(rotator.hasPointerCapture(e.pointerId))rotator.releasePointerCapture(e.pointerId)}catch{}
+    function setTarget(y,p=0){
+      targetYaw=y;targetPitch=p;
+      const back=Math.abs(Math.round(y/180)%2)===1;
+      turn.textContent=back?'↻ 앞면 보기':'↻ 뒷면 보기';
+      rotator.setAttribute('aria-pressed',String(back));rotator.setAttribute('aria-label',back?'라이센스 카드 앞면 보기':'라이센스 카드 뒷면 보기');
+      if(!raf)raf=requestAnimationFrame(paintPose);
     }
-    rotator.addEventListener('pointerup',e=>finish(e,false));
-    rotator.addEventListener('pointercancel',e=>finish(e,true));
-    rotator.addEventListener('lostpointercapture',e=>{if(drag&&drag.id===e.pointerId){drag=null;setTarget(Math.round(targetYaw/180)*180,0)}});
-    rotator.setAttribute('role','button');rotator.tabIndex=0;
-    rotator.setAttribute('aria-label','3D 라이센스 카드, 좌우로 드래그하거나 탭해서 뒤집기');
-    rotator.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard()}});
-    paintPose();
+    function flipCard(){if(ready)setTarget(Math.round(targetYaw/180)*180+180,0);}
+    function begin(id,x,y){
+      if(!ready||drag)return false;
+      drag={id,x,y,yaw:targetYaw,pitch:targetPitch,moved:false};return true;
+    }
+    function move(id,x,y){
+      if(!drag||drag.id!==id)return false;
+      const dx=x-drag.x,dy=y-drag.y;
+      if(Math.abs(dx)>6||Math.abs(dy)>6)drag.moved=true;
+      if(drag.moved)setTarget(drag.yaw+dx*1.12,Math.max(-18,Math.min(18,drag.pitch-dy*.16)));
+      return true;
+    }
+    function finish(id,x,y,cancel=false){
+      if(!drag||drag.id!==id)return;
+      const d=drag;drag=null;
+      const moved=d.moved||Math.abs(x-d.x)>6||Math.abs(y-d.y)>6;
+      const end=cancel?Math.round(d.yaw/180)*180:moved?Math.round((d.yaw+(x-d.x)*1.12)/180)*180:Math.round(d.yaw/180)*180+180;
+      setTarget(end,0);
+    }
+    // A stationary hit target owns the entire gesture, not the rotating plane.
+    if(window.PointerEvent){
+      on(rotator,'pointerdown',e=>{
+        if(e.button!==0||!begin(e.pointerId,e.clientX,e.clientY))return;
+        if(e.cancelable)e.preventDefault();
+        try{rotator.setPointerCapture(e.pointerId)}catch{}
+      });
+      on(window,'pointermove',e=>{if(move(e.pointerId,e.clientX,e.clientY)&&e.cancelable)e.preventDefault();},{passive:false});
+      on(window,'pointerup',e=>finish(e.pointerId,e.clientX,e.clientY));
+      on(window,'pointercancel',e=>finish(e.pointerId,e.clientX,e.clientY,true));
+      on(rotator,'lostpointercapture',e=>finish(e.pointerId,e.clientX,e.clientY,true));
+    }else{
+      // Fallback for older iOS WebKit, which has no PointerEvent.
+      on(rotator,'touchstart',e=>{const t=e.changedTouches[0];if(t&&begin(t.identifier,t.clientX,t.clientY)&&e.cancelable)e.preventDefault();},{passive:false});
+      on(window,'touchmove',e=>{for(const t of e.changedTouches)if(move(t.identifier,t.clientX,t.clientY)&&e.cancelable)e.preventDefault();},{passive:false});
+      for(const type of ['touchend','touchcancel'])on(window,type,e=>{for(const t of e.changedTouches)finish(t.identifier,t.clientX,t.clientY,type==='touchcancel');});
+      on(rotator,'mousedown',e=>{if(e.button===0)begin('mouse',e.clientX,e.clientY);});
+      on(window,'mousemove',e=>move('mouse',e.clientX,e.clientY));
+      on(window,'mouseup',e=>finish('mouse',e.clientX,e.clientY));
+    }
+    on(turn,'click',flipCard);
+    on(rotator,'keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard();}});
+    on(rotator,'click',e=>{if(e.detail===0)flipCard();});
+    paintPose(performance.now());
     const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
     const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
     const index=data.character;
-    Promise.all([load('assets/license/front.png'),load('assets/license/back.png'),load('assets/illustrations-3d/friend-'+String(index+1).padStart(2,'0')+'.png')]).then(([frontTemplate,template,sprite])=>{
-      if(!canvas.isConnected)return;
+    Promise.all([load('assets/license/front.png'),load('assets/license/back.png'),load('assets/illustrations-3d/friend-'+String(index+1).padStart(2,'0')+'.png')]).then(async ([frontTemplate,template,sprite])=>{
+      if(!rotator.isConnected||events.signal.aborted)return;
       const fctx=frontCanvas.getContext('2d',{alpha:false});if(fctx){fctx.setTransform(.5,0,0,.5,0,0);fctx.drawImage(frontTemplate,0,101,1080,1718,0,0,1080,1718)}
       ctx.setTransform(.5,0,0,.5,0,0);
       const W=1080,H=1718,CROP_Y=101;
@@ -480,7 +522,18 @@ const walletMedia=matchMedia('(max-width: 900px)');
       const module=6,quiet=4,x=704,y=1340,size=(qrMatrix.length+quiet*2)*module;
       ctx.fillStyle='#f5d578';ctx.fillRect(x,y,size,size);ctx.fillStyle='#780708';
       qrMatrix.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1')ctx.fillRect(x+(i+quiet)*module,y+(j+quiet)*module,module,module)});
-    }).catch(()=>{if(canvas.isConnected)frame.append(make('p','gtz-wallet-lite-error','라이센스 이미지를 불러오지 못했어요. MY ID 페이지에서 확인해주세요.'));});
+      const decoded=async(c,alt)=>{
+        const img=new Image();img.alt=alt;img.width=c.width;img.height=c.height;img.draggable=false;
+        await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=c.toDataURL('image/png');});
+        if(typeof img.decode==='function'){try{await img.decode()}catch{}}
+        return img;
+      };
+      const [frontImage,backImage]=await Promise.all([decoded(frontCanvas,'라이센스 앞면'),decoded(canvas,'라이센스 뒷면 '+data.name)]);
+      if(!rotator.isConnected||events.signal.aborted)return;
+      frontArt=frontImage;backArt=backImage;backArt.hidden=true;plane.append(frontArt,backArt,shine);
+      ready=true;turn.disabled=false;rotator.removeAttribute('aria-busy');loading.remove();
+      paintPose(performance.now());
+    }).catch(()=>{if(rotator.isConnected&&!events.signal.aborted){loading.textContent='라이센스 이미지를 불러오지 못했어요. MY ID 페이지에서 확인해주세요.';rotator.removeAttribute('aria-busy');}});
   }
   function warm(){/* Never preload a second license page. */}
   function sync(){
@@ -507,7 +560,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
     if(next){if(dock.dataset.mode!=='closed')setMode(dock.dataset.mode);notifyFrame(true);return;}
     lastOpened=performance.now();firstHit=null;notifyFrame(false);
     sheetTimer=setTimeout(()=>{
-      if(!open){presented=false;sheet.classList.remove('is-visible');document.documentElement.classList.remove('gtz-wallet-open');}
+      if(!open){presented=false;disposeWallet();frame.replaceChildren();frameStarted=false;sheet.classList.remove('is-visible');document.documentElement.classList.remove('gtz-wallet-open');}
       sheetTimer=0;
     },reducedWallet.matches?0:440);
   }
