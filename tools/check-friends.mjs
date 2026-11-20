@@ -227,11 +227,13 @@ test('Play icons stay flat and the geometric Motion layer loops behind the game 
  const html=src('play.html'),css=src('play-hub.css');
  assert.equal((html.match(/class="hub-symbol"/g)||[]).length,3);
  assert.match(html,/class="play-geometry" aria-hidden="true"/);
- for(const shape of ['fries','rings','mid','holder','orbit','dots'])assert.match(html,new RegExp('play-geo-'+shape));
+ for(const shape of ['contours','ribbon','axis'])assert.match(html,new RegExp('play-geo-'+shape));
  assert.match(css,/\.play-page \.play-geometry\{[^}]*pointer-events:none/);
  assert.match(css,/\.play-page \.hub-icon>svg\{[^}]*filter:none/);
  assert.match(css,/background:var\(--icon-paper\);border:0;box-shadow:none/);
- assert.match(css,/animation:play-fry-drift 14s ease-in-out infinite/);
- assert.match(css,/animation:play-orbit-spin 30s linear infinite/);
+ assert.match(css,/animation:play-contour-drift 28s ease-in-out infinite/);
+ assert.match(css,/animation:play-light-drift 24s ease-in-out infinite/);
+ assert.doesNotMatch(html.match(/<div class="play-geometry"[\s\S]*?<\/svg><\/div>/)[0],/#e93636|#f7b83f|<rect\b|<circle\b/);
+ assert.match(css,/var\(--ed-paper,#f8f8f5\)/);
  assert.match(css,/\.play-page \.play-geo\{animation:none!important/);
 });

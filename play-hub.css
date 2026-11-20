@@ -1,22 +1,17 @@
-/* GAMTTIZ Play: flat graphic icons, geometric motion and optical glass cards. */
+/* GAMTTIZ Play: quiet editorial background, flat icons and optical glass cards. */
 .play-page #main{
   position:relative;isolation:isolate;overflow:hidden;min-height:68vh;
-  background:radial-gradient(ellipse at 12% 8%,#fff3d9 0%,transparent 43%),radial-gradient(ellipse at 94% 90%,#fce3d9 0%,transparent 50%),#f8f8f5;
+  background:radial-gradient(ellipse at 78% 16%,#eaeae6a0 0%,transparent 56%),radial-gradient(ellipse at 18% 81%,#eeeee9a8 0%,transparent 50%),var(--ed-paper,#f8f8f5);
 }
 .play-page .play-geometry{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
 .play-page .play-geometry svg{display:block;width:100%;height:100%;min-height:600px}
 .play-page .play-geo{transform-box:fill-box;transform-origin:center;will-change:transform}
-.play-page .play-geo-fries{animation:play-fry-drift 14s ease-in-out infinite}
-.play-page .play-geo-rings{animation:play-orbit-spin 30s linear infinite}
-.play-page .play-geo-mid{animation:play-mid-drift 17s ease-in-out infinite}
-.play-page .play-geo-holder{animation:play-holder-drift 18s ease-in-out infinite}
-.play-page .play-geo-orbit{animation:play-orbit-spin 26s linear infinite reverse}
-.play-page .play-geo-dots{animation:play-dots-drift 10s ease-in-out infinite}
-@keyframes play-fry-drift{0%,100%{transform:translate(0,0) rotate(-3deg)}50%{transform:translate(43px,32px) rotate(9deg)}}
-@keyframes play-orbit-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes play-mid-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(52px,-36px)}}
-@keyframes play-holder-drift{0%,100%{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(25px,-34px) rotate(4deg)}}
-@keyframes play-dots-drift{0%,100%{transform:translateX(0);opacity:.14}50%{transform:translateX(36px);opacity:.27}}
+.play-page .play-geo-contours{animation:play-contour-drift 28s ease-in-out infinite}
+.play-page .play-geo-ribbon{animation:play-light-drift 24s ease-in-out infinite}
+.play-page .play-geo-axis{animation:play-axis-drift 32s ease-in-out infinite}
+@keyframes play-contour-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(-34px,22px)}}
+@keyframes play-light-drift{0%,100%{transform:translate(0,-14px);opacity:.65}50%{transform:translate(0,28px);opacity:.92}}
+@keyframes play-axis-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(22px,-15px)}}
 .play-page .play-hub{
   --play-red:var(--gtz-red,#e93636);
   --play-ink:var(--ed-ink,#252522);
@@ -95,7 +90,7 @@
 .play-page .play-hub .hub-grid>a:active{transform:scale(.982)}
 @media(max-width:900px){
   .play-page .play-geometry svg{min-height:100%;}
-  .play-page .play-geo-mid{opacity:.18}
+  .play-page .play-geo-axis{opacity:.75}
   .play-page .play-hub .hub-grid{grid-template-columns:minmax(0,1fr);max-width:680px;gap:14px}
   .play-page .play-hub .hub-grid>a{min-height:0;padding:22px;gap:13px;border-radius:24px}
   .play-page .hub-card-title h2{font-size:clamp(21px,3vw,26px)}
