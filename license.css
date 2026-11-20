@@ -439,6 +439,52 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
   .license-paper-seal{width:51px}
 }
 
+/* Small, intentional motion in the application and issued-card controls.
+   Never transform the 3D card's parent or delay access to a form control. */
+@keyframes license-ui-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes license-profile-confirm{0%{transform:translateY(2px) scale(.97);opacity:.84}100%{transform:translateY(0) scale(1);opacity:1}}
+@keyframes license-dialog-in{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.license-page:not(.has-license):not(.license-wallet-view) .license-application-head{animation:license-ui-reveal .38s cubic-bezier(.22,.8,.3,1) backwards}
+.license-page:not(.has-license):not(.license-wallet-view) #license-form>div.license-document-name,
+.license-page:not(.has-license):not(.license-wallet-view) #license-form>fieldset,
+.license-page:not(.has-license):not(.license-wallet-view) #license-form>#license-submit{animation:license-ui-reveal .38s cubic-bezier(.22,.8,.3,1) backwards}
+.license-page:not(.has-license):not(.license-wallet-view) #license-form>div.license-document-name{animation-delay:45ms;position:relative}
+.license-page:not(.has-license):not(.license-wallet-view) #license-form>fieldset.license-friends-field{animation-delay:85ms}
+.license-page:not(.has-license):not(.license-wallet-view) #license-form>fieldset.license-oath{animation-delay:125ms}
+.license-page:not(.has-license):not(.license-wallet-view) #license-form>#license-submit{animation-delay:160ms}
+.license-page:not(.has-license):not(.license-wallet-view) .license-document-name::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:#a6803d;transform:scaleX(0);transform-origin:left;transition:transform .28s cubic-bezier(.22,.8,.3,1);pointer-events:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-document-name:focus-within::after{transform:scaleX(1)}
+.license-page:not(.has-license):not(.license-wallet-view) .license-document-name:focus-within .license-label{color:#751317}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name:focus{border-bottom-width:1px;padding-bottom:12px}
+.license-page:not(.license-wallet-view) .license-label,.license-page:not(.license-wallet-view) .license-field-no{transition:color .18s ease}
+.license-profile-picker .license-profile-arrow{transition:color .2s,background-color .2s,opacity .2s,transform .22s cubic-bezier(.22,.8,.3,1)}
+.license-profile-picker .license-profile-arrow:not(:disabled):active{background:#a6803d14;transform:scale(.9)}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend:has(input:checked) img{animation:license-profile-confirm .3s cubic-bezier(.22,.8,.3,1) both}
+.license-oath-clause{transition:color .2s}
+.license-oath-clause strong,.license-oath-all small{transition:color .2s}
+.license-page .license-panel .license-oath-clause input[type="checkbox"]{transition:transform .16s cubic-bezier(.22,.8,.3,1),accent-color .2s}
+.license-page .license-panel .license-oath-clause:active input[type="checkbox"]{transform:scale(.91)}
+.license-oath-clause:has(input:checked) strong{color:#751317}
+.license-oath-all:has(input:checked) small{color:#751317}
+.license-page:not(.license-wallet-view) .license-primary,.license-page:not(.license-wallet-view) .license-secondary,.license-page:not(.license-wallet-view) .license-link,.license-page:not(.license-wallet-view) .license-turn{transition:background-color .2s,color .2s,border-color .2s,box-shadow .2s,opacity .2s,transform .18s cubic-bezier(.22,.8,.3,1)}
+.license-page:not(.license-wallet-view) .license-primary:not(:disabled):active,.license-page:not(.license-wallet-view) .license-secondary:not(:disabled):active{transform:scale(.985)}
+.license-page:not(.license-wallet-view) .license-link:active,.license-page:not(.license-wallet-view) .license-turn:active{transform:scale(.96)}
+.license-page.has-license:not(.license-wallet-view):not(.license-animating) #license-actions,
+.license-page.has-license:not(.license-wallet-view):not(.license-animating) .license-celebration{animation:license-ui-reveal .38s cubic-bezier(.22,.8,.3,1) backwards}
+.license-page.has-license:not(.license-wallet-view):not(.license-animating) #license-actions{animation-delay:60ms}
+.license-save-dialog[open]{animation:license-dialog-in .24s cubic-bezier(.22,.8,.3,1) both}
+@media(hover:hover) and (pointer:fine){
+  .license-profile-picker .license-profile-arrow:not(:disabled):hover{background:#a6803d13;color:#a17c43;transform:translateY(-1px)}
+  .license-oath-clause:hover strong{color:#751317}
+  .license-page:not(.license-wallet-view) .license-primary:not(:disabled):hover,.license-page:not(.license-wallet-view) .license-secondary:not(:disabled):hover{transform:translateY(-1px)}
+  .license-page:not(.license-wallet-view) .license-link:hover,.license-page:not(.license-wallet-view) .license-turn:hover{color:#751317}
+}
+@media(prefers-reduced-motion:reduce){
+  .license-page:not(.license-wallet-view) :is(.license-application-head,.license-document-name,.license-friends-field,.license-oath,#license-submit,#license-actions,.license-celebration,.license-save-dialog,.license-profile-picker .license-friend img){animation:none!important}
+  .license-page:not(.license-wallet-view) :is(.license-label,.license-primary,.license-secondary,.license-link,.license-turn,.license-profile-arrow,.license-oath-clause input,.license-oath-clause strong,.license-oath-all small){transition:none!important;transform:none!important}
+  .license-page .license-document-name::after{transition:none!important}
+}
+
 
 
 

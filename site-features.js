@@ -225,7 +225,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   const shakeMount=document.getElementById('license-shake-setting-mount');
   if(shakeMount)shakeMount.append(shakeSettings);
   const shakeKey='gamttiz-license-shake-enabled-v1';
-  let enabled=false,sensorSeen=false,sessionAllowed=false,restoreAttempted=false,gestureAttempted=false,requesting=false,open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,lastExists=null;
+  let enabled=false,sensorSeen=false,sessionAllowed=false,requesting=false,open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,lastExists=null;
   let gravity=null,firstHit=null,lastHit=-Infinity,lastOpened=-Infinity;
   try{enabled=localStorage.getItem(shakeKey)==='1';}catch{}
   const reducedWallet=matchMedia('(prefers-reduced-motion: reduce)');
@@ -235,24 +235,25 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function toolActive(){return ['pocket','level'].includes(window.GTZMember?.active);}
   function hasCard(){try{const r=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null');return !!(r?.name&&r?.number);}catch{return false;}}
   function remember(value){enabled=value;try{localStorage.setItem(shakeKey,value?'1':'0');}catch{}}
-  function restorePreference(){try{const saved=localStorage.getItem(shakeKey)==='1';if(saved!==enabled){enabled=saved;sensorSeen=false;sessionAllowed=false;restoreAttempted=false;gestureAttempted=false;firstHit=null;gravity=null;}}catch{}}
+  function restorePreference(){try{const saved=localStorage.getItem(shakeKey)==='1';if(saved!==enabled){enabled=saved;sensorSeen=false;sessionAllowed=false;firstHit=null;gravity=null;shakeStatus.textContent='';}}catch{}}
   function updateSetting(){
     shakeSettings.hidden=!mobile()||!hasCard();
     shakeButton.disabled=requesting||!canMotion();
     // A saved preference is independent of whether the new document has received sensor data.
-    shakeButton.textContent=enabled?'흔들어 카드 열기 끄기':'흔들어 카드 열기 켜기';
+    shakeButton.textContent=requesting?'센서 권한 확인 중…':enabled?'흔들어 카드 열기 끄기':'흔들어 카드 열기 켜기';
     shakeButton.setAttribute('aria-pressed',String(enabled));
     shakeReconnect.hidden=!enabled||sensorSeen||sessionAllowed||!needsPermission();
     shakeReconnect.disabled=requesting;
     if(!canMotion())shakeStatus.textContent='이 브라우저는 움직임 센서를 지원하지 않아요. MY ID 메뉴를 이용해주세요.';
+    else if(enabled&&!sensorSeen&&!sessionAllowed&&!requesting&&!shakeStatus.textContent)shakeStatus.textContent=needsPermission()?'활성화 설정이 저장되어 있어요. 연결이 필요하면 센서 권한 다시 연결을 눌러주세요.':'휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
   }
-  async function connectSensor(interactive){
-    if(requesting||!mobile()||!hasCard()||!canMotion()||toolActive())return;
+  async function connectSensor(){
+    if(requesting||!mobile()||!hasCard()||!canMotion()||toolActive()||document.body.classList.contains('license-animating'))return;
     const wasEnabled=enabled;
     requesting=true;updateSetting();
     try{
-      // A browser may reuse an existing grant. A fresh prompt can only occur
-      // during genuine user activation; in that case retry on the next tap.
+      // Permission is requested exclusively from explicit shake controls,
+      // never during rendering, card issuance, navigation or other gestures.
       const permission=needsPermission()?await window.DeviceMotionEvent.requestPermission():'granted';
       if(permission!=='granted')throw new Error('sensor permission not granted');
       if(wasEnabled&&!enabled)return;
@@ -261,36 +262,24 @@ const walletMedia=matchMedia('(max-width: 900px)');
     }catch{
       if(!wasEnabled)remember(false);
       sessionAllowed=false;
-      shakeStatus.textContent=enabled?(interactive?'흔들기 설정은 켜져 있어요. 기기의 센서 권한을 다시 연결해주세요.':'흔들기 설정이 저장되어 있어요. 화면을 한 번 터치하면 센서 연결을 확인해요.'):'동작 센서 권한을 허용해야 흔들기 기능을 사용할 수 있어요.';
+      shakeStatus.textContent=enabled?'흔들기 설정은 켜져 있어요. 센서 권한을 다시 연결해주세요.':'동작 센서 권한을 허용해야 흔들기 기능을 사용할 수 있어요.';
     }
     finally{requesting=false;updateSetting();}
   }
-  function restoreSensor(){
-    if(!enabled||!mobile()||!hasCard()||!canMotion()||toolActive()||sensorSeen||sessionAllowed||restoreAttempted||requesting)return;
-    restoreAttempted=true;
-    shakeStatus.textContent='흔들기 설정이 저장되어 있어요. 센서를 연결하고 있어요.';
-    void connectSensor(false);
-  }
-  function resumeOnGesture(e){
-    if(e.isTrusted===false||!enabled||sensorSeen||sessionAllowed||gestureAttempted||requesting||toolActive()||e.target?.closest?.('.gtz-shake-setting'))return;
-    if(!mobile()||!hasCard()||!needsPermission())return;
-    gestureAttempted=true;return connectSensor(true);
-  }
   shakeButton.addEventListener('click',()=>{
-    if(!mobile()||!hasCard()||!canMotion()||requesting)return;
+    if(!mobile()||!hasCard()||!canMotion()||requesting||document.body.classList.contains('license-animating'))return;
     if(enabled){
-      remember(false);sensorSeen=false;sessionAllowed=false;restoreAttempted=false;gestureAttempted=false;firstHit=null;gravity=null;
+      remember(false);sensorSeen=false;sessionAllowed=false;firstHit=null;gravity=null;
       shakeStatus.textContent='흔들기 기능을 껐어요.';updateSetting();return;
     }
-    gestureAttempted=true;return connectSensor(true);
+    return connectSensor();
   });
-  shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting){gestureAttempted=true;return connectSensor(true);}});
-  document.addEventListener('click',resumeOnGesture,true);
+  shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
   function notifyFrame(active){if(frameStarted)frame.contentWindow?.postMessage({type:'gamttiz-wallet-visibility',active},location.origin);}
   frame.addEventListener('load',()=>notifyFrame(presented));
   function startFrame(){
     if(frameStarted||!mobile())return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120paper2';
+    frameStarted=true;frame.src='license.html?wallet=1&v=20261120detail4';
   }
   function warm(){
     if(frameStarted||warmTimer||!enabled||!hasCard()||!mobile())return;
@@ -302,11 +291,11 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      frame.src='license.html?wallet=1&v=20261120paper2';
+      frame.src='license.html?wallet=1&v=20261120detail4';
     }
     lastExists=exists;updateSetting();
     if(!mobile()||!exists){if(presented)settle(false);return;}
-    if(exists){warm();restoreSensor();}
+    if(exists)warm();
   }
   function present(){
     clearTimeout(sheetTimer);sheetTimer=0;if(presented)return;

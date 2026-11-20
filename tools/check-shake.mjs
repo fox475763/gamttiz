@@ -24,14 +24,14 @@ function createPage(storage,permission='granted'){
   const ctx={window:win,document:doc,navigator:{maxTouchPoints:5},location:{origin:'https://example.com'},localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,v)},make:(tag,cls)=>new El(cls),dock:{dataset:{mode:'closed'}},setMode(){},matchMedia:q=>({matches:!q.includes('reduced'),addEventListener(){}}),performance:{now:()=>clock},setTimeout:()=>++count,clearTimeout(){}};
   vm.runInNewContext(wallet,ctx);
   const one=c=>elements.find(e=>e.cls===c);
-  return {button:one('gtz-shake-button'),reconnect:one('gtz-shake-reconnect'),sheet:one('gtz-wallet-sheet'),status:one('gtz-shake-status'),win,doc,get requests(){return requests},setPermission:p=>{mode=p},tap:async()=>{interaction=true;await doc.fire('click',{isTrusted:true,target:{closest:()=>null}});interaction=false;},shake:()=>{clock+=150;win.fire('devicemotion',{acceleration:{x:18,y:0,z:0}});clock+=150;win.fire('devicemotion',{acceleration:{x:-18,y:0,z:0}});}};
+  return {button:one('gtz-shake-button'),reconnect:one('gtz-shake-reconnect'),sheet:one('gtz-wallet-sheet'),status:one('gtz-shake-status'),win,doc,get requests(){return requests},setPermission:p=>{mode=p},tap:async()=>{interaction=true;await doc.fire('click',{isTrusted:true,target:{closest:()=>null}});interaction=false;},press:async control=>{interaction=true;await control.fire('click');interaction=false;},shake:()=>{clock+=150;win.fire('devicemotion',{acceleration:{x:18,y:0,z:0}});clock+=150;win.fire('devicemotion',{acceleration:{x:-18,y:0,z:0}});}};
 }
 const saved=()=>new Map([[LICENSE,JSON.stringify({name:'감띠',number:'GTZ - 0001'})]]);
 test('activation survives destruction and reconstruction of the page',async()=>{
   const store=saved(),first=createPage(store);
   await first.button.fire('click');assert.equal(store.get(KEY),'1');assert.equal(first.button.attrs['aria-pressed'],'true');
   const reopened=createPage(store);assert.equal(reopened.button.attrs['aria-pressed'],'true');await tick();
-  assert.equal(reopened.requests,1);assert.equal(reopened.reconnect.hidden,true);reopened.shake();assert.ok(reopened.sheet.classes.has('is-open'));
+  assert.equal(reopened.requests,0);assert.equal(reopened.reconnect.hidden,false);reopened.shake();assert.ok(reopened.sheet.classes.has('is-open'));assert.equal(reopened.reconnect.hidden,true);
   await reopened.button.fire('click');assert.equal(store.get(KEY),'0');
   const off=createPage(store);await tick();assert.equal(off.requests,0);assert.equal(off.button.attrs['aria-pressed'],'false');off.shake();assert.ok(!off.sheet.classes.has('is-open'));
 });
@@ -39,9 +39,16 @@ test('Safari-style user gesture requirement never clears a stored preference',as
   const store=saved();store.set(KEY,'1');
   const reopened=createPage(store,'gesture');await tick();
   assert.equal(reopened.button.attrs['aria-pressed'],'true');assert.equal(store.get(KEY),'1');assert.equal(reopened.reconnect.hidden,false);
-  await reopened.tap();assert.equal(reopened.requests,2);assert.equal(reopened.reconnect.hidden,true);reopened.shake();assert.ok(reopened.sheet.classes.has('is-open'));
-  const refused=createPage(store,'denied');await tick();await refused.tap();assert.equal(store.get(KEY),'1');assert.equal(refused.button.attrs['aria-pressed'],'true');
+  await reopened.tap();assert.equal(reopened.requests,0);await reopened.press(reopened.reconnect);assert.equal(reopened.requests,1);assert.equal(reopened.reconnect.hidden,true);reopened.shake();assert.ok(reopened.sheet.classes.has('is-open'));
+  const refused=createPage(store,'denied');await tick();await refused.press(refused.reconnect);assert.equal(store.get(KEY),'1');assert.equal(refused.button.attrs['aria-pressed'],'true');
   await refused.button.fire('click');assert.equal(store.get(KEY),'0');
+});
+test('issuance animation, page lifecycle and arbitrary taps never request permission',async()=>{
+  const store=new Map([[KEY,'1']]),page=createPage(store,'gesture');await tick();
+  page.doc.body.classList.add('license-animating');store.set(LICENSE,JSON.stringify({name:'감띠',number:'GTZ - 0002'}));
+  page.win.fire('gamttiz:license-change');page.win.fire('pageshow');await page.tap();await page.press(page.button);await page.press(page.reconnect);assert.equal(page.requests,0);
+  page.doc.body.classList.remove('license-animating');page.win.fire('pageshow');await page.tap();assert.equal(page.requests,0);
+  await page.press(page.reconnect);assert.equal(page.requests,1);
 });
 test('no license and active Member measurement tools suppress shake activation',async()=>{
   const store=new Map([[KEY,'1']]);const noCard=createPage(store);await tick();assert.equal(noCard.requests,0);noCard.shake();assert.ok(!noCard.sheet.classes.has('is-open'));
