@@ -246,7 +246,7 @@
     if(!editing||wallet||index<0||index>=names.length)return;
     const changed=index!==selected;
     setSelected(index,scroll,smooth);
-    if(changed){setSide(true);render();}
+    if(changed)render();
   }
   function viewEdit(value) {
     editing = value;
@@ -254,7 +254,7 @@
     $('license-heading-title').textContent=record&&!editing?'WELCOME':'MY ID';
     form.hidden = !editing; $('license-actions').hidden = editing;
     $('license-badge').textContent = record && !editing ? 'MY LICENSE' : record ? 'EDIT PREVIEW' : 'PREVIEW';
-    $('license-panel-title').textContent = editing&&record?'라이센스 수정':'라이센스 발급 신청';
+    $('license-panel-title').textContent = editing&&record?'라이센스 정보 수정':'라이센스 발급 신청서';
     $('license-submit').textContent = record?'수정 내용 저장':'라이센스 발급 신청';
     $('license-cancel').hidden = !record;
     const celebration=$('license-celebration');
@@ -320,7 +320,7 @@
   flip.addEventListener('pointerup',e=>finishDrag(e));flip.addEventListener('pointercancel',e=>finishDrag(e,true));flip.addEventListener('lostpointercapture',e=>finishDrag(e,true));
   flip.addEventListener('pointerleave',()=>{if(!drag)resetPose();});
   flip.addEventListener('click',e=>{if(ignoreClick&&e.detail!==0){ignoreClick=false;return;}ignoreClick=false;setSide(!isBack);}); $('license-turn').addEventListener('click',()=>setSide(!isBack));
-  input.addEventListener('input',()=>{$('license-submit').disabled=!ready||saving||!cleanName(input.value);setSide(true);render();});
+  input.addEventListener('input',()=>{$('license-submit').disabled=!ready||saving||!cleanName(input.value);render();});
   form.addEventListener('submit',async event=>{
     event.preventDefault(); if(!ready || saving) return;
     const name = cleanName(input.value); if(!name){status('이름을 입력해주세요.');input.focus();return;}

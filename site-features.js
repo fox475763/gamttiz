@@ -213,9 +213,11 @@ const walletMedia=matchMedia('(max-width: 900px)');
   const detail=make('a','gtz-wallet-detail','MY ID 페이지 ↗');detail.href='license.html';
   content.append(title,close,frame,detail);sheet.append(backdrop,content);document.body.append(sheet);
   const shakeSettings=make('div','gtz-shake-setting');shakeSettings.hidden=true;
-  const shakeButton=make('button','gtz-shake-button','흔들기 카드 열기 켜기');shakeButton.type='button';
+  const shakeButton=make('button','gtz-shake-button','흔들어 카드 열기 켜기');shakeButton.type='button';
   const shakeStatus=make('p','gtz-shake-status');shakeStatus.setAttribute('role','status');
-  shakeSettings.append(shakeButton,shakeStatus);menu.append(shakeSettings);
+  shakeSettings.append(shakeButton,shakeStatus);
+  const shakeMount=document.getElementById('license-shake-setting-mount');
+  if(shakeMount)shakeMount.append(shakeSettings);
   const shakeKey='gamttiz-license-shake-enabled-v1';
   let enabled=false,sensorSeen=false,requesting=false,open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,lastExists=null;
   let gravity=null,firstHit=null,lastHit=-Infinity,lastOpened=-Infinity;
@@ -226,14 +228,14 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function hasCard(){try{const r=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null');return !!(r?.name&&r?.number);}catch{return false;}}
   function remember(value){enabled=value;try{localStorage.setItem(shakeKey,value?'1':'0');}catch{}}
   function updateSetting(){
-    shakeSettings.hidden=!mobile();
+    shakeSettings.hidden=!mobile()||!hasCard();
     shakeButton.disabled=requesting||!canMotion();
-    shakeButton.textContent=enabled&&sensorSeen?'흔들기 카드 열기 끄기':enabled?'흔들기 기능 다시 활성화':'흔들기 카드 열기 켜기';
+    shakeButton.textContent=enabled&&sensorSeen?'흔들어 카드 열기 끄기':enabled?'흔들어 카드 열기 다시 활성화':'흔들어 카드 열기 켜기';
     shakeButton.setAttribute('aria-pressed',String(enabled&&sensorSeen));
     if(!canMotion())shakeStatus.textContent='이 브라우저는 움직임 센서를 지원하지 않아요. MY ID 메뉴를 이용해주세요.';
   }
   shakeButton.addEventListener('click',async()=>{
-    if(!mobile()||!canMotion()||requesting)return;
+    if(!mobile()||!hasCard()||!canMotion()||requesting)return;
     if(enabled&&sensorSeen){
       remember(false);sensorSeen=false;firstHit=null;gravity=null;
       shakeStatus.textContent='흔들기 기능을 껐어요.';updateSetting();return;
@@ -252,7 +254,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   frame.addEventListener('load',()=>notifyFrame(presented));
   function startFrame(){
     if(frameStarted||!mobile())return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120shake11';
+    frameStarted=true;frame.src='license.html?wallet=1&v=20261120application12';
   }
   function warm(){
     if(frameStarted||warmTimer||!enabled||!hasCard()||!mobile())return;
@@ -264,7 +266,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      frame.src='license.html?wallet=1&v=20261120shake11';
+      frame.src='license.html?wallet=1&v=20261120application12';
     }
     lastExists=exists;updateSetting();
     if(!mobile()||!exists){if(presented)settle(false);return;}

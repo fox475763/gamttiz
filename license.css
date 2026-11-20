@@ -338,6 +338,35 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
   .license-page.has-license:not(.license-wallet-view) .license-layout{gap:18px}
 }
 
+/* The application is a single sheet of official stationery. The 3D card
+   is reserved for the issued view (and the mobile wallet). */
+.license-page:not(.has-license):not(.license-wallet-view) .license-preview{display:none!important}
+.license-page.has-license .license-application-head{display:none!important}
+.license-page:not(.has-license):not(.license-wallet-view) .license-layout{display:block;max-width:500px;margin-inline:auto}
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading{margin-bottom:25px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading h1{font-size:clamp(25px,4vw,34px);letter-spacing:.15em}
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading::after{display:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-panel{position:relative;box-sizing:border-box;width:100%;padding:34px 37px 27px;background:#fffdf7;border:1px solid #c9ad77;border-radius:3px;box-shadow:0 12px 40px #65441a0c}
+.license-application-head{text-align:center;padding:0 0 23px;margin:0 0 27px;border-bottom:1px solid #c9ad77}
+.license-application-mark{display:block;font-size:24px;line-height:1;color:#a9823e;margin-bottom:10px}
+.license-application-kicker{font:600 10px/1.4 Georgia,serif;letter-spacing:.19em;color:#956e32;margin:0 0 14px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-application-head h2{font-size:clamp(22px,5vw,26px);font-weight:600;line-height:1.35;letter-spacing:-.055em;color:var(--id-ink);margin:0 0 9px}
+.license-application-caption{font:400 9px/1.5 Arial,sans-serif;letter-spacing:.12em;color:#987b52;margin:0}
+.license-field-no{font:400 12px/1 Georgia,serif;color:#a17b38;letter-spacing:.05em;margin-right:11px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-label{font-size:13px;color:#5d3025;line-height:1.5;margin-bottom:13px}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name{padding:10px 0 13px;background:transparent;border-width:0 0 1px;border-style:solid;border-radius:0;font-size:16px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friends-field{margin:27px 0 26px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker{background:#f9f4e8;border:1px solid #e7d8bb;border-radius:3px;padding:8px 5px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-count{margin:9px 0 0;text-align:center}
+.license-page:not(.has-license):not(.license-wallet-view) .license-storage-note{margin-top:17px;color:#897359}
+@media(max-width:760px){
+  .license-page:not(.has-license):not(.license-wallet-view) .license-main{padding-inline:20px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-heading{margin-bottom:17px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-panel{padding:26px 23px 23px}
+  .license-application-head{margin-bottom:23px;padding-bottom:20px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-friends-field{margin:23px 0}
+}
+
 
 
 
