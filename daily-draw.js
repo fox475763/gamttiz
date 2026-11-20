@@ -4,7 +4,8 @@
   const key='gamttiz-daily-draw-v1',reduced=matchMedia('(prefers-reduced-motion: reduce)');
   // Five straight rectangular sticks sit within the original five-slot 3D holder.
   const shapes=[[31,40,0,7.8],[40.5,44,0,7.8],[50,46,0,7.8],[59.5,43,0,7.8],[69,39,0,7.8]];
-  let date=dayKey(),selected=0,selectedSlot=0,busy=false,drag=null,keyboardPull=null;
+  const allIds=characters.map(c=>c.id);
+  let date=dayKey(),selected=0,selectedSlot=0,remaining=[...allIds],busy=false,drag=null,keyboardPull=null;
   const fries=shapes.map(([x,len,tilt,width],i)=>{
     const el=document.createElement('button');el.type='button';el.className='fry-choice';
     el.setAttribute('aria-label',(i+1)+'번째 감자튀김. 위로 당기기. 키보드는 위쪽 방향키.');
@@ -12,9 +13,21 @@
     el.innerHTML='<span class="fry-stick" aria-hidden="true"></span>';
     stack.append(el);return el;
   });
-  function getSaved(){try{const saved=JSON.parse(localStorage.getItem(key));return saved?.date===date&&Number.isInteger(saved.id)&&saved.id>=1&&saved.id<=characters.length?{id:saved.id,slot:Number.isInteger(saved.slot)&&saved.slot>=0&&saved.slot<fries.length?saved.slot:(saved.id-1)%fries.length}:null;}catch{return null;}}
-  function save(){try{localStorage.setItem(key,JSON.stringify({date,id:selected,slot:selectedSlot}));}catch{/* Private-mode storage is optional. */}}
-  function choose(){return Math.floor(Math.random()*characters.length)+1;}
+  function getSaved(){
+    try{
+      const saved=JSON.parse(localStorage.getItem(key));
+      if(!(saved?.date===date&&allIds.includes(saved.id)))return null;
+      const bag=Array.isArray(saved.remaining)&&saved.remaining.every(id=>allIds.includes(id))?[...new Set(saved.remaining)].filter(id=>id!==saved.id):allIds.filter(id=>id!==saved.id);
+      return {id:saved.id,slot:Number.isInteger(saved.slot)&&saved.slot>=0&&saved.slot<fries.length?saved.slot:(saved.id-1)%fries.length,remaining:bag};
+    }catch{return null;}
+  }
+  function save(){try{localStorage.setItem(key,JSON.stringify({date,id:selected,slot:selectedSlot,remaining}));}catch{/* Private-mode storage is optional. */}}
+  // Draw without replacement until all 14 friends are seen; reshuffle for the next round.
+  function choose(){
+    if(!remaining.length)remaining=[...allIds];
+    const candidates=remaining.filter(id=>id!==selected),pool=candidates.length?candidates:remaining;
+    const id=pool[Math.floor(Math.random()*pool.length)];remaining=remaining.filter(n=>n!==id);return id;
+  }
   function updateDate(){dateLabel.textContent=date.replaceAll('-',' . ');}
   function threshold(){return Math.max(55,Math.min(93,Math.round((stage.clientHeight||300)*.23)));}
   function setPull(f,pull,x=0){f.style.setProperty('--pull',-Math.max(0,pull)+'px');f.style.setProperty('--pull-x',Math.max(-19,Math.min(19,x))+'px');}
@@ -37,12 +50,12 @@
     if(animate&&matchMedia('(max-width: 780px)').matches){result.focus({preventScroll:true});result.scrollIntoView({behavior:reduced.matches?'instant':'smooth',block:'start'});}
   }
   function resetDay(){
-    const today=dayKey();if(date===today)return;date=today;const saved=getSaved();selected=saved?.id||0;selectedSlot=saved?.slot||0;updateDate();
+    const today=dayKey();if(date===today)return;date=today;const saved=getSaved();selected=saved?.id||0;selectedSlot=saved?.slot||0;remaining=saved?.remaining??[...allIds];updateDate();
     waiting('새로운 하루! 감튀를 잡고 위로 당겨보세요.');if(selected)showResult(selected);
   }
   const pause=ms=>reduced.matches?Promise.resolve():new Promise(resolve=>setTimeout(resolve,ms));
   async function start(slot,pull=0,x=0){
-    if(busy)return;resetDay();if(!selected)selected=choose();selectedSlot=slot;
+    if(busy)return;resetDay();selected=choose();selectedSlot=slot;
     save();busy=true;clearChoice();status.textContent='감튀가 쏙! 어떤 감띠일까요?';
     profile.hidden=true;placeholder.hidden=false;result.classList.remove('is-revealed');hint.hidden=true;
     fries.forEach((f,i)=>{f.disabled=true;f.classList.toggle('is-picked',i===selectedSlot);});
@@ -91,7 +104,7 @@
     f.addEventListener('blur',()=>{if(keyboardPull?.slot===i){keyboardPull=null;resetPull(f);stage.classList.remove('is-grabbing');}});
   });
   // Replay only restores the carton; the user must physically pull another fry.
-  replay.addEventListener('click',()=>{if(busy)return;resetDay();waiting('감튀를 다시 잡고 당겨보세요. 오늘의 결과는 그대로예요.');});
-  updateDate();const saved=getSaved();if(saved){selected=saved.id;selectedSlot=saved.slot;showResult(selected);}
+  replay.addEventListener('click',()=>{if(busy)return;resetDay();waiting('감튀를 다시 잡고 당겨 새로운 감띠를 만나보세요.');});
+  updateDate();const saved=getSaved();if(saved){selected=saved.id;selectedSlot=saved.slot;remaining=saved.remaining;showResult(selected);}
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!busy)resetDay();});
 })();

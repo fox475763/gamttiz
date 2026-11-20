@@ -12,6 +12,21 @@ test('14 complete, unique profiles and original illustrations',()=>{
  assert.equal(new Set(characters.map(c=>c.name)).size,14);
  characters.forEach((c,i)=>{assert.equal(c.id,i+1);for(const key of ['origin','story','likes','habit','friend','quote','message','type'])assert.ok(c[key].length>0);assert.ok(c.story.length>85);assert.equal(image(c.id),'assets/illustrations/friend-'+number(c.id)+'.svg');assert.match(ctx.GTZProfile(c,{daily:true}),new RegExp('collection.html#friend-'+number(c.id)));});
 });
+test('All 14 entries have face-focused original SVG crops and distinct expanded field notes',()=>{
+  const {facePortrait}=ctx.GTZFriends;
+  const subtitles=new Set(),episodes=new Set();
+  characters.forEach(c=>{
+    assert.ok(c.faceCrops.length>=1);
+    c.faceCrops.forEach(([x,y,w,h])=>{assert.ok(x>=0&&y>=0&&w>0&&h>0&&x+w<=56.69001&&y+h<=141.73);});
+    assert.equal((facePortrait(c.id).match(/class="dex-face"/g)||[]).length,c.faceCrops.length);
+    assert.match(facePortrait(c.id),new RegExp(image(c.id)));
+    for(const key of ['subtitle','appearance','talent','weakness','secret','episode'])assert.ok(c.details[key].length>7);
+    assert.equal(c.details.traits.length,3);subtitles.add(c.details.subtitle);episodes.add(c.details.episode);
+    const profile=ctx.GTZProfile(c);
+    for(const text of ['표정 확대','외형 특징','특기','약한 순간','감띠의 소소한 비밀','어느 날, 감띠즈에서'])assert.ok(profile.includes(text));
+  });
+  assert.equal(subtitles.size,14);assert.equal(episodes.size,14);assert.equal(characters[8].faceCrops.length,2);
+});
 test('Korea midnight changes the daily draw date',()=>{
  assert.equal(dayKey(new Date('2026-11-20T14:59:59Z')),'2026-11-20');
  assert.equal(dayKey(new Date('2026-11-20T15:00:00Z')),'2026-11-21');
@@ -56,7 +71,7 @@ test('National index interaction: filter, exact number search, sort, detail navi
  const mock=vm.createContext({GTZFriends:ctx.GTZFriends,GTZProfile:ctx.GTZProfile,document:doc,URL,URLSearchParams,location,history,window:{addEventListener(k,fn){eventMap[k]=fn;}}});
  vm.runInContext(src('friend-dex.js'),mock);
  const grid=nodes['dex-grid'],search=nodes['dex-search'],sort=nodes['dex-sort'],detail=nodes['dex-detail'],profile=nodes['dex-profile'];
- assert.equal(grid.children.length,20);assert.equal(detail.open,false);
+ assert.equal(grid.children.length,20);assert.equal(detail.open,false);assert.equal(grid.children.filter(b=>b.innerHTML.includes('dex-face')).length,14);assert.match(grid.children[8].className,/dex-dual-face/);
  filters[2].emit('click');assert.equal(grid.children.filter(b=>!b.hidden).length,6);
  filters[0].emit('click');search.value='No. 07';search.emit('input');assert.equal(grid.children.filter(b=>!b.hidden).length,1);
  grid.children.find(b=>!b.hidden).emit('click');assert.equal(detail.open,true);assert.match(profile.innerHTML,/빙빙이/);
@@ -120,7 +135,7 @@ test('Daily fry pick replaces the roulette with independent selectable fries',()
  assert.match(css,/touch-action:none/);assert.match(css,/fry-extract/);assert.match(css,/fry-character-in/);
  assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.equal((html.match(/class="fry-holder-vector" viewBox="0 0 480 480"/g)||[]).length,2);assert.doesNotMatch(html,/holder-fbx-render/);assert.match(html,/class="fry-holder-face"/);assert.match(css,/fry-holder-face\{pointer-events:visiblePainted\}/);assert.match(css,/is-preview:not\(:disabled\) \.fry-stick/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
 });
-test('Fry drag, replay, old saved result migration and Korea-date reset',async()=>{
+test('Fry drag, 14 unique random draws, reload, legacy migration and Korea-date reset',async()=>{
   let today='2026-11-21',randomCalls=0;
   const storage=new Map();
   class El {
@@ -154,10 +169,20 @@ test('Fry drag, replay, old saved result migration and Korea-date reset',async()
   const name=nodes['fry-reveal-name'].textContent;assert.equal(name,characters[3].name);
   assert.equal(nodes['draw-profile'].hidden,false);assert.equal(fries.filter(f=>f.classes.has('is-picked')).length,1);
   nodes['draw-replay'].emit('click');assert.equal(nodes['draw-profile'].hidden,true);assert.equal(randomCalls,1);
-  const another=fries[4];another.emit('pointerdown',point);another.emit('pointermove',{...point,clientY:25});await flush();assert.equal(nodes['fry-reveal-name'].textContent,name);
-  assert.equal(randomCalls,1);
-  const reload=run();assert.equal(reload['fry-reveal-name'].textContent,name);
+  const another=fries[4];another.emit('pointerdown',point);another.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(nodes['fry-reveal-name'].textContent,name);
+  assert.equal(randomCalls,2);
+  const second=JSON.parse(storage.get(key)),reload=run();assert.equal(reload['fry-reveal-name'].textContent,characters[second.id-1].name);
+  assert.equal(second.remaining.length,12);
+  const seen=new Set([saved.id,second.id]);
+  for(let i=0;i<12;i++){
+    reload['draw-replay'].emit('click');const f=reload['fry-stack'].children[i%5];f.emit('pointerdown',point);f.emit('pointermove',{...point,clientY:25});await flush();
+    const record=JSON.parse(storage.get(key));assert.ok(!seen.has(record.id));seen.add(record.id);
+  }
+  assert.equal(seen.size,14);assert.equal(randomCalls,14);assert.equal(JSON.parse(storage.get(key)).remaining.length,0);
+  const last=JSON.parse(storage.get(key)).id;
+  reload['draw-replay'].emit('click');const next=reload['fry-stack'].children[1];next.emit('pointerdown',point);next.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,last);assert.equal(JSON.parse(storage.get(key)).remaining.length,13);
   storage.set(key,JSON.stringify({date:today,id:7}));const old=run();assert.equal(old['fry-reveal-name'].textContent,characters[6].name);
+  old['draw-replay'].emit('click');const legacyFry=old['fry-stack'].children[0];legacyFry.emit('pointerdown',point);legacyFry.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,7);assert.equal(JSON.parse(storage.get(key)).remaining.length,12);
   today='2026-11-22';old['draw-replay'].emit('click');const keyboard=old['fry-stack'].children[0];for(let i=0;i<3;i++)keyboard.emit('keydown',{key:'ArrowUp',preventDefault(){}});await flush();assert.equal(JSON.parse(storage.get(key)).date,today);
 });
 

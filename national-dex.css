@@ -198,3 +198,28 @@
   .dex-page .dex-dial .dex-tile-info strong{font-size:15px}
 }
 @media(prefers-reduced-motion:reduce){.dex-page .dex-dial .dex-tile{transition:none;transform:none}.dex-page .dex-dial .dex-tile:hover{transform:none}}
+
+/* Face-focused dial portraits retain the original character illustration. */
+.dex-page .dex-dial .dex-tile-portrait{display:flex;align-items:center;justify-content:center;gap:3px;padding:2px}
+.dex-page .dex-dial .dex-tile-portrait::after{display:none}
+.dex-page .dex-dial .dex-face{display:block;flex:1 1 0;width:100%;height:100%;min-width:0;overflow:hidden}
+.dex-page .dex-dial .dex-unknown .dex-tile-mark{text-align:center}
+.dex-page #dex-profile .profile-face-inset{position:absolute;z-index:3;left:10px;bottom:10px;width:76px;height:92px;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:3px;padding:5px;border-radius:15px;border:1px solid #fffc;background:linear-gradient(145deg,#ffffffe0,#ffffff70);box-shadow:inset 0 1px 2px #fff,0 4px 12px #25232112}
+.dex-page #dex-profile .profile-face-inset.is-dual{width:108px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.dex-page #dex-profile .profile-face-inset .dex-face{width:100%;height:100%;min-width:0;overflow:hidden}
+.dex-page #dex-profile .profile-face-inset span{grid-column:1/-1;text-align:center;line-height:1.15;font-size:9px;font-weight:650;color:#686863}
+.dex-page #dex-profile .profile-lore{margin-top:24px;padding-top:20px;border-top:1px solid #68686328}
+.dex-page #dex-profile .profile-lore h3{font-size:19px;line-height:1.4;margin:7px 0 10px;letter-spacing:-.035em}
+.dex-page #dex-profile .profile-traits{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.dex-page #dex-profile .profile-traits span{border-radius:99px;padding:5px 11px;background:linear-gradient(145deg,#fff9,#fbe5e580);box-shadow:inset 0 1px 1px #fff9,0 2px 5px #2523210c;border:1px solid #fff9;color:#a52d2d;font-size:12px;font-weight:650}
+.dex-page #dex-profile .profile-lore-facts{margin-bottom:16px}
+.dex-page #dex-profile :is(.profile-secret,.profile-episode){margin:12px 0;padding:15px 17px;border:1px solid #fff9;border-radius:16px;background:linear-gradient(145deg,#ffffffc4,#fff5);box-shadow:inset 0 1px 2px #fff9,0 4px 12px #2523210c}
+.dex-page #dex-profile .profile-secret{background:linear-gradient(145deg,#fff9,#fce6e66b)}
+.dex-page #dex-profile :is(.profile-secret,.profile-episode)>span{color:var(--dex-red);font-size:10px;font-weight:750;letter-spacing:.08em}
+.dex-page #dex-profile :is(.profile-secret,.profile-episode)>h3{font-size:16px;margin:5px 0 7px}
+.dex-page #dex-profile :is(.profile-secret,.profile-episode)>p{margin:0;color:#4f4f4a;font-size:14px;line-height:1.8;word-break:keep-all;overflow-wrap:anywhere}
+@media(max-width:700px){
+ .dex-page #dex-profile .profile-face-inset{width:61px;height:74px;left:8px;bottom:8px}
+ .dex-page #dex-profile .profile-face-inset.is-dual{width:86px}
+ .dex-page #dex-profile .profile-lore h3{font-size:18px}
+}

@@ -66,6 +66,8 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      if(filename==='collection.html'){
        assert.equal(await page.locator('.dex-tile').count(),20);
        assert.equal(await page.locator('.dex-unknown').count(),6);
+       assert.equal(await page.locator('.dex-tile .dex-face').count(),15);
+       assert.equal(await page.locator('.dex-dual-face .dex-face').count(),2);
        const dial=page.locator('#dex-grid');
        assert.equal(await dial.evaluate(el=>getComputedStyle(el).scrollSnapType),'y mandatory');
        await page.locator('#dex-dial-down').click();
@@ -87,6 +89,8 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        assert.equal(await page.locator('.dex-tile:visible').count(),1);
        await page.locator('.dex-tile:visible').click();
        assert.equal(await page.locator('#dex-profile h2').textContent(),'빙빙이');
+       assert.equal(await page.locator('#dex-profile .profile-face-inset .dex-face').count(),1);
+       assert.equal(await page.locator('#dex-profile .profile-episode').count(),1);
        await page.locator('#dex-next').click();
        assert.equal(await page.locator('#dex-current').textContent(),'NO. 08 / 20');
        await page.keyboard.press('Escape');
@@ -114,7 +118,7 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        assert.equal(await page.locator('#draw-profile').evaluate(el=>el.hidden),true);
        await fry.scrollIntoViewIfNeeded();await dragFry();
        await page.locator('#draw-profile h2').waitFor({state:'visible'});
-       assert.equal(await page.locator('#draw-profile h2').textContent(),picked);
+       assert.notEqual(await page.locator('#draw-profile h2').textContent(),picked);
      }
    }
    await context.close();
