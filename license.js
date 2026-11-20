@@ -20,6 +20,7 @@
   if(previewScale<1){for(const ctx of [fctx,bctx])ctx.setTransform(previewScale,0,0,previewScale,0,0);}
   const cardInner=flip.querySelector('.license-flip-inner');
   const backArt=$('license-back-art');
+  const glossFaces=[$('license-gloss-front'),$('license-gloss-back')];
   // Mobile WebKit can drop a canvas or backface in a preserve-3d stack.
   // Paint one image plane at a time, with the same perspective and drag motion.
   if(mobile)flip.classList.add('license-flat');
@@ -44,6 +45,15 @@
       angle-=half*180;
     }
     cardInner.style.transform=`rotateX(${pose.pitch.toFixed(3)}deg) rotateY(${angle.toFixed(3)}deg)`;
+    // Light follows the eased orientation of the card rather than a cursor
+    // hotspot. The reflection naturally settles back into the idle animation.
+    const tilt=pose.yaw-Math.round(pose.yaw/180)*180;
+    const dx=Math.sin(tilt*Math.PI/180),dy=Math.sin(pose.pitch*Math.PI/180);
+    const intensity=Math.min(.92,Math.abs(dx)*.83+Math.abs(dy)*1.55);
+    for(const layer of glossFaces){if(!layer)continue;
+      layer.style.transform=`translate3d(${(dx*44).toFixed(2)}%,${(-dy*56).toFixed(2)}%,0) rotate(${(pose.pitch*.28).toFixed(2)}deg)`;
+      layer.style.opacity=reduced.matches?'0':intensity.toFixed(3);
+    }
   }
   function animate(time){
     const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
@@ -136,8 +146,8 @@
   ];
   function drawQr(ctx){
     const module=6,quiet=4,x=704,y=1340,size=(qrMatrix.length+quiet*2)*module;
-    ctx.fillStyle='#fffaf0';ctx.fillRect(x,y,size,size);
-    ctx.fillStyle='#29100c';
+    ctx.fillStyle='#f5d578';ctx.fillRect(x,y,size,size);
+    ctx.fillStyle='#780708';
     qrMatrix.forEach((row,j)=>{for(let i=0;i<row.length;i++){if(row[i]==='1')ctx.fillRect(x+(i+quiet)*module,y+(j+quiet)*module,module,module);}});
   }
   function issuedDate(value){
@@ -210,8 +220,25 @@
     flip.setAttribute('aria-label',isBack?'카드 앞면 보기':'카드 뒷면 보기');
     $('license-turn').textContent = isBack?'↻ 앞면 보기':'↻ 뒷면 보기';
   }
-  function setSelected(index) {
-    selected = index; const radio = friends.querySelector(`input[value="${index}"]`); if(radio) radio.checked = true;
+  function setSelected(index,scroll=true,smooth=false) {
+    selected = Math.max(0,Math.min(names.length-1,index));
+    const radio = friends.querySelector(`input[value="${selected}"]`); if(radio) radio.checked = true;
+    $('license-profile-prev').disabled=selected===0;
+    $('license-profile-next').disabled=selected===names.length-1;
+    $('license-profile-count').textContent=`${String(selected+1).padStart(2,'0')} / ${names.length}`;
+    if(scroll&&friends.clientWidth){
+      const left=selected*friends.clientWidth;
+      if(Math.abs(friends.scrollLeft-left)>1){
+        if(friends.scrollTo)friends.scrollTo({left,behavior:smooth&&!reduced.matches?'smooth':'instant'});
+        else friends.scrollLeft=left;
+      }
+    }
+  }
+  function chooseProfile(index,scroll=true,smooth=true){
+    if(!editing||wallet||index<0||index>=names.length)return;
+    const changed=index!==selected;
+    setSelected(index,scroll,smooth);
+    if(changed){setSide(true);render();}
   }
   function viewEdit(value) {
     editing = value;
@@ -219,13 +246,13 @@
     $('license-heading-title').textContent=record&&!editing?'WELCOME':'MY ID';
     form.hidden = !editing; $('license-actions').hidden = editing;
     $('license-badge').textContent = record && !editing ? 'MY LICENSE' : record ? 'EDIT PREVIEW' : 'PREVIEW';
-    $('license-panel-title').textContent = editing&&record?'라이센스 수정':'라이센스 만들기';
-    $('license-submit').textContent = record?'수정 내용 저장':'라이센스 카드 만들기';
+    $('license-panel-title').textContent = editing&&record?'라이센스 수정':'라이센스 발급 신청';
+    $('license-submit').textContent = record?'수정 내용 저장':'라이센스 발급 신청';
     $('license-cancel').hidden = !record;
     const celebration=$('license-celebration');
     celebration.hidden=editing||!record||wallet;
     celebration.textContent=record?`이 브라우저에서 ${serial(record.number)}번째로 라이센스가 발급되었습니다!`:'';
-    if(record){ input.value=record.name; setSelected(record.character); }
+    if(record){ input.value=record.name; setSelected(record.character); }else setSelected(selected);
     $('license-submit').disabled = !ready || saving || !cleanName(input.value);
     return render();
   }
@@ -235,8 +262,24 @@
     const img=document.createElement('img'); img.src=imagePath(index); img.alt=''; img.loading='lazy'; img.decoding='async';
     const text=document.createElement('span'); text.textContent=name;
     label.append(radio,img,text); friends.append(label);
-    radio.addEventListener('change',()=>{setSelected(index);setSide(true);render();});
+    radio.addEventListener('change',()=>chooseProfile(index));
   });
+  if(!wallet){
+    let scrollTimer;
+    friends.addEventListener('scroll',()=>{
+      clearTimeout(scrollTimer);
+      scrollTimer=setTimeout(()=>{
+        if(friends.clientWidth)chooseProfile(Math.round(friends.scrollLeft/friends.clientWidth),false);
+      },110);
+    },{passive:true});
+    $('license-profile-prev').addEventListener('click',()=>chooseProfile(selected-1));
+    $('license-profile-next').addEventListener('click',()=>chooseProfile(selected+1));
+    friends.addEventListener('keydown',e=>{
+      if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+        e.preventDefault();chooseProfile(selected+(e.key==='ArrowRight'?1:-1));
+      }
+    });
+  }
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   function pointerPosition(e){
     const r=flip.getBoundingClientRect(),x=clamp((e.clientX-r.left)/r.width,0,1),y=clamp((e.clientY-r.top)/r.height,0,1);

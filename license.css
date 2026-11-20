@@ -211,6 +211,32 @@
 .license-animating .license-face::after,.license-wallet-inactive .license-face::after,.license-page-inactive .license-face::after{animation-play-state:paused!important}
 @media(prefers-reduced-motion:reduce){.license-face::before{animation:none;opacity:.32}.license-face::after{animation:none;opacity:.2}}
 
+/* One profile per view: native horizontal swipe, plus accessible arrows.
+   No neighbouring profile peeks into the selection window. */
+.license-profile-picker{display:grid;grid-template-columns:36px minmax(0,1fr) 36px;align-items:center;gap:9px}
+.license-profile-picker .license-profile-arrow{display:grid;place-items:center;width:36px;height:40px;padding:0;border:0;border-radius:50%;background:transparent;color:#850000;font:400 36px/1 Georgia,serif;cursor:pointer;touch-action:manipulation}
+.license-profile-picker .license-profile-arrow:disabled{opacity:.24;cursor:default}
+.license-profile-picker .license-profile-arrow:focus-visible,.license-profile-picker .license-friends:focus-visible{outline:2px solid #b89149;outline-offset:3px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friends{display:flex;gap:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;min-width:0;touch-action:pan-x pan-y}
+.license-profile-picker .license-friends::-webkit-scrollbar{display:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend{flex:0 0 100%;box-sizing:border-box;scroll-snap-align:start;scroll-snap-stop:always;min-height:132px;padding:13px 8px 10px;gap:9px;border:1px solid transparent;border-radius:8px;background:transparent}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend:has(input:checked){padding:13px 8px 10px;border:1px solid transparent;background:transparent}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend:has(input:checked)::after{display:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend img{height:100px;width:min(100%,135px);object-fit:contain}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend span{color:#651014;font-size:14px;font-weight:650}
+.license-profile-count{text-align:center;font:500 11px/1.4 Arial,sans-serif;color:#9b7950;letter-spacing:.16em;margin:7px 0 0}
+@media(max-width:760px){
+  .license-profile-picker{grid-template-columns:34px minmax(0,1fr) 34px;gap:4px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend{min-height:115px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend img{height:85px}
+}
+
+/* The moving highlight is driven by actual smoothed yaw and pitch, not the
+   pointer position. Keep it independent of the looping foil and artwork. */
+.license-motion-gloss{position:absolute;inset:-30% -55%;z-index:3;pointer-events:none;opacity:0;background:linear-gradient(118deg,transparent 28%,#d5a14e0a 35%,#f2cd6466 42%,#fff4c6c4 49%,#f7d67f80 53%,#c68f361f 63%,transparent 74%);will-change:transform,opacity}
+.license-face::after{z-index:4}
+@media(prefers-reduced-motion:reduce){.license-motion-gloss{display:none}}
+
 
 
 
