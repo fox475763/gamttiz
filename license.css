@@ -499,3 +499,10 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
 @media(max-width:760px){
   body.license-page.has-license:not(.license-wallet-view) .license-main{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
 }
+
+/* Stable mobile member-entry alignment; decorative glass layers must not
+   participate in the button's icon/text layout. */
+@media(max-width:780px){
+ .license-page:not(.license-wallet-view) .license-member-link{position:relative;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:7px;min-width:0;width:100%;min-height:46px;padding:10px 16px;font-size:13px;line-height:1.35;text-align:center;white-space:normal}
+ .license-page .license-member-link :is(svg,img,i){position:static;flex:0 0 auto;width:1em;height:1em;vertical-align:middle;transform:none}
+}
