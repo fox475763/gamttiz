@@ -118,7 +118,7 @@ test('Daily fry pick replaces the roulette with independent selectable fries',()
  assert.match(html,/id="fry-stack"/);assert.doesNotMatch(html,/룰렛|draw-wheel|wheel-slot/);
  assert.match(html,/fry-pick\.css/);assert.doesNotMatch(play,/룰렛/);
  assert.match(css,/touch-action:none/);assert.match(css,/fry-extract/);assert.match(css,/fry-character-in/);
- assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.match(html,/fry-holder-render/);assert.equal((html.match(/src="assets\/holder-fbx-render\.png"/g)||[]).length,2);assert.match(css,/clip-path:polygon/);assert.match(css,/is-preview:not\(:disabled\) \.fry-stick/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
+ assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.equal((html.match(/class="fry-holder-vector" viewBox="0 0 480 480"/g)||[]).length,2);assert.doesNotMatch(html,/holder-fbx-render/);assert.match(html,/class="fry-holder-face"/);assert.match(css,/fry-holder-face\{pointer-events:visiblePainted\}/);assert.match(css,/is-preview:not\(:disabled\) \.fry-stick/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
 });
 test('Fry drag, replay, old saved result migration and Korea-date reset',async()=>{
   let today='2026-11-21',randomCalls=0;

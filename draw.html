@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="license-wallet.css?v=20261120reopen6">
 <link rel="stylesheet" href="ui-system.css?v=20261121radar2">
 <link rel="stylesheet" href="friends-experience.css?v=1">
-<link rel="stylesheet" href="fry-pick.css?v=20261121holder1">
+<link rel="stylesheet" href="fry-pick.css?v=20261121vector1">
 <script src="friends-data.js?v=1" defer></script><script src="friends-profile.js?v=1" defer></script></head>
 <body class="experience-page refined-page daily-page"><a class="skip" href="#main">본문으로 건너뛰기</a><header class="header experience-header"><a class="wordmark" href="index.html" aria-label="감띠즈 홈">GAMTTIZ<span>French Fry Lovers</span></a><nav aria-label="주 메뉴"><a href="collection.html">Collection</a><a href="play.html">Play</a><a href="member.html">Member</a><a href="license.html">MY ID</a><a href="products.html">Products</a><a href="news.html">Notice</a><a href="project.html">Project Info</a><a class="nav-social" href="https://www.instagram.com/gamttiz_official/" target="_blank" rel="noopener noreferrer">Instagram ↗</a></nav></header>
 <main id="main" class="fx-main"><div class="fx-top"><a href="play.html" class="fx-back">← Play로 돌아가기</a><span>GAMTTIZ / PLAY / 03</span></div>
@@ -21,9 +21,21 @@
 <div class="draw-machine-top"><span>GAMTTIZ<br>DAILY FRY PICK</span><span id="draw-date"></span></div>
 <div class="fry-stage" id="fry-stage" aria-label="감자튀김을 집고 위로 당겨 뽑는 게임">
 <div class="fry-stage-light" aria-hidden="true"></div><div class="fry-floor" aria-hidden="true"></div>
-<div class="fry-pack fry-pack-back" aria-hidden="true"><img class="fry-holder-render" src="assets/holder-fbx-render.png" srcset="assets/display/holder-fbx-render-png-480.webp 480w, assets/display/holder-fbx-render-png-960.webp 960w" sizes="(max-width: 780px) 90vw, 490px" alt="" decoding="async"></div>
+<div class="fry-pack fry-pack-back" aria-hidden="true"><svg class="fry-holder-vector" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rounded high back and broad side shoulders, traced in proportion from the holder. -->
+  <path d="M96 83C96 64 109 55 127 50C161 42 184 7 240 7C296 7 320 44 351 57C378 68 392 79 392 101V324C392 343 383 356 368 367L342 380L122 369C104 368 94 356 94 339Z" fill="#c2292f"/>
+  <path d="M103 85C103 68 115 61 132 56C167 46 186 14 240 14C291 14 314 49 346 63C369 73 384 84 384 103V320L341 371L126 361L103 337Z" fill="#b8242b"/>
+  <path d="M96 83C96 64 109 55 127 50C161 42 184 7 240 7C296 7 320 44 351 57C378 68 392 79 392 101" fill="none" stroke="#e93636" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="244" y="31" width="7" height="13" rx="2" transform="rotate(14 247.5 37.5)" fill="#f8f8f5"/>
+</svg></div>
 <div id="fry-stack" class="fry-stack" role="group" aria-label="뽑을 감자튀김 선택"></div>
-<div class="fry-pack fry-pack-front" aria-hidden="true"><img class="fry-holder-render" src="assets/holder-fbx-render.png" srcset="assets/display/holder-fbx-render-png-480.webp 480w, assets/display/holder-fbx-render-png-960.webp 960w" sizes="(max-width: 780px) 90vw, 490px" alt="" decoding="async"></div>
+<div class="fry-pack fry-pack-front" aria-hidden="true"><svg class="fry-holder-vector" viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+  <!-- Low U-shaped front lip and rounded base hide the lower half of each fry. -->
+  <path class="fry-holder-face" d="M96 83C103 123 108 163 129 188C155 210 191 221 239 222C287 223 325 210 348 186C371 159 383 119 392 101V324C392 344 383 357 368 367L342 380L122 369C104 368 94 356 94 339Z" fill="#e93636"/>
+  <path d="M392 101V324C392 344 383 357 368 367L342 380L326 378C349 354 364 338 367 311L371 158C382 131 388 110 392 101Z" fill="#d22c31"/>
+  <path d="M96 83C103 123 108 163 129 188C155 210 191 221 239 222C287 223 325 210 348 186C371 159 383 119 392 101" fill="none" stroke="#f45a52" stroke-width="5" stroke-linecap="round"/>
+  <g fill="#a91f28"><ellipse cx="143" cy="225" rx="7.5" ry="6.8" transform="rotate(23 143 225)"/><ellipse cx="184" cy="237" rx="7.8" ry="7"/><ellipse cx="225" cy="244" rx="8" ry="7.1"/><ellipse cx="267" cy="245" rx="8" ry="7.1"/><ellipse cx="309" cy="238" rx="7.8" ry="7"/></g>
+</svg></div>
 <div class="fry-reveal" id="fry-reveal" aria-hidden="true" hidden><div class="fry-halo"></div><div class="fry-ring"></div><div class="fry-sparkles"><i></i><i></i><i></i><i></i><i></i><i></i></div><img id="fry-reveal-image" alt=""><span id="fry-reveal-name"></span></div>
 <span class="fry-pull-hint" id="fry-pull-hint" aria-hidden="true">↑ &nbsp; 감튀를 잡고 위로 쭉 당겨보세요</span></div>
 <div class="draw-control"><p id="draw-status" role="status" aria-live="polite">감튀 하나를 잡고 위로 쭉 당겨보세요.</p><button id="draw-replay" class="draw-replay" type="button" hidden>다시 당겨보기 ↻</button></div></section>

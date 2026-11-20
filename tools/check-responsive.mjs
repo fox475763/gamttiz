@@ -97,7 +97,7 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      }
      if(filename==='draw.html'){
        assert.equal(await page.locator('.fry-choice').count(),5);
-       assert.equal(await page.locator('.fry-holder-render').count(),2);
+       assert.equal(await page.locator('.fry-holder-vector').count(),2);
        const fry=page.locator('.fry-choice').nth(2);
        await fry.scrollIntoViewIfNeeded();
        const dragFry=async()=>{const b=await fry.boundingBox();assert.ok(b);const x=b.x+b.width/2,y=b.y+Math.min(22,b.height*.15);await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x,y-105,{steps:7});await page.mouse.up();};
