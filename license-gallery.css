@@ -187,3 +187,12 @@ body.license-page.has-license:not(.license-wallet-view) .license-main{
 @media(max-width:780px){
  .license-page.has-license:not(.license-wallet-view) .license-member-link{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px;min-width:0;overflow:hidden}
 }
+
+/* Wallet opened by shake: keep the card legible while reducing iOS GPU load. */
+@media(max-width:900px){
+ .license-page.license-wallet-view .license-geometry,
+ .license-page.license-wallet-view :is(.license-geo-orbit,.license-geo-particle){display:none!important;animation:none!important}
+ .license-page.license-wallet-view :is(.license-gloss-front,.license-gloss-back,.license-card-gloss,.license-hologram){animation:none!important}
+ .license-page.license-wallet-view .license-flip-inner{will-change:auto}
+ .license-page.license-wallet-view .license-main{contain:layout style}
+}
