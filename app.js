@@ -40,7 +40,7 @@ products.forEach((p,i)=>{
   const img=document.createElement('img');img.src=p.image;const variants=window.GTZDisplayAssets?.[p.image];if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 45vw, 260px';}img.alt=`${p.name} — ${p.description}`;img.width=1080;img.height=1350;img.loading='lazy';img.decoding='async';
   const label=document.createElement('span');label.className='card-label';
   const name=document.createElement('span');name.textContent=p.name;
-  label.append(name);card.append(img,label);card.addEventListener('click',()=>showDetail(i));gallery?.append(card);
+  label.append(name);card.append(img,label);card.addEventListener('click',()=>{if(document.querySelector('#friends-carousel'))location.href='collection.html#friend-'+String(i+1).padStart(2,'0');else showDetail(i);});gallery?.append(card);
 });
 function showDetail(index){
   current=index;const p=index===-1?holder:products[index];
@@ -62,7 +62,6 @@ dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoun
 document.querySelector('#previous').addEventListener('click',()=>showDetail((current+13)%14));
 document.querySelector('#next').addEventListener('click',()=>showDetail((current+1)%14));
 dialog.addEventListener('keydown',e=>{if(current<0)return;if(e.key==='ArrowRight'){e.preventDefault();showDetail((current+1)%14);}if(e.key==='ArrowLeft'){e.preventDefault();showDetail((current+13)%14);}});
-document.querySelector('#random')?.addEventListener('click',()=>showDetail(Math.floor(Math.random()*14)));
 document.querySelector('.holder-open')?.addEventListener('click',()=>showDetail(-1));
 const linkedFriend=Number(new URLSearchParams(location.search).get('friend'));
 if(Number.isInteger(linkedFriend)&&linkedFriend>=1&&linkedFriend<=products.length)showDetail(linkedFriend-1);

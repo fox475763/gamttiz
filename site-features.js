@@ -3,19 +3,20 @@
   if(page==='license.html'&&new URLSearchParams(location.search).get('wallet')==='1')return;
   const pages = [
     {title:'홈', description:'감띠즈를 처음부터 둘러보기', url:'index.html', keys:'home gamttiz 감띠즈'},
-    {title:'감띠즈 컬렉션', description:'14종의 감띠와 각각의 이야기', url:'index.html#collection', keys:'collection 캐릭터 키링 감띠'},
+    {title:'감띠즈 도감', description:'14종의 감띠와 미공개 친구들의 도감', url:'collection.html', keys:'collection dex 도감 캐릭터 키링 감띠'},
     {title:'제품 정보', description:'랜덤박스, 키링, 홀더', url:'products.html', keys:'products 랜덤박스 굿즈 제품'},
     {title:'공지', description:'감띠즈의 공식 공지와 제작·운영 소식', url:'news.html', keys:'notice news 공지 소식 게시글'},
     {title:'Fry Rader (감튀 레이더)', description:'감자튀김 할인·이벤트·굿즈 등 외부 소식', url:'member.html#radar', keys:'fry radar rader 레이더 감튀 소식 할인 이벤트'},
     {title:'감튀 취향 테스트', description:'10개의 질문으로 나의 감띠 찾기', url:'quiz.html', keys:'quiz 테스트 성향'},
     {title:'나만의 감띠 홀더', description:'감띠를 담고 3D 홀더를 돌려보기', url:'combo.html', keys:'combo 체험 3d'},
     {title:'나의 라이센스 (MY ID)', description:'나만의 감띠즈 애호가 라이센스를 발급하고 열람하기', url:'license.html', keys:'my id license 라이센스 라이선스 회원증 카드 발급'},
-    {title:'체험 모아보기', description:'감띠즈의 두 가지 체험', url:'play.html', keys:'play 게임'},
+    {title:'오늘의 감띠 뽑기', description:'룰렛을 돌리고 오늘 함께할 감띠 만나기', url:'draw.html', keys:'daily draw 룰렛 랜덤 뽑기 게임'},
+    {title:'체험 모아보기', description:'감띠즈의 세 가지 체험', url:'play.html', keys:'play 게임'},
     {title:'Member · 멤버 전용', description:'라이센스 보유자의 감튀 레이더', url:'member.html', keys:'member 멤버 회원 감튀 레이더 웹앱'},
     {title:'프로젝트 정보', description:'기획 의도, 제작자, 디자인 정보', url:'project.html', keys:'project info 포트폴리오'}
   ];
   const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
-  names.forEach((name,index) => pages.push({title:name, description:`감띠즈 ${String(index+1).padStart(2,'0')}번 친구 자세히 보기`, url:`index.html?friend=${index+1}#collection`, keys:`감자튀김 캐릭터 ${name}`}));
+  names.forEach((name,index) => pages.push({title:name, description:`감띠즈 ${String(index+1).padStart(2,'0')}번 친구 자세히 보기`, url:`collection.html#friend-${String(index+1).padStart(2,'0')}`, keys:`감자튀김 캐릭터 ${name}`}));
   const make = (tag, className, value) => { const el=document.createElement(tag); if(className)el.className=className; if(value)el.textContent=value; return el; };
   const header = document.querySelector('.header');
   const nav = header?.querySelector('nav[aria-label="주 메뉴"]');
@@ -49,7 +50,7 @@
   menuScroll.append(make('span','control-panel-label','GAMTTIZ / MENU'));
   menu.append(menuScroll);
   const menuLinks=make('div','control-menu-links');
-  const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Member:'멤버 전용','MY ID':'나의 라이센스',Products:'제품',Notice:'브랜드 공지',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
+  const menuTranslations={Home:'홈',Collection:'감띠즈 도감',Play:'체험',Member:'멤버 전용','MY ID':'나의 라이센스',Products:'제품',Notice:'브랜드 공지',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
   // Decorative outline icons are embedded locally, so no icon font or extra request is needed.
   const menuIcons={
     Home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
@@ -85,7 +86,7 @@
   function syncCurrentMenuLink(){
     const current=new URL(location.href),normalized=url=>url.pathname.replace(/\/$/,'/index.html');
     const links=[...menuLinks.querySelectorAll('a')];
-    const matching=links.filter(link=>{const url=new URL(link.href,current);return url.origin===current.origin&&normalized(url)===normalized(current);});
+    const matching=links.filter(link=>{const url=new URL(link.href,current);return url.origin===current.origin&&normalized(url)===normalized(current).replace(/\/draw\.html$/,'/play.html');});
     const selected=matching.find(link=>{const url=new URL(link.href,current);return url.hash&&url.hash===current.hash;})||matching.find(link=>!new URL(link.href,current).hash);
     for(const link of links){if(link===selected)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
   }

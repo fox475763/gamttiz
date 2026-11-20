@@ -10,7 +10,7 @@ const server=createServer(async(req,res)=>{
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const base='http://127.0.0.1:'+server.address().port+'/';
-const pages=['index.html','member.html','license.html','play.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar'];
+const pages=['index.html','member.html','license.html','play.html','collection.html','draw.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar'];
 const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2026-11-20T00:00:00Z',character:0};
 for(const engine of [chromium,webkit])test('Responsive menu, page widths and member paths: '+engine.name(),{timeout:180000},async()=>{
  const browser=await engine.launch();
@@ -63,6 +63,25 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      await trigger.click();
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
      assert.ok(overflow<=2,filename+' horizontal overflow '+overflow+'px at '+viewport.width);
+     if(filename==='collection.html'){
+       assert.equal(await page.locator('.dex-tile').count(),20);
+       assert.equal(await page.locator('.dex-unknown').count(),6);
+       await page.locator('.dex-unknown').first().click();
+       assert.equal(await page.locator('#dex-profile h2').textContent(),'???');
+       await page.locator('#dex-search').fill('빙빙이');
+       assert.equal(await page.locator('.dex-tile:visible').count(),1);
+       await page.locator('.dex-tile:visible').click();
+       assert.equal(await page.locator('#dex-profile h2').textContent(),'빙빙이');
+     }
+     if(filename==='draw.html'){
+       assert.equal(await page.locator('.wheel-slot').count(),14);
+       await page.locator('#draw-button').click();
+       await page.locator('#draw-profile h2').waitFor({state:'visible'});
+       const picked=await page.locator('#draw-profile h2').textContent();
+       await page.reload();
+       assert.equal(await page.locator('#draw-profile h2').textContent(),picked);
+       assert.equal(await page.locator('.wheel-slot.is-picked').count(),1);
+     }
    }
    await context.close();
  }
