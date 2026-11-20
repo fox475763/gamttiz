@@ -341,29 +341,92 @@ const walletMedia=matchMedia('(max-width: 900px)');
     return connectSensor();
   });
   shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
-  // Lightweight wallet: never load a second full license page, canvas renderer,
-  // font stack or 3D animation inside the overlay on mobile Safari.
+  // Render the exact issued license artwork on one small canvas, without
+  // mounting the entire license page in an iframe or running 3D animations.
   const walletStyle=document.createElement('style');
-  walletStyle.textContent='.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:0;padding:18px 10px;background:transparent!important;border:0!important;box-shadow:none!important}.gtz-wallet-lite-card{position:relative;width:min(72vw,280px);aspect-ratio:1080/1718;overflow:hidden;border-radius:17px;background:linear-gradient(145deg,#8b111b,#3f1015);box-shadow:0 12px 30px #0003;border:1px solid #f1d18b}.gtz-wallet-lite-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.97}.gtz-wallet-lite-info{position:absolute;inset:auto 7% 7%;padding:12px 9px;border-radius:10px;background:#3d0c12e8;color:#ffe5a2;text-align:center;font-size:12px;line-height:1.65}.gtz-wallet-lite-info strong{display:block;font-size:clamp(15px,4vw,20px);overflow-wrap:anywhere}.gtz-wallet-lite-info small{display:block;letter-spacing:.08em}.gtz-wallet-lite-caption{color:#665e55;font-size:12px;text-align:center}.gtz-wallet-lite .gtz-wallet-lite-card{transform:none!important;animation:none!important}';
+  walletStyle.textContent='.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:12px 6px;background:transparent!important;border:0!important;box-shadow:none!important}.gtz-wallet-lite-card{display:block;width:min(72vw,290px);height:auto;aspect-ratio:1080/1718;border-radius:12px;box-shadow:0 12px 28px #0003;background:#780708}.gtz-wallet-lite-error{font-size:13px;color:#7d1616;text-align:center;padding:30px 12px}';
   document.head.append(walletStyle);
   const friendNames=['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
+  const qrMatrix=[
+    '111111100101010011111011101111111',
+    '100000100111011111000100001000001',
+    '101110101001010011101101001011101',
+    '101110101001101110001010101011101',
+    '101110101111100101100111001011101',
+    '100000101010100110101110101000001',
+    '111111101010101010101010101111111',
+    '000000001101101100100111000000000',
+    '101111100100011101001001001111100',
+    '011110011000000010011111101101101',
+    '101100101100000110101110100010110',
+    '001010011111001010000100011011100',
+    '111101110111100000110010110111010',
+    '111011000011111110001101101000011',
+    '100100110110011000010010011001110',
+    '111100010101110010011110011111100',
+    '000111100011100001010000010111001',
+    '001111001011011001111011101101111',
+    '000110111111101111001110110110110',
+    '101100011000110011111110110111100',
+    '101110101010100010001011110111010',
+    '110111000100011100100101001000001',
+    '100110110001100111101010010100010',
+    '100001000001110100100101101010100',
+    '100011111000110101100000111110000',
+    '000000001111001010111011100010111',
+    '111111100110100110100111101010110',
+    '100000101001101100011101100011110',
+    '101110101011110000110100111111011',
+    '101110101101000111001101010011011',
+    '101110101010011001010001001101000',
+    '100000100010101010111111011011100',
+    '111111101111101001010001101100010',
+  ];
   function notifyFrame(active){}
   function startFrame(){
     if(!mobile())return;
     let data;try{data=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null')}catch{}
-    frame.replaceChildren();
+    frame.replaceChildren();frameStarted=true;
     if(!data||!Number.isInteger(data.character)||data.character<0||data.character>=friendNames.length)return;
-    const card=make('div','gtz-wallet-lite-card');
-    const img=document.createElement('img');img.src='assets/illustrations-3d/friend-'+String(data.character+1).padStart(2,'0')+'.png';img.alt=friendNames[data.character];img.loading='eager';img.decoding='async';
-    const info=make('div','gtz-wallet-lite-info');
-    const heading=document.createElement('strong');heading.textContent=data.name||'GAMTTIZ';
-    const sub=document.createElement('span');sub.textContent=friendNames[data.character];
-    const serial=document.createElement('small');serial.textContent=data.number||'';
-    info.append(heading,sub,serial);card.append(img,info);
-    frame.append(card,make('p','gtz-wallet-lite-caption','전체 라이센스 디자인은 MY ID 페이지에서 확인할 수 있어요.'));
-    frameStarted=true;
+    const canvas=document.createElement('canvas');canvas.className='gtz-wallet-lite-card';
+    canvas.width=540;canvas.height=859;canvas.setAttribute('role','img');canvas.setAttribute('aria-label','감띠즈 라이센스 뒷면 '+data.name);
+    frame.append(canvas);
+    const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
+    const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
+    const index=data.character;
+    Promise.all([load('assets/license/back.png'),load('assets/illustrations-3d/friend-'+String(index+1).padStart(2,'0')+'.png')]).then(([template,sprite])=>{
+      if(!canvas.isConnected)return;
+      ctx.setTransform(.5,0,0,.5,0,0);
+      const W=1080,H=1718,CROP_Y=101;
+      ctx.drawImage(template,0,CROP_Y,W,H,0,0,W,H);
+      const max=376,scale=Math.min(max/sprite.naturalWidth,max/sprite.naturalHeight);
+      const w=sprite.naturalWidth*scale,h=sprite.naturalHeight*scale;
+      ctx.drawImage(sprite,540-w/2,704-CROP_Y-h/2,w,h);
+      function value(text,x,y,maxWidth,size){
+        ctx.fillStyle='#ffe09a';ctx.textAlign='right';ctx.textBaseline='alphabetic';
+        text=String(text||'');let fontSize=size;
+        do{ctx.font='600 '+fontSize+'px "Wanted Sans Variable","Noto Sans CJK KR","Noto Sans KR","Malgun Gothic",Arial,sans-serif';fontSize--;}while(fontSize>20&&ctx.measureText(text).width>maxWidth);
+        ctx.fillText(text,x,y,maxWidth);
+      }
+      value(data.name,950,1071-CROP_Y,633,46);
+      value(friendNames[index],950,1233-CROP_Y,510,40);
+      value(data.number,950,1400-CROP_Y,530,34);
+      const issued=new Date(data.issuedAt);
+      let date='발급 후 표시';
+      if(Number.isFinite(issued.getTime())){
+        const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(issued);
+        date=['year','month','day'].map(type=>parts.find(p=>p.type===type)?.value||'').join('.');
+      }
+      ctx.fillStyle='#ffe09a';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+      ctx.font='42px Georgia,"Times New Roman",serif';ctx.fillText('issued date.',129,1401);
+      ctx.font='600 39px "Wanted Sans Variable",Arial,sans-serif';ctx.fillText(date,129,1460,545);
+      ctx.font='500 23px Arial,sans-serif';ctx.fillText('SCAN TO OPEN MY ID',129,1547,545);
+      const module=6,quiet=4,x=704,y=1340,size=(qrMatrix.length+quiet*2)*module;
+      ctx.fillStyle='#f5d578';ctx.fillRect(x,y,size,size);ctx.fillStyle='#780708';
+      qrMatrix.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1')ctx.fillRect(x+(i+quiet)*module,y+(j+quiet)*module,module,module)});
+    }).catch(()=>{if(canvas.isConnected)frame.append(make('p','gtz-wallet-lite-error','라이센스 이미지를 불러오지 못했어요. MY ID 페이지에서 확인해주세요.'));});
   }
-  function warm(){/* No hidden iframe preload. */}
+  function warm(){/* Never preload a second license page. */}
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
