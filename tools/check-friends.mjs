@@ -167,3 +167,11 @@ test('Rectangular sticks are contained inside the rendered holder at rest',()=>{
  for(const [x,len,tilt,w] of sticks){assert.equal(tilt,0);assert.ok(x-w/2>=26&&x+w/2<=74);assert.ok(100-28-len>=23);assert.ok(100-28-len<39);}
  const css=src('fry-pick.css');assert.match(css,/bottom:28%/);assert.match(css,/translateY\(-12px\)/);assert.doesNotMatch(css,/fry-stick::before|fry-stick::after/);
 });
+
+test('Holder is viewed straight on, with symmetrical front lip and five round holes',()=>{
+ const html=src('draw.html'),front=html.match(/<div class="fry-pack fry-pack-front"[\s\S]*?<\/svg>/)[0];
+ assert.match(front,/M94 89C104 126 109 164 132 190C154 213 194 222 240 222C286 222 326 213 348 190C371 164 376 126 386 89/);
+ assert.match(front,/V342Q386 374 354 374H126Q94 374 94 342Z/);
+ assert.equal((front.match(/<circle /g)||[]).length,5);
+ assert.doesNotMatch(front,/fill="#d22c31"|rotate\(/);
+});
