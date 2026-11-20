@@ -422,3 +422,32 @@ const walletMedia=matchMedia('(max-width: 900px)');
 }
 
 })();
+
+/* Subtle glass scroll handle; native page scrolling and Menu stay unchanged. */
+(()=>{
+ 'use strict';
+ if(new URLSearchParams(location.search).get('wallet')==='1'&&location.pathname.endsWith('license.html'))return;
+ const init=()=>{
+  if(document.querySelector('.gtz-scroll-rail'))return;
+  const rail=document.createElement('div');rail.className='gtz-scroll-rail';rail.setAttribute('aria-hidden','true');
+  const thumb=document.createElement('div');thumb.className='gtz-scroll-droplet';rail.append(thumb);document.body.append(rail);
+  let dragging=false,raf=0,hideTimer=0,offset=0;
+  const maxScroll=()=>Math.max(0,document.documentElement.scrollHeight-innerHeight);
+  const travel=()=>Math.max(1,rail.clientHeight-thumb.offsetHeight);
+  const refresh=()=>{
+   raf=0;const max=maxScroll();rail.style.display=max>100?'block':'none';
+   if(!dragging&&max>0)rail.style.setProperty('--gtz-scroll-y',Math.min(1,Math.max(0,scrollY/max))*travel()+'px');
+  };
+  const schedule=()=>{if(!raf)raf=requestAnimationFrame(refresh)};
+  const show=()=>{rail.classList.add('is-visible');clearTimeout(hideTimer);if(!dragging)hideTimer=setTimeout(()=>rail.classList.remove('is-visible'),1500)};
+  addEventListener('scroll',()=>{schedule();show()},{passive:true});
+  addEventListener('resize',schedule,{passive:true});
+  addEventListener('pageshow',schedule);
+  thumb.addEventListener('pointerdown',e=>{if(e.button!==0)return;dragging=true;offset=e.clientY-thumb.getBoundingClientRect().top;thumb.setPointerCapture(e.pointerId);show();e.preventDefault()});
+  thumb.addEventListener('pointermove',e=>{if(!dragging)return;const y=Math.max(0,Math.min(travel(),e.clientY-rail.getBoundingClientRect().top-offset));rail.style.setProperty('--gtz-scroll-y',y+'px');scrollTo({top:y/travel()*maxScroll(),behavior:'instant'});e.preventDefault()});
+  const end=()=>{if(!dragging)return;dragging=false;schedule();show()};
+  thumb.addEventListener('pointerup',end);thumb.addEventListener('pointercancel',end);thumb.addEventListener('lostpointercapture',end);
+  new ResizeObserver(schedule).observe(document.documentElement);schedule();
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
