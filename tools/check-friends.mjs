@@ -205,3 +205,20 @@ test('Holder is viewed straight on, with symmetrical front lip and five round ho
  assert.equal((front.match(/<circle /g)||[]).length,5);
  assert.doesNotMatch(front,/fill="#d22c31"|rotate\(/);
 });
+
+test('Play game cards use three matching vector icons and shared light glass without old character art',()=>{
+ const html=src('play.html'),css=src('play-hub.css');
+ const grid=html.match(/<div class="hub-grid">([\s\S]*?)<\/section>/)[1];
+ assert.doesNotMatch(grid,/hub-art|<img\b/);
+ assert.equal((grid.match(/class="hub-icon"/g)||[]).length,3);
+ assert.equal((grid.match(/class="hub-card-head"/g)||[]).length,3);
+ for(const [href,cls] of [['quiz.html','hub-quiz'],['combo.html','hub-combo'],['draw.html','hub-daily']]){
+   assert.match(grid,new RegExp('href="'+href+'" class="'+cls+'"'));
+ }
+ assert.match(html,/play-hub\.css\?v=/);
+ assert.match(css,/backdrop-filter:blur\(22px\)/);
+ assert.match(css,/conic-gradient/);
+ assert.match(css,/mask-composite:exclude/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+ assert.match(css,/\.hub-card-head\{display:flex;align-items:center/);
+});

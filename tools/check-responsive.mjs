@@ -63,6 +63,17 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      await trigger.click();
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
      assert.ok(overflow<=2,filename+' horizontal overflow '+overflow+'px at '+viewport.width);
+     if(filename==='play.html'){
+       const cards=page.locator('.hub-grid>a');
+       assert.equal(await cards.count(),3);
+       assert.equal(await page.locator('.hub-grid img').count(),0);
+       const layout=await cards.evaluateAll(items=>items.map(card=>{
+         const icon=card.querySelector('.hub-icon'),title=card.querySelector('h2'),ib=icon.getBoundingClientRect(),tb=title.getBoundingClientRect(),cb=card.getBoundingClientRect();
+         return {href:card.getAttribute('href'),aligned:ib.width>=50&&ib.right<=tb.left&&tb.right<=cb.right,material:getComputedStyle(card,'::before').backgroundImage.includes('conic-gradient')&&getComputedStyle(card).backdropFilter!=='none'};
+       }));
+       assert.deepEqual(layout.map(c=>c.href),['quiz.html','combo.html','draw.html']);
+       assert.ok(layout.every(c=>c.aligned&&c.material),'Play glass and icon alignment at '+viewport.width);
+     }
      if(filename==='collection.html'){
        assert.equal(await page.locator('.dex-tile').count(),20);
        assert.equal(await page.locator('.dex-unknown').count(),6);

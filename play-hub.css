@@ -1,0 +1,95 @@
+/* GAMTTIZ Play: compact game cards in the site's light liquid-glass material. */
+.play-page .play-hub{
+  --play-red:var(--gtz-red,#e93636);
+  --play-ink:var(--ed-ink,#252522);
+  --play-muted:var(--ed-muted,#686863);
+  --play-ease:cubic-bezier(.22,1,.36,1);
+  position:relative;
+  padding-block:clamp(58px,7vw,94px) clamp(80px,11vw,150px);
+  background:var(--ed-paper,#f8f8f5);
+}
+.play-page .play-hub>.eyebrow{color:var(--play-red);font-weight:700;letter-spacing:.13em}
+.play-page .play-hub>h1{margin:20px 0 16px}
+.play-page .play-hub>p:not(.eyebrow){line-height:1.8}
+.play-page .play-hub .hub-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(15px,2vw,25px);
+  margin-top:clamp(30px,4.5vw,54px);
+  align-items:stretch;
+}
+.play-page .play-hub .hub-grid>a{
+  --card-tint:#f9d98c;
+  position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:stretch;
+  gap:19px;min-width:0;min-height:238px; padding:clamp(20px,2.3vw,31px);
+  border:0;border-radius:28px;overflow:hidden;text-decoration:none;color:var(--play-ink);
+  background:
+    radial-gradient(ellipse at 9% 2%,color-mix(in srgb,var(--card-tint) 24%,transparent),transparent 53%),
+    linear-gradient(146deg,#ffffffb8 0%,#ffffff4d 44%,#e9e8e1a6 100%);
+  -webkit-backdrop-filter:blur(22px) saturate(1.28);backdrop-filter:blur(22px) saturate(1.28);
+  box-shadow:inset 0 1px 2px #fff, inset 0 -1px 2px #b0aea326,0 2px 5px #2f2c2310,0 12px 30px #302e2310;
+  transition:transform .38s var(--play-ease),box-shadow .38s var(--play-ease),background .35s ease;
+}
+.play-page .play-hub .hub-grid>a.hub-combo{--card-tint:#f5bdb0}
+.play-page .play-hub .hub-grid>a.hub-daily{--card-tint:#f9d7a0}
+.play-page .play-hub .hub-grid>a::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;border:1.5px solid transparent;
+  background:conic-gradient(from 205deg,#fff2 0deg,#fff 50deg,#fff8 82deg,#c7c5b82e 133deg,#fff3 190deg,#fff 239deg,#fff8 294deg,#a6a39730 336deg,#fff2 360deg) border-box;
+  -webkit-mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;z-index:2;
+}
+.play-page .play-hub .hub-grid>a::after{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:radial-gradient(ellipse at 20% -5%,#fff9,transparent 57%),radial-gradient(ellipse at 100% 105%,#fff7,transparent 50%);
+  pointer-events:none;opacity:.7;transition:opacity .32s ease;
+}
+.play-page .hub-card-head{display:flex;align-items:center;gap:14px;min-width:0}
+.play-page .hub-card-title{flex:1;min-width:0}
+.play-page .hub-card-title .hub-index{display:block;font-size:10px;font-weight:700;letter-spacing:.075em;line-height:1.35;color:var(--play-red);margin-bottom:6px}
+.play-page .hub-card-title h2{font-size:clamp(19px,1.8vw,25px);line-height:1.26;letter-spacing:-.045em;margin:0;word-break:keep-all;overflow-wrap:anywhere;color:var(--play-ink)}
+.play-page .hub-grid .hub-icon{
+  position:relative;display:grid;place-items:center;flex:none;
+  width:clamp(55px,5vw,70px);height:clamp(55px,5vw,70px);border-radius:21px;
+  background:radial-gradient(ellipse at 24% 12%,#fffdf9 0%,#fff8 32%,transparent 72%),linear-gradient(145deg,#ffffffb0,color-mix(in srgb,var(--card-tint) 50%,#fff) 70%,#ffffff80);
+  border:1px solid #fff9;box-shadow:inset 0 1px 2px #fff,inset 0 -2px 4px #ac7f5320,0 5px 12px #68502a19;
+  transition:transform .45s var(--play-ease);
+}
+.play-page .hub-icon>svg{width:72%;height:72%;display:block;overflow:visible;filter:drop-shadow(0 2px 1px #783a2820)}
+.play-page .play-hub .hub-grid>a>p{font-size:14px;line-height:1.75;min-height:0;color:var(--play-muted);margin:0;word-break:keep-all;overflow-wrap:anywhere}
+.play-page .play-hub .hub-grid>a>b{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-top:auto;padding:12px 0 0;border:0;border-top:1px solid #92918a24;
+  border-radius:0;box-shadow:none;background:none;color:var(--play-ink);
+  font-size:13px;font-weight:700;line-height:1.4;
+}
+.play-page .play-hub .hub-grid>a>b::after{content:none;display:none}
+.play-page .hub-grid .hub-action-icon{
+  display:grid;place-items:center;flex:none;width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(145deg,#fffdf6,#ffffff65 48%,#e6e6dd9e);
+  border:1px solid #ffffffa8;color:var(--play-red);box-shadow:inset 0 1px 2px #fff,0 3px 8px #24242113;
+  transition:background .25s ease,color .25s ease,transform .35s var(--play-ease);
+}
+.play-page .hub-action-icon svg{width:19px;height:19px;display:block}
+.play-page .play-hub .hub-grid>a:focus-visible{outline:2px solid var(--play-red);outline-offset:4px}
+@media(hover:hover){
+  .play-page .play-hub .hub-grid>a:hover{transform:translateY(-5px);box-shadow:inset 0 1px 2px #fff,inset 0 -1px 2px #b0aea326,0 6px 12px #2f2c2310,0 20px 40px #302e231b}
+  .play-page .play-hub .hub-grid>a:hover::after{opacity:1}
+  .play-page .hub-grid>a:hover .hub-icon{transform:translateY(-2px) scale(1.055)}
+  .play-page .hub-grid>a:hover .hub-action-icon{color:white;background:var(--play-red);transform:translateX(2px)}
+}
+.play-page .play-hub .hub-grid>a:active{transform:scale(.982)}
+@media(max-width:900px){
+  .play-page .play-hub .hub-grid{grid-template-columns:minmax(0,1fr);max-width:680px;gap:14px}
+  .play-page .play-hub .hub-grid>a{min-height:0;padding:22px;gap:13px;border-radius:24px}
+  .play-page .hub-card-title h2{font-size:clamp(21px,3vw,26px)}
+  .play-page .hub-grid .hub-icon{width:62px;height:62px;border-radius:19px}
+}
+@media(max-width:420px){
+  .play-page .play-hub{width:calc(100% - 36px);padding-block:45px 75px}
+  .play-page .play-hub .hub-grid>a{padding:18px;gap:12px;border-radius:22px}
+  .play-page .hub-card-head{gap:12px}
+  .play-page .hub-grid .hub-icon{width:52px;height:52px;border-radius:17px}
+  .play-page .hub-card-title h2{font-size:20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .play-page .play-hub .hub-grid>a,.play-page .hub-grid .hub-icon,.play-page .hub-grid .hub-action-icon{transition:none}
+  .play-page .play-hub .hub-grid>a:is(:hover,:active),.play-page .hub-grid>a:hover :is(.hub-icon,.hub-action-icon){transform:none}
+}
