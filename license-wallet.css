@@ -1,7 +1,7 @@
 .gtz-wallet-bar,.gtz-wallet-sheet{display:none}
-@media(max-width:900px) and (pointer:coarse){
-  .gtz-wallet-bar{display:block;position:fixed;z-index:9998;left:50%;bottom:calc(5px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:154px;height:28px;border:0;padding:0;background:transparent;touch-action:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .gtz-wallet-bar::before{content:"";display:block;position:absolute;left:12px;right:12px;bottom:8px;height:5px;border-radius:999px;background:rgba(65,35,28,.48);box-shadow:0 0 1px 1px #ffffff64}
+@media(max-width:900px){
+  .gtz-wallet-bar{display:block;position:fixed;z-index:1201;left:50%;bottom:calc(7px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:156px;height:40px;border:0;padding:0;background:transparent;touch-action:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .gtz-wallet-bar::before{content:"";display:block;position:absolute;left:14px;right:14px;bottom:12px;height:5px;border-radius:999px;background:rgba(48,29,26,.68);box-shadow:0 0 0 1px #ffffffa8,0 2px 7px #00000024}
   .gtz-wallet-bar[hidden],.gtz-wallet-sheet[hidden]{display:none!important}
   html.gtz-wallet-open,html.gtz-wallet-open body{overflow:hidden!important;overscroll-behavior:none}
   .gtz-wallet-sheet{display:block;position:fixed;inset:0;z-index:2147483640;isolation:isolate;visibility:hidden;pointer-events:none}
@@ -21,4 +21,5 @@
   .gtz-wallet-detail{font-size:12px;color:#850000;text-decoration:none;padding:8px}
 }
 @media(prefers-reduced-motion:reduce){.gtz-wallet-backdrop,.gtz-wallet-content{transition:none}}
+
 

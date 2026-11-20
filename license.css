@@ -132,6 +132,51 @@
   .license-forge-card{box-shadow:0 8px 32px #f6c54d28}
 }
 
+/* The issuance screen: restrained stationery-style typography, warm ivory
+   and a single burgundy action. The issued card / wallet stay unchanged. */
+.license-page:not(.has-license):not(.license-wallet-view) .license-main{max-width:1010px;padding-top:clamp(36px,5.8vw,74px)}
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading{margin-bottom:40px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading h1{font-size:clamp(2.65rem,7vw,4.8rem);font-family:Georgia,"Times New Roman",serif;letter-spacing:.075em;font-weight:600;color:#690c10;margin:0;line-height:1.05}
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading::after{content:"";display:block;width:33px;height:1px;background:#bd944a;margin:16px auto 0}
+.license-page:not(.has-license):not(.license-wallet-view) .license-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(30px,6vw,72px);max-width:870px;align-items:center}
+.license-page:not(.has-license):not(.license-wallet-view) .license-preview{position:relative;gap:13px;padding:21px 0 15px;isolation:isolate}
+.license-page:not(.has-license):not(.license-wallet-view) .license-preview::before{content:"";position:absolute;inset:7% 0 6%;z-index:-1;background:radial-gradient(ellipse at 50% 55%,#d3b37c29 0,transparent 67%);pointer-events:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-badge{font-size:10px;letter-spacing:.24em;border:0;padding:0;color:#9b7950}
+.license-page:not(.has-license):not(.license-wallet-view) .license-flip{width:min(100%,292px)}
+.license-page:not(.has-license):not(.license-wallet-view) .license-turn{font-weight:600;font-size:12px;color:#916e4b;padding:3px 8px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-panel{background:transparent;border:0;border-left:1px solid #d9c7af;border-radius:0;padding:8px 0 8px clamp(24px,4vw,48px);box-shadow:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-panel h2{font-size:clamp(1.25rem,3vw,1.65rem);font-weight:650;letter-spacing:-.04em;margin:0 0 24px;color:#651014}
+.license-page:not(.has-license):not(.license-wallet-view) .license-label{font-weight:650;font-size:12px;color:#69463b;margin-bottom:9px}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name{min-height:48px;background:transparent;border:0;border-bottom:1px solid #c9ad89;border-radius:0;padding:8px 0;color:#421b16}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name::placeholder{color:#a18d7b}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name:focus{outline:0;border-bottom:2px solid #b98b3e}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friends-field{margin:24px 0 21px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friends{gap:5px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friend{position:relative;border:1px solid transparent;background:transparent;border-radius:10px;min-height:70px;gap:4px;padding:7px 3px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friend img{height:43px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friend span{font-weight:550;font-size:10px;color:#775d50}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friend:has(input:checked){border:1px solid #b89149;background:#f5e9ce;padding:7px 3px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friend:has(input:checked)::after{content:"";position:absolute;top:6px;right:7px;width:6px;height:3px;border-left:1px solid #947137;border-bottom:1px solid #947137;transform:rotate(-45deg);pointer-events:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-primary{background:#750b12;border:1px solid #bd944a;border-radius:6px;min-height:50px;color:#fff6df;letter-spacing:.025em;font-size:13px;font-weight:650}
+.license-page:not(.has-license):not(.license-wallet-view) .license-primary:disabled{opacity:.56;cursor:not-allowed}
+.license-page:not(.has-license):not(.license-wallet-view) .license-storage-note{margin-top:15px;color:#9a8170}
+@media(max-width:760px){
+  .license-page:not(.has-license):not(.license-wallet-view) .license-main{padding:27px 24px 84px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-heading{margin-bottom:19px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-heading h1{font-size:2.7rem}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-heading::after{margin-top:11px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-layout{grid-template-columns:1fr;gap:18px;max-width:430px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-preview{padding:11px 0 4px;gap:8px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-flip{width:min(52vw,205px)}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-panel{border-left:0;border-top:1px solid #d9c7af;padding:22px 0 0}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-panel h2{font-size:19px;margin-bottom:20px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-friend{min-height:64px;padding:5px 2px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-friend:has(input:checked){padding:5px 2px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-friend img{height:38px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-friends-field{margin:19px 0 17px}
+}
+
+
 
 
 
