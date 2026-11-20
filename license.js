@@ -13,7 +13,32 @@
   const imagePath = index => `assets/illustrations-3d/friend-${String(index+1).padStart(2,'0')}.png`;
   const images = new Map();
   let record = null, selected = 0, editing = true, isBack = false, ready = false, saving = false, renderVersion = 0;
-  let frontImage, backImage, yaw=0, drag=null, ignoreClick=false;
+  let frontImage, backImage, yaw=0, drag=null, ignoreClick=false, exportFiles=null;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const pose={yaw:0,pitch:0,x:50,y:50,foil:.14}, goal={...pose};
+  let motionFrame=0,lastFrame=0;
+  function paint(){
+    flip.style.setProperty('--yaw',pose.yaw.toFixed(3)+'deg');
+    flip.style.setProperty('--pitch',pose.pitch.toFixed(3)+'deg');
+    flip.style.setProperty('--light-x',pose.x.toFixed(2)+'%');
+    flip.style.setProperty('--light-y',pose.y.toFixed(2)+'%');
+    flip.style.setProperty('--foil',pose.foil.toFixed(3));
+  }
+  function animate(time){
+    const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
+    lastFrame=time;const weight=1-Math.exp(-dt/(drag?48:94));let moving=false;
+    for(const key of Object.keys(goal)){
+      const delta=goal[key]-pose[key],threshold=key==='foil'?.002:.05;
+      if(Math.abs(delta)>threshold){pose[key]+=delta*weight;moving=true;}else pose[key]=goal[key];
+    }
+    paint();
+    if(moving)motionFrame=requestAnimationFrame(animate);else{motionFrame=0;lastFrame=0;}
+  }
+  function moveTo(values){
+    Object.assign(goal,values);
+    if(reduced.matches){Object.assign(pose,goal);paint();return;}
+    if(!motionFrame)motionFrame=requestAnimationFrame(animate);
+  }
   const status = message => { $('license-status').textContent = message; };
   const cleanName = str => [...String(str || '').replace(/[\u0000-\u001f\u007f]/g,'').trim()].slice(0,18).join('');
   const serial = value => Number(/^GTZ - (\d{4,})$/.exec(value || '')?.[1] || 0);
@@ -53,6 +78,7 @@
   }
   async function render() {
     const seq = ++renderVersion;
+    exportFiles=null;$('download-both').disabled=true;
     const name = editing ? cleanName(input.value) : record?.name || '';
     const member = record?.number || '발급 후 생성';
     const index = editing ? selected : record?.character ?? selected;
@@ -68,13 +94,23 @@
       drawValue(bctx,names[index],950,1233-CROP_Y,510,40);
       drawValue(bctx,member,950,1400-CROP_Y,530,34);
       $('license-card-details').textContent = `${name || '이름 미입력'}, ${names[index]}, ${member}`;
+      if(!editing&&record&&!wallet){
+        // Prepare both actual PNGs before the user's tap, keeping Web Share's
+        // transient user activation intact on iOS.
+        const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
+        const blobFor=canvas=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('PNG export failed')),'image/png'));
+        const blobs=await Promise.all([blobFor(front),blobFor(back)]);
+        if(seq!==renderVersion||editing||!record)return;
+        exportFiles=blobs.map((blob,i)=>new File([blob],base+(i===0?'-front':'-back')+'.png',{type:'image/png'}));
+        $('download-both').disabled=false;
+      }
     } catch { if(seq === renderVersion) status('감띠 이미지를 불러오지 못했어요. 다시 시도해주세요.'); }
   }
   function setSide(value, target) {
     isBack = value; flip.classList.toggle('is-back',isBack);
     const half=Math.round(yaw/180);
     yaw=target ?? ((half%2!==0)===value?half*180:(half+1)*180);
-    flip.style.setProperty('--yaw',yaw+'deg');flip.style.setProperty('--pitch','0deg');
+    moveTo({yaw,pitch:0});
     flip.setAttribute('aria-pressed',String(isBack));
     flip.setAttribute('aria-label',isBack?'카드 앞면 보기':'카드 뒷면 보기');
     $('license-turn').textContent = isBack?'↻ 앞면 보기':'↻ 뒷면 보기';
@@ -84,14 +120,16 @@
   }
   function viewEdit(value) {
     editing = value;
+    document.body.classList.toggle('has-license',!!record&&!editing);
     form.hidden = !editing; $('license-actions').hidden = editing;
     $('license-badge').textContent = record && !editing ? 'MY LICENSE' : record ? 'EDIT PREVIEW' : 'PREVIEW';
-    $('license-panel-kicker').textContent = editing ? 'CREATE MY LICENSE' : 'GAMTTIZ / MY LICENSE';
-    $('license-panel-title').textContent = editing ? record?'라이센스 정보 수정':'나만의 라이센스 만들기' : '나의 감띠즈 라이센스';
-    $('license-panel-description').textContent = editing ? '이름과 가장 좋아하는 감띠를 골라주세요. 뒷면에 실시간으로 반영돼요.' : '카드를 손으로 돌려 빛의 반사와 나의 정보를 확인하세요.';
+    $('license-panel-title').textContent = editing&&record?'라이센스 수정':'라이센스 만들기';
     $('license-submit').textContent = record?'수정 내용 저장':'라이센스 카드 만들기';
     $('license-cancel').hidden = !record;
-    if(record){ input.value=record.name; setSelected(record.character); $('license-owner').textContent=record.name; $('license-number').textContent=record.number; }
+    const celebration=$('license-celebration');
+    celebration.hidden=editing||!record||wallet;
+    celebration.textContent=record?`이 브라우저에서 ${serial(record.number)}번째로 라이센스가 발급되었습니다!`:'';
+    if(record){ input.value=record.name; setSelected(record.character); }
     $('license-submit').disabled = !ready || saving || !cleanName(input.value);
     return render();
   }
@@ -106,14 +144,13 @@
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   function light(e){
     const r=flip.getBoundingClientRect(),x=clamp((e.clientX-r.left)/r.width,0,1),y=clamp((e.clientY-r.top)/r.height,0,1);
-    flip.style.setProperty('--light-x',(x*100)+'%');flip.style.setProperty('--light-y',(y*100)+'%');
-    flip.style.setProperty('--foil',String(.45+Math.min(.45,Math.abs(x-.5)+Math.abs(y-.5))));
+    moveTo({x:x*100,y:y*100,foil:.30+Math.min(.30,(Math.abs(x-.5)+Math.abs(y-.5))*.42)});
     return {x,y};
   }
-  function resetLight(){flip.classList.remove('is-tracking','is-dragging');flip.style.setProperty('--foil','0');flip.style.setProperty('--pitch','0deg');flip.style.setProperty('--yaw',yaw+'deg');}
+  function resetLight(){flip.classList.remove('is-tracking','is-dragging');moveTo({foil:.14,pitch:0,yaw,x:50,y:50});}
   flip.addEventListener('pointerdown',e=>{
     if(e.button!==0||drag)return;
-    ignoreClick=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw,moved:false};
+    ignoreClick=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:pose.yaw,pitch:pose.pitch,moved:false};
     flip.setPointerCapture(e.pointerId);flip.classList.add('is-dragging');light(e);
   });
   flip.addEventListener('pointermove',e=>{
@@ -122,22 +159,21 @@
     if(drag){
       const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
       if(Math.hypot(dx,dy)>7)drag.moved=true;
-      flip.style.setProperty('--yaw',(drag.yaw+dx*1.15)+'deg');
-      flip.style.setProperty('--pitch',clamp(-dy*.55,-34,34)+'deg');
+      moveTo({yaw:drag.yaw+dx*1.12,pitch:clamp(drag.pitch-dy*.48,-33,33)});
     }else if(e.pointerType==='mouse'||e.pointerType==='pen'){
-      flip.classList.add('is-tracking');flip.style.setProperty('--yaw',(yaw+(x-.5)*36)+'deg');flip.style.setProperty('--pitch',((.5-y)*32)+'deg');
+      flip.classList.add('is-tracking');moveTo({yaw:yaw+(x-.5)*30,pitch:(.5-y)*28});
     }
   });
   function finishDrag(e,cancel=false){
     if(!drag||drag.id!==e.pointerId)return;
     const d=drag;drag=null;ignoreClick=d.moved||cancel;
-    if(d.moved&&!cancel){const target=Math.round((d.yaw+(e.clientX-d.x)*1.15)/180)*180;setSide(Math.abs(target/180)%2===1,target);}
+    if(d.moved&&!cancel){const target=Math.round((d.yaw+(e.clientX-d.x)*1.12)/180)*180;setSide(Math.abs(target/180)%2===1,target);}
     resetLight();
     if(flip.hasPointerCapture(e.pointerId))flip.releasePointerCapture(e.pointerId);
   }
   flip.addEventListener('pointerup',e=>finishDrag(e));flip.addEventListener('pointercancel',e=>finishDrag(e,true));flip.addEventListener('lostpointercapture',e=>finishDrag(e,true));
   flip.addEventListener('pointerleave',()=>{if(!drag)resetLight();});
-  flip.addEventListener('click',()=>{if(ignoreClick){ignoreClick=false;return;}setSide(!isBack);}); $('license-turn').addEventListener('click',()=>setSide(!isBack));
+  flip.addEventListener('click',e=>{if(ignoreClick&&e.detail!==0){ignoreClick=false;return;}ignoreClick=false;setSide(!isBack);}); $('license-turn').addEventListener('click',()=>setSide(!isBack));
   input.addEventListener('input',()=>{$('license-submit').disabled=!ready||saving||!cleanName(input.value);setSide(true);render();});
   form.addEventListener('submit',async event=>{
     event.preventDefault(); if(!ready || saving) return;
@@ -148,53 +184,65 @@
       const old=record||restore();
       const next={version:1,name,character:selected,number:old?.number||number(),issuedAt:old?.issuedAt||new Date().toISOString()};
       localStorage.setItem(KEY,JSON.stringify(next));record=next;
+      if(!old)$('license-issuing').hidden=false;
       await viewEdit(false);setSide(!old?false:true);changed();
       if(!old){
-        const overlay=$('license-issuing');overlay.hidden=false;
+        const overlay=$('license-issuing');
         await new Promise(resolve=>setTimeout(resolve,matchMedia('(prefers-reduced-motion: reduce)').matches?250:2350));
         overlay.hidden=true;$('license-celebration').hidden=false;
-        status('라이센스카드가 발급되었습니다.');
+        status('');
         document.querySelector('.license-preview').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
-      }else status('라이센스 정보가 수정되었어요.');
+      }else status('');
     }
-    catch { status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
+    catch { $('license-issuing').hidden=true;status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
     finally {saving=false;$('license-submit').disabled=!ready||!cleanName(input.value);}
   });
   $('license-edit').addEventListener('click',()=>{viewEdit(true);setSide(true);status('');input.focus();});
-  $('license-cancel').addEventListener('click',()=>{viewEdit(false);status('수정을 취소했어요.');});
+  $('license-cancel').addEventListener('click',()=>{viewEdit(false);status('');});
   $('license-delete').addEventListener('click',()=>{
     if(!confirm('이 브라우저에 저장된 라이센스를 삭제할까요? 삭제하면 복구할 수 없어요.'))return;
     try {localStorage.removeItem(KEY);}catch{status('삭제하지 못했어요. 브라우저 저장 설정을 확인해주세요.');return;}
     record=null;input.value='';setSelected(0);$('license-celebration').hidden=true;viewEdit(true);setSide(false);status('라이센스를 삭제했어요.');changed();
   });
-  // Single ZIP download avoids browsers blocking simultaneous downloads.
-  function zip(files){
-    const table=Array.from({length:256},(_,i)=>{let c=i;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0);return c>>>0;});
-    const crc=bytes=>{let c=0xffffffff;for(const b of bytes)c=(c>>>8)^table[(c^b)&255];return (c^0xffffffff)>>>0;};
-    const header=(length,fields)=>{const a=new Uint8Array(length),d=new DataView(a.buffer);for(const [offset,value,size] of fields){if(size===2)d.setUint16(offset,value,true);else d.setUint32(offset,value,true);}return a;};
-    const parts=[],central=[];let pos=0,centralSize=0;
-    for(const file of files){
-      const name=new TextEncoder().encode(file.name),bytes=file.bytes,sum=crc(bytes),size=bytes.length;
-      const l=header(30,[[0,0x04034b50,4],[4,20,2],[14,sum,4],[18,size,4],[22,size,4],[26,name.length,2]]);
-      const c=header(46,[[0,0x02014b50,4],[4,20,2],[6,20,2],[16,sum,4],[20,size,4],[24,size,4],[28,name.length,2],[42,pos,4]]);
-      parts.push(l,name,bytes);central.push(c,name);pos+=l.length+name.length+size;centralSize+=c.length+name.length;
-    }
-    const end=header(22,[[0,0x06054b50,4],[8,files.length,2],[10,files.length,2],[12,centralSize,4],[16,pos,4]]);
-    return new Blob([...parts,...central,end],{type:'application/zip'});
+  const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  const saveDialog=$('license-save-dialog');
+  let manualUrls=[];
+  function clearManual(){manualUrls.forEach(url=>URL.revokeObjectURL(url));manualUrls=[];}
+  function manualSave(files){
+    if(!record||editing||files!==exportFiles)return;
+    clearManual();
+    files.forEach((file,i)=>{
+      const side=i===0?'front':'back',url=URL.createObjectURL(file);
+      manualUrls.push(url);$('license-save-'+side).src=url;
+      const link=$('license-save-'+side+'-link');link.href=url;link.download=file.name;
+    });
+    $('license-save-help').textContent=mobile?'각 이미지를 길게 눌러 사진에 저장하세요.':'저장되지 않은 이미지를 선택하세요.';
+    if(!saveDialog.open)saveDialog.showModal();
   }
-  async function download(){
-    if(!record||editing||!ready||saving)return;
-    const button=$('download-both');button.disabled=true;
-    try {
-      // Rendering has already completed on issuance; refresh before encoding.
-      await render();
-      const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
-      const files=[['front',front],['back',back]].map(([side,canvas])=>({name:base+'-'+side+'.png',bytes:Uint8Array.from(atob(canvas.toDataURL('image/png').split(',')[1]),c=>c.charCodeAt(0))}));
-      const blob=zip(files),url=URL.createObjectURL(blob),a=document.createElement('a');
-      a.href=url;a.download=base+'.zip';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
-      status('앞면과 뒷면 PNG를 하나의 ZIP 파일로 저장했어요.');
-    }catch{status('카드를 저장하지 못했어요. 다시 시도해주세요.');}
-    finally{button.disabled=false;}
+  $('license-save-close').addEventListener('click',()=>saveDialog.close());
+  saveDialog.addEventListener('close',clearManual);
+  function download(){
+    if(!record||editing||!ready||saving||!exportFiles)return;
+    const files=exportFiles;status('');
+    if(mobile){
+      try{
+        // Only file payloads: title/text may remove Save Images from the iOS sheet.
+        if(navigator.share&&navigator.canShare&&navigator.canShare({files})){
+          navigator.share({files}).catch(()=>manualSave(files));
+          return;
+        }
+      }catch{}
+      manualSave(files);return;
+    }
+    try{
+      for(const file of files){
+        const url=URL.createObjectURL(file),a=document.createElement('a');
+        a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+      }
+      // A browser may block multiple automatic downloads; each individual PNG
+      // remains available immediately in a simple recovery dialog.
+      manualSave(files);
+    }catch{manualSave(files);}
   }
   $('download-both').addEventListener('click',download);
   window.addEventListener('storage',event=>{if(event.key!==KEY)return;record=restore();if(!record){input.value='';setSelected(0);}viewEdit(!record);setSide(false);});
@@ -209,4 +257,5 @@
     drawTemplate(fctx,frontImage);drawTemplate(bctx,backImage);ready=true;viewEdit(!record);
   }).catch(()=>status('카드 이미지를 불러오지 못했어요. 잠시 후 다시 접속해주세요.'));
 })();
+
 

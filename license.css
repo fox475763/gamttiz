@@ -17,17 +17,18 @@
 @media(prefers-reduced-motion:reduce){.license-flip-inner{transition:none}}
 
 /* Interactive foil layered over the original, unmodified card artwork. */
-.license-flip{--yaw:0deg;--pitch:0deg;--light-x:50%;--light-y:50%;--foil:0;touch-action:none;user-select:none;perspective:950px}
-.license-flip .license-flip-inner,.license-flip.is-back .license-flip-inner{transform:rotateX(var(--pitch)) rotateY(var(--yaw));transition:transform .68s cubic-bezier(.2,.72,.2,1)}
-.license-flip.is-tracking .license-flip-inner{transition:transform .07s linear}
+.license-flip{--yaw:0deg;--pitch:0deg;--light-x:50%;--light-y:50%;--foil:.14;touch-action:none;user-select:none;perspective:1050px}
+.license-flip .license-flip-inner,.license-flip.is-back .license-flip-inner{transform:rotateX(var(--pitch)) rotateY(var(--yaw));transition:none;will-change:transform}
 .license-flip.is-dragging .license-flip-inner{transition:none;cursor:grabbing}
 .license-flip .license-front{transform:translateZ(.65px)}
 .license-flip .license-back{transform:rotateY(180deg) translateZ(.65px)}
 .license-flip-inner::before,.license-flip-inner::after{content:"";position:absolute;top:3%;bottom:3%;width:1.3px;background:linear-gradient(#d8a34b,#6c310d,#f3c86b);transform:rotateY(90deg);pointer-events:none}
 .license-flip-inner::before{left:0}.license-flip-inner::after{right:0}
-.license-face::before,.license-face::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:var(--foil);transition:opacity .32s ease}
-.license-face::before{background:radial-gradient(ellipse at var(--light-x) var(--light-y),#fffbe5b8 0%,#ffe1a44d 19%,transparent 53%),linear-gradient(115deg,transparent 18%,#f7d97b30 35%,#fff9dc90 47%,#a8ebff38 53%,#f9a8d140 60%,transparent 76%);background-size:100% 100%,230% 230%;background-position:center,var(--light-x) var(--light-y);mix-blend-mode:screen}
-.license-face::after{background-image:radial-gradient(ellipse at var(--light-x) var(--light-y),#fff8cbaa,transparent 57%),radial-gradient(circle,#fffad9 0,.65px,transparent 1.2px),radial-gradient(circle,#f6d37b 0,.9px,transparent 1.5px),linear-gradient(135deg,transparent 40%,#fff5bc66 49%,transparent 60%);background-size:100% 100%,17px 23px,31px 29px,190% 190%;background-position:center,var(--light-x) var(--light-y),var(--light-y) var(--light-x),var(--light-x) var(--light-y);mix-blend-mode:screen;opacity:calc(var(--foil) * .58);mask-image:radial-gradient(ellipse at var(--light-x) var(--light-y),#000,transparent 66%)}
+.license-face::before,.license-face::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;mix-blend-mode:screen}
+/* A slow, soft gold reflection runs across the foil even at rest. */
+.license-face::before{background:linear-gradient(119deg,transparent 17%,#ad68130c 32%,#d99a3330 40%,#ffdf8b66 49%,#f5ca5b42 56%,#ba7c1e10 66%,transparent 82%);background-size:300% 300%;background-position:10% 50%;opacity:.48;animation:license-gold-drift 12s ease-in-out infinite alternate}
+.license-face::after{background:radial-gradient(ellipse at var(--light-x) var(--light-y),#fff0ad88 0%,#f2bd4d45 21%,#c88b2520 43%,transparent 75%),linear-gradient(117deg,transparent 16%,#d69a2720 33%,#ffe39b6b 48%,#e7aa3c36 60%,transparent 83%);background-size:100% 100%,220% 220%;background-position:center,var(--light-x) var(--light-y);opacity:var(--foil)}
+@keyframes license-gold-drift{0%{background-position:4% 22%;opacity:.29}45%{opacity:.50}100%{background-position:96% 77%;opacity:.34}}
 .license-downloads{grid-template-columns:1fr}
 .license-celebration{margin:5px 0 0;color:#850000;font-size:14px;font-weight:700;text-align:center}
 .license-issuing{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 40%,#540e11,#180304 74%);color:#ffdf91;text-align:center;overflow:hidden}
@@ -51,4 +52,47 @@
 .license-wallet-view .license-hint{max-width:280px;line-height:1.45;margin:0}
 .license-wallet-empty{display:block;text-align:center;padding:35px 15px;color:#850000}
 @media(prefers-reduced-motion:reduce){.license-flip .license-flip-inner,.license-flip.is-back .license-flip-inner,.license-face::before,.license-face::after{transition:none}.license-forge-card,.license-forge-card::after,.license-forge-progress::after{animation:none}}
+
+/* Keep creation compact, and make the issued card itself the focal point. */
+.license-main{padding-top:clamp(26px,4vw,56px)}
+.license-heading{margin:0 0 28px}
+.license-heading h1{font-size:clamp(2.5rem,6vw,4.5rem)}
+.license-layout{gap:clamp(22px,4vw,46px);max-width:900px;margin:0 auto;align-items:center}
+.license-preview{gap:10px;top:24px}
+.license-panel{padding:clamp(18px,3vw,28px);border-radius:17px;box-shadow:none}
+.license-panel h2{font-size:clamp(1.2rem,2.6vw,1.65rem);margin:0 0 23px}
+.license-label{font-size:13px;margin-bottom:7px}
+.license-friends-field{margin:20px 0}
+.license-friends{gap:5px}
+.license-friend{min-height:73px;gap:2px;padding:5px 2px;border-radius:8px}
+.license-friend:has(input:checked){padding:4px 1px}
+.license-friend img{height:45px}
+.license-friend span{font-size:10px}
+.license-status:empty{display:none}
+.license-storage-note{font-size:10px;margin-top:12px}
+.license-storage-note summary{width:max-content;cursor:pointer}
+.license-storage-note p{margin:6px 0 0}
+.license-page.has-license .license-layout{display:flex;flex-direction:column;gap:14px;max-width:420px}
+.license-page.has-license .license-preview{position:static;width:100%;padding:0;gap:14px}
+.license-page.has-license .license-badge,.license-page.has-license .license-turn,.license-page.has-license #license-panel-title,.license-page.has-license .license-storage-note{display:none!important}
+.license-page.has-license .license-flip{width:min(100%,310px)}
+.license-page.has-license .license-panel{width:min(100%,310px);padding:0;border:0;background:transparent;box-shadow:none}
+.license-celebration{font-size:clamp(13px,3.5vw,15px);font-weight:700;line-height:1.5;margin:4px 0 0}
+.license-manage{display:flex;justify-content:center;gap:20px;margin-top:10px}
+.license-link{border:0;background:none;color:#876a5b;font:inherit;font-size:12px;padding:8px 9px;cursor:pointer}
+.license-primary:disabled{cursor:wait}
+.license-save-dialog{border:1px solid #e4cdb6;border-radius:20px;padding:22px;width:min(90vw,420px);max-height:90dvh;overflow:auto;background:#fff9ef;color:#42180c;text-align:center}
+.license-save-dialog::backdrop{background:#220b0b8c;backdrop-filter:blur(5px)}
+.license-save-dialog h2{font-size:20px;margin:0 0 6px;color:#850000}
+.license-save-dialog p{font-size:12px;margin:0 0 18px;color:#725748}
+.license-save-images{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 20px}
+.license-save-images img{display:block;width:100%;aspect-ratio:1080/1718;object-fit:contain;border-radius:8px;-webkit-touch-callout:default;user-select:auto}
+.license-save-images a{display:block;font-size:12px;color:#850000;padding:10px 0;text-decoration:underline}
+.license-wallet-view.has-license .license-layout{display:block;max-width:none;margin:0}
+.license-wallet-view.has-license .license-flip{width:min(78vw,300px,calc((100dvh - 70px) * 1080 / 1718))}
+.license-wallet-view .license-celebration{display:none!important}
+@media(max-width:760px){.license-heading{margin-bottom:18px}.license-layout{gap:15px}.license-preview{position:static;padding:0}.license-panel{padding:19px}.license-page.has-license .license-flip{width:min(82vw,300px)}.license-page.has-license .license-layout{gap:14px}}
+.license-page.license-wallet-view.has-license .license-flip{width:min(78vw,300px,calc((100dvh - 45px) * 1080 / 1718))}
+@media(prefers-reduced-motion:reduce){.license-face::before{animation:none;opacity:.32}}
+
 
