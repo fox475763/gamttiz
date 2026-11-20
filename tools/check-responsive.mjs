@@ -10,7 +10,7 @@ const server=createServer(async(req,res)=>{
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const base='http://127.0.0.1:'+server.address().port+'/';
-const pages=['index.html','member.html','license.html','play.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar','member.html#level'];
+const pages=['index.html','member.html','license.html','play.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar'];
 const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2026-11-20T00:00:00Z',character:0};
 for(const engine of [chromium,webkit])test('Responsive menu, page widths and member paths: '+engine.name(),{timeout:180000},async()=>{
  const browser=await engine.launch();
@@ -44,14 +44,16 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
          const menu=document.querySelector('.control-menu'),contact=document.querySelector('.control-contact');
          const link=contact.querySelector('.control-contact-links a'),copy=contact.querySelector('.contact-copy');
          const a=getComputedStyle(link),b=getComputedStyle(copy);
-         return {frame:getComputedStyle(menu,'::before').backgroundImage===getComputedStyle(contact,'::before').backgroundImage,
-           border:getComputedStyle(contact).borderTopWidth,button:a.backgroundColor===b.backgroundColor&&a.borderRadius===b.borderRadius&&a.boxShadow===b.boxShadow,
+         return {frame:getComputedStyle(contact,'::before').backgroundImage.includes('conic-gradient'),
+           border:getComputedStyle(contact).borderTopWidth,button:b.backgroundImage.includes('linear-gradient')&&a.borderRadius===b.borderRadius&&b.backdropFilter!=='none',
            sweep:getComputedStyle(copy,'::before').backgroundImage.includes('conic-gradient'),height:copy.getBoundingClientRect().height};
        });
        assert.ok(material.frame&&material.border==='0px'&&material.button&&material.sweep&&material.height>=44,'Contact liquid glass material mismatch');
        await contact.locator('.contact-copy').click();
        await page.waitForFunction(()=>document.querySelector('.contact-copy-status').textContent.length>0);
      }
+     if(filename==='member.html')assert.equal(await page.locator('.member-tile').count(),1);
+     if(filename==='member.html#radar')assert.equal(await page.getByRole('button',{name:'캘린더 추가'}).count(),0);
      await trigger.click();
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
      assert.ok(overflow<=2,filename+' horizontal overflow '+overflow+'px at '+viewport.width);

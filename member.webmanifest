@@ -3,7 +3,7 @@
   "name": "GAMTTIZ MEMBER",
   "short_name": "감띠즈",
   "lang": "ko",
-  "description": "감띠즈 멤버 전용 감튀 레이더와 수평·각도계",
+  "description": "감띠즈 멤버 전용 감튀 레이더",
   "start_url": "./member.html#hub",
   "scope": "./",
   "display": "standalone",

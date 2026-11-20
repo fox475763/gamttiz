@@ -61,8 +61,7 @@
 @media(prefers-reduced-motion:reduce){.radar-action,.radar-view-tabs button{transition:none;transform:none}}
 
 /* Align secondary glass controls without changing the physical License card. */
-.member-page .member-main .member-btn:not(.primary),.license-page.has-license:not(.license-wallet-view) .license-member-link,
-.member-page .member-main .level-tabs{background:var(--gtz-glass);border-color:var(--gtz-glass-border);box-shadow:var(--gtz-glass-shadow)}
+.member-page .member-main .member-btn:not(.primary),.license-page.has-license:not(.license-wallet-view) .license-member-link{background:var(--gtz-glass);border-color:var(--gtz-glass-border);box-shadow:var(--gtz-glass-shadow)}
 .member-page .radar-tool .radar-controls{grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr))}
 .member-page .radar-tool .radar-controls :is(input,select){font-size:16px}
 .member-page .member-main :is(.member-btn,.member-id-chip,.member-tile-copy){min-width:0}

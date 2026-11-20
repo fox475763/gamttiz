@@ -16,14 +16,9 @@ test('only explicit, unambiguous sale pairs are compared',()=>{
  assert.equal(M.offer({category:'discount',summary:'2,100원 → 1,700원, 3000원 → 2000원'}),null);
  assert.equal(M.offer({category:'event',summary:'2,100원 → 1,700원'}),null);
 });
-test('brand aliases, new posts and safe calendar data',()=>{
+test('brand aliases, new posts and retired calendar export',()=>{
  assert.deepEqual(M.brandNames({title:'맥도날드와 롯데리아 감튀'}),['맥도날드','롯데리아']);
  assert.equal(M.isNew({collectedAt:'2026-11-20T16:00:00Z'},now),true);
  assert.equal(M.isNew({collectedAt:'2026-11-20T16:00:00Z'},0),false);
- const event={id:'abc',title:'감튀, 이벤트;\n즐겨요',eventStart:'2026-11-21',eventEnd:'2026-11-23',url:'https://example.com'};
- const ics=M.calendar(event,now);
- assert.match(ics,/DTEND;VALUE=DATE:20261124/);
- assert.match(ics,/SUMMARY:감튀\\, 이벤트\\;\\n즐겨요/);
- assert.equal(M.calendar({...event,eventStatus:'ended-early'},now),null);
- assert.equal(M.calendar({...event,eventEnd:null},now),null);
+ assert.equal(M.calendar,undefined);
 });

@@ -69,5 +69,5 @@
 ### 공통 UI와 리소스 관리
 - 공통 기준: `ui-system.css`의 색상, 버튼 터치 영역(44px), 간격(4/8/12/16/24px), 라운드, 글라스 표면과 키보드 포커스. 고유 카드 디자인과 하단 메뉴 위치는 변경하지 않습니다.
 - 화면용 이미지: `tools/optimize-display-images.py`가 원본을 보존하고, 크기별 WebP와 srcset을 생성합니다. GitHub Actions의 Optimize display images에서 자동 실행합니다. 원본 다운로드/라이센스 PNG와 3D 소스는 유지합니다.
-- 감튀 레이더: 즐겨찾기 및 방문 기준은 라이센스별 브라우저 저장소에만 저장합니다. 행사 날짜는 한국 시간 기준이고, 가격 비교는 명시된 정상가/행사가를 사용합니다. 캘린더는 ICS 파일로 내보냅니다.
+- 감튀 레이더: 즐겨찾기 및 방문 기준은 라이센스별 브라우저 저장소에만 저장합니다. 행사 날짜는 한국 시간 기준이고, 가격 비교는 명시된 정상가/행사가를 사용합니다.
 - 검증: `node tools/check-site.mjs`, `node --test tools/test-fry-radar.mjs`, `node --test tools/check-responsive.mjs` (Playwright Chromium/WebKit 설치 필요).

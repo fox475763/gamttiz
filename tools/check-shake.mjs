@@ -51,9 +51,9 @@ test('issuance animation, page lifecycle and arbitrary taps never request permis
   page.doc.body.classList.remove('license-animating');page.win.fire('pageshow');await page.tap();assert.equal(page.requests,0);
   await page.press(page.reconnect);assert.equal(page.requests,1);
 });
-test('no license and active Member measurement tools suppress shake activation',async()=>{
+test('no license suppresses shake activation; Member retains wallet gesture',async()=>{
   const store=new Map([[KEY,'1']]);const noCard=createPage(store);await tick();assert.equal(noCard.requests,0);noCard.shake();assert.ok(!noCard.sheet.classes.has('is-open'));
-  const licensed=saved();licensed.set(KEY,'1');const page=createPage(licensed);await tick();page.win.GTZMember={active:'level'};page.shake();assert.ok(!page.sheet.classes.has('is-open'));
+  const licensed=saved();licensed.set(KEY,'1');const page=createPage(licensed);await tick();page.win.GTZMember={active:'radar'};page.shake();assert.ok(page.sheet.classes.has('is-open'));
 });
 test('cold Safari launch reuses a grant silently; no permission popup',async()=>{
   const store=saved();store.set(KEY,'1');const page=createPage(store,'granted',true,false);

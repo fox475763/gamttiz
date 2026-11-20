@@ -161,15 +161,6 @@
       save.setAttribute('aria-pressed',String(saved.has(item.id)));
     });
     actions.append(save);
-    if(!past&&model?.calendar(item)){
-      const cal=el('button','radar-action','캘린더 추가');
-      cal.type='button';cal.addEventListener('click',()=>{
-        if(!isActive())return;
-        const content=model.calendar(item);if(!content)return;
-        const href=URL.createObjectURL(new Blob([content],{type:'text/calendar;charset=utf-8'}));
-        const a=el('a');a.href=href;a.download='gamttiz-fry-event.ics';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),30000);
-      });actions.append(cal);
-    }
     wrap.append(link,actions);return wrap;
   };
   const empty=(container,title,description)=>{

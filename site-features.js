@@ -11,7 +11,7 @@
     {title:'나만의 감띠 홀더', description:'감띠를 담고 3D 홀더를 돌려보기', url:'combo.html', keys:'combo 체험 3d'},
     {title:'나의 라이센스 (MY ID)', description:'나만의 감띠즈 애호가 라이센스를 발급하고 열람하기', url:'license.html', keys:'my id license 라이센스 라이선스 회원증 카드 발급'},
     {title:'체험 모아보기', description:'감띠즈의 두 가지 체험', url:'play.html', keys:'play 게임'},
-    {title:'Member · 멤버 전용', description:'라이센스 보유자의 감튀 레이더와 수평·각도계', url:'member.html', keys:'member 멤버 회원 감튀 레이더 수평계 각도계 웹앱'},
+    {title:'Member · 멤버 전용', description:'라이센스 보유자의 감튀 레이더', url:'member.html', keys:'member 멤버 회원 감튀 레이더 웹앱'},
     {title:'프로젝트 정보', description:'기획 의도, 제작자, 디자인 정보', url:'project.html', keys:'project info 포트폴리오'}
   ];
   const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
@@ -248,13 +248,12 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function mobile(){return walletMedia.matches&&(matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0);}
   function canMotion(){return typeof window.DeviceMotionEvent!=='undefined';}
   function needsPermission(){return typeof window.DeviceMotionEvent?.requestPermission==='function';}
-  function toolActive(){return window.GTZMember?.active==='level';}
   function hasCard(){try{const r=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null');return !!(r?.name&&r?.number);}catch{return false;}}
   function remember(value){enabled=value;try{localStorage.setItem(shakeKey,value?'1':'0');}catch{}}
   function clearRecovery(){clearTimeout(recoveryTimer);recoveryTimer=0;recoveryNeeded=false;recoveryEpoch++;silentPending=false;}
   function resetSensor(){clearRecovery();silentAttempted=false;sensorSeen=false;sessionAllowed=false;firstHit=null;gravity=null;shakeStatus.textContent='';}
   function restorePreference(){try{const saved=localStorage.getItem(shakeKey)==='1';if(saved!==enabled){enabled=saved;resetSensor();}}catch{}}
-  function mayRecover(){return enabled&&mobile()&&hasCard()&&canMotion()&&needsPermission()&&!document.hidden&&!toolActive()&&!document.body.classList.contains('license-animating');}
+  function mayRecover(){return enabled&&mobile()&&hasCard()&&canMotion()&&needsPermission()&&!document.hidden&&!document.body.classList.contains('license-animating');}
   function updateSetting(){
     shakeSettings.hidden=!mobile()||!hasCard();
     shakeButton.disabled=requesting||!canMotion();
@@ -267,7 +266,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
     else if(enabled&&!sensorSeen&&!sessionAllowed&&!requesting&&!shakeStatus.textContent)shakeStatus.textContent=needsPermission()?'활성화 설정이 저장되어 있어요. 연결이 필요하면 센서 권한 다시 연결을 눌러주세요.':'휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
   }
   async function connectSensor(){
-    if(requesting||!mobile()||!hasCard()||!canMotion()||toolActive()||document.body.classList.contains('license-animating'))return;
+    if(requesting||!mobile()||!hasCard()||!canMotion()||document.body.classList.contains('license-animating'))return;
     const wasEnabled=enabled;clearRecovery();silentAttempted=true;
     requesting=true;updateSetting();
     try{
@@ -365,7 +364,6 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function vector(v){return v&&[v.x,v.y,v.z].every(Number.isFinite)?[v.x,v.y,v.z]:null;}
   function motion(e){
     if(!enabled||!mobile()||document.hidden)return;
-    if(toolActive()){firstHit=null;gravity=null;return;}
     let a=vector(e.acceleration);
     if(!a){
       const raw=vector(e.accelerationIncludingGravity);if(!raw)return;

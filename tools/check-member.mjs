@@ -7,7 +7,6 @@ vm.runInThisContext(src('member-model.js'));
 const M=globalThis.GTZMemberModel;
 const now=Date.parse('2026-11-20T00:00:00Z');
 const sample={version:1,name:'감띠 팬',character:3,number:'GTZ - 0008',issuedAt:new Date(now).toISOString()};
-const near=(actual,expected)=>assert.ok(Math.abs(actual-expected)<.00001,`${actual} ≠ ${expected}`);
 test('existing license and legacy IDs, invalid licenses denied',()=>{
   assert.deepEqual(M.license(sample),sample);
   assert.ok(M.license({...sample,number:'GTZ-ABC234-XYZ567'}));
@@ -16,41 +15,29 @@ test('existing license and legacy IDs, invalid licenses denied',()=>{
   assert.equal(M.readLicense({getItem:()=>'{broken'}),null);
 });
 test('retired pet model is no longer exposed',()=>{assert.equal(M.pet,undefined);assert.equal(M.petKey,undefined);});
-test('real gravity vector measurement, rotation and calibration',()=>{
-  near(M.measure(0,0,9.8).flat,0);
-  near(M.measure(0,0,-9.8).flat,0);
-  near(M.measure(0,9.8,0).edge,90);
-  near(M.measure(0,-9.8,0).edge,-90);
-  near(M.measure(0,4.9,Math.sqrt(9.8**2-4.9**2)).flat,30);
-  near(M.measure(4.9,0,Math.sqrt(9.8**2-4.9**2),90).edge,-30);
-  const diagonal=M.measure(4.9,4.9,Math.sqrt(9.8**2-2*4.9**2));near(diagonal.flat,45);
-  const zero={x:diagonal.x,y:diagonal.y,edge:diagonal.edge,normal:diagonal.normal};
-  near(M.relative(diagonal,zero).flat,0);
-  assert.equal(M.measure(0,0,0),null);
-});
+test('retired measurement model is no longer exposed',()=>{assert.equal(M.measure,undefined);assert.equal(M.relative,undefined);});
 test('Member HTML contains all implementation targets and install entry',()=>{
   const html=src('member.html'),ids=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
-  for(const file of ['member.js','member-level.js']){
+  for(const file of ['member.js']){
     for(const [,id] of src(file).matchAll(/\$\('([^']+)'\)/g))assert.ok(ids.has(id),file+': missing '+id);
   }
   assert.match(html,/id="member-unlocked" hidden/);
   assert.match(html,/data-member-view="radar" hidden/);
-  assert.match(html,/data-member-view="level" hidden/);
+  assert.doesNotMatch(html,/data-member-view="level"|member-level\.js|href="#level"/);
   const manifest=JSON.parse(src('member.webmanifest'));
   assert.equal(manifest.display,'standalone');
   assert.equal(manifest.start_url,'./member.html#hub');
 });
 test('Member UI controls and offline versions stay in sync',()=>{
   const html=src('member.html'),sw=src('member-sw.js'),version=/const VERSION='([^']+)'/.exec(sw)[1];
-  for(const file of ['member.css','member-model.js','member.js','member-level.js','fry-radar.js','fry-radar.css','member.webmanifest']){
+  for(const file of ['member.css','member-model.js','member.js','fry-radar.js','fry-radar.css','member.webmanifest']){
     assert.ok(html.includes(file+'?v='+version),file+' must match the offline cache version');
   }
   assert.ok(!html.includes("member-pocket.js"));
   assert.ok(!html.includes('data-member-view="pocket"'));
   for(const id of ["radar-list","radar-archive-list","radar-admin"])assert.ok(html.includes(`id="${id}"`));
-  assert.match(html,/id="level-start" type="button" aria-pressed="false"/);
-  assert.match(html,/id="level-board" data-mode="flat"/);
-  assert.equal((html.match(/id="level-start"/g)||[]).length,1);
+  assert.ok(!fs.existsSync(new URL("../member-level.js",import.meta.url)));
+  assert.doesNotMatch(sw,/member-level\.js/);
   assert.equal((html.match(/id="member-avatar"/g)||[]).length,1);
   assert.match(src('member.css'),/prefers-reduced-motion:reduce/);
 });
@@ -63,7 +50,7 @@ test('Member navigation reveals only the authorized view and animates route chan
     querySelector(){return {focus(){}}}
   }
   const ids=new Map(),get=id=>{if(!ids.has(id))ids.set(id,new Element());return ids.get(id)};
-  const pages=['hub','radar','level'].map(n=>new Element(n)),listeners={};
+  const pages=['hub','radar'].map(n=>new Element(n)),listeners={};
   const location={hash:'#radar'},data=new Map([[M.KEY,JSON.stringify(sample)]]);
   const window={addEventListener:(name,fn)=>listeners[name]=fn,scrollTo(){},isSecureContext:false};
   vm.runInNewContext(src('member.js'),{GTZMemberModel:M,document:{getElementById:get,querySelectorAll:()=>pages,addEventListener(){},title:''},location,localStorage:{getItem:k=>data.get(k)||null},navigator:{},window});
@@ -72,8 +59,8 @@ test('Member navigation reveals only the authorized view and animates route chan
   assert.equal(pages[1].hidden,false);assert.equal(pages[0].hidden,true);
   assert.ok(pages[1].classes.has('is-entering'));
   location.hash='#level';listeners.hashchange();
-  assert.equal(window.GTZMember.active,'level');assert.equal(pages[1].hidden,true);assert.equal(pages[2].hidden,false);
-  assert.ok(pages[2].classes.has('is-entering'));assert.ok(!pages[1].classes.has('is-entering'));
+  assert.equal(window.GTZMember.active,'hub');assert.equal(pages[1].hidden,true);assert.equal(pages[0].hidden,false);
+  assert.ok(pages[0].classes.has('is-entering'));assert.ok(!pages[1].classes.has('is-entering'));
   location.hash='#post-item';listeners.hashchange();assert.equal(window.GTZMember.active,'radar');
   location.hash='#radar-admin';listeners.hashchange();assert.equal(window.GTZMember.active,'radar');
   location.hash='#pocket';listeners.hashchange();assert.equal(window.GTZMember.active,'hub');

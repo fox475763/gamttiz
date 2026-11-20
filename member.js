@@ -21,7 +21,7 @@
     }
     if(previous&&(previous!==active||!next||!sameLicense(previousId,next)))handlers.get(previous)?.leave?.();
     if(active)handlers.get(active)?.enter?.(next);
-    document.title=(active==='radar'?'FRY RADER':active==='level'?'GAMTTIZ LEVEL':'Member · 감띠즈 멤버')+' — GAMTTIZ';
+    document.title=(active==='radar'?'FRY RADER':'Member · 감띠즈 멤버')+' — GAMTTIZ';
   }
   window.GTZMember={get license(){return id;},get active(){return active;},register(name,handler){handlers.set(name,handler);if(active===name)handler.enter?.(id);},isActive:name=>active===name&&!!M.readLicense(localStorage)};
   window.addEventListener('hashchange',()=>{sync();shownView?.querySelector('h1[tabindex]')?.focus({preventScroll:true});window.scrollTo({top:0,behavior:'instant'});});

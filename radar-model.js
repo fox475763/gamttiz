@@ -22,18 +22,5 @@
     return {original,sale,saving:original-sale,percent:Math.round((original-sale)*100/original)};
   };
   const isNew=(item,since)=>Number.isFinite(since)&&since>0&&Date.parse(item.collectedAt||'')>since;
-  const escape=value=>String(value??'').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/;/g,'\\;').replace(/,/g,'\\,');
-  const nextDay=d=>new Date(Date.parse(d)+86400000).toISOString().slice(0,10);
-  const fold=line=>{let result='',bytes=0;for(const char of line){const n=new TextEncoder().encode(char).length;if(bytes+n>75){result+='\r\n ';bytes=1;}result+=char;bytes+=n;}return result;};
-  const calendar=(item,now=Date.now())=>{
-    const end=day(item.eventEnd),start=day(item.eventStart)||end;
-    if(!start||!end||start>end||item.eventStatus==='ended-early'||daysLeft(item,now)<0)return null;
-    const compact=x=>x.replace(/-/g,'');
-    return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//GAMTTIZ//Fry Rader//KO','CALSCALE:GREGORIAN','BEGIN:VEVENT',
-      'UID:'+escape(String(item.id).replace(/[^a-zA-Z0-9_-]/g,''))+'@gamttiz',
-      'DTSTAMP:'+new Date(now).toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z'),
-      'DTSTART;VALUE=DATE:'+compact(start),'DTEND;VALUE=DATE:'+compact(nextDay(end)),
-      'SUMMARY:'+escape(item.title),'DESCRIPTION:'+escape('공식 원문에서 행사 조건을 확인하세요. '+item.url),'END:VEVENT','END:VCALENDAR'].map(fold).join('\r\n')+'\r\n';
-  };
-  globalThis.GTZRadarModel=Object.freeze({brands:Object.keys(brands),brandNames,day,daysLeft,offer,isNew,calendar});
+  globalThis.GTZRadarModel=Object.freeze({brands:Object.keys(brands),brandNames,day,daysLeft,offer,isNew});
 })();
