@@ -43,4 +43,5 @@ try{
   if(!Number.isFinite(Date.parse(state.checkedAt)))errors.push('fry-radar-health.json: checkedAt missing');
 }catch{errors.push('data/fry-radar-health.json: missing or invalid JSON');}
 if(!fs.existsSync('404.html'))errors.push('Missing 404.html');
+try{execFileSync(process.execPath,['--test',path.join(root,'tools/check-member.mjs')],{stdio:'inherit'});}catch{errors.push('Member feature tests failed');}
 if(errors.length){console.error(errors.join('\n'));process.exitCode=1;}else console.log(`Site check passed: ${htmlFiles.length} pages, ${count} quiz questions, local assets and JavaScript syntax`);

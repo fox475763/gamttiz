@@ -350,6 +350,8 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
 .license-application-head{text-align:center;padding:0 0 23px;margin:0 0 27px;border-bottom:1px solid #c9ad77}
 .license-application-mark{display:block;font-size:24px;line-height:1;color:#a9823e;margin-bottom:10px}
 .license-application-kicker{font:600 10px/1.4 Georgia,serif;letter-spacing:.19em;color:#956e32;margin:0 0 14px}
+.license-page:not(.license-wallet-view) .license-member-link{display:flex;align-items:center;justify-content:center;box-sizing:border-box;margin-top:9px;text-decoration:none;min-height:46px;letter-spacing:.025em}
+.license-wallet-view .license-member-link{display:none}
 .license-page:not(.has-license):not(.license-wallet-view) .license-application-head h2{font-size:clamp(22px,5vw,26px);font-weight:600;line-height:1.35;letter-spacing:-.055em;color:var(--id-ink);margin:0 0 9px}
 .license-application-caption{font:400 9px/1.5 Arial,sans-serif;letter-spacing:.12em;color:#987b52;margin:0}
 .license-field-no{font:400 12px/1 Georgia,serif;color:#a17b38;letter-spacing:.05em;margin-right:11px}

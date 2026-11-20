@@ -1,0 +1,13 @@
+{
+  "id": "./member.html",
+  "name": "GAMTTIZ POCKET",
+  "short_name": "감띠즈",
+  "lang": "ko",
+  "description": "감띠즈 멤버 전용 디지털 홀더와 수평·각도계",
+  "start_url": "./member.html#pocket",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf7ed",
+  "theme_color": "#fbf7ed",
+  "icons": [{"src":"assets/badge.png","sizes":"any","type":"image/png","purpose":"any"},{"src":"member-icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}

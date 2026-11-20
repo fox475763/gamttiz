@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Member · 감띠즈 멤버 — GAMTTIZ</title><meta name="description" content="감띠즈 라이센스 소지자만을 위한 디지털 홀더와 실용 도구."><meta name="theme-color" content="#fbf7ed">
+  <link rel="icon" href="assets/badge.png"><link rel="apple-touch-icon" href="assets/badge.png"><link rel="manifest" href="member.webmanifest?v=20261120member1">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="site-font.css"><link rel="stylesheet" href="experience.css"><link rel="stylesheet" href="studio-polish.css"><link rel="stylesheet" href="catalog-news.css"><link rel="stylesheet" href="site-features.css?v=20261113flow2"><link rel="stylesheet" href="typography-system.css?v=20261113a"><link rel="stylesheet" href="editorial.css?v=20261113glassrestore"><link rel="stylesheet" href="license-wallet.css?v=20261120application12"><link rel="stylesheet" href="member.css?v=20261120member1">
+  <script src="member-model.js?v=20261120member1" defer></script><script src="member.js?v=20261120member1" defer></script><script src="member-pocket.js?v=20261120member1" defer></script><script src="member-level.js?v=20261120member1" defer></script><script src="site-features.js?v=20261120member1" defer></script>
+</head>
+<body class="member-page refined-page">
+  <a class="skip" href="#main">본문으로 건너뛰기</a>
+  <header class="header"><a class="wordmark" href="index.html" aria-label="감띠즈 홈">GAMTTIZ<span>French Fry Lovers</span></a><nav aria-label="주 메뉴"><a href="index.html#collection">Collection</a><a href="play.html">Play</a><a href="member.html" aria-current="page">Member</a><a href="license.html">MY ID</a><a href="products.html">Products</a><a href="news.html">Notice</a><a href="fry-radar.html">Fry Rader</a><a href="project.html">Project Info</a><a class="nav-social" href="https://www.instagram.com/gamttiz_official/" target="_blank" rel="noopener noreferrer">Instagram ↗</a></nav></header>
+  <main class="member-main" id="main">
+    <section id="member-locked" class="member-locked" hidden>
+      <p class="member-kicker">GAMTTIZ / MEMBERS ONLY</p><div class="member-lock-mark" aria-hidden="true">✦</div><h1>MEMBER</h1><p>감자튀김 애호가들을 위한 우리만의 공간.</p><p>라이센스를 발급받으면 모든 멤버 콘텐츠를 이용할 수 있어요.</p><a class="member-btn primary" href="license.html">라이센스 발급 신청 ↗</a>
+      <details class="member-note"><summary>이미 발급받았거나 홈 화면 앱으로 옮겼나요?</summary><p>기존 브라우저의 Member에서 내려받은 백업 파일을 불러오면 같은 라이센스와 감띠 홀더를 이어 사용할 수 있어요.</p><button class="member-btn" id="member-restore" type="button">백업 불러오기</button></details>
+      <p class="member-status" id="member-lock-status" role="status"></p>
+    </section>
+    <div id="member-unlocked" hidden>
+      <section class="member-hub" data-member-view="hub" hidden>
+        <p class="member-kicker">GAMTTIZ / MEMBERS ONLY</p><h1>MEMBER</h1><p class="member-intro"><strong id="member-greeting"></strong>님, 감띠즈의 작은 즐거움을 만나보세요.</p>
+        <div class="member-grid">
+          <a class="member-tile" href="#pocket"><span class="member-tile-number">01 · DIGITAL HOLDER</span><div class="member-tile-art pocket-art"><img src="assets/illustrations/friend-01.svg" alt=""><img src="assets/illustrations/friend-04.svg" alt=""><img src="assets/illustrations/friend-08.svg" alt=""><div class="tile-carton">GAMTTIZ</div></div><h2>감띠즈 키우기</h2><p>나만의 감띠 홀더, 손안의 작은 친구들.</p><span class="member-tile-link">열기 ↗</span></a>
+          <a class="member-tile" href="#level"><span class="member-tile-number">02 · LEVEL & ANGLE</span><div class="member-tile-art level-art"><div class="tile-level"><span></span><img src="assets/illustrations/friend-01.svg" alt=""></div><b>0.0°</b></div><h2>수평·각도계</h2><p>휴대폰을 기울여 수평과 각도를 측정하세요.</p><span class="member-tile-link">열기 ↗</span></a>
+        </div>
+        <details class="member-note member-install"><summary>홈 화면에 감띠즈 추가하기</summary><p>iPhone: Safari의 공유 메뉴 → 홈 화면에 추가 → 웹 앱으로 열기.<br>Android: 브라우저의 설치 또는 홈 화면에 추가 메뉴를 이용하세요.</p><p>웹앱에서는 기존 브라우저의 라이센스가 자동으로 이어지지 않을 수 있어요. 설치 전 백업을 내려받고 새 웹앱에서 불러오세요.</p><button id="member-install" class="member-btn" type="button" hidden>웹앱 설치</button><button id="member-backup" class="member-btn" type="button">라이센스·홀더 백업</button><p id="member-backup-status" class="member-status" role="status"></p></details>
+      </section>
+      <section class="member-tool pocket-tool" data-member-view="pocket" hidden>
+        <a class="member-back" href="#hub">← Member</a><p class="member-kicker">01 / GAMTTIZ POCKET</p><h1>MY GAMTTIZ</h1><p class="member-intro">손안에서 함께하는 나만의 감띠들.</p>
+        <div class="pocket-device" id="pocket-device">
+          <div class="pocket-top"><span id="pocket-day">DAY 1</span><span id="pocket-care">♥ 0</span></div>
+          <div class="pocket-stage" id="pocket-stage"><div class="pocket-particles" aria-hidden="true">✦</div><div class="pocket-assembly"><div class="pocket-friends" id="pocket-friends"></div><div class="pocket-holder"><span>GAMTTIZ</span><small>FRENCH FRY LOVERS</small></div></div></div>
+          <p class="pocket-mood" id="pocket-mood" aria-live="polite">오늘도 함께해요!</p>
+          <div class="pocket-stats"><div><span>포만감 <b id="pocket-full-value">100</b></span><progress id="pocket-full" max="100" value="100"></progress></div><div><span>기분 <b id="pocket-happy-value">100</b></span><progress id="pocket-happy" max="100" value="100"></progress></div></div>
+          <div class="pocket-actions"><button class="member-btn primary" type="button" id="pocket-feed">간식 주기</button><button class="member-btn" type="button" id="pocket-play">같이 놀기</button></div>
+          <button class="pocket-motion" type="button" id="pocket-motion">흔들리는 홀더 켜기</button>
+          <p class="member-status" id="pocket-status" role="status"></p>
+        </div>
+        <section class="pocket-choose"><div class="pocket-choose-heading"><h2>홀더 꾸미기</h2><span id="pocket-count">1 / 6</span></div><p>최대 6명의 감띠와 함께할 수 있어요.</p><div class="pocket-picker" id="pocket-picker" aria-label="홀더 감띠 선택"></div></section>
+        <p class="member-footnote">감띠들은 돌봐주지 않아도 사라지지 않아요. 언제든 돌아와 함께 놀아주세요. 홀더는 이 기기에 저장됩니다.</p>
+      </section>
+      <section class="member-tool level-tool" data-member-view="level" hidden>
+        <a class="member-back" href="#hub">← Member</a><p class="member-kicker">02 / GAMTTIZ LEVEL</p><h1>LEVEL</h1><p class="member-intro">감띠와 함께 정확하게 맞춰보세요.</p>
+        <div class="level-tabs" role="group" aria-label="측정 모드"><button id="level-flat-tab" type="button" aria-pressed="true">수평계</button><button id="level-angle-tab" type="button" aria-pressed="false">각도계</button></div>
+        <div class="level-board" id="level-board"><div class="level-reading"><span id="level-number">—</span><small>°</small></div><p id="level-message">센서를 활성화해 주세요.</p>
+          <div class="level-dial" id="level-flat"><div class="level-cross"></div><div class="level-ring ring-mid"></div><div class="level-ring ring-inner"></div><div id="level-bubble" class="level-bubble"><img id="level-friend" alt="" src="assets/illustrations/friend-01.svg"></div></div>
+          <div class="level-angle" id="level-angle" hidden><div class="level-angle-grid"><span>−90°</span><span>0°</span><span>+90°</span></div><div class="level-angle-axis"></div><div id="level-needle" class="level-needle"><img id="level-angle-friend" alt="" src="assets/illustrations/friend-01.svg"></div></div>
+          <div class="level-axes" id="level-axes"><span>좌우 <b id="level-x">—</b></span><span>앞뒤 <b id="level-y">—</b></span></div>
+        </div>
+        <p class="level-instructions" id="level-instructions">휴대폰을 측정할 면에 평평하게 올려놓으세요.</p>
+        <div class="level-actions"><button class="member-btn primary" id="level-start" type="button">센서 활성화</button><button class="member-btn" id="level-zero" type="button" disabled>영점 맞추기</button><button class="member-btn" id="level-reset" type="button" disabled>초기화</button></div>
+        <p class="member-status" id="level-status" role="status"></p><p class="member-footnote">휴대폰의 움직임 센서를 사용하는 참고용 측정기입니다. 케이스와 센서 오차의 영향을 받을 수 있어요. 영점 보정 후 사용하세요.</p>
+      </section>
+    </div>
+    <input type="file" id="member-import-file" accept="application/json,.json" hidden>
+    <noscript><p>Member 기능을 사용하려면 JavaScript를 켜주세요.</p></noscript>
+  </main>
+  <footer><span>© GAMTTIZ</span><span>French Fry Lovers</span><a href="index.html">홈으로 ↗</a></footer>
+</body>
+</html>

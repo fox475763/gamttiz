@@ -1,0 +1,15 @@
+/* Only Member's static UI is cached; no license or personal data is stored here. */
+const CACHE='gamttiz-member-20261120-v1';
+const VERSION='20261120member1';
+const paths=['member.html','member.webmanifest','member-icon.svg','assets/badge.png','style.css','refinement.css','site-font.css','experience.css','studio-polish.css','catalog-news.css','site-features.css?v=20261113flow2','typography-system.css?v=20261113a','editorial.css?v=20261113glassrestore','license-wallet.css?v=20261120application12',...['member.css','member-model.js','member.js','member-pocket.js','member-level.js','site-features.js'].map(p=>`${p}?v=${VERSION}`),...Array.from({length:14},(_,i)=>`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`)];
+paths.push(`member.webmanifest?v=${VERSION}`);
+const urls=new Set(paths.map(p=>new URL(p,self.registration.scope).href));
+const memberURL=new URL('member.html',self.registration.scope).href;
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(paths)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('gamttiz-member-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',event=>{
+  const req=event.request;if(req.method!=='GET')return;
+  const url=new URL(req.url),isMember=req.mode==='navigate'&&url.origin===new URL(memberURL).origin&&url.pathname===new URL(memberURL).pathname;
+  if(!isMember&&!urls.has(url.href))return;
+  event.respondWith((async()=>{const cache=await caches.open(CACHE);try{const response=await fetch(req);if(response.ok)await cache.put(isMember?memberURL:req,response.clone());return response;}catch{const saved=await cache.match(isMember?memberURL:req);return saved||Response.error();}})());
+});
