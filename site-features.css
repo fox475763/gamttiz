@@ -252,11 +252,11 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   animation: none !important;
 }
 
-/* 메뉴가 열려 있을 때 글씨 흰색 */
+/* 메뉴가 선택됐을 때 감띠즈 레드 */
 .control-dock[data-mode="menu"] .control-trigger,
 .control-dock[data-mode="contact"] .control-trigger,
 .control-dock[data-mode="search"] .control-trigger {
-  color: #ffffff !important;
+  color: #e93636 !important;
 }
 
 /* Keep the search pill slimmer than the floating menu button. */
@@ -563,3 +563,51 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   .site-contact-actions a{min-height:45px}
 }
 @media(prefers-reduced-motion:reduce){.site-contact-actions a{transition:none}}
+
+
+/* A fixed liquid-glass shell with an independently scrolling list.
+   Safari otherwise scrolls the masked pseudo-element with the list,
+   making a second, detached rounded rectangle visible near the bottom. */
+.control-menu,.control-contact{
+  display:flex!important;flex-direction:column;box-sizing:border-box;
+  padding:0;overflow:hidden;
+  max-height:calc(100vh - 119px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  max-height:calc(100dvh - 119px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+}
+.control-menu::before,.control-contact::before{
+  inset:0;z-index:2;border-radius:inherit;pointer-events:none;
+}
+.control-panel-scroll{
+  position:relative;z-index:1;flex:0 1 auto;min-height:0;min-width:0;
+  box-sizing:border-box;width:100%;padding:16px;
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:none;touch-action:pan-y;-webkit-overflow-scrolling:touch;
+}
+.control-panel-scroll::-webkit-scrollbar{display:none}
+.control-panel-scroll .control-menu-links,.control-panel-scroll .control-contact-links{overflow:visible;width:100%;min-width:0}
+.control-menu-links :is(a,button):is(:hover,:focus-visible,:active,.glass-pressed,[aria-current="page"]),
+.control-contact-links :is(a,button):is(:hover,:focus-visible,:active,.glass-pressed),
+.control-result:is(:hover,:focus-visible,:active,.glass-pressed){
+  color:#e93636;background:rgba(255,255,255,.92);text-shadow:none;
+}
+.control-menu-links :is(a,button):is(:hover,:focus-visible,:active,.glass-pressed,[aria-current="page"]) .control-menu-subtitle,
+.control-contact-links :is(a,button):is(:hover,:focus-visible,:active,.glass-pressed) small,
+.control-result:is(:hover,:focus-visible,:active,.glass-pressed) :is(span,b){color:#e93636}
+.control-dock:not([data-mode="closed"]) .control-trigger{color:#e93636!important}
+@media(max-width:520px){
+  .control-menu,.control-contact{
+    max-height:calc(100vh - 105px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+    max-height:calc(100dvh - 105px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  }
+  .control-panel-scroll{padding:12px}
+  .control-panel-label{margin:0 5px 8px}
+  .control-menu-links{gap:4px}
+  .control-menu-links :is(a,button),
+  .control-menu-links :is(a,button):is(:hover,:focus-visible,:active,.glass-pressed,[aria-current="page"]){
+    width:100%;min-height:42px;padding:8px 11px;
+    font-size:.88rem;line-height:1.25;transform:none!important;animation:none!important;
+    transition:background .2s ease,color .2s ease;
+  }
+  .control-menu-links button.control-menu-search{margin-top:2px}
+}
+@media(prefers-reduced-motion:reduce){.control-panel-scroll *{transition:none!important}}

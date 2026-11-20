@@ -118,6 +118,27 @@ test('Every main page uses the original bottom-right Menu without local repositi
   for(const file of ['license.css','license-wallet.css','license-gallery.css','member.css','editorial.css']){
     assert.doesNotMatch(src(file),/\.control-dock\b/,file+' should inherit the common anchor');
   }
-  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261120dock1'));
-  assert.ok(src('member-sw.js').includes('site-features.css?v=20261120dock1'));
+  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261120menu2'));
+  assert.ok(src('member-sw.js').includes('site-features.css?v=20261120menu2'));
+});
+
+test('Menu glass frame and scrolling content are separate and selection stays brand red',()=>{
+  const js=src('site-features.js'),css=src('site-features.css');
+  assert.ok(js.includes("menu.append(menuScroll)"));
+  assert.ok(js.includes("menuScroll.append(menuLinks)"));
+  assert.ok(js.includes("contactScroll.append(contactLinks,copyStatus)"));
+  assert.match(css,/\.control-menu,\.control-contact\{\s*display:flex!important;flex-direction:column;box-sizing:border-box;\s*padding:0;overflow:hidden;/);
+  assert.match(css,/\.control-panel-scroll\{[^}]+overflow-y:auto;/);
+  assert.match(css,/\.control-menu::before,\.control-contact::before\{\s*inset:0;z-index:2;/);
+  assert.match(css,/\[aria-current="page"\][^}]+color:#e93636/);
+  assert.ok(js.includes("link.setAttribute('aria-current','page')"));
+  assert.ok(js.includes("menuScroll.scrollTop=0"));
+});
+
+test('Current menu selection follows Home, Collection and Member deep links without double selection',()=>{
+  const js=src('site-features.js');const fn=js.slice(js.indexOf('  function syncCurrentMenuLink(){'),js.indexOf('  syncCurrentMenuLink();'));
+  const links=['https://example.test/gamttiz/index.html','https://example.test/gamttiz/index.html#collection','https://example.test/gamttiz/member.html','https://example.test/gamttiz/license.html'].map(href=>({href,attrs:{},setAttribute(k,v){this.attrs[k]=v},removeAttribute(k){delete this.attrs[k]}}));
+  const location={href:'https://example.test/gamttiz/'};
+  const ctx={location,URL,menuLinks:{querySelectorAll:()=>links}};vm.createContext(ctx);vm.runInContext(fn,ctx);
+  for(const [href,index] of [['https://example.test/gamttiz/',0],['https://example.test/gamttiz/index.html#collection',1],['https://example.test/gamttiz/member.html#radar',2],['https://example.test/gamttiz/license.html',3]]){location.href=href;vm.runInContext('syncCurrentMenuLink()',ctx);assert.deepEqual(links.map(l=>l.attrs['aria-current']==='page'),links.map((_,i)=>i===index));}
 });

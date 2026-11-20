@@ -44,7 +44,10 @@
   const searchResults=make('div','control-search-results'); searchResults.setAttribute('aria-live','polite');
   search.append(searchInput,searchResults);
   const menu=make('nav','control-menu'); menu.id='control-menu'; menu.setAttribute('aria-label','컨트롤 메뉴'); menu.setAttribute('aria-hidden','true'); menu.inert=true;
-  menu.append(make('span','control-panel-label','GAMTTIZ / MENU'));
+  // The glass shell never scrolls; only this inner surface does.
+  const menuScroll=make('div','control-panel-scroll');
+  menuScroll.append(make('span','control-panel-label','GAMTTIZ / MENU'));
+  menu.append(menuScroll);
   const menuLinks=make('div','control-menu-links');
   const menuTranslations={Home:'홈',Collection:'컬렉션',Play:'체험',Member:'멤버 전용','MY ID':'나의 라이센스',Products:'제품',Notice:'브랜드 공지',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
   const addMenuSubtitle=(item)=>{
@@ -58,9 +61,19 @@
   const menuContact=make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
   const menuSearch=make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
   menuSearch.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2" stroke="currentColor" stroke-width="1.8"/><path d="m15.5 15.5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>');
-  menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menu.append(menuLinks);
+  menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menuScroll.append(menuLinks);
+  function syncCurrentMenuLink(){
+    const current=new URL(location.href),normalized=url=>url.pathname.replace(/\/$/,'/index.html');
+    const links=[...menuLinks.querySelectorAll('a')];
+    const matching=links.filter(link=>{const url=new URL(link.href,current);return url.origin===current.origin&&normalized(url)===normalized(current);});
+    const selected=matching.find(link=>{const url=new URL(link.href,current);return url.hash&&url.hash===current.hash;})||matching.find(link=>!new URL(link.href,current).hash);
+    for(const link of links){if(link===selected)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');}
+  }
+  syncCurrentMenuLink();
+  window.addEventListener('hashchange',syncCurrentMenuLink);
   const contact=make('section','control-contact');contact.id='control-contact';contact.setAttribute('aria-label','문의 방법 선택');contact.setAttribute('aria-hidden','true');contact.inert=true;
-  contact.append(make('span','control-panel-label','CONTACT GAMTTIZ'));
+  const contactScroll=make('div','control-panel-scroll');
+  contactScroll.append(make('span','control-panel-label','CONTACT GAMTTIZ'));contact.append(contactScroll);
   const contactLinks=make('div','control-contact-links');
   const dm=make('a','','Instagram DM ↗');dm.href='https://ig.me/m/gamttiz_official';dm.target='_blank';dm.rel='noopener noreferrer';dm.append(make('small','','@gamttiz_official'));
   const mail=make('a','','Gmail에서 작성 ↗');
@@ -71,7 +84,7 @@
   const copy=make('button','contact-copy','이메일 주소 복사');copy.type='button';
   const copyStatus=make('p','contact-copy-status');copyStatus.setAttribute('role','status');
   copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText('fox475763@gmail.com');copyStatus.textContent='이메일 주소를 복사했어요.';}catch{copyStatus.textContent='fox475763@gmail.com — 주소를 선택해 복사해 주세요.';}});
-  contactLinks.append(dm,mail,mailApp,copy);contact.append(contactLinks,copyStatus);
+  contactLinks.append(dm,mail,mailApp,copy);contactScroll.append(contactLinks,copyStatus);
   dock.append(search,menu,contact,trigger);document.body.append(dock);
   // Restart one complete light sweep for every touch or mouse press.
   dock.addEventListener('pointerdown',event=>{
@@ -101,6 +114,8 @@
   function setMode(mode){
     const next=dock.dataset.mode===mode?'closed':mode;
     dock.dataset.mode=next;
+    if(next==='menu'){syncCurrentMenuLink();menuScroll.scrollTop=0;}
+    if(next==='contact')contactScroll.scrollTop=0;
     updateMenuTextColor();
     scrim.classList.toggle('is-open',next!=='closed');
     trigger.setAttribute('aria-expanded',String(next!=='closed'));
@@ -162,7 +177,7 @@ function setButtonColor(color) {
 
 function updateMenuTextColor() {
   if (dock.dataset.mode !== 'closed') {
-    setButtonColor('#ffffff');
+    setButtonColor('#e93636');
     return;
   }
 
