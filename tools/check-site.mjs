@@ -62,4 +62,5 @@ if(!fs.existsSync('404.html'))errors.push('Missing 404.html');
 try{execFileSync(process.execPath,['--test',path.join(root,'tools/check-member.mjs')],{stdio:'inherit'});}catch{errors.push('Member feature tests failed');}
 try{execFileSync(process.execPath,['--test',path.join(root,'tools/check-shake.mjs')],{stdio:'inherit'});}catch{errors.push('Shake preference tests failed');}
 try{execFileSync(process.execPath,['--test',path.join(root,'tools/check-license.mjs')],{stdio:'inherit'});}catch{errors.push('License image rendering tests failed');}
+try{execFileSync(process.execPath,['--test',path.join(root,'tools/check-radar-ui.mjs')],{stdio:'inherit'});}catch{errors.push('Radar UI tests failed');}
 if(errors.length){console.error(errors.join('\n'));process.exitCode=1;}else console.log(`Site check passed: ${htmlFiles.length} pages, ${count} quiz questions, local assets and JavaScript syntax`);

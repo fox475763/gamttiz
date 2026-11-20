@@ -15,3 +15,9 @@ jobs:
         with:
           node-version: '20'
       - run: node tools/check-site.mjs
+      - name: Install responsive test browsers
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Check mobile and desktop layouts
+        run: node --test tools/check-responsive.mjs

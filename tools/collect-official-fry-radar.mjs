@@ -228,19 +228,20 @@ await mapLimit(officialSources,3,async source=>{
   for(const listUrl of [source.list,...(source.alternates||[])]){
     try{
       const listing=await fetchHtml(listUrl);
-      if(source.brand==='맘스터치'&&!hostAllowed(listing.url,source))throw Error('unrelated listing redirect');
-      candidates=links(listing.html,{...source,list:listing.url});
+      if(!hostAllowed(listing.url,source))throw Error('unrelated listing redirect');
+      const routeCandidates=links(listing.html,{...source,list:listing.url});
       if(source.brand==='맘스터치'){
         const route=new URL(listing.url);
         if(route.hostname==='order.momstouch.co.kr'&&route.pathname==='/momsmall/menu.jsp')diag.orderMenuReachable=true;
         else if(/^\/(?:m\/)?promotion\/list\.php$/i.test(route.pathname))diag.promotionReachable=true;
         else throw Error('promotion listing not returned');
       }
+      candidates=[...candidates,...routeCandidates];
       accessed=true;
       diag.reachable=true;
       diag.lastReachableAt=now.toISOString();
       diag.collectionUrl=listing.url;
-      if(candidates.length)break;
+      // Check alternate official routes too; one list may contain different events.
     }catch(e){diag.errors.push(String(e.message).slice(0,120));console.warn('[공식 수집 오류] '+source.brand+': '+e.message);}
   }
   if(candidates.length===0||(source.brand==='맘스터치'&&!candidates.some(x=>momPromotionUrl(x.url,source.list)))){
@@ -273,14 +274,21 @@ await mapLimit(officialSources,3,async source=>{
   diag.fallbackArticles=[...items.values()].filter(p=>(p.title+' '+p.summary).includes(source.brand)).map(p=>p.url);
   if(!accessed&&!candidates.length)return;
   if(accessed)successes++;
+  candidates=[...new Map(candidates.map(candidate=>[candidate.url,candidate])).values()];
   diag.candidates=candidates.length;
+  diag.verifiedDetails=0;
+  const limit=source.brand==='맘스터치'?30:24;
+  const offset=candidates.length>limit?Math.floor(now.getTime()/3600000)*limit%candidates.length:0;
+  const selected=[...candidates.slice(offset),...candidates.slice(0,offset)].slice(0,limit);
+  diag.remaining=Math.max(0,candidates.length-selected.length);
   console.log('[공식 목록] '+source.brand+': 상세 후보 '+candidates.length+'건');
-  for(const candidate of candidates.slice(0,source.brand==='맘스터치'?30:18)){
+  for(const candidate of selected){
 
     checked++;diag.checked++;
     let page;
     try{page=await fetchHtml(candidate.url);}catch(e){diag.excluded.blockedDetail++;continue;}
-    if(!hostAllowed(page.url,source))continue;
+    if(!hostAllowed(page.url,source)){diag.excluded.blockedDetail++;continue;}
+    diag.verifiedDetails++;
     if(source.brand==='맘스터치'&&momPromotionUrl(page.url,source.list))diag.promotionDetailReachable=true;
     let title=titleOf(page.html,candidate.hint);
     if(source.brand==='롯데리아'){
@@ -355,9 +363,9 @@ data.items=dedupe([...items.values()].filter(allowedPost)).sort((a,b)=>Date.pars
 data.updatedAt=now.toISOString();
 await fs.writeFile(output,JSON.stringify(data,null,2)+'\n');
 health.checkedAt=now.toISOString();
-health.sources=sourceHealth;
+health.sources=sourceHealth.sort((a,b)=>officialSources.findIndex(s=>s.brand===a.brand)-officialSources.findIndex(s=>s.brand===b.brand));
 health.rechecks=rechecks;
 if(successes>0||health.news?.feedsSucceeded>0)health.lastCompletedAt=new Date().toISOString();
-health.summary={sources:sourceHealth.length,reachable:sourceHealth.filter(x=>x.reachable).length,detailCandidates:sourceHealth.reduce((s,x)=>s+x.candidates,0),detailChecked:sourceHealth.reduce((s,x)=>s+x.checked,0),newOfficial:added,photoEnriched:pictures,stored:data.items.length,status:sourceHealth.every(x=>x.reachable&&x.candidates>0&&(x.brand!=='맘스터치'||x.promotionReachable))?'ok':'partial'};
+health.summary={sources:sourceHealth.length,reachable:sourceHealth.filter(x=>x.reachable).length,detailCandidates:sourceHealth.reduce((s,x)=>s+x.candidates,0),detailChecked:sourceHealth.reduce((s,x)=>s+x.checked,0),detailVerified:sourceHealth.reduce((s,x)=>s+(x.verifiedDetails||0),0),detailRemaining:sourceHealth.reduce((s,x)=>s+(x.remaining||0),0),newOfficial:added,photoEnriched:pictures,stored:data.items.length,status:sourceHealth.every(x=>x.reachable&&x.candidates>0&&!x.remaining&&!x.excluded.blockedDetail&&(x.brand!=='맘스터치'||x.promotionReachable))?'ok':'partial'};
 await fs.writeFile(healthFile,JSON.stringify(health,null,2)+'\n');
 console.log('[공식 수집 결과] 목록 접근 '+successes+'/'+officialSources.length+', 상세 확인 '+checked+', 새 글 '+added+', 이미지 추출 '+pictures+', 전체 '+data.items.length);

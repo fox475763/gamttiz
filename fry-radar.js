@@ -19,6 +19,15 @@
   const DAY=86400000;
   const MAX_RECENT_DAYS=14;
   let items=[];
+  const model=window.GTZRadarModel;
+  const brand=document.getElementById('radar-brand');
+  const tabs=document.querySelectorAll?.('[data-radar-view]')||[];
+  const dealPanel=document.getElementById('radar-deal-panel'),deals=document.getElementById('radar-deals');
+  let view='all',saved=new Set(),previousVisit=0,sessionKey='',visitRecorded=false;
+  const storageRead=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback;}catch{return fallback;}};
+  const storageWrite=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));}catch{}};
+  const nearEnd=item=>{const days=model?.daysLeft(item);return statusOf(item)==='ongoing'&&days!=null&&days>=0&&days<=3;};
+  const cash=n=>n.toLocaleString('ko-KR')+'원';
 
   const el=(tag,className,text)=>{
     const node=document.createElement(tag);
@@ -80,13 +89,15 @@
   const card=item=>{
     const state=statusOf(item);
     const node=el('a','radar-card'+(isArchived(item)?' radar-card-archived':''));
-    node.href=item.url;node.id=`post-${item.id}`;node.target='_blank';node.rel='noopener noreferrer';
+    node.href=item.url;node.target='_blank';node.rel='noopener noreferrer';
     const top=el('div','radar-card-top');
     const badge=el('span','radar-badge',labels[item.category]||'소식');
     const stateBadge=el('span','radar-status radar-status-'+state,statusLabels[state]);
     const period=item.kind==='ongoing-menu'?(item.verifiedAt?'확인일 '+dateLabel(item.verifiedAt):'판매 기간 미확인'):(item.eventStart&&item.eventEnd?dateLabel(item.eventStart)+' ~ '+dateLabel(item.eventEnd):dateLabel(item.publishedAt));
     const time=el('time','',period);
     top.append(badge,stateBadge,time);
+    if(model?.isNew(item,previousVisit))top.append(el('span','radar-new','NEW'));
+    if(nearEnd(item))top.append(el('span','radar-new',model.daysLeft(item)===0?'오늘 종료':'D-'+model.daysLeft(item)));
     const title=el('h3','',item.title);
     // Source thumbnail display, retaining the original GAMTTIZ illustration as fallback.
     const picture=el('div','radar-card-media');
@@ -124,7 +135,6 @@
   const archiveRow=item=>{
     const node=el('a','radar-archive-row');
     node.href=item.url;
-    node.id=`post-${item.id}`;
     node.target='_blank';
     node.rel='noopener noreferrer';
     node.title=item.title;
@@ -133,6 +143,34 @@
     arrow.setAttribute('aria-hidden','true');
     node.append(title,arrow);
     return node;
+  };
+  const entry=(item,past=false)=>{
+    const wrap=el('article',past?'radar-entry radar-entry-past':'radar-entry');
+    wrap.id='post-'+item.id;
+    const link=past?archiveRow(item):card(item);
+    const actions=el('div','radar-entry-actions');
+    const save=el('button','radar-action',saved.has(item.id)?'★ 저장됨':'☆ 즐겨찾기');
+    save.type='button';save.setAttribute('aria-pressed',String(saved.has(item.id)));
+    save.setAttribute('aria-label',item.title+' 즐겨찾기');
+    save.addEventListener('click',()=>{
+      if(!isActive())return;
+      if(saved.has(item.id))saved.delete(item.id);else saved.add(item.id);
+      storageWrite(sessionKey+':saved',[...saved]);
+      if(view==='saved'){render();tabs[1]?.focus();return;}
+      save.textContent=saved.has(item.id)?'★ 저장됨':'☆ 즐겨찾기';
+      save.setAttribute('aria-pressed',String(saved.has(item.id)));
+    });
+    actions.append(save);
+    if(!past&&model?.calendar(item)){
+      const cal=el('button','radar-action','캘린더 추가');
+      cal.type='button';cal.addEventListener('click',()=>{
+        if(!isActive())return;
+        const content=model.calendar(item);if(!content)return;
+        const href=URL.createObjectURL(new Blob([content],{type:'text/calendar;charset=utf-8'}));
+        const a=el('a');a.href=href;a.download='gamttiz-fry-event.ics';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(href),30000);
+      });actions.append(cal);
+    }
+    wrap.append(link,actions);return wrap;
   };
   const empty=(container,title,description)=>{
     const node=el('div','radar-empty');
@@ -272,28 +310,33 @@
     const order=sort?.value||'newest';
     const shown=items.filter(item=>
       (group==='all'||item.category===group)&&
+      (!brand||brand.value==='all'||(brand.value==='기타'?!model?.brandNames(item).length:model?.brandNames(item).includes(brand.value)))&&
+      (view==='all'||view==='saved'&&saved.has(item.id)||view==='new'&&model?.isNew(item,previousVisit)||view==='ending'&&nearEnd(item)||view==='discount'&&item.category==='discount'&&statusOf(item)==='ongoing')&&
       (!term||[item.title,item.summary,item.source].some(value=>String(value||'').toLocaleLowerCase().includes(term)))
     ).sort(byNewest);
     if(order==='oldest')shown.reverse();
+    if(order==='ending')shown.sort((a,b)=>(statusOf(a)==='ongoing'?(model?.daysLeft(a)??Infinity):Infinity)-(statusOf(b)==='ongoing'?(model?.daysLeft(b)??Infinity):Infinity));
+    if(dealPanel&&deals){dealPanel.hidden=view!=='discount';deals.replaceChildren();if(view==='discount'){const verified=shown.filter(i=>model?.offer(i));if(!verified.length)deals.append(el('p','','현재 정상가와 행사가가 모두 확인된 행사가 없습니다.'));for(const item of verified){const o=model.offer(item),row=el('a','radar-deal-row');row.href=item.url;row.target='_blank';row.rel='noopener noreferrer';row.append(el('strong','',item.title),el('span','',cash(o.original)+' → '+cash(o.sale)),el('b','',cash(o.saving)+' 절약 · '+o.percent+'%'));deals.append(row);}}}
 
     if(list){
       const current=shown.filter(item=>!isArchived(item));
       list.replaceChildren();
-      if(current.length)current.forEach(item=>list.append(card(item)));
-      else empty(list,'최근 소식이 없어요.','최근 14일 내 확인된 감튀 소식이 들어오면 여기에 표시할게요.');
+      if(current.length)current.forEach(item=>list.append(entry(item)));
+      else empty(list,view==='all'?'조건에 맞는 소식이 없어요.':'해당 소식이 아직 없어요.',view==='new'&&!previousVisit?'첫 방문 이후 새로 수집된 소식이 표시됩니다.':'필터를 바꾸거나 다음 소식을 기다려 주세요.');
       if(count)count.textContent=`${current.length}개의 최근 소식`;
     }
     if(archive){
       const past=shown.filter(isArchived);
       archive.replaceChildren();
-      if(past.length)past.forEach(item=>archive.append(archiveRow(item)));
+      if(past.length)past.forEach(item=>archive.append(entry(item,true)));
       else empty(archive,'보관된 지난 소식이 없어요.','종료일이 확인되거나 발행 후 14일이 지난 소식이 여기에 모입니다.');
       if(archiveCount)archiveCount.textContent=`${past.length}개의 지난 소식`;
     }
     if(updatePreview===true&&preview)renderPreview();
     revealAnchor();
   };
-  [search,category,sort].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
+  tabs.forEach(tab=>tab.addEventListener('click',()=>{view=tab.dataset.radarView;tabs.forEach(t=>t.setAttribute('aria-pressed',String(t===tab)));render();}));
+  [search,category,sort,brand].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
   const healthView=document.getElementById('radar-health');
   let refreshing=false,loaded=false,lastSignature='',timer=0,generation=0;
   const controllers=new Set();
@@ -301,7 +344,7 @@
     const controller=new AbortController();controllers.add(controller);
     const timeout=setTimeout(()=>controller.abort(),15000);
     try{
-      const response=await fetch(file+'?v='+Date.now(),{cache:'no-store',signal:controller.signal});
+      const response=await fetch(file,{cache:'no-cache',signal:controller.signal});
       if(!response.ok)throw Error('HTTP '+response.status);
       return await response.json();
     }finally{clearTimeout(timeout);controllers.delete(controller);}
@@ -316,8 +359,9 @@
       if(epoch!==generation||!isActive())return;
       if(healthView&&healthResult.status==='fulfilled'){
         const at=new Date(healthResult.value.checkedAt);
-        if(Number.isFinite(at.getTime()))healthView.textContent='최근 검사 '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(at);
+        if(Number.isFinite(at.getTime()))healthView.textContent=(healthResult.value.summary?.status==='partial'?'일부 수집 경로 점검 필요 · ':'')+(healthResult.value.summary?.sources?`${healthResult.value.summary.reachable}/${healthResult.value.summary.sources}개 공식 경로 연결 · `:'')+'최근 검사 '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(at);
       }
+      if(healthView&&healthResult.status==='rejected')healthView.textContent='수집 상태를 확인하지 못했어요.';
       if(dataResult.status!=='fulfilled')throw Error('data unavailable');
       const data=dataResult.value;
       if(!Array.isArray(data.items))throw Error('invalid data');
@@ -334,6 +378,7 @@
         }
         lastSignature=signature;
       }
+      if(!homePreview&&!visitRecorded&&sessionKey){storageWrite(sessionKey+':visit',Date.now());visitRecorded=true;}
       loaded=true;
       if(updated)updated.textContent=data.updatedAt?'마지막 수집: '+dateLabel(data.updatedAt):'아직 수집된 소식이 없습니다.';
     }catch{
@@ -345,14 +390,15 @@
       }
     }finally{refreshing=false;if(epoch!==generation&&isActive())refresh();}
   };
-  function enter(){
+  function enter(license){
+    if(!homePreview&&!sessionKey){sessionKey='gtz:radar:'+String(license?.number||member?.license?.number||'local')+':'+String(license?.issuedAt||member?.license?.issuedAt||'');const value=storageRead(sessionKey+':saved',[]);saved=new Set(Array.isArray(value)?value:[]);previousVisit=Number(storageRead(sessionKey+':visit',0))||0;visitRecorded=false;lastSignature='';view='all';tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.radarView==='all')));}
     if(homePreview)homeRunning=true;
     const hash=location.hash.slice(1);
-    if(!homePreview&&hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';render();}}
-    revealAnchor();if(!timer)timer=window.setInterval(refresh,60000);
+    if(!homePreview&&hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';if(brand)brand.value='all';view='all';tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.radarView==='all')));render();}}
+    revealAnchor();if(!timer)timer=window.setInterval(refresh,homePreview?300000:120000);
     if(loaded)startPreviewTimer();refresh();
   }
-  function leave(){if(homePreview)homeRunning=false;generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
+  function leave(){sessionKey='';if(homePreview)homeRunning=false;generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
   if(homePreview)enter();else member.register('radar',{enter,leave});
   window.addEventListener('focus',refresh);
   window.addEventListener('online',refresh);

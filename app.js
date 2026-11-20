@@ -37,14 +37,14 @@ const dialog=document.querySelector('#detail');
 let current=0;
 products.forEach((p,i)=>{
   const card=document.createElement('button');card.type='button';card.className='card friend-carousel-card';card.setAttribute('aria-label',`${p.name} 상세 보기`);
-  const img=document.createElement('img');img.src=p.image;img.alt=`${p.name} — ${p.description}`;img.width=1080;img.height=1350;img.loading='lazy';img.decoding='async';
+  const img=document.createElement('img');img.src=p.image;const variants=window.GTZDisplayAssets?.[p.image];if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 45vw, 260px';}img.alt=`${p.name} — ${p.description}`;img.width=1080;img.height=1350;img.loading='lazy';img.decoding='async';
   const label=document.createElement('span');label.className='card-label';
   const name=document.createElement('span');name.textContent=p.name;
   label.append(name);card.append(img,label);card.addEventListener('click',()=>showDetail(i));gallery?.append(card);
 });
 function showDetail(index){
   current=index;const p=index===-1?holder:products[index];
-  document.querySelector('#detail-image').src=p.image;
+  {const img=document.querySelector('#detail-image'),variants=window.GTZDisplayAssets?.[p.image];img.removeAttribute('srcset');img.src=p.image;if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 92vw, 640px';}}
   document.querySelector('#detail-image').alt=`${p.name} 원본 제품 소개`;
   document.querySelector('#detail-title').textContent=p.name;
   document.querySelector('#detail-english').textContent=p.english;

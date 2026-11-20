@@ -1,0 +1,76 @@
+/* GAMTTIZ shared UI contract — preserve the brand and page-specific art. */
+:root{
+ --gtz-red:#e93636;--gtz-ink:#252321;--gtz-muted:#746e66;
+ --gtz-space-1:4px;--gtz-space-2:8px;--gtz-space-3:12px;--gtz-space-4:16px;--gtz-space-6:24px;
+ --gtz-radius:16px;--gtz-radius-lg:24px;--gtz-touch:44px;
+ --gtz-glass:linear-gradient(145deg,#ffffffdc,#ffffff80 55%,#eee9df9e);
+ --gtz-glass-border:rgba(255,255,255,.88);
+ --gtz-glass-shadow:inset 0 1px 2px #fff,0 6px 20px #3a302218;
+ --gtz-ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+:where(main,section,article,fieldset,figure){min-width:0}
+:where(img,video){max-width:100%}
+:where(button,input,select,textarea){font:inherit}
+:where(button,a,input,select,textarea):focus-visible{outline:2px solid var(--gtz-red);outline-offset:3px}
+:where(.member-main,.license-main,.radar-board,.radar-controls,.site-contact-band){min-width:0;max-width:100%;overflow-wrap:anywhere}
+:where(.radar-controls,.radar-entry-actions,.radar-view-tabs,.member-actions,.license-actions)>*{min-width:0}
+:where(.member-btn,.radar-action,.radar-view-tabs button){min-height:var(--gtz-touch);transition:transform .23s var(--gtz-ease),background .23s,color .23s,box-shadow .23s}
+:where(.radar-action,.radar-view-tabs button):active{transform:scale(.97)}
+.control-menu,.control-contact{max-width:calc(100vw - 28px);max-height:calc(100dvh - 122px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+.control-panel-scroll{min-height:0;flex:1 1 auto}
+.control-search-results{max-width:calc(100vw - 28px);max-height:calc(100dvh - 180px);overscroll-behavior:contain}
+.control-menu-links :is(a,button)[aria-current="page"]{color:var(--gtz-red)!important}
+.control-menu-links :is(a,button)[aria-current="page"] .control-menu-subtitle{color:var(--gtz-red)!important}
+.radar-controls{grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr))}
+.radar-controls label{min-width:0}
+.radar-controls input,.radar-controls select{min-width:0;max-width:100%;font-size:16px}
+.radar-controls select{appearance:auto}
+.radar-view-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}
+.radar-view-tabs button,.radar-action{border:1px solid #dad4c9;background:var(--gtz-glass);box-shadow:var(--gtz-glass-shadow);border-radius:999px;padding:8px 14px;color:var(--gtz-ink);font-weight:650;cursor:pointer;font-size:.85rem}
+.radar-view-tabs button[aria-pressed="true"],.radar-action[aria-pressed="true"]{background:#fff;color:#b32629;border-color:#e5a3a3}
+.radar-entry{display:flex;flex-direction:column;min-width:0;gap:10px}
+.radar-entry .radar-card{flex:1;min-width:0;overflow-wrap:anywhere}
+.radar-entry-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.radar-entry-past{flex-direction:row;align-items:center;gap:8px}
+.radar-entry-past .radar-archive-row{flex:1;min-width:0}
+.radar-entry-past .radar-action{font-size:.75rem;white-space:nowrap}
+.radar-new{font-size:.72rem;font-weight:800;color:#b32629;background:#fff0e9;border-radius:99px;padding:5px 8px}
+.radar-deal-panel{margin:20px 0;padding:clamp(16px,3vw,26px);border:1px solid var(--gtz-glass-border);background:var(--gtz-glass);border-radius:var(--gtz-radius-lg);box-shadow:var(--gtz-glass-shadow)}
+.radar-deal-panel[hidden]{display:none}
+.radar-deal-panel h3{margin:0 0 8px}
+.radar-deal-panel p{font-size:.85rem;color:var(--gtz-muted);line-height:1.6}
+.radar-deal-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center;padding:14px 0;border-top:1px solid #d8d3ca;color:inherit;text-decoration:none;overflow-wrap:anywhere}
+.radar-deal-row b{color:#b32629}
+@media(max-width:780px){.radar-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.radar-search-label{grid-column:1/-1}}
+@media(max-width:520px){
+ .control-menu,.control-contact{max-height:calc(100dvh - 114px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+ .control-panel-scroll{padding:10px}
+ .control-menu-links :is(a,button),.control-menu-links :is(a,button):is(:hover,:focus-visible,:active,[aria-current="page"]){min-height:44px;white-space:normal}
+ .radar-board{padding-inline:16px;padding-bottom:96px}
+ .member-page .member-main .radar-tool .radar-board{padding-inline:16px}
+ .member-page .member-main .radar-tool .radar-archive{padding-bottom:96px}
+ .radar-controls{gap:8px}
+ .radar-deal-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .radar-deal-row strong{grid-column:1/-1}
+ .radar-entry-past{flex-wrap:wrap}
+ .radar-entry-past .radar-archive-row{flex-basis:100%}
+ :where(.member-main,.license-main,.radar-board) :is(button,a){scroll-margin-bottom:110px}
+}
+@media(max-height:480px) and (orientation:landscape){.control-panel-scroll{padding:8px}.control-menu-links{gap:4px}}
+@media(prefers-reduced-motion:reduce){.radar-action,.radar-view-tabs button{transition:none;transform:none}}
+
+/* Align secondary glass controls without changing the physical License card. */
+.member-page .member-main .member-btn:not(.primary),.license-page.has-license:not(.license-wallet-view) .license-member-link,
+.member-page .member-main .level-tabs{background:var(--gtz-glass);border-color:var(--gtz-glass-border);box-shadow:var(--gtz-glass-shadow)}
+.member-page .radar-tool .radar-controls{grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr))}
+.member-page .radar-tool .radar-controls :is(input,select){font-size:16px}
+.member-page .member-main :is(.member-btn,.member-id-chip,.member-tile-copy){min-width:0}
+.license-page.has-license:not(.license-wallet-view) #license-actions{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr)}
+.license-page.has-license:not(.license-wallet-view) #license-actions>*{min-width:0}
+@media(max-width:780px){.member-page .radar-tool .radar-controls{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:360px){
+ .license-page.has-license:not(.license-wallet-view) #license-actions{grid-template-columns:minmax(0,1fr);grid-template-areas:"save" "member" "shake" "manage"}
+ .license-page.has-license:not(.license-wallet-view) #license-actions:not(:has(.gtz-shake-setting:not([hidden]))){grid-template-areas:"save" "member" "manage"}
+ .member-page .radar-tool .radar-controls{grid-template-columns:minmax(0,1fr)}
+}
