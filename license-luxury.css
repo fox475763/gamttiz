@@ -1,0 +1,182 @@
+/* Issued license / private collection. The ambient light is independent of
+   the card's two physical faces and never alters the 3D rendering tree. */
+.license-ambient,.license-issued-eyebrow{display:none}
+body.license-page.has-license:not(.license-wallet-view){
+  --lux-ink:#54221f;--lux-gold:#a4814c;--lux-rule:#c8aa7870;
+  --lux-ease:cubic-bezier(.22,.82,.28,1);
+  background:#f5ecde;
+}
+.license-page.has-license:not(.license-wallet-view) .license-main{
+  position:relative;isolation:isolate;max-width:1200px;
+  padding:clamp(36px,5vw,66px) clamp(24px,5vw,68px) 106px;
+  min-height:65vh;
+}
+.license-page.has-license .license-ambient{
+  display:block;position:fixed;inset:0;z-index:-1;overflow:hidden;
+  pointer-events:none;background:linear-gradient(155deg,#fffdf7 0%,#f8efdf 52%,#efe0cb 100%);
+}
+.license-ambient::before,.license-ambient::after{
+  content:"";position:absolute;inset:-16%;pointer-events:none;
+  background:radial-gradient(ellipse at 36% 45%,#fffdfbe8 0%,#fff8e3a6 19%,transparent 51%);
+  animation:license-ambient-light 19s ease-in-out infinite alternate;
+}
+.license-ambient::after{
+  inset:-16%;opacity:.64;
+  background:radial-gradient(ellipse at 67% 56%,#c99c622f 0%,#d5b17c24 24%,transparent 54%);
+  animation:license-ambient-light 27s ease-in-out -9s infinite alternate-reverse;
+}
+@keyframes license-ambient-light{
+  0%{transform:translate3d(-7%,-6%,0) scale(.99)}
+  100%{transform:translate3d(8%,7%,0) scale(1.04)}
+}
+.license-page.has-license:not(.license-wallet-view) .license-heading{
+  margin:0 0 clamp(28px,5vw,46px);text-align:center;
+}
+.license-page.has-license:not(.license-wallet-view) .license-issued-eyebrow{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  color:#8b6a43;font:600 10px/1.3 Georgia,serif;letter-spacing:.27em;
+  margin:0 0 16px;
+}
+.license-issued-eyebrow::before,.license-issued-eyebrow::after{
+  content:"";width:20px;height:1px;background:#b18f5a8c;
+}
+.license-page.has-license:not(.license-wallet-view) .license-heading h1{
+  font-size:clamp(42px,6.7vw,76px);letter-spacing:.09em;line-height:1.1;
+  filter:none;
+}
+.license-page.has-license:not(.license-wallet-view) .license-heading::after{
+  width:5px;height:5px;border-radius:0;transform:rotate(45deg);margin:19px auto 0;
+  background:#af8c54;
+}
+.license-page.has-license:not(.license-wallet-view):not(.license-animating) .license-heading{
+  animation:license-ui-reveal .58s var(--lux-ease) backwards;
+}
+.license-page.has-license:not(.license-wallet-view) .license-layout{
+  display:flex;flex-direction:column;gap:23px;max-width:520px;
+}
+.license-page.has-license:not(.license-wallet-view) .license-preview{
+  gap:24px;padding:0;position:static;
+}
+.license-page.has-license:not(.license-wallet-view) .license-flip{
+  width:min(100%,338px);
+}
+.license-page.has-license:not(.license-wallet-view) .license-face{
+  box-shadow:0 16px 35px #652d2629,0 3px 8px #5e221b12;
+}
+.license-page.has-license:not(.license-wallet-view) .license-celebration{
+  color:#684b39;font-size:13px;font-weight:550;line-height:1.6;
+  letter-spacing:-.025em;word-break:keep-all;
+}
+.license-page.has-license:not(.license-wallet-view) .license-panel{
+  width:min(100%,338px);padding:0;margin:0;background:transparent;
+  border:none;box-shadow:none;
+}
+.license-page.has-license:not(.license-wallet-view) #license-actions{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:10px;
+}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.gtz-shake-button,.license-member-link){
+  box-sizing:border-box;position:relative;display:flex;align-items:center;justify-content:center;
+  gap:10px;min-height:54px;margin:0;padding:13px 15px;
+  border-radius:12px;font-size:13px;font-weight:600;letter-spacing:.015em;line-height:1.45;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .26s var(--lux-ease),background-color .28s,border-color .28s,box-shadow .28s,color .28s;
+}
+.license-page.has-license:not(.license-wallet-view) #download-both{
+  overflow:hidden;isolation:isolate;color:#fff6e4;border:1px solid #af8b48;
+  background:linear-gradient(145deg,#a43a33 0%,#7f1d22 38%,#581216 100%);
+  box-shadow:inset 0 1px 0 #fff1bd33,0 6px 18px #6723192b;
+}
+.license-page.has-license:not(.license-wallet-view) #download-both::after{
+  content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,transparent 22%,#ffedb135 48%,transparent 72%);
+  transform:translateX(-120%);transition:transform .62s var(--lux-ease);
+}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.gtz-shake-button,.license-member-link)::before{
+  content:"";width:18px;height:18px;flex:none;background:currentColor;
+  -webkit-mask:var(--lux-icon) center/contain no-repeat;mask:var(--lux-icon) center/contain no-repeat;
+}
+.license-page.has-license:not(.license-wallet-view) #download-both{
+  --lux-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.65' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12m-5-5 5 5 5-5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4'/%3E%3C/svg%3E");
+}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-button{
+  --lux-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='8.5' y='3' width='7' height='18' rx='1.6'/%3E%3Cpath d='M11.5 17.8h1M5.4 8l-2 4 2 4m13.2-8 2 4-2 4'/%3E%3C/svg%3E");
+}
+.license-page.has-license:not(.license-wallet-view) .license-member-link{
+  --lux-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l2.5 6 6.5.5-5 4.3 1.5 6.2-5.5-3.4L6.5 20 8 13.8l-5-4.3L9.5 9z'/%3E%3C/svg%3E");
+  text-decoration:none;
+}
+.license-page.has-license:not(.license-wallet-view) :is(.gtz-shake-button,.license-member-link){
+  min-height:49px;background:#fffaf180;color:#69352c;border:1px solid #b597646b;
+  box-shadow:inset 0 1px 0 #fffdf9;
+}
+.license-page.has-license:not(.license-wallet-view) #license-shake-setting-mount:not(:has(.gtz-shake-setting:not([hidden]))){display:none}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-setting{margin:0}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-button[aria-pressed="true"]{
+  background:#e9dfc99c;border-color:#a68955;color:#583b24;
+}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-button[aria-pressed="true"]::after{
+  content:"";width:6px;height:6px;border-radius:50%;background:#a78941;box-shadow:0 0 0 3px #a7894120;
+}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-status{
+  margin:7px 5px 2px;font-size:11px;color:#785c44;word-break:keep-all;
+}
+.license-page.has-license:not(.license-wallet-view) .license-manage{
+  gap:0;margin:8px 0 0;padding-top:9px;border-top:1px solid var(--lux-rule);
+}
+.license-page.has-license:not(.license-wallet-view) .license-link{
+  min-height:44px;padding:9px 20px;font-size:12px;color:#76573e;
+  text-decoration:none;transition:color .2s,transform .22s var(--lux-ease);
+}
+.license-page.has-license:not(.license-wallet-view) .license-link+.license-link{border-left:0}
+.license-page.has-license:not(.license-wallet-view) .license-link:first-child{position:relative}
+.license-page.has-license:not(.license-wallet-view) .license-link:first-child::after{
+  content:"";position:absolute;right:0;top:35%;height:30%;width:1px;background:var(--lux-rule);
+}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.gtz-shake-button,.license-member-link):not(:disabled):active{
+  transform:scale(.975);box-shadow:inset 0 2px 4px #4e2b1820;
+}
+.license-page.has-license:not(.license-wallet-view) #download-both:not(:disabled):active::after{transform:translateX(110%)}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.gtz-shake-button,.license-member-link,.license-link):focus-visible{
+  outline:2px solid #a57f42;outline-offset:4px;
+}
+.license-page.has-license:not(.license-wallet-view) .license-save-dialog{
+  background:#fffcf5;border:1px solid #c6ad7d;border-radius:20px;
+  box-shadow:0 16px 64px #2b130e38;
+}
+.license-page.has-license:not(.license-wallet-view) .license-save-dialog::backdrop{background:#24110da1;backdrop-filter:none}
+.license-page.has-license:not(.license-wallet-view) .license-save-dialog h2{font-weight:650;color:var(--lux-ink)}
+.license-page.license-wallet-view.has-license{background:#f7eddf!important}
+.license-page.license-wallet-view.has-license .license-main{position:relative;isolation:isolate;min-height:100dvh}
+@media(hover:hover) and (pointer:fine){
+  .license-page.has-license:not(.license-wallet-view) #download-both:not(:disabled):hover{
+    background:linear-gradient(145deg,#a43a33 0%,#7f1d22 38%,#581216 100%);
+    transform:translateY(-2px);box-shadow:inset 0 1px 0 #fff1bd44,0 11px 24px #67231935;
+  }
+  .license-page.has-license:not(.license-wallet-view) #download-both:not(:disabled):hover::after{transform:translateX(110%)}
+  .license-page.has-license:not(.license-wallet-view) :is(.gtz-shake-button,.license-member-link):not(:disabled):hover{
+    background:#fffdf8;border-color:#bda06a;transform:translateY(-2px);box-shadow:0 5px 14px #6b451013;
+  }
+  .license-page.has-license:not(.license-wallet-view) .license-link:hover{color:#861c21}
+  .license-page.has-license:not(.license-wallet-view) :is(#download-both,.gtz-shake-button,.license-member-link):not(:disabled):active{transform:scale(.975)}
+}
+@media(max-width:760px){
+  body.license-page.has-license:not(.license-wallet-view) .license-main{padding:29px 25px 100px}
+  .license-page.has-license:not(.license-wallet-view) .license-heading{margin-bottom:28px}
+  .license-page.has-license:not(.license-wallet-view) .license-heading h1{font-size:clamp(37px,10vw,52px)}
+  .license-page.has-license:not(.license-wallet-view) .license-issued-eyebrow{margin-bottom:12px;font-size:9px}
+  .license-page.has-license:not(.license-wallet-view) .license-heading::after{margin-top:14px}
+  .license-page.has-license:not(.license-wallet-view) .license-flip{width:min(100%,76vw,325px)}
+  .license-page.has-license:not(.license-wallet-view) .license-panel{width:min(100%,76vw,325px)}
+  .license-page.has-license:not(.license-wallet-view) .license-preview{gap:20px}
+  .license-page.has-license:not(.license-wallet-view) .license-layout{gap:18px}
+}
+.license-page-inactive .license-ambient::before,.license-page-inactive .license-ambient::after,
+.license-wallet-inactive .license-ambient::before,.license-wallet-inactive .license-ambient::after,
+.license-animating .license-ambient::before,.license-animating .license-ambient::after{animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+  .license-ambient::before,.license-ambient::after{animation:none!important}
+  .license-page.has-license:not(.license-wallet-view) .license-heading{animation:none!important}
+  .license-page.has-license:not(.license-wallet-view) :is(#download-both,.gtz-shake-button,.license-member-link,.license-link),
+  .license-page.has-license:not(.license-wallet-view) #download-both::after{transition:none!important;transform:none!important}
+  .license-page.has-license:not(.license-wallet-view) #download-both::after{display:none}
+}
