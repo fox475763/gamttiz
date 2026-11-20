@@ -3,13 +3,28 @@
   const KEY = 'gamttiz-my-license-v1';
   const COUNTER = 'gamttiz-license-local-sequence';
   const wallet = new URLSearchParams(location.search).get('wallet') === '1';
-  if(wallet) document.body.classList.add('license-wallet-view');
+  if(wallet) document.body.classList.add('license-wallet-view','license-wallet-inactive');
   const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
   const $ = id => document.getElementById(id);
   const form = $('license-form'), input = $('license-name'), friends = $('license-friends');
   const flip = $('license-flip'), front = $('license-front'), back = $('license-back');
-  const fctx = front.getContext('2d'), bctx = back.getContext('2d');
   const W = 1080, H = 1718, CROP_Y = 101;
+  const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  // The preview is much smaller than the exported artwork. Keep its backing
+  // textures light enough for mobile GPU rotations, while exports stay 1080×1718.
+  const previewScale=mobile?Math.min(1,Math.max(480,Math.min(680,325*Math.min(window.devicePixelRatio||2,2)))/W):1;
+  if(previewScale<1){
+    for(const canvas of [front,back]){canvas.width=Math.round(W*previewScale);canvas.height=Math.round(H*previewScale);}
+  }
+  const fctx=front.getContext('2d'),bctx=back.getContext('2d');
+  if(previewScale<1){for(const ctx of [fctx,bctx])ctx.setTransform(previewScale,0,0,previewScale,0,0);}
+  const cardInner=flip.querySelector('.license-flip-inner');
+  if(wallet)window.addEventListener('message',e=>{
+    if(e.source===parent&&e.origin===location.origin&&e.data?.type==='gamttiz-wallet-visibility'){
+      document.body.classList.toggle('license-wallet-inactive',!e.data.active);
+    }
+  });
+  document.addEventListener('visibilitychange',()=>document.body.classList.toggle('license-page-inactive',document.hidden));
   const imagePath = index => `assets/illustrations-3d/friend-${String(index+1).padStart(2,'0')}.png`;
   const images = new Map();
   let record = null, selected = 0, editing = true, isBack = false, ready = false, saving = false, renderVersion = 0;
@@ -18,8 +33,8 @@
   const pose={yaw:0,pitch:0}, goal={...pose};
   let motionFrame=0,lastFrame=0;
   function paint(){
-    flip.style.setProperty('--yaw',pose.yaw.toFixed(3)+'deg');
-    flip.style.setProperty('--pitch',pose.pitch.toFixed(3)+'deg');
+    // One compositor transform rather than two inherited custom properties.
+    cardInner.style.transform=`rotateX(${pose.pitch.toFixed(3)}deg) rotateY(${pose.yaw.toFixed(3)}deg)`;
   }
   function animate(time){
     const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
@@ -73,6 +88,37 @@
     do { ctx.font = `600 ${size}px "Wanted Sans Variable", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif`; size--; } while (size > 20 && ctx.measureText(value).width > maxWidth);
     ctx.fillText(value,x,y,maxWidth);
   }
+  function drawBack(ctx,sprite,name,member,index){
+    drawTemplate(ctx,backImage);
+    const max=376,scale=Math.min(max/sprite.naturalWidth,max/sprite.naturalHeight);
+    const w=sprite.naturalWidth*scale,h=sprite.naturalHeight*scale;
+    ctx.drawImage(sprite,540-w/2,704-CROP_Y-h/2,w,h);
+    drawValue(ctx,name||'이름을 입력해주세요',950,1071-CROP_Y,633,46);
+    drawValue(ctx,names[index],950,1233-CROP_Y,510,40);
+    drawValue(ctx,member,950,1400-CROP_Y,530,34);
+  }
+  function scheduleExport(seq,sprite,name,member,index){
+    const task=async()=>{
+      if(seq!==renderVersion||editing||!record||wallet)return;
+      try{
+        let exportFront=front,exportBack=back;
+        if(previewScale<1){
+          exportFront=document.createElement('canvas');exportBack=document.createElement('canvas');
+          for(const canvas of [exportFront,exportBack]){canvas.width=W;canvas.height=H;}
+          drawTemplate(exportFront.getContext('2d'),frontImage);
+          drawBack(exportBack.getContext('2d'),sprite,name,member,index);
+        }
+        const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
+        const blobFor=canvas=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('PNG export failed')),'image/png'));
+        const blobs=await Promise.all([blobFor(exportFront),blobFor(exportBack)]);
+        if(seq!==renderVersion||editing||!record)return;
+        exportFiles=blobs.map((blob,i)=>new File([blob],base+(i===0?'-front':'-back')+'.png',{type:'image/png'}));
+        $('download-both').disabled=false;
+      }catch{if(seq===renderVersion)status('카드 저장용 이미지를 준비하지 못했어요. 다시 접속해주세요.');}
+    };
+    if(typeof requestIdleCallback==='function')requestIdleCallback(task,{timeout:900});
+    else setTimeout(task,80);
+  }
   async function render() {
     const seq = ++renderVersion;
     exportFiles=null;$('download-both').disabled=true;
@@ -83,24 +129,10 @@
     try {
       const sprite = await image(imagePath(index));
       if (seq !== renderVersion) return;
-      drawTemplate(bctx,backImage);
-      const max = 376, scale = Math.min(max/sprite.naturalWidth,max/sprite.naturalHeight);
-      const w = sprite.naturalWidth*scale, h = sprite.naturalHeight*scale;
-      bctx.drawImage(sprite,540-w/2,704-CROP_Y-h/2,w,h);
-      drawValue(bctx,name || '이름을 입력해주세요',950,1071-CROP_Y,633,46);
-      drawValue(bctx,names[index],950,1233-CROP_Y,510,40);
-      drawValue(bctx,member,950,1400-CROP_Y,530,34);
+      drawBack(bctx,sprite,name,member,index);
       $('license-card-details').textContent = `${name || '이름 미입력'}, ${names[index]}, ${member}`;
-      if(!editing&&record&&!wallet){
-        // Prepare both actual PNGs before the user's tap, keeping Web Share's
-        // transient user activation intact on iOS.
-        const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
-        const blobFor=canvas=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('PNG export failed')),'image/png'));
-        const blobs=await Promise.all([blobFor(front),blobFor(back)]);
-        if(seq!==renderVersion||editing||!record)return;
-        exportFiles=blobs.map((blob,i)=>new File([blob],base+(i===0?'-front':'-back')+'.png',{type:'image/png'}));
-        $('download-both').disabled=false;
-      }
+      // Never encode full-size files during the forging/signing animation.
+      if(!editing&&record&&!wallet&&$('license-issuing').hidden)scheduleExport(seq,sprite,name,member,index);
     } catch { if(seq === renderVersion) status('감띠 이미지를 불러오지 못했어요. 다시 시도해주세요.'); }
   }
   function setSide(value, target) {
@@ -131,7 +163,7 @@
     $('license-submit').disabled = !ready || saving || !cleanName(input.value);
     return render();
   }
-  names.forEach((name,index)=>{
+  if(!wallet)names.forEach((name,index)=>{
     const label=document.createElement('label'); label.className='license-friend';
     const radio=document.createElement('input'); radio.type='radio'; radio.name='character'; radio.value=String(index); radio.setAttribute('aria-label',name); radio.checked=index===0;
     const img=document.createElement('img'); img.src=imagePath(index); img.alt=''; img.loading='lazy'; img.decoding='async';
@@ -185,6 +217,7 @@
       const overlay=$('license-issuing');
       if(!old){
         overlay.classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');
+        document.body.classList.add('license-animating');
         overlay.hidden=false;
         loading=new Promise(resolve=>setTimeout(resolve,reduced.matches?250:2350));
       }
@@ -194,11 +227,13 @@
         overlay.classList.add('is-signing');$('license-signature').setAttribute('aria-hidden','false');
         await new Promise(resolve=>setTimeout(resolve,reduced.matches?500:2650));
         overlay.hidden=true;overlay.classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');$('license-celebration').hidden=false;
+        document.body.classList.remove('license-animating');
+        render();
         status('');
         document.querySelector('.license-heading').scrollIntoView({behavior:reduced.matches?'auto':'smooth',block:'start'});
       }else status('');
     }
-    catch { $('license-issuing').hidden=true;$('license-issuing').classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
+    catch { document.body.classList.remove('license-animating');$('license-issuing').hidden=true;$('license-issuing').classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
     finally {saving=false;$('license-submit').disabled=!ready||!cleanName(input.value);}
   });
   $('license-edit').addEventListener('click',()=>{viewEdit(true);setSide(true);status('');input.focus();});
@@ -208,7 +243,6 @@
     try {localStorage.removeItem(KEY);}catch{status('삭제하지 못했어요. 브라우저 저장 설정을 확인해주세요.');return;}
     record=null;input.value='';setSelected(0);$('license-celebration').hidden=true;viewEdit(true);setSide(false);status('라이센스를 삭제했어요.');changed();
   });
-  const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   const saveDialog=$('license-save-dialog');
   let manualUrls=[];
   function clearManual(){manualUrls.forEach(url=>URL.revokeObjectURL(url));manualUrls=[];}
@@ -261,6 +295,7 @@
     drawTemplate(fctx,frontImage);drawTemplate(bctx,backImage);ready=true;viewEdit(!record);
   }).catch(()=>status('카드 이미지를 불러오지 못했어요. 잠시 후 다시 접속해주세요.'));
 })();
+
 
 
 

@@ -29,10 +29,10 @@
 .license-edge-left{left:0}.license-edge-right{left:100%}
 .license-edge-top,.license-edge-bottom{left:5%;right:5%;height:var(--paper-thickness);background:linear-gradient(0deg,#754014,#dfb568 51%,#8d5223);transform:translateY(-50%) rotateX(90deg)}
 .license-edge-top{top:0}.license-edge-bottom{top:100%}
-.license-face::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;mix-blend-mode:screen}
+.license-face::before{content:"";position:absolute;inset:-30% -55%;pointer-events:none;mix-blend-mode:screen;will-change:transform,opacity}
 /* A slow, soft gold reflection runs across the foil even at rest. */
-.license-face::before{background:linear-gradient(119deg,transparent 17%,#ad68130c 32%,#d99a3330 40%,#ffdf8b66 49%,#f5ca5b42 56%,#ba7c1e10 66%,transparent 82%);background-size:300% 300%;background-position:10% 50%;opacity:.48;animation:license-gold-drift 12s ease-in-out infinite alternate}
-@keyframes license-gold-drift{0%{background-position:4% 22%;opacity:.29}45%{opacity:.50}100%{background-position:96% 77%;opacity:.34}}
+.license-face::before{background:linear-gradient(119deg,transparent 24%,#ad68130a 34%,#d99a332b 41%,#ffdf8b60 49%,#f5ca5b38 56%,#ba7c1e0e 66%,transparent 77%);opacity:.48;animation:license-gold-drift 12s ease-in-out infinite alternate}
+@keyframes license-gold-drift{0%{transform:translate3d(-35%,-10%,0);opacity:.29}45%{opacity:.50}100%{transform:translate3d(35%,10%,0);opacity:.34}}
 .license-downloads{grid-template-columns:1fr}
 .license-celebration{margin:5px 0 0;color:#850000;font-size:14px;font-weight:700;text-align:center}
 .license-issuing{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 40%,#540e11,#180304 74%);color:#ffdf91;text-align:center;overflow:hidden}
@@ -44,7 +44,7 @@
 .license-forge-card::after{content:"";position:absolute;inset:-50%;background:linear-gradient(115deg,transparent 40%,#fff8d7e8 50%,transparent 60%);mix-blend-mode:screen;animation:license-sweep 2.35s ease both}
 .license-forge-progress{height:2px;width:70%;background:#ffffff22;overflow:hidden;margin-top:8px}
 .license-forge-progress::after{content:"";display:block;background:linear-gradient(90deg,#b98028,#fff5ae);height:100%;transform-origin:left;animation:license-progress 2.35s linear both}
-@keyframes license-forge{0%{opacity:0;transform:perspective(800px) rotateY(-60deg) scale(.65);filter:brightness(2)}45%{opacity:1;transform:perspective(800px) rotateY(15deg) scale(1);filter:brightness(1.25)}100%{opacity:1;transform:perspective(800px) rotateY(0) scale(1);filter:brightness(1)}}
+@keyframes license-forge{0%{opacity:0;transform:perspective(800px) rotateY(-60deg) scale(.65)}45%{opacity:1;transform:perspective(800px) rotateY(15deg) scale(1)}100%{opacity:1;transform:perspective(800px) rotateY(0) scale(1)}}
 @keyframes license-sweep{0%{transform:translateX(-90%)}100%{transform:translateX(90%)}}
 @keyframes license-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .license-wallet-view{background:#fff9ef!important;min-height:100%;overflow-x:hidden}
@@ -120,6 +120,18 @@
 @keyframes license-sign-confirm{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 @media(max-height:600px){.license-issuing-inner{gap:9px}.license-forge-card{width:min(35vw,150px,calc((100dvh - 220px)*1080/1718))}.license-forge-stage{min-height:110px}.license-signature-ink{width:min(80%,250px)}}
 @media(prefers-reduced-motion:reduce){.license-page.has-license .license-heading h1{animation:none;background-position:50% 50%}.license-forge-message{transition:none}.license-issuing.is-signing .license-signature-ink path{animation:none;stroke-dashoffset:0}.license-issuing.is-signing .license-signature-confirm{animation:none;opacity:1}}
+
+/* Mobile compositing: animate transforms/opacity, not blended backgrounds or filters. */
+.license-animating .license-face::before,.license-animating .license-heading h1,.license-wallet-inactive .license-face::before,.license-page-inactive .license-face::before,.license-page-inactive .license-heading h1{animation-play-state:paused!important}
+.license-forge-card,.license-forge-card::after{will-change:transform,opacity}
+@media(max-width:900px) and (pointer:coarse){
+  .license-face::before,.license-forge-card::after{mix-blend-mode:normal}
+  .license-face{box-shadow:0 10px 23px #4a120e20}
+  .license-page.has-license .license-heading h1{animation:none;background-position:50% 50%;filter:none}
+  .license-signature-ink{filter:none}
+  .license-forge-card{box-shadow:0 8px 32px #f6c54d28}
+}
+
 
 
 
