@@ -106,3 +106,18 @@ export function momPromotionLinks(html,base){
   for(const m of String(html).matchAll(/(?<![\w./])(?:https?:\/\/(?:www\.)?momstouch\.co\.kr\/(?:m\/)?promotion\/|\/(?:m\/)?promotion\/|(?:\.\.\/)?promotion\/|(?:\.\/)?)view\.php\?[^"'\s<>]+/gi))add(m[0],html.slice(Math.max(0,m.index-100),m.index+200));
   return [...found.values()];
 }
+
+/* Official channel identity is checked on the hostname and path, including the
+   channel landing page itself. A similar-looking channel or query is not trusted. */
+export function officialHostAllowed(url,source){
+  try{
+    const target=new URL(url),host=target.hostname.toLowerCase();
+    if(!['http:','https:'].includes(target.protocol))return false;
+    if(host==='pf.kakao.com'){
+      const channels=[...(source.channels||[])];
+      if(source.host==='pf.kakao.com')channels.push(new URL(source.list).pathname.split('/').filter(Boolean)[0]);
+      return channels.some(channel=>channel&&(target.pathname==='/'+channel||target.pathname.startsWith('/'+channel+'/')));
+    }
+    return [source.host,...(source.hosts||[])].some(allowed=>host===allowed||host.endsWith('.'+allowed));
+  }catch{return false;}
+}

@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {canonical,dedupe,dateRange,FRY as SHARED_FRY,TOPIC as SHARED_TOPIC,related,koreanRelated,momPromotionUrl,momPromotionLinks} from './fry-radar-common.mjs';
+import {canonical,dedupe,dateRange,FRY as SHARED_FRY,TOPIC as SHARED_TOPIC,related,koreanRelated,momPromotionUrl,momPromotionLinks,officialHostAllowed} from './fry-radar-common.mjs';
 
 const output = new URL('../data/fry-radar.json', import.meta.url);
 const now = new Date();
@@ -123,14 +123,7 @@ const relevant = (title,body) => {
   return TOPIC.test(head)&&FRY.test(text)&&new RegExp('(?:'+FRY.source+')[\\s\\S]{0,220}(?:'+TOPIC.source+')|(?:'+TOPIC.source+')[\\s\\S]{0,220}(?:'+FRY.source+')','i').test(text);
 };
 const category = title => /축제/.test(title)?'festival':/할인|쿠폰|특가/.test(title)?'discount':/굿즈|홀더|콜라보|협업/.test(title)?'goods':/소스|시즈닝|디핑/.test(title)?'sauce':/맛집|오픈|팝업/.test(title)?'place':/신메뉴|신제품|출시/.test(title)?'new-product':'event';
-const hostAllowed = (url, source) => {
-  try {
-    const host=new URL(url).hostname.toLowerCase();
-    if(host==='pf.kakao.com'&&source.channels?.some(channel=>new URL(url).pathname.startsWith('/'+channel+'/')))return true;
-    if (source.host==='pf.kakao.com')return host==='pf.kakao.com'&&url.includes(new URL(source.list).pathname);
-    return [source.host,...(source.hosts||[])].some(allowed=>host===allowed||host.endsWith('.'+allowed));
-  } catch {return false;}
-};
+const hostAllowed = officialHostAllowed;
 const fetchHtml = async url => {
   const page=await fetchText(url,{timeout:8500,attempts:2});
   if(!/text\/html|application\/xhtml/i.test(page.type)&&!/^\s*(?:<!doctype html|<html\b)/i.test(page.text))throw Error('non-HTML response');

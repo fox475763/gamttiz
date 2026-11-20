@@ -99,3 +99,16 @@ test('new fries spelling variants are relevant without matching unrelated fried 
   assert.equal(FRY.test('치킨 후라이드 할인'),false);
   assert.equal(related('맘스터치 무료 세트업 행사','무료 세트업 행사에는 케이준양념감자가 포함됩니다'),true);
 });
+
+test('official Kakao channel root and exact path accepted, spoofed channels rejected',async()=>{
+  const {officialHostAllowed}=await import('./fry-radar-common.mjs');
+  const burger={host:'burgerking.co.kr',list:'https://www.burgerking.co.kr/event',channels:['_xcBxnxah']};
+  const down={host:'pf.kakao.com',list:'https://pf.kakao.com/_feexixj'};
+  assert.equal(officialHostAllowed('https://pf.kakao.com/_xcBxnxah',burger),true);
+  assert.equal(officialHostAllowed('https://pf.kakao.com/_xcBxnxah/contents/posts/123',burger),true);
+  assert.equal(officialHostAllowed('https://pf.kakao.com/_xcBxnxah_fake',burger),false);
+  assert.equal(officialHostAllowed('https://pf.kakao.com/other?next=/_feexixj',down),false);
+  assert.equal(officialHostAllowed('https://pf.kakao.com/_feexixj',down),true);
+  assert.equal(officialHostAllowed('https://www.burgerking.co.kr/event',burger),true);
+  assert.equal(officialHostAllowed('https://burgerking.co.kr.fake.com/event',burger),false);
+});
