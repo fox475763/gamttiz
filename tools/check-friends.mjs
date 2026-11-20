@@ -112,3 +112,48 @@ test('Dial follows scroll center, skips hidden rows, resets filters and navigate
  grid.emit('keydown',{key:'End',preventDefault(){}});flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 20');assert.equal(nodes['dex-dial-down'].disabled,true);
  grid.children.forEach(b=>b.hidden=true);filter.emit('click');flush();assert.equal(shell.hidden,true);
 });
+
+test('Daily fry pick replaces the roulette with independent selectable fries',()=>{
+ const html=src('draw.html'),css=src('fry-pick.css'),js=src('daily-draw.js'),play=src('play.html');
+ assert.match(html,/id="fry-stack"/);assert.doesNotMatch(html,/룰렛|draw-wheel|wheel-slot/);
+ assert.match(html,/fry-pick\.css/);assert.doesNotMatch(play,/룰렛/);
+ assert.match(css,/touch-action:none/);assert.match(css,/fry-extract/);assert.match(css,/fry-character-in/);
+ assert.match(js,/pointermove/);assert.match(js,/d\.pull>=40/);
+});
+test('Fry drag, replay, old saved result migration and Korea-date reset',async()=>{
+  let today='2026-11-21',randomCalls=0;
+  const storage=new Map();
+  class El {
+    constructor(){this.children=[];this.events={};this.hidden=false;this.disabled=false;this.classes=new Set();this.classList={add:(...k)=>k.forEach(c=>this.classes.add(c)),remove:(...k)=>k.forEach(c=>this.classes.delete(c)),toggle:(k,v)=>v?this.classes.add(k):this.classes.delete(k)};this.style={setProperty(){},removeProperty(){}};}
+    append(b){this.children.push(b);}
+    setAttribute(){}
+    setPointerCapture(){}
+    addEventListener(k,fn){this.events[k]=fn;}
+    emit(k,e={}){return this.events[k]?.(e);}
+  }
+  const fakeMath=Object.create(Math);fakeMath.random=()=>{randomCalls++;return .25;};
+  const run=()=>{
+    const ids=['fry-stack','fry-stage','fry-reveal','fry-reveal-image','fry-reveal-name','fry-pull-hint','draw-button','draw-status','draw-date','draw-result','draw-placeholder','draw-profile'];
+    const nodes=Object.fromEntries(ids.map(id=>[id,new El()]));
+    const doc={querySelector:s=>nodes[s.slice(1)],createElement:()=>new El(),addEventListener(){}};
+    const localStorage={getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)};
+    const m=vm.createContext({document:doc,GTZFriends:{...ctx.GTZFriends,dayKey:()=>today},GTZProfile:ctx.GTZProfile,localStorage,Math:fakeMath,matchMedia:q=>({matches:q.includes('reduced')})});
+    vm.runInContext(src('daily-draw.js'),m);return nodes;
+  };
+  const flush=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};
+  const key='gamttiz-daily-draw-v1',nodes=run(),fries=nodes['fry-stack'].children;
+  assert.equal(fries.length,7);
+  const first=fries[2],point={isPrimary:true,button:0,pointerId:1,clientX:80,clientY:120};
+  first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:110});first.emit('pointercancel',point);
+  assert.equal(storage.has(key),false);
+  first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:55});first.emit('pointerup',{...point,clientY:55});
+  await flush();
+  const saved=JSON.parse(storage.get(key));assert.equal(saved.slot,2);assert.equal(saved.id,4);
+  const name=nodes['fry-reveal-name'].textContent;assert.equal(name,characters[3].name);
+  assert.equal(nodes['draw-profile'].hidden,false);assert.equal(fries.filter(f=>f.classes.has('is-picked')).length,1);
+  nodes['draw-button'].emit('click');await flush();assert.equal(nodes['fry-reveal-name'].textContent,name);
+  assert.equal(randomCalls,1);
+  const reload=run();assert.equal(reload['fry-reveal-name'].textContent,name);
+  storage.set(key,JSON.stringify({date:today,id:7}));const old=run();assert.equal(old['fry-reveal-name'].textContent,characters[6].name);
+  today='2026-11-22';old['draw-button'].emit('click');await flush();assert.equal(JSON.parse(storage.get(key)).date,today);
+});

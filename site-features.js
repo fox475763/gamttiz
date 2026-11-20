@@ -10,7 +10,7 @@
     {title:'감튀 취향 테스트', description:'10개의 질문으로 나의 감띠 찾기', url:'quiz.html', keys:'quiz 테스트 성향'},
     {title:'나만의 감띠 홀더', description:'감띠를 담고 3D 홀더를 돌려보기', url:'combo.html', keys:'combo 체험 3d'},
     {title:'나의 라이센스 (MY ID)', description:'나만의 감띠즈 애호가 라이센스를 발급하고 열람하기', url:'license.html', keys:'my id license 라이센스 라이선스 회원증 카드 발급'},
-    {title:'오늘의 감띠 뽑기', description:'룰렛을 돌리고 오늘 함께할 감띠 만나기', url:'draw.html', keys:'daily draw 룰렛 랜덤 뽑기 게임'},
+    {title:'오늘의 감띠 뽑기', description:'감튀 하나를 골라 오늘 함께할 감띠 만나기', url:'draw.html', keys:'daily draw 감튀 감자튀김 랜덤 뽑기 게임'},
     {title:'체험 모아보기', description:'감띠즈의 세 가지 체험', url:'play.html', keys:'play 게임'},
     {title:'Member · 멤버 전용', description:'라이센스 보유자의 감튀 레이더', url:'member.html', keys:'member 멤버 회원 감튀 레이더 웹앱'},
     {title:'프로젝트 정보', description:'기획 의도, 제작자, 디자인 정보', url:'project.html', keys:'project info 포트폴리오'}

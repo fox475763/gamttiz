@@ -96,13 +96,17 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        await page.locator('#dex-close').click();
      }
      if(filename==='draw.html'){
-       assert.equal(await page.locator('.wheel-slot').count(),14);
-       await page.locator('#draw-button').click();
+       assert.equal(await page.locator('.fry-choice').count(),7);
+       await page.locator('.fry-choice').nth(3).click();
        await page.locator('#draw-profile h2').waitFor({state:'visible'});
        const picked=await page.locator('#draw-profile h2').textContent();
        await page.reload();
        assert.equal(await page.locator('#draw-profile h2').textContent(),picked);
-       assert.equal(await page.locator('.wheel-slot.is-picked').count(),1);
+       assert.equal(await page.locator('.fry-choice.is-picked').count(),1);
+       assert.equal(await page.locator('#fry-reveal-name').textContent(),picked);
+       await page.locator('#draw-button').click();
+       await page.locator('#draw-profile h2').waitFor({state:'visible'});
+       assert.equal(await page.locator('#draw-profile h2').textContent(),picked);
      }
    }
    await context.close();
