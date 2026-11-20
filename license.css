@@ -31,8 +31,8 @@
 .license-edge-top{top:0}.license-edge-bottom{top:100%}
 .license-face::before{content:"";position:absolute;inset:-30% -55%;pointer-events:none;mix-blend-mode:screen;will-change:transform,opacity}
 /* A slow, soft gold reflection runs across the foil even at rest. */
-.license-face::before{background:linear-gradient(119deg,transparent 24%,#ad68130a 34%,#d99a332b 41%,#ffdf8b60 49%,#f5ca5b38 56%,#ba7c1e0e 66%,transparent 77%);opacity:.48;animation:license-gold-drift 12s ease-in-out infinite alternate}
-@keyframes license-gold-drift{0%{transform:translate3d(-35%,-10%,0);opacity:.29}45%{opacity:.50}100%{transform:translate3d(35%,10%,0);opacity:.34}}
+.license-face::before{background:linear-gradient(119deg,transparent 24%,#b7781810 30%,#e9ae4550 39%,#ffe19b9c 46%,#fff4c9c9 49%,#f8d477a0 52%,#df9e3a48 59%,transparent 72%);opacity:.7;animation:license-gold-drift 6.8s ease-in-out infinite alternate}
+@keyframes license-gold-drift{0%{transform:translate3d(-39%,-11%,0);opacity:.38}48%{opacity:.82}100%{transform:translate3d(39%,11%,0);opacity:.48}}
 .license-downloads{grid-template-columns:1fr}
 .license-celebration{margin:5px 0 0;color:#850000;font-size:14px;font-weight:700;text-align:center}
 .license-issuing{position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 40%,#540e11,#180304 74%);color:#ffdf91;text-align:center;overflow:hidden}
@@ -191,6 +191,25 @@
 .license-flat.is-paint-back .license-front{display:none}
 .license-flat.is-paint-back .license-back{display:block}
 .license-flat .license-face{box-shadow:0 10px 23px #4a120e20,0 0 0 .5px #ad7539}
+
+/* Small gold glints complement the sweeping foil, without pointer-tracking
+   or filters. Only opacity/transform animate, including on mobile. */
+.license-face::after{
+  content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:
+    radial-gradient(ellipse 12px 1px at 19% 18%,#fff9e3 15%,#f9d377a0 45%,transparent 100%),
+    radial-gradient(ellipse 1px 12px at 19% 18%,#fff9e3 15%,#f9d377a0 45%,transparent 100%),
+    radial-gradient(ellipse 9px 1px at 78% 28%,#fff9e3 15%,#f9d37790 50%,transparent 100%),
+    radial-gradient(ellipse 1px 9px at 78% 28%,#fff9e3 15%,#f9d37790 50%,transparent 100%),
+    radial-gradient(ellipse 13px 1px at 67% 57%,#fff9e3 15%,#f9d377a0 45%,transparent 100%),
+    radial-gradient(ellipse 1px 13px at 67% 57%,#fff9e3 15%,#f9d377a0 45%,transparent 100%),
+    radial-gradient(circle 3px at 32% 49%,#fff5c6 12%,#eebd6180 40%,transparent 100%),
+    radial-gradient(circle 2px at 84% 69%,#fff5c6 12%,#eebd6180 40%,transparent 100%);
+  opacity:0;animation:license-glints 5.7s ease-in-out infinite;will-change:opacity;
+}
+@keyframes license-glints{0%,100%{opacity:.1}24%{opacity:.82}46%{opacity:.18}70%{opacity:.95}86%{opacity:.24}}
+.license-animating .license-face::after,.license-wallet-inactive .license-face::after,.license-page-inactive .license-face::after{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){.license-face::before{animation:none;opacity:.32}.license-face::after{animation:none;opacity:.2}}
 
 
 

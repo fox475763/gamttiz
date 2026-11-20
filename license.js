@@ -97,7 +97,55 @@
     do { ctx.font = `600 ${size}px "Wanted Sans Variable", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif`; size--; } while (size > 20 && ctx.measureText(value).width > maxWidth);
     ctx.fillText(value,x,y,maxWidth);
   }
-  function drawBack(ctx,sprite,name,member,index){
+  // QR Model 2, error correction M; encodes the public MY ID page only.
+  // A local, precomputed matrix needs no external QR service or personal data.
+  const qrMatrix=[
+    '111111100101010011111011101111111',
+    '100000100111011111000100001000001',
+    '101110101001010011101101001011101',
+    '101110101001101110001010101011101',
+    '101110101111100101100111001011101',
+    '100000101010100110101110101000001',
+    '111111101010101010101010101111111',
+    '000000001101101100100111000000000',
+    '101111100100011101001001001111100',
+    '011110011000000010011111101101101',
+    '101100101100000110101110100010110',
+    '001010011111001010000100011011100',
+    '111101110111100000110010110111010',
+    '111011000011111110001101101000011',
+    '100100110110011000010010011001110',
+    '111100010101110010011110011111100',
+    '000111100011100001010000010111001',
+    '001111001011011001111011101101111',
+    '000110111111101111001110110110110',
+    '101100011000110011111110110111100',
+    '101110101010100010001011110111010',
+    '110111000100011100100101001000001',
+    '100110110001100111101010010100010',
+    '100001000001110100100101101010100',
+    '100011111000110101100000111110000',
+    '000000001111001010111011100010111',
+    '111111100110100110100111101010110',
+    '100000101001101100011101100011110',
+    '101110101011110000110100111111011',
+    '101110101101000111001101010011011',
+    '101110101010011001010001001101000',
+    '100000100010101010111111011011100',
+    '111111101111101001010001101100010',
+  ];
+  function drawQr(ctx){
+    const module=6,quiet=4,x=704,y=1340,size=(qrMatrix.length+quiet*2)*module;
+    ctx.fillStyle='#fffaf0';ctx.fillRect(x,y,size,size);
+    ctx.fillStyle='#29100c';
+    qrMatrix.forEach((row,j)=>{for(let i=0;i<row.length;i++){if(row[i]==='1')ctx.fillRect(x+(i+quiet)*module,y+(j+quiet)*module,module,module);}});
+  }
+  function issuedDate(value){
+    if(!value)return '발급 후 표시';
+    const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(value));
+    return ['year','month','day'].map(type=>parts.find(p=>p.type===type).value).join('.');
+  }
+  function drawBack(ctx,sprite,name,member,index,issuedAt){
     drawTemplate(ctx,backImage);
     const max=376,scale=Math.min(max/sprite.naturalWidth,max/sprite.naturalHeight);
     const w=sprite.naturalWidth*scale,h=sprite.naturalHeight*scale;
@@ -105,8 +153,13 @@
     drawValue(ctx,name||'이름을 입력해주세요',950,1071-CROP_Y,633,46);
     drawValue(ctx,names[index],950,1233-CROP_Y,510,40);
     drawValue(ctx,member,950,1400-CROP_Y,530,34);
+    ctx.fillStyle='#ffe09a';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    ctx.font='42px Georgia, "Times New Roman", serif';ctx.fillText('issued date.',129,1401);
+    ctx.font='600 39px "Wanted Sans Variable", Arial, sans-serif';ctx.fillText(issuedDate(issuedAt),129,1460,545);
+    ctx.font='500 23px Arial, sans-serif';ctx.fillText('SCAN TO OPEN MY ID',129,1547,545);
+    drawQr(ctx);
   }
-  function scheduleExport(seq,sprite,name,member,index){
+  function scheduleExport(seq,sprite,name,member,index,issuedAt){
     const task=async()=>{
       if(seq!==renderVersion||editing||!record||wallet)return;
       try{
@@ -115,7 +168,7 @@
           exportFront=document.createElement('canvas');exportBack=document.createElement('canvas');
           for(const canvas of [exportFront,exportBack]){canvas.width=W;canvas.height=H;}
           drawTemplate(exportFront.getContext('2d'),frontImage);
-          drawBack(exportBack.getContext('2d'),sprite,name,member,index);
+          drawBack(exportBack.getContext('2d'),sprite,name,member,index,issuedAt);
         }
         const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
         const blobFor=canvas=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('PNG export failed')),'image/png'));
@@ -134,17 +187,18 @@
     const name = editing ? cleanName(input.value) : record?.name || '';
     const member = record?.number || '발급 후 생성';
     const index = editing ? selected : record?.character ?? selected;
+    const issuedAt=record?.issuedAt;
     if (!ready) return;
     try {
       const sprite = await image(imagePath(index));
       if (seq !== renderVersion) return;
-      drawBack(bctx,sprite,name,member,index);
+      drawBack(bctx,sprite,name,member,index,issuedAt);
       // A regular image is much more reliable than a live canvas inside a
       // transformed layer on iOS. Keep the original template as its fallback.
       if(backArt)backArt.src=back.toDataURL('image/png');
-      $('license-card-details').textContent = `${name || '이름 미입력'}, ${names[index]}, ${member}`;
+      $('license-card-details').textContent = `${name || '이름 미입력'}, ${names[index]}, ${member}, 발급일 ${issuedDate(issuedAt)}`;
       // Never encode full-size files during the forging/signing animation.
-      if(!editing&&record&&!wallet&&$('license-issuing').hidden)scheduleExport(seq,sprite,name,member,index);
+      if(!editing&&record&&!wallet&&$('license-issuing').hidden)scheduleExport(seq,sprite,name,member,index,issuedAt);
     } catch { if(seq === renderVersion) status('감띠 이미지를 불러오지 못했어요. 다시 시도해주세요.'); }
   }
   function setSide(value, target) {
