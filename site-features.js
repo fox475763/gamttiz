@@ -414,10 +414,9 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
     for(const c of [frontCanvas,canvas]){c.width=540;c.height=859;}
     let yaw=0,pitch=0,targetYaw=0,targetPitch=0,raf=0,lastFrame=0,drag=null,ready=false,frontArt,backArt,lastGestureAt=-Infinity;
     let paintedSide=null,paintedTransform='',paintedLight='';
-    const objectUrls=new Set();
     const events=new AbortController();
     const on=(el,type,fn,options={})=>el.addEventListener(type,fn,{...options,signal:events.signal});
-    disposeWallet=()=>{events.abort();if(raf)cancelAnimationFrame(raf);raf=0;drag=null;ready=false;for(const url of objectUrls)URL.revokeObjectURL(url);objectUrls.clear();};
+    disposeWallet=()=>{events.abort();if(raf)cancelAnimationFrame(raf);raf=0;drag=null;ready=false;};
     function paintPose(time){
       raf=0;
       const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
@@ -525,12 +524,9 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
       qrMatrix.forEach((row,j)=>{for(let i=0;i<row.length;i++)if(row[i]==='1')ctx.fillRect(x+(i+quiet)*module,y+(j+quiet)*module,module,module)});
       const decoded=async(c,alt)=>{
         const img=new Image();img.alt=alt;img.width=c.width;img.height=c.height;img.draggable=false;
-        // Encode asynchronously when supported to avoid stalling the opening animation.
-        const blob=typeof c.toBlob==='function'?await new Promise(resolve=>c.toBlob(resolve,'image/png')):null;
-        if(events.signal.aborted)throw Error('Wallet closed');
-        const src=blob?URL.createObjectURL(blob):c.toDataURL('image/png');
-        if(blob)objectUrls.add(src);
-        await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=src;});
+        // Keep the proven WebKit-safe decoded data image path, then release
+        // the temporary canvas backing store as soon as loading finishes.
+        await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=c.toDataURL('image/png');});
         c.width=c.height=0;
         if(typeof img.decode==='function'){try{await img.decode()}catch{}}
         return img;
