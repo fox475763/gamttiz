@@ -345,7 +345,16 @@ const walletMedia=matchMedia('(max-width: 900px)');
   // mounting the entire license page in an iframe or running 3D animations.
   const walletStyle=document.createElement('style');
   walletStyle.textContent='.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:12px 6px;background:transparent!important;border:0!important;box-shadow:none!important}.gtz-wallet-lite-card{display:block;width:min(72vw,290px);height:auto;aspect-ratio:1080/1718;border-radius:12px;box-shadow:0 12px 28px #0003;background:#780708}.gtz-wallet-lite-error{font-size:13px;color:#7d1616;text-align:center;padding:30px 12px}';
-  walletStyle.textContent+=' .gtz-wallet-rotator{position:relative;width:min(72vw,290px);aspect-ratio:1080/1718;touch-action:none;user-select:none;-webkit-user-select:none;perspective:1100px;cursor:grab;flex:none}.gtz-wallet-rotator:active{cursor:grabbing}.gtz-wallet-rotator-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;will-change:transform}.gtz-wallet-face{position:absolute;inset:0;width:100%!important;height:100%!important;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 12px 28px #0003}.gtz-wallet-face-back{transform:rotateY(180deg)}.gtz-wallet-turn{border:1px solid #c7a67d;border-radius:100px;padding:9px 19px;color:#7b171b;background:#fff9ef;font:600 12px inherit;cursor:pointer}.gtz-wallet-hint{font-size:12px;color:#7d6a60;margin:0;text-align:center}@media(max-width:900px){.gtz-wallet-rotator-inner{transform-style:flat;-webkit-transform-style:flat}.gtz-wallet-face{backface-visibility:visible;-webkit-backface-visibility:visible;transform:none}.gtz-wallet-face-back{display:none}.gtz-wallet-rotator.is-back .gtz-wallet-face-front{display:none}.gtz-wallet-rotator.is-back .gtz-wallet-face-back{display:block}}';document.head.append(walletStyle);
+  walletStyle.textContent+=`
+.gtz-wallet-rotator{position:relative;width:min(72vw,290px);aspect-ratio:1080/1718;touch-action:none;user-select:none;-webkit-user-select:none;perspective:1200px;-webkit-perspective:1200px;cursor:grab;flex:none}
+.gtz-wallet-rotator:active{cursor:grabbing}
+.gtz-wallet-rotator-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d!important;-webkit-transform-style:preserve-3d!important;transform:rotateY(180deg);-webkit-transform:rotateY(180deg);will-change:transform}
+.gtz-wallet-face{position:absolute;inset:0;width:100%!important;height:100%!important;border-radius:12px;backface-visibility:hidden!important;-webkit-backface-visibility:hidden!important;box-shadow:0 12px 28px #0003;display:block!important;object-fit:cover}
+.gtz-wallet-face-front{transform:rotateY(0deg)!important;-webkit-transform:rotateY(0deg)!important}
+.gtz-wallet-face-back{transform:rotateY(180deg)!important;-webkit-transform:rotateY(180deg)!important}
+.gtz-wallet-turn{border:1px solid #c7a67d;border-radius:100px;padding:9px 19px;color:#7b171b;background:#fff9ef;font-size:12px;font-weight:600;cursor:pointer}
+.gtz-wallet-hint{font-size:12px;color:#7d6a60;margin:0;text-align:center}
+`;document.head.append(walletStyle);
   const friendNames=['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
   const qrMatrix=[
     '111111100101010011111011101111111',
@@ -393,64 +402,50 @@ const walletMedia=matchMedia('(max-width: 900px)');
     const canvas=document.createElement('canvas');canvas.className='gtz-wallet-face gtz-wallet-face-back';canvas.width=540;canvas.height=859;canvas.setAttribute('aria-label','라이센스 뒷면 '+data.name);
     inner.append(frontCanvas,canvas);rotator.append(inner);frame.append(rotator);
     const turn=make('button','gtz-wallet-turn','카드 뒤집기 ↻');turn.type='button';frame.append(turn,make('p','gtz-wallet-hint','카드를 좌우로 드래그하거나 탭해서 돌려보세요.'));
-    // Mobile Safari: a single visible face and a 2D flip. Avoid GPU-heavy
-    // preserve-3d canvas stacks and unreliable backface compositing.
-    rotator.style.touchAction='none';
-    inner.style.transformStyle='flat';
-    inner.style.webkitTransformStyle='flat';
-    frontCanvas.style.transform='none';
-    canvas.style.transform='none';
-    frontCanvas.style.backfaceVisibility='visible';
-    canvas.style.backfaceVisibility='visible';
-    let shownBack=true,drag=null,flipping=false,flipTimer=0;
-    function showFace(back){
-      shownBack=back;
-      rotator.classList.toggle('is-back',back);
-      frontCanvas.style.display=back?'none':'block';
-      canvas.style.display=back?'block':'none';
-      rotator.setAttribute('aria-label',back?'라이센스 뒷면, 탭하거나 좌우로 밀어 앞면 보기':'라이센스 앞면, 탭하거나 좌우로 밀어 뒷면 보기');
+    // Real two-sided 3D card, with continuous drag rotation and a lightweight
+    // canvas texture for each side. No iframe, no repeated canvas painting.
+    let yaw=180,pitch=0,targetYaw=180,targetPitch=0,raf=0,drag=null;
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+    function paintPose(){
+      raf=0;
+      yaw+=(targetYaw-yaw)*.28;
+      pitch+=(targetPitch-pitch)*.28;
+      if(Math.abs(targetYaw-yaw)<.12)yaw=targetYaw;
+      if(Math.abs(targetPitch-pitch)<.12)pitch=targetPitch;
+      const transform='rotateX('+pitch.toFixed(2)+'deg) rotateY('+yaw.toFixed(2)+'deg)';
+      inner.style.transform=transform;inner.style.webkitTransform=transform;
+      if(yaw!==targetYaw||pitch!==targetPitch)raf=requestAnimationFrame(paintPose);
     }
-    function flipCard(){
-      if(flipping)return;
-      flipping=true;
-      const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(reduce){showFace(!shownBack);flipping=false;return;}
-      inner.style.transition='transform 160ms ease-in';
-      inner.style.transform='scaleX(0.04)';
-      clearTimeout(flipTimer);
-      flipTimer=setTimeout(()=>{
-        showFace(!shownBack);
-        inner.style.transition='transform 190ms ease-out';
-        inner.style.transform='scaleX(1)';
-        flipTimer=setTimeout(()=>{flipping=false;inner.style.transition='';inner.style.transform='';},200);
-      },165);
-    }
+    function schedulePose(){if(!raf)raf=requestAnimationFrame(paintPose)}
+    function setTarget(y,p=0){targetYaw=y;targetPitch=p;schedulePose()}
+    function flipCard(){setTarget(Math.round(targetYaw/180)*180+180,0)}
     turn.addEventListener('click',flipCard);
     rotator.addEventListener('pointerdown',e=>{
-      if(flipping||drag)return;
-      drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};
+      if(drag)return;
+      drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:targetYaw,pitch:targetPitch};
       try{rotator.setPointerCapture(e.pointerId)}catch{}
     });
     rotator.addEventListener('pointermove',e=>{
-      if(!drag||e.pointerId!==drag.id)return;
+      if(!drag||drag.id!==e.pointerId)return;
       const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
-      if(Math.abs(dx)>8||Math.abs(dy)>8)drag.moved=true;
-      inner.style.transform='translateX('+Math.max(-18,Math.min(18,dx*.12))+'px) rotate('+Math.max(-5,Math.min(5,dx*.035))+'deg)';
+      setTarget(drag.yaw+dx*.85,Math.max(-18,Math.min(18,drag.pitch-dy*.16)));
     });
-    function finishPointer(e,cancel){
-      if(!drag||e.pointerId!==drag.id)return;
+    function finish(e,cancel){
+      if(!drag||drag.id!==e.pointerId)return;
       const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
-      const shouldFlip=!cancel&&((Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy))||!drag.moved);
-      drag=null;inner.style.transform='';inner.style.transition='';
+      const tapped=Math.abs(dx)<9&&Math.abs(dy)<9;
+      const finalYaw=cancel?drag.yaw:tapped?Math.round(drag.yaw/180)*180+180:Math.round(targetYaw/180)*180;
+      drag=null;
+      setTarget(finalYaw,0);
       try{if(rotator.hasPointerCapture(e.pointerId))rotator.releasePointerCapture(e.pointerId)}catch{}
-      if(shouldFlip)flipCard();
     }
-    rotator.addEventListener('pointerup',e=>finishPointer(e,false));
-    rotator.addEventListener('pointercancel',e=>finishPointer(e,true));
-    rotator.addEventListener('lostpointercapture',e=>{if(drag&&e.pointerId===drag.id){drag=null;inner.style.transform=''}});
+    rotator.addEventListener('pointerup',e=>finish(e,false));
+    rotator.addEventListener('pointercancel',e=>finish(e,true));
+    rotator.addEventListener('lostpointercapture',e=>{if(drag&&drag.id===e.pointerId){drag=null;setTarget(Math.round(targetYaw/180)*180,0)}});
     rotator.setAttribute('role','button');rotator.tabIndex=0;
+    rotator.setAttribute('aria-label','3D 라이센스 카드, 좌우로 드래그하거나 탭해서 뒤집기');
     rotator.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard()}});
-    showFace(true);
+    paintPose();
     const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
     const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
     const index=data.character;
