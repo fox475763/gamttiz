@@ -393,15 +393,64 @@ const walletMedia=matchMedia('(max-width: 900px)');
     const canvas=document.createElement('canvas');canvas.className='gtz-wallet-face gtz-wallet-face-back';canvas.width=540;canvas.height=859;canvas.setAttribute('aria-label','라이센스 뒷면 '+data.name);
     inner.append(frontCanvas,canvas);rotator.append(inner);frame.append(rotator);
     const turn=make('button','gtz-wallet-turn','카드 뒤집기 ↻');turn.type='button';frame.append(turn,make('p','gtz-wallet-hint','카드를 좌우로 드래그하거나 탭해서 돌려보세요.'));
-    let yaw=0,shownBack=false,drag=null,frameId=0,targetYaw=0,dragged=false;
-    const drawPose=()=>{frameId=0;const delta=targetYaw-yaw;yaw+=Math.abs(delta)<.15?delta:delta*.24;const normalized=((yaw%360)+360)%360;const back=normalized>90&&normalized<270;rotator.classList.toggle('is-back',back);inner.style.transform='rotateY('+((yaw-Math.round(yaw/180)*180).toFixed(2))+'deg)';if(Math.abs(targetYaw-yaw)>.15)frameId=requestAnimationFrame(drawPose)};
-    const aim=n=>{targetYaw=n;if(!frameId)frameId=requestAnimationFrame(drawPose)};
-    turn.addEventListener('click',()=>{shownBack=!shownBack;aim(Math.round(targetYaw/180)*180+180)});
-    rotator.addEventListener('pointerdown',e=>{if(drag)return;drag={id:e.pointerId,x:e.clientX,yaw:targetYaw};dragged=false;rotator.setPointerCapture(e.pointerId)});
-    rotator.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>7)dragged=true;aim(drag.yaw+dx*1.15)});
-    const endDrag=e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x;const moved=dragged;drag=null;aim(moved?Math.round((targetYaw)/180)*180:Math.round(targetYaw/180)*180+180);shownBack=Math.abs(Math.round(targetYaw/180)%2)===1;dragged=false;if(rotator.hasPointerCapture(e.pointerId))rotator.releasePointerCapture(e.pointerId)};
-    rotator.addEventListener('pointerup',endDrag);rotator.addEventListener('pointercancel',e=>{if(drag&&e.pointerId===drag.id){drag=null;aim(Math.round(targetYaw/180)*180)}});
-    rotator.classList.add('is-back');yaw=180;targetYaw=180;inner.style.transform='rotateY(0deg)';shownBack=true;
+    // Mobile Safari: a single visible face and a 2D flip. Avoid GPU-heavy
+    // preserve-3d canvas stacks and unreliable backface compositing.
+    rotator.style.touchAction='none';
+    inner.style.transformStyle='flat';
+    inner.style.webkitTransformStyle='flat';
+    frontCanvas.style.transform='none';
+    canvas.style.transform='none';
+    frontCanvas.style.backfaceVisibility='visible';
+    canvas.style.backfaceVisibility='visible';
+    let shownBack=true,drag=null,flipping=false,flipTimer=0;
+    function showFace(back){
+      shownBack=back;
+      rotator.classList.toggle('is-back',back);
+      frontCanvas.style.display=back?'none':'block';
+      canvas.style.display=back?'block':'none';
+      rotator.setAttribute('aria-label',back?'라이센스 뒷면, 탭하거나 좌우로 밀어 앞면 보기':'라이센스 앞면, 탭하거나 좌우로 밀어 뒷면 보기');
+    }
+    function flipCard(){
+      if(flipping)return;
+      flipping=true;
+      const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(reduce){showFace(!shownBack);flipping=false;return;}
+      inner.style.transition='transform 160ms ease-in';
+      inner.style.transform='scaleX(0.04)';
+      clearTimeout(flipTimer);
+      flipTimer=setTimeout(()=>{
+        showFace(!shownBack);
+        inner.style.transition='transform 190ms ease-out';
+        inner.style.transform='scaleX(1)';
+        flipTimer=setTimeout(()=>{flipping=false;inner.style.transition='';inner.style.transform='';},200);
+      },165);
+    }
+    turn.addEventListener('click',flipCard);
+    rotator.addEventListener('pointerdown',e=>{
+      if(flipping||drag)return;
+      drag={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};
+      try{rotator.setPointerCapture(e.pointerId)}catch{}
+    });
+    rotator.addEventListener('pointermove',e=>{
+      if(!drag||e.pointerId!==drag.id)return;
+      const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+      if(Math.abs(dx)>8||Math.abs(dy)>8)drag.moved=true;
+      inner.style.transform='translateX('+Math.max(-18,Math.min(18,dx*.12))+'px) rotate('+Math.max(-5,Math.min(5,dx*.035))+'deg)';
+    });
+    function finishPointer(e,cancel){
+      if(!drag||e.pointerId!==drag.id)return;
+      const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+      const shouldFlip=!cancel&&((Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy))||!drag.moved);
+      drag=null;inner.style.transform='';inner.style.transition='';
+      try{if(rotator.hasPointerCapture(e.pointerId))rotator.releasePointerCapture(e.pointerId)}catch{}
+      if(shouldFlip)flipCard();
+    }
+    rotator.addEventListener('pointerup',e=>finishPointer(e,false));
+    rotator.addEventListener('pointercancel',e=>finishPointer(e,true));
+    rotator.addEventListener('lostpointercapture',e=>{if(drag&&e.pointerId===drag.id){drag=null;inner.style.transform=''}});
+    rotator.setAttribute('role','button');rotator.tabIndex=0;
+    rotator.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flipCard()}});
+    showFace(true);
     const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
     const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
     const index=data.character;
