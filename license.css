@@ -503,3 +503,80 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
 @media(max-width:760px){
   body.license-page.has-license:not(.license-wallet-view) .license-main{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
 }
+
+/* ROYAL FINISH: velvet matte, pressed champagne-gold foil and a gilt edge.
+   Independent mask textures follow the original art; the red is never glossy. */
+.license-page .license-flip {
+  --paper-thickness: 3.6px;
+  --paper-half: 1.8px;
+  --edge-x: 0px; --edge-y: 0px; --rim-x: 0px; --rim-y: 0px; --shadow-x: 0px; --shadow-scale: 1;
+  position: relative;
+  perspective: 1250px;
+}
+.license-page .license-flip::after {
+  content: ""; position: absolute; pointer-events: none; z-index: -1;
+  left: 4%; right: 4%; bottom: -4%; height: 18%;
+  background: radial-gradient(ellipse at center,rgba(52,22,14,.34) 0%,rgba(74,35,24,.16) 31%,transparent 73%);
+  transform: translateX(var(--shadow-x)) scaleX(var(--shadow-scale));
+}
+.license-page .license-face,.license-page.has-license .license-flip .license-face {
+  box-shadow: 0 9px 23px rgba(44,12,15,.20),0 25px 48px -23px rgba(56,16,15,.39);
+  background-color: #6c0c15;
+}
+.license-page .license-paper-core {
+  background: linear-gradient(108deg,#6c411e,#d4ad71 24%,#f3d9a6 43%,#9b692d 66%,#e6c58f 89%,#764a25);
+  box-shadow: inset 0 0 0 .5px #f9ddaa;
+}
+.license-page .license-edge {
+  background: linear-gradient(90deg,#6f411c 0%,#b48649 17%,#f7dfaf 38%,#b98c51 55%,#8c5428 78%,#e8c794 100%);
+}
+.license-page :is(.license-edge-top,.license-edge-bottom) {
+  background: linear-gradient(0deg,#6f411c,#b48649 17%,#f7dfaf 38%,#b98c51 55%,#8c5428 78%,#e8c794);
+}
+.license-page .license-rim {
+  position: absolute; inset: 0; pointer-events: none; z-index: 4; border-radius: inherit;
+  box-shadow: inset var(--rim-x) calc(1px + var(--rim-y)) 1px rgba(255,226,174,.57),inset calc(1px + var(--rim-x)) var(--rim-y) 1px rgba(239,180,103,.28),inset -1px -1px 2px rgba(43,6,9,.68);
+}
+.license-page .license-motion-gloss {
+  /* Never fall back to an unmasked, plastic-looking full-surface reflection. */
+  visibility: hidden;
+  inset: 0;
+  -webkit-mask-image: var(--foil-mask,none); mask-image: var(--foil-mask,none);
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  mask-mode: alpha;
+  background-image: linear-gradient(116deg,transparent 18%,rgba(255,239,197,.07) 28%,rgba(255,244,215,.46) 40%,rgba(255,250,230,.88) 45%,rgba(255,245,208,.58) 48%,rgba(172,113,42,.12) 53%,transparent 61%,rgba(255,239,196,.24) 73%,transparent 82%);
+  background-size: 260% 240%;
+  mix-blend-mode: screen;
+  opacity: .42;
+  animation: license-royal-foil 11s ease-in-out infinite alternate;
+}
+.license-page .license-motion-gloss.is-foil-ready { visibility: visible; }
+@keyframes license-royal-foil {
+  0% { background-position: 14% 32%; opacity: .27; }
+  48% { opacity: .53; }
+  100% { background-position: 86% 69%; opacity: .32; }
+}
+.license-page .license-flip.is-motion-light .license-motion-gloss { animation: none; }
+.license-page-inactive .license-motion-gloss,.license-wallet-inactive .license-motion-gloss,.license-animating .license-motion-gloss{animation-play-state:paused!important}
+/* iPhone's one-plane fallback gets a visible offset metal core without
+   reintroducing WebKit's dropped backface/canvas bug. */
+.license-page .license-flat .license-paper-core {
+  display: block;
+  transform: translate(var(--edge-x),var(--edge-y));
+}
+.license-page .license-flat .license-face,.license-page.has-license .license-flat .license-face { box-shadow: 0 11px 25px rgba(44,12,15,.23),0 0 0 .55px #c49a62; }
+.license-page .license-forge-card::after {
+  inset: 0; transform: none;
+  -webkit-mask-image: var(--foil-mask,linear-gradient(transparent,transparent));
+  mask-image: var(--foil-mask,linear-gradient(transparent,transparent));
+  -webkit-mask-size: 100% 100%;mask-size:100% 100%;
+  background: linear-gradient(116deg,transparent 31%,#fff4ce 50%,transparent 69%) 0 0/240% 100% no-repeat;
+  animation: license-royal-forge 2.35s ease both;
+}
+@keyframes license-royal-forge { from{background-position:100% 0}to{background-position:0 0} }
+@media(prefers-reduced-motion:reduce) {
+  .license-page .license-motion-gloss { animation:none;opacity:.23; }
+  .license-page .license-flip.is-motion-light .license-motion-gloss { opacity:0; }
+  .license-page .license-forge-card::after { animation:none;opacity:0; }
+}

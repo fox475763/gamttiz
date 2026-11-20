@@ -22,6 +22,7 @@
   if(previewScale<1){for(const ctx of [fctx,bctx])ctx.setTransform(previewScale,0,0,previewScale,0,0);}
   const cardInner=flip.querySelector('.license-flip-inner');
   let backArt=$('license-back-art');
+  const materials=new Map();
   let previewKey='',fontRevision=0;
   const glossFaces=[$('license-gloss-front'),$('license-gloss-back')];
   // Mobile WebKit can drop a canvas or backface in a preserve-3d stack.
@@ -52,7 +53,13 @@
     // hotspot. The reflection naturally settles back into the idle animation.
     const tilt=pose.yaw-Math.round(pose.yaw/180)*180;
     const dx=Math.sin(tilt*Math.PI/180),dy=Math.sin(pose.pitch*Math.PI/180);
-    const intensity=Math.min(.92,Math.abs(dx)*.83+Math.abs(dy)*1.55);
+    const intensity=Math.min(.82,.16+Math.abs(dx)*.59+Math.abs(dy)*1.15);
+    flip.style.setProperty('--edge-x',`${(-dx*3.1).toFixed(2)}px`);
+    flip.style.setProperty('--edge-y',`${(dy*2.6).toFixed(2)}px`);
+    flip.style.setProperty('--rim-x',`${(-dx*1.25).toFixed(2)}px`);
+    flip.style.setProperty('--rim-y',`${(dy*1.25).toFixed(2)}px`);
+    flip.style.setProperty('--shadow-x',`${(-dx*19).toFixed(1)}px`);
+    flip.style.setProperty('--shadow-scale',(1-Math.abs(dx)*.26).toFixed(3));
     const lightingActive=!!drag||Math.abs(pose.yaw-yaw)>.05||Math.abs(pose.pitch)>.05||Math.abs(tilt)>.05;
     // During the complete gesture and spring-back, hide and pause both idle
     // effects. Only angle-responsive reflections are visible until settled.
@@ -60,7 +67,7 @@
     for(const layer of glossFaces){if(!layer)continue;
       // Move the gradient inside the stationary, full-size surface. A translated
       // rectangle can expose its edges when tilted (especially in Safari).
-      layer.style.backgroundPosition=`${(50+dx*43).toFixed(2)}% ${(50-dy*76).toFixed(2)}%`;
+      layer.style.backgroundPosition=`${(50+dx*48).toFixed(2)}% ${(50-dy*83).toFixed(2)}%`;
       layer.style.animation=lightingActive?'none':'';
       layer.style.opacity=lightingActive?(reduced.matches?'0.000':intensity.toFixed(3)):'';
     }
@@ -108,15 +115,56 @@
     }
     return images.get(url);
   }
-  function drawTemplate(ctx, img) {
+  function materialFor(ctx,img){
+    const width=ctx.canvas.width,height=ctx.canvas.height,side=img===frontImage?'front':'back';
+    const key=side+':'+width+'x'+height;
+    if(!materials.has(key)){
+      const isPreview=width===front.width&&height===front.height;
+      materials.set(key,GTZLicenseMaterial.prepare(img,width,height,CROP_Y,W,H,isPreview));
+    }
+    return materials.get(key);
+  }
+  function drawTemplate(ctx,img){
     ctx.clearRect(0,0,W,H);
-    ctx.drawImage(img,0,CROP_Y,W,H,0,0,W,H);
+    try{ctx.drawImage(materialFor(ctx,img).art,0,0,W,H);}
+    catch{ctx.drawImage(img,0,CROP_Y,W,H,0,0,W,H);}
+  }
+  function foilText(ctx,y,size){
+    const gold=ctx.createLinearGradient(0,y-size,0,y+2);
+    gold.addColorStop(0,'#fff1c4');gold.addColorStop(.28,'#dfbb79');
+    gold.addColorStop(.53,'#b88846');gold.addColorStop(.8,'#e9c88b');gold.addColorStop(1,'#fff0bc');
+    ctx.fillStyle=gold;
   }
   function drawValue(ctx, value, x, y, maxWidth, fontSize) {
-    ctx.fillStyle = '#ffe09a'; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
     let size = fontSize;
     do { ctx.font = `600 ${size}px "Wanted Sans Variable", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", Arial, sans-serif`; size--; } while (size > 20 && ctx.measureText(value).width > maxWidth);
-    ctx.fillText(value,x,y,maxWidth);
+    foilText(ctx,y,size);ctx.fillText(value,x,y,maxWidth);
+  }
+  function prepareFoil(){
+    for(const [ctx,img,layer] of [[fctx,frontImage,glossFaces[0]],[bctx,backImage,glossFaces[1]]]){
+      try{
+        const {mask}=materialFor(ctx,img);
+        if(!mask||!layer)continue;
+        const url='url("'+mask.toDataURL('image/png')+'")';
+        layer.style.setProperty('--foil-mask',url);layer.classList.add('is-foil-ready');
+        if(img===frontImage)document.querySelector('.license-forge-card')?.style.setProperty('--foil-mask',url);
+      }catch{/* no unmasked shine if material preparation fails */}
+    }
+  }
+  async function commitFront(){
+    const original=document.querySelector('.license-front .license-art');
+    if(!original)return;
+    try{
+      const data=front.toDataURL('image/png'),next=new Image();
+      next.className='license-art license-art-composed';next.alt=original.alt;
+      next.width=front.width;next.height=front.height;
+      await new Promise((resolve,reject)=>{next.onload=resolve;next.onerror=reject;next.src=data;});
+      if(typeof next.decode==='function'){try{await next.decode();}catch{}}
+      original.replaceWith(next);
+      const forge=document.querySelector('.license-forge-card');
+      if(forge){forge.style.backgroundImage='url("'+data+'")';forge.style.backgroundSize='100% 100%';}
+    }catch{/* original image remains a safe fallback */}
   }
   // QR Model 2, error correction M; encodes the public MY ID page only.
   // A local, precomputed matrix needs no external QR service or personal data.
@@ -170,14 +218,25 @@
     drawTemplate(ctx,backImage);
     const max=376,scale=Math.min(max/sprite.naturalWidth,max/sprite.naturalHeight);
     const w=sprite.naturalWidth*scale,h=sprite.naturalHeight*scale;
+    // Recessed velvet portrait well inside the original gilt profile frame.
+    ctx.save();
+    ctx.beginPath();ctx.rect(337,401,406,405);ctx.clip();
+    const recess=ctx.createRadialGradient(493,509,15,540,603,292);
+    recess.addColorStop(0,'#a13139');recess.addColorStop(.53,'#651018');recess.addColorStop(1,'#3d090e');
+    ctx.fillStyle=recess;ctx.fillRect(337,401,406,405);
+    const rim=ctx.createLinearGradient(337,401,741,805);
+    rim.addColorStop(0,'#f4d7a2');rim.addColorStop(.33,'#a57336');rim.addColorStop(.69,'#f9dfad');rim.addColorStop(1,'#7d4b24');
+    ctx.lineWidth=3;ctx.strokeStyle=rim;ctx.strokeRect(339,403,402,401);
+    ctx.shadowColor='rgba(21,0,4,.65)';ctx.shadowBlur=18;ctx.shadowOffsetY=12;
     ctx.drawImage(sprite,540-w/2,704-CROP_Y-h/2,w,h);
+    ctx.restore();
     drawValue(ctx,name||'이름을 입력해주세요',950,1071-CROP_Y,633,46);
     drawValue(ctx,names[index],950,1233-CROP_Y,510,40);
     drawValue(ctx,member,950,1400-CROP_Y,530,34);
-    ctx.fillStyle='#ffe09a';ctx.textAlign='left';ctx.textBaseline='alphabetic';
-    ctx.font='42px Georgia, "Times New Roman", serif';ctx.fillText('issued date.',129,1401);
-    ctx.font='600 39px "Wanted Sans Variable", Arial, sans-serif';ctx.fillText(issuedDate(issuedAt),129,1460,545);
-    ctx.font='500 23px Arial, sans-serif';ctx.fillText('SCAN TO OPEN MY ID',129,1547,545);
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    ctx.font='42px Georgia, "Times New Roman", serif';foilText(ctx,1401,42);ctx.fillText('issued date.',129,1401);
+    ctx.font='600 39px "Wanted Sans Variable", Arial, sans-serif';foilText(ctx,1460,39);ctx.fillText(issuedDate(issuedAt),129,1460,545);
+    ctx.font='500 23px Arial, sans-serif';foilText(ctx,1547,23);ctx.fillText('SCAN TO OPEN MY ID',129,1547,545);
     drawQr(ctx);
   }
   function scheduleExport(seq,sprite,name,member,index,issuedAt){
@@ -455,7 +514,8 @@
   }
   Promise.all([image('assets/license/front.png'),image('assets/license/back.png')]).then(([f,b])=>{
     frontImage=f;backImage=b;
-    drawTemplate(fctx,frontImage);drawTemplate(bctx,backImage);ready=true;viewEdit(!record);
+    drawTemplate(fctx,frontImage);drawTemplate(bctx,backImage);
+    prepareFoil();commitFront();ready=true;viewEdit(!record);
     // Font fetching must never delay the artwork or prevent the card appearing.
     try{document.fonts.load('600 46px "Wanted Sans Variable"').then(()=>{fontRevision++;render();}).catch(()=>{});}catch{}
   }).catch(()=>status('카드 이미지를 불러오지 못했어요. 잠시 후 다시 접속해주세요.'));
