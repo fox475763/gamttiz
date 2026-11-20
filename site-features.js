@@ -250,7 +250,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   const backdrop=make('button','gtz-wallet-backdrop');backdrop.type='button';backdrop.setAttribute('aria-label','라이센스 닫기');
   const content=make('div','gtz-wallet-content'),title=make('p','gtz-wallet-title','MY LICENSE');
   const close=make('button','gtz-wallet-close','×');close.type='button';close.setAttribute('aria-label','닫기');
-  const frame=make('iframe','gtz-wallet-frame');frame.title='나의 감띠즈 라이센스 카드';frame.loading='lazy';
+  const frame=make('div','gtz-wallet-frame gtz-wallet-lite');frame.setAttribute('aria-label','나의 감띠즈 라이센스 카드');
   const detail=make('a','gtz-wallet-detail','MY ID 페이지 ↗');detail.href='license.html';
   content.append(title,close,frame,detail);sheet.append(backdrop,content);document.body.append(sheet);
   const shakeSettings=make('div','gtz-shake-setting');shakeSettings.hidden=true;
@@ -341,18 +341,33 @@ const walletMedia=matchMedia('(max-width: 900px)');
     return connectSensor();
   });
   shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
-  function notifyFrame(active){if(frameStarted)frame.contentWindow?.postMessage({type:'gamttiz-wallet-visibility',active},location.origin);}
-  frame.addEventListener('load',()=>notifyFrame(presented));
+  // Lightweight wallet: never load a second full license page, canvas renderer,
+  // font stack or 3D animation inside the overlay on mobile Safari.
+  const walletStyle=document.createElement('style');
+  walletStyle.textContent='.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:0;padding:18px 10px;background:transparent!important;border:0!important;box-shadow:none!important}.gtz-wallet-lite-card{position:relative;width:min(72vw,280px);aspect-ratio:1080/1718;overflow:hidden;border-radius:17px;background:linear-gradient(145deg,#8b111b,#3f1015);box-shadow:0 12px 30px #0003;border:1px solid #f1d18b}.gtz-wallet-lite-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.97}.gtz-wallet-lite-info{position:absolute;inset:auto 7% 7%;padding:12px 9px;border-radius:10px;background:#3d0c12e8;color:#ffe5a2;text-align:center;font-size:12px;line-height:1.65}.gtz-wallet-lite-info strong{display:block;font-size:clamp(15px,4vw,20px);overflow-wrap:anywhere}.gtz-wallet-lite-info small{display:block;letter-spacing:.08em}.gtz-wallet-lite-caption{color:#665e55;font-size:12px;text-align:center}.gtz-wallet-lite .gtz-wallet-lite-card{transform:none!important;animation:none!important}';
+  document.head.append(walletStyle);
+  const friendNames=['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
+  function notifyFrame(active){}
   function startFrame(){
-    if(frameStarted||!mobile())return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120reopen7';
+    if(!mobile())return;
+    let data;try{data=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null')}catch{}
+    frame.replaceChildren();
+    if(!data||!Number.isInteger(data.character)||data.character<0||data.character>=friendNames.length)return;
+    const card=make('div','gtz-wallet-lite-card');
+    const img=document.createElement('img');img.src='assets/illustrations-3d/friend-'+String(data.character+1).padStart(2,'0')+'.png';img.alt=friendNames[data.character];img.loading='eager';img.decoding='async';
+    const info=make('div','gtz-wallet-lite-info');
+    const heading=document.createElement('strong');heading.textContent=data.name||'GAMTTIZ';
+    const sub=document.createElement('span');sub.textContent=friendNames[data.character];
+    const serial=document.createElement('small');serial.textContent=data.number||'';
+    info.append(heading,sub,serial);card.append(img,info);
+    frame.append(card,make('p','gtz-wallet-lite-caption','전체 라이센스 디자인은 MY ID 페이지에서 확인할 수 있어요.'));
+    frameStarted=true;
   }
-  function warm(){/* Do not pre-render the full animated license in a hidden iframe. */}
+  function warm(){/* No hidden iframe preload. */}
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      if(presented)frame.src='license.html?wallet=1&v=20261120reopen7';
-      else{frame.removeAttribute('src');frameStarted=false;}
+      frameStarted=false;if(presented)startFrame();else frame.replaceChildren();
     }
     lastExists=exists;updateSetting();
     if(!mobile()||!exists||!enabled){clearRecovery();updateSetting();if(presented&&!exists)settle(false);return;}
