@@ -1,0 +1,24 @@
+/* Home-only cinematic scroll: no layout changes, scroll snapping or navigation interception. */
+@media(prefers-reduced-motion:no-preference){
+ html.gtz-cinema-ready .hero .hero-copy{translate:0 var(--cinema-y,0px);opacity:var(--cinema-opacity,1)}
+ html.gtz-cinema-ready .hero .hero-poster{translate:0 var(--cinema-y,0px);scale:var(--cinema-scale,1)}
+ html.gtz-cinema-ready #about .story-row .story-image,
+ html.gtz-cinema-ready #holder .holder-image,
+ html.gtz-cinema-ready .home-package .home-package-image{translate:0 var(--cinema-y,0px);scale:var(--cinema-scale,1)}
+ html.gtz-cinema-ready #collection>.section-heading,
+ html.gtz-cinema-ready #about .story-row .story-copy,
+ html.gtz-cinema-ready #holder .holder-copy,
+ html.gtz-cinema-ready .home-package .home-package-copy,
+ html.gtz-cinema-ready #experiences .experience-intro,
+ html.gtz-cinema-ready #fry-radar-preview .radar-preview-heading,
+ html.gtz-cinema-ready .home-news,
+ html.gtz-cinema-ready #guide>h2,
+ html.gtz-cinema-ready #contact>div,
+ html.gtz-cinema-ready .social>h2{translate:0 var(--cinema-y,0px);opacity:var(--cinema-opacity,1)}
+}
+@media(max-width:680px) and (prefers-reduced-motion:no-preference){
+ html.gtz-cinema-ready .hero .hero-poster,
+ html.gtz-cinema-ready #about .story-row .story-image,
+ html.gtz-cinema-ready #holder .holder-image,
+ html.gtz-cinema-ready .home-package .home-package-image{scale:1}
+}
