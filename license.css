@@ -176,6 +176,22 @@
   .license-page:not(.has-license):not(.license-wallet-view) .license-friends-field{margin:19px 0 17px}
 }
 
+/* Display the original card artwork even before JavaScript or fonts load.
+   Canvases are only used to compose/export the personalized card. */
+.license-front{background:#850000 url('assets/license/front.png') center/cover no-repeat}
+.license-back{background:#850000 url('assets/license/back.png') center/cover no-repeat}
+.license-face .license-art{position:absolute;inset:0;display:block;width:100%;height:100%;max-width:none;object-fit:cover;border-radius:inherit;z-index:1;pointer-events:none}
+.license-face canvas{display:none!important}
+.license-face::before{z-index:2}
+/* One visible image plane on mobile avoids iOS's backface/canvas compositing
+   failure while retaining perspective, full rotation and the gold sheen. */
+.license-flip.license-flat .license-flip-inner{transform-style:flat;-webkit-transform-style:flat}
+.license-flip.license-flat .license-face{transform:none;-webkit-transform:none;backface-visibility:visible;-webkit-backface-visibility:visible}
+.license-flat .license-paper-core,.license-flat .license-edge,.license-flat .license-back{display:none}
+.license-flat.is-paint-back .license-front{display:none}
+.license-flat.is-paint-back .license-back{display:block}
+.license-flat .license-face{box-shadow:0 10px 23px #4a120e20,0 0 0 .5px #ad7539}
+
 
 
 

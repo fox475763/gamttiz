@@ -19,6 +19,10 @@
   const fctx=front.getContext('2d'),bctx=back.getContext('2d');
   if(previewScale<1){for(const ctx of [fctx,bctx])ctx.setTransform(previewScale,0,0,previewScale,0,0);}
   const cardInner=flip.querySelector('.license-flip-inner');
+  const backArt=$('license-back-art');
+  // Mobile WebKit can drop a canvas or backface in a preserve-3d stack.
+  // Paint one image plane at a time, with the same perspective and drag motion.
+  if(mobile)flip.classList.add('license-flat');
   if(wallet)window.addEventListener('message',e=>{
     if(e.source===parent&&e.origin===location.origin&&e.data?.type==='gamttiz-wallet-visibility'){
       document.body.classList.toggle('license-wallet-inactive',!e.data.active);
@@ -33,8 +37,13 @@
   const pose={yaw:0,pitch:0}, goal={...pose};
   let motionFrame=0,lastFrame=0;
   function paint(){
-    // One compositor transform rather than two inherited custom properties.
-    cardInner.style.transform=`rotateX(${pose.pitch.toFixed(3)}deg) rotateY(${pose.yaw.toFixed(3)}deg)`;
+    let angle=pose.yaw;
+    if(mobile){
+      const half=Math.floor((angle+90)/180);
+      flip.classList.toggle('is-paint-back',Math.abs(half%2)===1);
+      angle-=half*180;
+    }
+    cardInner.style.transform=`rotateX(${pose.pitch.toFixed(3)}deg) rotateY(${angle.toFixed(3)}deg)`;
   }
   function animate(time){
     const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
@@ -130,6 +139,9 @@
       const sprite = await image(imagePath(index));
       if (seq !== renderVersion) return;
       drawBack(bctx,sprite,name,member,index);
+      // A regular image is much more reliable than a live canvas inside a
+      // transformed layer on iOS. Keep the original template as its fallback.
+      if(backArt)backArt.src=back.toDataURL('image/png');
       $('license-card-details').textContent = `${name || '이름 미입력'}, ${names[index]}, ${member}`;
       // Never encode full-size files during the forging/signing animation.
       if(!editing&&record&&!wallet&&$('license-issuing').hidden)scheduleExport(seq,sprite,name,member,index);
@@ -290,11 +302,14 @@
     const empty=document.createElement('a');empty.className='license-wallet-empty';empty.href='license.html';empty.target='_top';empty.textContent='아직 발급된 카드가 없어요. 나만의 라이센스 만들기 ↗';document.querySelector('.license-layout').append(empty);
     return;
   }
-  Promise.all([image('assets/license/front.png'),image('assets/license/back.png')]).then(async ([f,b])=>{
-    frontImage=f;backImage=b; try{await document.fonts.load('600 46px "Wanted Sans Variable"');await document.fonts.ready;}catch{}
+  Promise.all([image('assets/license/front.png'),image('assets/license/back.png')]).then(([f,b])=>{
+    frontImage=f;backImage=b;
     drawTemplate(fctx,frontImage);drawTemplate(bctx,backImage);ready=true;viewEdit(!record);
+    // Font fetching must never delay the artwork or prevent the card appearing.
+    try{document.fonts.load('600 46px "Wanted Sans Variable"').then(()=>render()).catch(()=>{});}catch{}
   }).catch(()=>status('카드 이미지를 불러오지 못했어요. 잠시 후 다시 접속해주세요.'));
 })();
+
 
 
 
