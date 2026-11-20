@@ -255,19 +255,35 @@
     flip.setAttribute('aria-label',isBack?'카드 앞면 보기':'카드 뒷면 보기');
     $('license-turn').textContent = isBack?'↻ 앞면 보기':'↻ 뒷면 보기';
   }
+  // The nearest square is the dial's active profile; geometry is measured
+  // from the actual cards, including gaps and centering padding.
+  function profileCenter(el){const r=el.getBoundingClientRect();return r.left+r.width/2;}
+  function closestProfile(){
+    if(!friends.clientWidth)return selected;
+    const center=profileCenter(friends);let best=0,dist=Infinity;
+    [...friends.children].forEach((card,i)=>{const d=Math.abs(profileCenter(card)-center);if(d<dist){dist=d;best=i;}});
+    return best;
+  }
+  function paintProfileDial(index=closestProfile()){
+    [...friends.children].forEach((card,i)=>{
+      card.classList.toggle('is-profile-current',i===index);
+      card.classList.toggle('is-profile-near',Math.abs(i-index)===1);
+      card.classList.toggle('is-profile-far',Math.abs(i-index)>1);
+    });
+  }
+  function centerProfile(index,smooth=false){
+    const card=friends.children[index];if(!card||!friends.clientWidth)return;
+    const left=friends.scrollLeft+profileCenter(card)-profileCenter(friends);
+    if(Math.abs(friends.scrollLeft-left)>1)friends.scrollTo({left,behavior:smooth&&!reduced.matches?'smooth':'instant'});
+  }
   function setSelected(index,scroll=true,smooth=false) {
     selected = Math.max(0,Math.min(names.length-1,index));
     const radio = friends.querySelector(`input[value="${selected}"]`); if(radio) radio.checked = true;
     $('license-profile-prev').disabled=selected===0;
     $('license-profile-next').disabled=selected===names.length-1;
     $('license-profile-count').textContent=`${String(selected+1).padStart(2,'0')} / ${names.length}`;
-    if(scroll&&friends.clientWidth){
-      const left=selected*friends.clientWidth;
-      if(Math.abs(friends.scrollLeft-left)>1){
-        if(friends.scrollTo)friends.scrollTo({left,behavior:smooth&&!reduced.matches?'smooth':'instant'});
-        else friends.scrollLeft=left;
-      }
-    }
+    if(scroll)centerProfile(selected,smooth);
+    paintProfileDial(smooth&&scroll?closestProfile():selected);
   }
   function chooseProfile(index,scroll=true,smooth=true){
     if(!editing||wallet||index<0||index>=names.length)return;
@@ -307,25 +323,64 @@
     const label=document.createElement('label'); label.className='license-friend';
     const radio=document.createElement('input'); radio.type='radio'; radio.name='character'; radio.value=String(index); radio.setAttribute('aria-label',name); radio.checked=index===0;
     const img=document.createElement('img'); img.src=imagePath(index); img.alt=''; img.loading='lazy'; img.decoding='async';
-    const text=document.createElement('span'); text.textContent=name;
-    label.append(radio,img,text); friends.append(label);
+    const text=document.createElement('span'); text.className='license-profile-name';text.textContent=name;
+    const num=document.createElement('small');num.className='license-profile-no';num.textContent='NO. '+String(index+1).padStart(2,'0');
+    label.append(radio,num,img,text); friends.append(label);
     radio.addEventListener('change',()=>chooseProfile(index));
   });
   if(!wallet){
-    let scrollTimer;
-    friends.addEventListener('scroll',()=>{
+    let scrollTimer,profileFrame=0,profileDrag=null,skipProfileClick=false,lastWheel=0;
+    const settle=()=>{
       clearTimeout(scrollTimer);
-      scrollTimer=setTimeout(()=>{
-        if(friends.clientWidth)chooseProfile(Math.round(friends.scrollLeft/friends.clientWidth),false);
-      },110);
-    },{passive:true});
+      if(editing&&friends.clientWidth&&!profileDrag)chooseProfile(closestProfile(),false);
+    };
+    const onScroll=()=>{
+      if(!profileFrame)profileFrame=requestAnimationFrame(()=>{profileFrame=0;paintProfileDial();});
+      clearTimeout(scrollTimer);scrollTimer=setTimeout(settle,160);
+    };
+    friends.addEventListener('scroll',onScroll,{passive:true});
+    friends.addEventListener('scrollend',settle,{passive:true});
     $('license-profile-prev').addEventListener('click',()=>chooseProfile(selected-1));
     $('license-profile-next').addEventListener('click',()=>chooseProfile(selected+1));
     friends.addEventListener('keydown',e=>{
-      if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
-        e.preventDefault();chooseProfile(selected+(e.key==='ArrowRight'?1:-1));
-      }
+      const keys=['ArrowLeft','ArrowRight','Home','End'];if(!keys.includes(e.key))return;
+      e.preventDefault();const index=e.key==='Home'?0:e.key==='End'?names.length-1:selected+(e.key==='ArrowRight'?1:-1);
+      chooseProfile(index);
     });
+    // A conventional mouse wheel steps one detent; horizontal trackpad and
+    // touch scrolling retain their native inertia and snap behavior.
+    friends.addEventListener('wheel',e=>{
+      if(!editing||e.ctrlKey||Math.abs(e.deltaY)<=Math.abs(e.deltaX)||!e.deltaY)return;
+      const direction=e.deltaY>0?1:-1,next=selected+direction;
+      if(next<0||next>=names.length)return;
+      e.preventDefault();const now=performance.now();
+      if(now-lastWheel<140)return;
+      lastWheel=now;chooseProfile(next);
+    },{passive:false});
+    friends.addEventListener('pointerdown',e=>{
+      if(!editing||e.pointerType!=='mouse'||e.button!==0)return;
+      skipProfileClick=false;profileDrag={id:e.pointerId,x:e.clientX,left:friends.scrollLeft,moved:false};
+    });
+    friends.addEventListener('pointermove',e=>{
+      if(!profileDrag||profileDrag.id!==e.pointerId)return;
+      const d=profileDrag,dx=e.clientX-d.x;
+      if(!d.moved&&Math.abs(dx)>6){d.moved=true;friends.classList.add('is-profile-dragging');friends.setPointerCapture(e.pointerId);}
+      if(d.moved){e.preventDefault();friends.scrollLeft=d.left-dx;}
+    });
+    function endProfileDrag(e){
+      if(!profileDrag||profileDrag.id!==e.pointerId)return;
+      const moved=profileDrag.moved;profileDrag=null;
+      if(moved){skipProfileClick=true;const index=closestProfile();friends.classList.remove('is-profile-dragging');chooseProfile(index,true);}
+    }
+    friends.addEventListener('pointerup',endProfileDrag);
+    friends.addEventListener('pointercancel',endProfileDrag);
+    friends.addEventListener('lostpointercapture',endProfileDrag);
+    friends.addEventListener('pointerleave',e=>{if(profileDrag&&!profileDrag.moved)profileDrag=null;});
+    friends.addEventListener('click',e=>{if(skipProfileClick){skipProfileClick=false;e.preventDefault();e.stopPropagation();}},true);
+    if('ResizeObserver' in window){
+      let width=0;
+      new ResizeObserver(()=>{if(friends.clientWidth&&friends.clientWidth!==width){width=friends.clientWidth;centerProfile(selected);paintProfileDial(selected);}}).observe(friends);
+    }
   }
   const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
   function pointerPosition(e){

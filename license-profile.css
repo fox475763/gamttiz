@@ -1,0 +1,61 @@
+/* Favorite profile: horizontal square dial, independent of the license artwork. */
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker{
+  display:block;min-width:0;padding:0;border:0;background:transparent;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friends{
+  --profile-size:clamp(105px,32vw,142px);
+  box-sizing:border-box;display:flex;align-items:center;gap:11px;
+  width:100%;min-width:0;padding:11px calc((100% - var(--profile-size))/2) 13px;
+  overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;user-select:none;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);
+  mask-image:linear-gradient(to right,transparent,#000 10%,#000 90%,transparent);
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friends.is-profile-dragging{scroll-snap-type:none;cursor:grabbing}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend,
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend:has(input:checked){
+  box-sizing:border-box;flex:0 0 var(--profile-size);width:var(--profile-size);height:var(--profile-size);aspect-ratio:1;
+  min-height:0;min-width:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;justify-items:center;align-items:center;
+  gap:3px;position:relative;padding:10px 7px 9px;border:1px solid #fffc;border-radius:19px;
+  background:linear-gradient(145deg,#fffdf4e6,#f8efdf8c 65%,#e9dcc46e);
+  box-shadow:inset 0 1px 2px #fff,0 4px 9px #62401d14;
+  scroll-snap-align:center;scroll-snap-stop:normal;opacity:.72;transform:scale(.94);
+  transition:transform .24s cubic-bezier(.22,1,.36,1),opacity .22s,background .22s,border-color .22s,box-shadow .22s;
+  cursor:pointer;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend.is-profile-near{transform:scale(.975);opacity:.88}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend.is-profile-current,
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend.is-profile-current:has(input:checked){
+  opacity:1;transform:scale(1);border-color:#b89149b0;
+  background:radial-gradient(ellipse at 35% 12%,#ffffffde,transparent 62%),linear-gradient(145deg,#fff9ee,#f6e7c9bb);
+  box-shadow:inset 0 1px 2px #fff,0 0 0 1px #c39e5450,0 5px 14px #865c2422;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend img{
+  width:100%;height:100%;max-width:none;min-height:0;object-fit:contain;animation:none;pointer-events:none;
+  -webkit-user-drag:none;filter:drop-shadow(0 4px 3px #62432218);
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend:has(input:checked) img{animation:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend .license-profile-no{
+  justify-self:start;color:#926d39;font:650 8px/1.2 var(--type-sans,Arial,sans-serif);letter-spacing:.08em;font-variant-numeric:tabular-nums;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend .license-profile-name{
+  font-size:clamp(10px,2.7vw,12px);line-height:1.25;color:#651014;font-weight:650;max-width:100%;overflow-wrap:anywhere;text-align:center;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend.is-profile-current::after,
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend.is-profile-current:has(input:checked)::after{
+  content:"";display:block;position:absolute;top:10px;right:9px;width:7px;height:4px;border-left:1.5px solid #a87935;border-bottom:1.5px solid #a87935;transform:rotate(-45deg);pointer-events:none;
+}
+.license-profile-controls{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:2px}
+.license-profile-controls .license-profile-count{margin:0;min-width:64px;font:650 11px/1.4 var(--type-sans,Arial,sans-serif);font-variant-numeric:tabular-nums;color:#886d45;letter-spacing:.1em}
+.license-profile-picker .license-profile-controls .license-profile-arrow{
+  width:44px;height:44px;border:1px solid #fff9;color:#850000;
+  background:linear-gradient(145deg,#fffaf0,#f6ead2a6);box-shadow:inset 0 1px 2px #fff,0 3px 8px #60411d16;
+}
+.license-profile-controls .license-profile-arrow svg{width:21px;height:21px}
+.license-profile-picker .license-profile-controls .license-profile-arrow:disabled{opacity:.32}
+@media(max-width:380px){
+  .license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friends{--profile-size:clamp(96px,32vw,118px);gap:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend{transition:none;transform:none}
+}

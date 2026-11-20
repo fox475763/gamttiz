@@ -74,6 +74,23 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        assert.deepEqual(layout.map(c=>c.href),['quiz.html','combo.html','draw.html']);
        assert.ok(layout.every(c=>c.aligned&&c.material),'Play glass and icon alignment at '+viewport.width);
      }
+     if(filename==='license.html'){
+       await page.locator('#license-edit').click();
+       const rail=page.locator('#license-friends');
+       await rail.waitFor({state:'visible'});
+       assert.equal(await rail.locator('.license-friend').count(),14);
+       assert.equal(await rail.evaluate(el=>getComputedStyle(el).scrollSnapType),'x mandatory');
+       const square=await rail.locator('.license-friend.is-profile-current').boundingBox();
+       assert.ok(square&&Math.abs(square.width-square.height)<2,'favorite profile card must be square');
+       const previous=await rail.locator('input:checked').getAttribute('value');
+       await page.locator('#license-profile-next').click();
+       await page.waitForFunction(n=>document.querySelector('#license-friends input:checked').value!==n,previous);
+       await rail.focus();
+       await page.keyboard.press('End');
+       await page.waitForFunction(()=>document.querySelector('#license-profile-count').textContent==='14 / 14');
+       assert.equal(await rail.locator('input:checked').getAttribute('value'),'13');
+       await page.locator('#license-cancel').click();
+     }
      if(filename==='collection.html'){
        assert.equal(await page.locator('.dex-tile').count(),20);
        assert.equal(await page.locator('.dex-unknown').count(),6);
