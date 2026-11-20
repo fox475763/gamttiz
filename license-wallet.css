@@ -6,6 +6,9 @@
 .gtz-shake-button:focus-visible{outline:2px solid #aa843e;outline-offset:3px}
 .gtz-shake-status{margin:8px 0 0;font-size:11px;line-height:1.5;color:#816349;text-align:center}
 .gtz-shake-status:empty{display:none}
+.gtz-shake-reconnect{display:block;margin:8px auto 0;padding:5px 9px;border:0;border-bottom:1px solid #c9ad77;background:transparent;color:#816349;font:inherit;font-size:11px;cursor:pointer;min-height:32px}
+.gtz-shake-reconnect[hidden]{display:none!important}
+.gtz-shake-reconnect:disabled{opacity:.5}
 @media(max-width:900px){
   .gtz-wallet-sheet[hidden]{display:none!important}
   html.gtz-wallet-open,html.gtz-wallet-open body{overflow:hidden!important;overscroll-behavior:none}

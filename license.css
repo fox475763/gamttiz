@@ -378,6 +378,63 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
   .license-page:not(.has-license):not(.license-wallet-view) .license-friends-field{margin:23px 0}
 }
 
+/* License application: an actual paper form, not an app-style card. */
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0}
+.license-page:not(.has-license):not(.license-wallet-view) .license-layout{max-width:585px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-panel{
+  --form-ink:#49332b;--form-rule:#a79882;--form-faint:#d8cec0;
+  isolation:isolate;background:#fffef9;
+  background-image:linear-gradient(116deg,#d9c9a514,transparent 28%,transparent 74%,#e6d6bb12);
+  border:1px solid #c8bca6;border-radius:0;
+  padding:36px 42px 24px;box-shadow:0 2px 3px #50321b16,0 14px 35px #50321b14;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-panel::before{
+  content:"";position:absolute;inset:9px;border:1px solid #bfae8d70;pointer-events:none;z-index:-1;
+}
+.license-application-head{border-bottom:3px double #a79882;margin:0 0 28px;padding-bottom:22px}
+.license-document-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;text-align:left;font-size:10px;line-height:1.5;color:#786b59;letter-spacing:.08em;border-bottom:1px solid #d8cec0;padding-bottom:10px;margin-bottom:24px}
+.license-document-meta span:first-child,.license-document-footer{font-family:Georgia,"Times New Roman",serif;font-variant-numeric:tabular-nums}
+.license-application-mark{display:grid;place-items:center;width:42px;height:42px;border:1px solid #9c7639;border-radius:50%;margin:0 auto 9px;color:#9c7639;font-size:22px;outline:1px solid #cbb78a;outline-offset:3px}
+.license-application-kicker{color:#7b5434;font-size:10px;margin:14px 0 12px;letter-spacing:.15em}
+.license-page:not(.has-license):not(.license-wallet-view) .license-application-head h2{font-family:"Noto Serif KR","Nanum Myeongjo",Batang,serif;font-weight:700;color:#5e1b20;letter-spacing:-.055em;font-size:clamp(24px,5vw,32px);margin-bottom:6px}
+.license-application-caption{font:400 10px/1.6 Georgia,serif;color:#8e7b62;letter-spacing:.08em}
+.license-page:not(.has-license):not(.license-wallet-view) .license-label{display:flex;align-items:center;gap:8px;color:var(--form-ink);font-size:13px;font-weight:650;margin:0 0 11px;width:100%;box-sizing:border-box}
+.license-label small{font:400 9px/1.4 Georgia,serif;color:#92816b;letter-spacing:.08em;margin-left:auto}
+.license-field-no{display:inline-grid;place-items:center;min-width:24px;height:24px;border:1px solid #b19b78;color:#8a663a;margin:0;font-size:11px}
+.license-document-name{padding-bottom:0}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name{min-height:43px;border:1px solid var(--form-rule);padding:11px 12px;background:#ffffff8c;font-size:16px}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name:focus{outline:1px solid #9c7639;outline-offset:1px;border-color:#9c7639}
+.license-page:not(.has-license):not(.license-wallet-view) .license-friends-field{border:0;margin:24px 0 26px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker{background:#fffef9;border:1px solid var(--form-rule);padding:9px 5px;border-radius:0}
+.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend{background:transparent;border-radius:0;box-shadow:none}
+.license-profile-count{font-family:Georgia,serif}
+.license-oath-intro{color:#726152;font-size:11px;margin:0 0 10px}
+.license-oath-list{border:1px solid var(--form-rule)}
+.license-oath-clause{padding:12px 11px;grid-template-columns:18px minmax(0,1fr);color:#54473b;gap:10px}
+.license-oath-clause+.license-oath-clause{border-top:1px solid var(--form-faint)}
+.license-oath-clause strong{font-size:12px;color:#49332b}
+.license-oath-clause:has(input:checked){background:#f4eee1}
+.license-oath-note{color:#887866}
+.license-paper-declaration{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:24px 0 0;padding-top:16px;border-top:3px double var(--form-rule)}
+.license-paper-declaration p{margin:0;color:#54473b;font-size:11px;line-height:1.85;word-break:keep-all}
+.license-paper-seal{flex:none;display:flex;flex-direction:column;justify-content:center;align-items:center;width:60px;aspect-ratio:1;border:3px double #9b3131;border-radius:50%;color:#9b3131;transform:rotate(-9deg);gap:2px;opacity:.8}
+.license-paper-seal span{font:600 6px/1.25 Georgia,serif;letter-spacing:.06em}
+.license-paper-seal b{font-size:13px;letter-spacing:.06em}
+.license-page:not(.has-license):not(.license-wallet-view) #license-submit{border-radius:0;box-shadow:none;min-height:48px}
+.license-document-footer{display:flex;justify-content:space-between;gap:8px;color:#8e7b62;letter-spacing:.08em;font-size:9px;border-top:1px solid var(--form-faint);padding-top:12px;margin-top:22px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-status:empty{display:none}
+.license-page:not(.has-license):not(.license-wallet-view) .license-storage-note{margin-top:10px}
+@media(max-width:760px){
+  .license-page:not(.has-license):not(.license-wallet-view) .license-main{padding-inline:15px;padding-top:24px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-panel{padding:22px 22px 20px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-panel::before{inset:6px}
+  .license-document-meta{font-size:9px;margin-bottom:20px}
+  .license-application-head{padding-bottom:19px;margin-bottom:22px}
+  .license-label small{font-size:8px}
+  .license-oath-clause{padding:10px 8px}
+  .license-paper-seal{width:54px}
+}
+
 
 
 
