@@ -1,0 +1,158 @@
+/* MY ID — animated gallery. All declarations are confined to issued cards. */
+.license-ambient,.license-issued-eyebrow{display:none}
+.license-page.has-license{
+  --gallery-ink:#f8f3ee;--gallery-muted:#d1c0ba;--gallery-accent:#f4d5a2;
+  --gallery-ease:cubic-bezier(.22,1,.36,1);
+  background:#201417;
+}
+body.license-page.has-license:not(.license-wallet-view) .license-main{
+  position:relative;isolation:isolate;overflow:hidden;max-width:none;width:100%;
+  min-height:calc(100svh - 88px);padding:clamp(37px,6vw,76px) clamp(20px,5vw,64px) 100px;
+  background:#201417;color:var(--gallery-ink);
+}
+.license-page.has-license .license-ambient{
+  display:block;position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:linear-gradient(150deg,#21151e 0%,#311b1e 47%,#1a1518 100%);
+}
+/* Positive stacking layer, below the content; no fixed descendants or negative z-index. */
+.license-page.has-license .license-ambient-light{
+  position:absolute;display:block;width:100%;height: min(1100px,100%);top:0;left:0;
+  transform-origin:50% 50%;pointer-events:none;
+}
+.license-ambient-light--ruby{
+  background:radial-gradient(ellipse at 29% 34%,#b8463cbb 0%,#7f262ca8 30%,transparent 66%);
+  animation:license-ruby-flow 15s ease-in-out infinite alternate;
+}
+.license-ambient-light--gold{
+  background:radial-gradient(ellipse at 70% 45%,#f1b56f93 0%,#b96c3b62 24%,transparent 57%);
+  animation:license-gold-flow 19s ease-in-out -5s infinite alternate;
+}
+.license-ambient-ribbons{
+  position:absolute;display:block;top:0;left:0;width:100%;height:min(1100px,100%);
+  opacity:.48;transform-origin:50% 48%;animation:license-ribbon-flow 22s ease-in-out infinite alternate;
+}
+@keyframes license-ruby-flow{
+  0%{transform:translate3d(-22%,-13%,0) scale(1.4);opacity:.65}
+  100%{transform:translate3d(38%,12%,0) scale(1.53);opacity:1}
+}
+@keyframes license-gold-flow{
+  0%{transform:translate3d(28%,-14%,0) scale(1.45);opacity:.7}
+  100%{transform:translate3d(-39%,19%,0) scale(1.5);opacity:1}
+}
+@keyframes license-ribbon-flow{
+  0%{transform:translate3d(-10%,-5%,0) rotate(-11deg) scale(1.22);opacity:.35}
+  100%{transform:translate3d(12%,7%,0) rotate(13deg) scale(1.28);opacity:.72}
+}
+.license-page.has-license .license-layout,.license-page.has-license .license-heading{position:relative;z-index:1}
+.license-page.has-license:not(.license-wallet-view) .license-heading{margin:0 auto clamp(26px,4vw,46px);text-align:center}
+.license-page.has-license:not(.license-wallet-view) .license-heading::after{display:none}
+.license-page.has-license:not(.license-wallet-view) .license-issued-eyebrow{
+  display:block;color:#e2cdc2;font-family:inherit;font-size:10px;font-weight:650;letter-spacing:.24em;margin:0 0 10px;
+}
+.license-page.has-license:not(.license-wallet-view) .license-heading h1{
+  font-family:inherit;font-size:clamp(40px,6.5vw,70px);font-weight:750;letter-spacing:-.035em;line-height:1;
+  color:#ffe1b6;background:linear-gradient(110deg,#ffd7a4 10%,#fff6e6 47%,#dba774 88%);
+  background-size:180% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  animation:license-welcome-gold 7.5s ease-in-out infinite alternate;filter:none;
+}
+.license-page.has-license:not(.license-wallet-view):not(.license-animating) .license-heading{animation:license-ui-reveal .65s var(--gallery-ease) backwards}
+.license-page.has-license:not(.license-wallet-view) .license-layout{
+  display:flex;flex-direction:column;max-width:430px;margin:auto;gap:20px;align-items:center;
+}
+.license-page.has-license:not(.license-wallet-view) .license-preview{position:static;gap:20px;padding:0;width:100%}
+.license-page.has-license:not(.license-wallet-view) .license-flip{width:min(100%,328px)}
+.license-page.has-license .license-face{box-shadow:0 22px 48px #08030680,0 2px 8px #0b03062e}
+.license-page.has-license:not(.license-wallet-view) .license-celebration{
+  color:var(--gallery-muted);font-size:12px;font-weight:500;line-height:1.5;letter-spacing:0;margin:0;
+}
+.license-page.has-license:not(.license-wallet-view) .license-panel{width:100%;padding:0;border:0;background:none;box-shadow:none;margin:0}
+.license-page.has-license:not(.license-wallet-view) #license-actions{
+  display:grid;grid-template-columns:1.12fr 1fr;gap:10px;
+  grid-template-areas:"save member" "shake shake" "manage manage";align-items:center;
+}
+.license-page.has-license:not(.license-wallet-view) #download-both{grid-area:save}
+.license-page.has-license:not(.license-wallet-view) .license-member-link{grid-area:member}
+.license-page.has-license:not(.license-wallet-view) #license-shake-setting-mount{grid-area:shake}
+.license-page.has-license:not(.license-wallet-view) .license-manage{grid-area:manage}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button){
+  box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;
+  min-height:56px;width:100%;margin:0;padding:10px 12px;border-radius:18px;border:0;
+  font-family:inherit;font-size:13px;font-weight:650;letter-spacing:-.02em;line-height:1.3;
+  -webkit-tap-highlight-color:transparent;text-decoration:none;
+  transition:transform .24s var(--gallery-ease),background-color .24s,box-shadow .24s,color .24s;
+}
+.license-page.has-license:not(.license-wallet-view) #download-both{
+  color:#27191b;background:#fff4e6;box-shadow:0 5px 22px #07030428;
+}
+.license-page.has-license:not(.license-wallet-view) .license-member-link{
+  color:#fff4ed;background:#ffffff16;box-shadow:inset 0 0 0 1px #ffffff20;
+}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button)::before{
+  content:"";width:19px;height:19px;flex:none;background:currentColor;
+  -webkit-mask:var(--gallery-icon) center/contain no-repeat;mask:var(--gallery-icon) center/contain no-repeat;
+}
+.license-page.has-license:not(.license-wallet-view) #download-both{
+  --gallery-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12m-5-5 5 5 5-5M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4'/%3E%3C/svg%3E");
+}
+.license-page.has-license:not(.license-wallet-view) .license-member-link{
+  --gallery-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='2'/%3E%3Crect x='14' y='3' width='7' height='7' rx='2'/%3E%3Crect x='3' y='14' width='7' height='7' rx='2'/%3E%3Crect x='14' y='14' width='7' height='7' rx='2'/%3E%3C/svg%3E");
+}
+.license-page.has-license:not(.license-wallet-view) #license-shake-setting-mount:not(:has(.gtz-shake-setting:not([hidden]))){display:none}
+.license-page.has-license:not(.license-wallet-view) #license-actions:not(:has(.gtz-shake-setting:not([hidden]))){grid-template-areas:"save member" "manage manage"}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-setting{margin:0}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-button{
+  --gallery-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='8.5' y='3' width='7' height='18' rx='1.6'/%3E%3Cpath d='M11.5 17.8h1M5.4 8l-2 4 2 4m13.2-8 2 4-2 4'/%3E%3C/svg%3E");
+  min-height:60px;justify-content:flex-start;text-align:left;padding:12px 15px;gap:10px;
+  color:#fff5ec;background:#ffffff0e;box-shadow:inset 0 0 0 1px #ffffff19;
+}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-button::after{
+  content:"";margin-left:auto;width:42px;height:25px;flex:none;border-radius:100px;
+  background:radial-gradient(circle at 12px 50%,#fff 0 8px,transparent 8.8px) #ffffff25;
+  transition:background-color .25s,background-position .25s var(--gallery-ease);
+}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-button[aria-pressed="true"]{background:#ffffff12;color:#fff5ec}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-button[aria-pressed="true"]::after{background:radial-gradient(circle at 30px 50%,#fff 0 8px,transparent 8.8px) #b07552}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-status{font-size:11px;color:#e1c9bd;text-align:left;line-height:1.5;margin:7px 10px 0;word-break:keep-all}
+.license-page.has-license:not(.license-wallet-view) .gtz-shake-reconnect{color:#e6c9af;border-color:#ffffff35}
+.license-page.has-license:not(.license-wallet-view) .license-manage{margin:2px 0 0;padding:0;gap:3px;border:0;justify-content:center}
+.license-page.has-license:not(.license-wallet-view) .license-link{
+  min-height:44px;padding:8px 15px;border:0;border-radius:12px;color:#d8bfba;font-size:12px;font-weight:500;text-decoration:none;
+  transition:color .2s,background-color .2s,transform .24s var(--gallery-ease);
+}
+.license-page.has-license:not(.license-wallet-view) .license-link+.license-link{border-left:0;color:#e7b4ae}
+.license-page.has-license:not(.license-wallet-view) .license-status{color:#ffe5ba}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button,.license-link):focus-visible{outline:2px solid #ffdbad;outline-offset:4px}
+.license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button,.license-link):not(:disabled):active{transform:scale(.965)}
+.license-page.has-license:not(.license-wallet-view) .license-save-dialog{border:0;border-radius:24px;background:#fff7ed;box-shadow:0 20px 75px #0006}
+.license-page.has-license:not(.license-wallet-view) .license-save-dialog::backdrop{background:#100b0bd0;backdrop-filter:none}
+.license-page.has-license:not(.license-wallet-view) .license-save-dialog button{min-height:50px;border:0;border-radius:16px;background:#27191b;color:#fff4e6}
+.license-page.license-wallet-view.has-license{background:#201417!important}
+.license-page.license-wallet-view.has-license .license-main{position:relative;isolation:isolate;overflow:hidden;min-height:100dvh;background:#201417}
+@media(hover:hover) and (pointer:fine){
+  .license-page.has-license:not(.license-wallet-view) #download-both:not(:disabled):hover{background:#fff;transform:translateY(-2px);box-shadow:0 8px 25px #0004}
+  .license-page.has-license:not(.license-wallet-view) :is(.license-member-link,.gtz-shake-button):not(:disabled):hover{background:#ffffff26;transform:translateY(-2px)}
+  .license-page.has-license:not(.license-wallet-view) .license-link:hover{background:#ffffff12;color:#fff}
+  .license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button,.license-link):active{transform:scale(.965)}
+}
+@media(min-width:900px){
+  .license-page.has-license:not(.license-wallet-view) .license-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:clamp(45px,7vw,100px);max-width:860px;align-items:center}
+  .license-page.has-license:not(.license-wallet-view) .license-flip{width:min(100%,360px)}
+  .license-page.has-license:not(.license-wallet-view) .license-panel{max-width:360px}
+}
+@media(max-width:760px){
+  body.license-page.has-license:not(.license-wallet-view) .license-main{padding:30px 24px 98px}
+  .license-page.has-license:not(.license-wallet-view) .license-heading{margin-bottom:26px}
+  .license-page.has-license:not(.license-wallet-view) .license-heading h1{font-size:clamp(37px,11vw,48px)}
+  .license-page.has-license:not(.license-wallet-view) .license-flip{width:min(100%,74vw,300px)}
+  .license-page.has-license:not(.license-wallet-view) .license-panel{max-width:336px}
+  .license-page.has-license:not(.license-wallet-view) .license-preview{gap:17px}
+  .license-page.has-license:not(.license-wallet-view) .license-layout{gap:18px}
+}
+.license-page-inactive :is(.license-ambient-light,.license-ambient-ribbons),.license-wallet-inactive :is(.license-ambient-light,.license-ambient-ribbons),.license-animating :is(.license-ambient-light,.license-ambient-ribbons){animation-play-state:paused}
+@media(prefers-reduced-motion:reduce){
+  .license-ambient-light,.license-ambient-ribbons{animation:none!important}
+  .license-ambient-light--ruby{transform:translate3d(-8%,0,0) scale(1.3)}
+  .license-ambient-light--gold{transform:translate3d(7%,0,0) scale(1.3)}
+  .license-page.has-license:not(.license-wallet-view) .license-heading,.license-page.has-license:not(.license-wallet-view) .license-heading h1{animation:none!important}
+  .license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button,.license-link){transition:none!important;transform:none!important}
+}
