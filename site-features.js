@@ -345,7 +345,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   // mounting the entire license page in an iframe or running 3D animations.
   const walletStyle=document.createElement('style');
   walletStyle.textContent='.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;min-height:0;padding:12px 6px;background:transparent!important;border:0!important;box-shadow:none!important}.gtz-wallet-lite-card{display:block;width:min(72vw,290px);height:auto;aspect-ratio:1080/1718;border-radius:12px;box-shadow:0 12px 28px #0003;background:#780708}.gtz-wallet-lite-error{font-size:13px;color:#7d1616;text-align:center;padding:30px 12px}';
-  document.head.append(walletStyle);
+  walletStyle.textContent+=' .gtz-wallet-rotator{position:relative;width:min(72vw,290px);aspect-ratio:1080/1718;touch-action:none;user-select:none;-webkit-user-select:none;perspective:1100px;cursor:grab;flex:none}.gtz-wallet-rotator:active{cursor:grabbing}.gtz-wallet-rotator-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;will-change:transform}.gtz-wallet-face{position:absolute;inset:0;width:100%!important;height:100%!important;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 12px 28px #0003}.gtz-wallet-face-back{transform:rotateY(180deg)}.gtz-wallet-turn{border:1px solid #c7a67d;border-radius:100px;padding:9px 19px;color:#7b171b;background:#fff9ef;font:600 12px inherit;cursor:pointer}.gtz-wallet-hint{font-size:12px;color:#7d6a60;margin:0;text-align:center}@media(max-width:900px){.gtz-wallet-rotator-inner{transform-style:flat;-webkit-transform-style:flat}.gtz-wallet-face{backface-visibility:visible;-webkit-backface-visibility:visible;transform:none}.gtz-wallet-face-back{display:none}.gtz-wallet-rotator.is-back .gtz-wallet-face-front{display:none}.gtz-wallet-rotator.is-back .gtz-wallet-face-back{display:block}}';document.head.append(walletStyle);
   const friendNames=['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
   const qrMatrix=[
     '111111100101010011111011101111111',
@@ -388,14 +388,26 @@ const walletMedia=matchMedia('(max-width: 900px)');
     let data;try{data=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null')}catch{}
     frame.replaceChildren();frameStarted=true;
     if(!data||!Number.isInteger(data.character)||data.character<0||data.character>=friendNames.length)return;
-    const canvas=document.createElement('canvas');canvas.className='gtz-wallet-lite-card';
-    canvas.width=540;canvas.height=859;canvas.setAttribute('role','img');canvas.setAttribute('aria-label','감띠즈 라이센스 뒷면 '+data.name);
-    frame.append(canvas);
+    const rotator=make('div','gtz-wallet-rotator');const inner=make('div','gtz-wallet-rotator-inner');
+    const frontCanvas=document.createElement('canvas');frontCanvas.className='gtz-wallet-face gtz-wallet-face-front';frontCanvas.width=540;frontCanvas.height=859;frontCanvas.setAttribute('aria-label','라이센스 앞면');
+    const canvas=document.createElement('canvas');canvas.className='gtz-wallet-face gtz-wallet-face-back';canvas.width=540;canvas.height=859;canvas.setAttribute('aria-label','라이센스 뒷면 '+data.name);
+    inner.append(frontCanvas,canvas);rotator.append(inner);frame.append(rotator);
+    const turn=make('button','gtz-wallet-turn','카드 뒤집기 ↻');turn.type='button';frame.append(turn,make('p','gtz-wallet-hint','카드를 좌우로 드래그하거나 탭해서 돌려보세요.'));
+    let yaw=0,shownBack=false,drag=null,frameId=0,targetYaw=0,dragged=false;
+    const drawPose=()=>{frameId=0;const delta=targetYaw-yaw;yaw+=Math.abs(delta)<.15?delta:delta*.24;const normalized=((yaw%360)+360)%360;const back=normalized>90&&normalized<270;rotator.classList.toggle('is-back',back);inner.style.transform='rotateY('+((yaw-Math.round(yaw/180)*180).toFixed(2))+'deg)';if(Math.abs(targetYaw-yaw)>.15)frameId=requestAnimationFrame(drawPose)};
+    const aim=n=>{targetYaw=n;if(!frameId)frameId=requestAnimationFrame(drawPose)};
+    turn.addEventListener('click',()=>{shownBack=!shownBack;aim(Math.round(targetYaw/180)*180+180)});
+    rotator.addEventListener('pointerdown',e=>{if(drag)return;drag={id:e.pointerId,x:e.clientX,yaw:targetYaw};dragged=false;rotator.setPointerCapture(e.pointerId)});
+    rotator.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>7)dragged=true;aim(drag.yaw+dx*1.15)});
+    const endDrag=e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x;const moved=dragged;drag=null;aim(moved?Math.round((targetYaw)/180)*180:Math.round(targetYaw/180)*180+180);shownBack=Math.abs(Math.round(targetYaw/180)%2)===1;dragged=false;if(rotator.hasPointerCapture(e.pointerId))rotator.releasePointerCapture(e.pointerId)};
+    rotator.addEventListener('pointerup',endDrag);rotator.addEventListener('pointercancel',e=>{if(drag&&e.pointerId===drag.id){drag=null;aim(Math.round(targetYaw/180)*180)}});
+    rotator.classList.add('is-back');yaw=180;targetYaw=180;inner.style.transform='rotateY(0deg)';shownBack=true;
     const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
     const load=src=>new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=reject;img.src=src;});
     const index=data.character;
-    Promise.all([load('assets/license/back.png'),load('assets/illustrations-3d/friend-'+String(index+1).padStart(2,'0')+'.png')]).then(([template,sprite])=>{
+    Promise.all([load('assets/license/front.png'),load('assets/license/back.png'),load('assets/illustrations-3d/friend-'+String(index+1).padStart(2,'0')+'.png')]).then(([frontTemplate,template,sprite])=>{
       if(!canvas.isConnected)return;
+      const fctx=frontCanvas.getContext('2d',{alpha:false});if(fctx){fctx.setTransform(.5,0,0,.5,0,0);fctx.drawImage(frontTemplate,0,101,1080,1718,0,0,1080,1718)}
       ctx.setTransform(.5,0,0,.5,0,0);
       const W=1080,H=1718,CROP_Y=101;
       ctx.drawImage(template,0,CROP_Y,W,H,0,0,W,H);
