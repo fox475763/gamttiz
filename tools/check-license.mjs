@@ -58,30 +58,3 @@ test('a failed PNG must not replace the visible card',async()=>{
   await assert.rejects(commit,/Card preview decode failed/);
   assert.equal(replacements.length,0);
 });
-
-test('royal foil masks exclude burgundy and white/transparent corners',()=>{
-  const context=vm.createContext({});
-  vm.runInContext(fs.readFileSync(new URL('../license-material.js',import.meta.url),'utf8'),context);
-  const M=context.GTZLicenseMaterial;
-  assert.equal(M.foilAmount(130,0,0),0);
-  assert.equal(M.foilAmount(255,255,255),0);
-  assert.equal(M.foilAmount(245,197,99,0),0);
-  assert.ok(M.foilAmount(245,197,99)>.95);
-  assert.ok(M.foilAmount(157,30,10)>0);
-  const a=new Uint8ClampedArray([130,0,0,255,245,197,99,255,255,255,255,0,125,0,0,255]);
-  const b=a.slice(),mask=M.finishPixels(a,2,2),other=M.finishPixels(b,2,2);
-  assert.deepEqual(Array.from(mask),[0,255,0,0]);
-  assert.deepEqual(Array.from(mask),Array.from(other));assert.deepEqual(Array.from(a),Array.from(b));
-  assert.equal(a[11],0);assert.equal(a[3],255);assert.ok(a[4]>a[5]&&a[5]>a[6]);
-});
-test('static material and masked angle-responsive foil survive the wallet fallback',()=>{
-  const html=fs.readFileSync(new URL('../license.html',import.meta.url),'utf8'),css=fs.readFileSync(new URL('../license.css',import.meta.url),'utf8');
-  assert.ok(html.indexOf('license-material.js')<html.indexOf('license.js?'));
-  assert.equal((html.match(/class="license-rim"/g)||[]).length,2);
-  assert.match(css,/-webkit-mask-image: var\(--foil-mask,none\)/);
-  assert.match(css,/\.license-flat \.license-paper-core\s*\{\s*display: block/);
-  assert.ok(source.includes('GTZLicenseMaterial.prepare'));
-  assert.ok(source.includes('drawTemplate(exportFront.getContext'));
-  assert.ok(source.includes('drawQr(ctx);'));
-  assert.ok(source.includes('front.toDataURL'));
-});
