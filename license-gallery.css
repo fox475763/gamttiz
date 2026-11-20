@@ -1,4 +1,4 @@
-/* MY ID — white marble hall. All declarations are confined to issued cards. */
+/* MY ID — geometric white-and-gold gallery. Confined to issued cards. */
 .license-ambient,.license-issued-eyebrow{display:none}
 .license-page.has-license{
   --gallery-ink:#292720;--gallery-muted:#57534c;--gallery-accent:#a8792f;
@@ -12,40 +12,63 @@ body.license-page.has-license:not(.license-wallet-view) .license-main{
 }
 .license-page.has-license .license-ambient{
   display:block;position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
-  background:linear-gradient(143deg,#ffffff 0%,#f7f7f5 44%,#efede8 100%);
+  background:radial-gradient(ellipse at 76% 20%,#e9daaf51 0%,transparent 46%),linear-gradient(143deg,#ffffff 0%,#f7f7f5 52%,#efede8 100%);
 }
 .license-ambient-marble{
   position:absolute;inset:0;width:100%;height:100%;display:block;
-  pointer-events:none;
+  pointer-events:none;opacity:.55;
 }
 /* Positive stacking layer, below the content; no fixed descendants or negative z-index. */
-.license-page.has-license .license-ambient-light{
-  position:absolute;display:block;width:100%;height: min(1100px,100%);top:0;left:0;
-  transform-origin:50% 50%;pointer-events:none;
+.license-geometry{
+  position:absolute;display:block;inset:0;overflow:hidden;pointer-events:none;
 }
-.license-ambient-light--pearl{
-  background:radial-gradient(ellipse at 29% 34%,#ffffffdd 0%,#ffffff90 30%,transparent 60%);
-  animation:license-pearl-flow 15s ease-in-out infinite alternate;
+.license-geo-orbit,.license-geo-plane,.license-geo-marker{
+  position:absolute;display:block;transform-origin:center;pointer-events:none;
 }
-.license-ambient-light--gold{
-  background:radial-gradient(ellipse at 70% 45%,#eac47782 0%,#e8c78943 20%,transparent 53%);
-  animation:license-gold-flow 19s ease-in-out -5s infinite alternate;
+/* Large concentric precision rings, with one restrained gold arc. */
+.license-geo-orbit{
+  width:clamp(390px,67vw,860px);aspect-ratio:1;top:2%;right:-13%;border-radius:50%;
+  border:1px solid #bba05e66;
+  animation:license-geo-orbit 26s ease-in-out infinite alternate;
 }
-.license-ambient-ribbons{
-  position:absolute;display:block;top:0;left:0;width:100%;height:min(1100px,100%);
-  opacity:.6;transform-origin:50% 48%;animation:license-ribbon-flow 22s ease-in-out infinite alternate;
+.license-geo-orbit::before,.license-geo-orbit::after{
+  content:"";position:absolute;inset:6%;border-radius:50%;border:1px solid #b99d654d;
 }
-@keyframes license-pearl-flow{
-  0%{transform:translate3d(-22%,-13%,0) scale(1.4);opacity:.65}
-  100%{transform:translate3d(38%,12%,0) scale(1.53);opacity:1}
+.license-geo-orbit::after{
+  inset:0;border:2px solid transparent;border-top-color:#b38a3caa;border-right-color:#d4b66c62;
+  transform:rotate(24deg);
 }
-@keyframes license-gold-flow{
-  0%{transform:translate3d(28%,-14%,0) scale(1.45);opacity:.7}
-  100%{transform:translate3d(-39%,19%,0) scale(1.5);opacity:1}
+/* A softly illuminated, angular gold plane and an offset fine frame. */
+.license-geo-plane{
+  width:clamp(290px,48vw,640px);aspect-ratio:1.12;left:-17%;top:45%;
+  border:1px solid #bf9f5640;background:linear-gradient(140deg,#ffffff18 0%,#e0c27d26 58%,#c19b4c17 100%);
+  animation:license-geo-plane 21s ease-in-out -4s infinite alternate;
 }
-@keyframes license-ribbon-flow{
-  0%{transform:translate3d(-10%,-5%,0) rotate(-11deg) scale(1.22);opacity:.42}
-  100%{transform:translate3d(12%,7%,0) rotate(13deg) scale(1.28);opacity:.88}
+.license-geo-plane::after{
+  content:"";position:absolute;inset:-22px 22px 22px -22px;border:1px solid #b99d6559;
+}
+/* One small card-red accent; never a full red wash. */
+.license-geo-marker{
+  width:clamp(13px,2.4vw,26px);aspect-ratio:1;left:11%;top:19%;
+  border:1px solid #8f222877;background:#a32d2d1c;
+  animation:license-geo-marker 16s ease-in-out -2s infinite alternate;
+}
+@keyframes license-geo-orbit{
+  0%{transform:translate3d(-6%,1%,0) rotate(-36deg)}
+  100%{transform:translate3d(13%,12%,0) rotate(64deg)}
+}
+@keyframes license-geo-plane{
+  0%{transform:translate3d(-8%,-12%,0) rotate(29deg)}
+  100%{transform:translate3d(22%,14%,0) rotate(43deg)}
+}
+@keyframes license-geo-marker{
+  0%{transform:translate3d(-12px,-18px,0) rotate(34deg)}
+  100%{transform:translate3d(30px,36px,0) rotate(110deg)}
+}
+@media(max-width:760px){
+  .license-geo-orbit{right:-41%;top:4%;width:clamp(360px,104vw,500px)}
+  .license-geo-plane{left:-44%;top:47%;width:clamp(310px,82vw,460px)}
+  .license-geo-marker{left:12%;top:20%}
 }
 .license-page.has-license .license-layout,.license-page.has-license .license-heading{position:relative;z-index:1}
 .license-page.has-license:not(.license-wallet-view) .license-heading{margin:0 auto clamp(26px,4vw,46px);text-align:center}
@@ -152,11 +175,12 @@ body.license-page.has-license:not(.license-wallet-view) .license-main{
   .license-page.has-license:not(.license-wallet-view) .license-preview{gap:17px}
   .license-page.has-license:not(.license-wallet-view) .license-layout{gap:18px}
 }
-.license-page-inactive :is(.license-ambient-light,.license-ambient-ribbons),.license-wallet-inactive :is(.license-ambient-light,.license-ambient-ribbons),.license-animating :is(.license-ambient-light,.license-ambient-ribbons){animation-play-state:paused}
+.license-page-inactive :is(.license-geo-orbit,.license-geo-plane,.license-geo-marker),.license-wallet-inactive :is(.license-geo-orbit,.license-geo-plane,.license-geo-marker),.license-animating :is(.license-geo-orbit,.license-geo-plane,.license-geo-marker){animation-play-state:paused}
 @media(prefers-reduced-motion:reduce){
-  .license-ambient-light,.license-ambient-ribbons{animation:none!important}
-  .license-ambient-light--pearl{transform:translate3d(-8%,0,0) scale(1.3)}
-  .license-ambient-light--gold{transform:translate3d(7%,0,0) scale(1.3)}
+  .license-geo-orbit,.license-geo-plane,.license-geo-marker{animation:none!important}
+  .license-geo-orbit{transform:rotate(12deg)}
+  .license-geo-plane{transform:rotate(34deg)}
+  .license-geo-marker{transform:rotate(45deg)}
   .license-page.has-license:not(.license-wallet-view) .license-heading,.license-page.has-license:not(.license-wallet-view) .license-heading h1{animation:none!important}
   .license-page.has-license:not(.license-wallet-view) :is(#download-both,.license-member-link,.gtz-shake-button,.license-link){transition:none!important;transform:none!important}
 }
