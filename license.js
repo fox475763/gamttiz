@@ -23,7 +23,6 @@
   const cardInner=flip.querySelector('.license-flip-inner');
   let backArt=$('license-back-art');
   let previewKey='',fontRevision=0;
-  const glossFaces=[$('license-gloss-front'),$('license-gloss-back')];
   // Mobile WebKit can drop a canvas or backface in a preserve-3d stack.
   // Paint one image plane at a time, with the same perspective and drag motion.
   if(mobile)flip.classList.add('license-flat');
@@ -39,7 +38,24 @@
   let frontImage, backImage, yaw=0, drag=null, ignoreClick=false, exportFiles=null;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const pose={yaw:0,pitch:0}, goal={...pose};
-  let motionFrame=0,lastFrame=0;
+  let motionFrame=0,lastFrame=0,lastReflectionFrame=0,lightClock=0,lightBlend=0,cardInView=true;
+  // The light is an elongated studio softbox reflected by a polished plane.
+  // Use the actual, spring-smoothed surface normal, not cursor coordinates.
+  function studioReflection(tilt,pitch,phase,blend){
+    const a=tilt*Math.PI/180,b=pitch*Math.PI/180;
+    const nx=Math.sin(a)*Math.cos(b),ny=-Math.sin(b),nz=Math.cos(a)*Math.cos(b);
+    const halfDot=Math.max(0,Math.min(1,nx*.19+ny*.13+nz*.973));
+    const specular=Math.pow(halfDot,13);
+    const idleX=Math.sin(phase)*17,idleY=Math.cos(phase+.4)*6;
+    const lerp=(x,y)=>x+(y-x)*blend;
+    const x=lerp(idleX,nx*31),y=lerp(idleY,ny*16);
+    return {
+      x,y,angle:lerp(-7+Math.sin(phase-.7)*3,-7+nx*12-ny*9),
+      strength:lerp(.48+.12*Math.cos(phase-.65),.22+.65*specular),
+      fillX:-x*.62-12,fillY:-y*.58+5,
+      fillStrength:lerp(.33+.06*Math.sin(phase),.22+.15*Math.abs(nx)+.08*Math.abs(ny))
+    };
+  }
   function paint(){
     let angle=pose.yaw;
     if(mobile){
@@ -48,39 +64,68 @@
       angle-=half*180;
     }
     cardInner.style.transform=`rotateX(${pose.pitch.toFixed(3)}deg) rotateY(${angle.toFixed(3)}deg)`;
-    // Light follows the eased orientation of the card rather than a cursor
-    // hotspot. The reflection naturally settles back into the idle animation.
+  }
+  function lightingVisible(){
+    const classes=document.body.classList;
+    return !reduced.matches&&!document.hidden&&cardInView&&classes.contains('has-license')&&
+      !classes.contains('license-animating')&&!classes.contains('license-wallet-inactive');
+  }
+  function paintReflection(dt){
     const tilt=pose.yaw-Math.round(pose.yaw/180)*180;
-    const dx=Math.sin(tilt*Math.PI/180),dy=Math.sin(pose.pitch*Math.PI/180);
-    const intensity=Math.min(.92,Math.abs(dx)*.83+Math.abs(dy)*1.55);
-    const lightingActive=!!drag||Math.abs(pose.yaw-yaw)>.05||Math.abs(pose.pitch)>.05||Math.abs(tilt)>.05;
-    // During the complete gesture and spring-back, hide and pause both idle
-    // effects. Only angle-responsive reflections are visible until settled.
-    flip.classList.toggle('is-motion-light',lightingActive);
-    for(const layer of glossFaces){if(!layer)continue;
-      // Move the gradient inside the stationary, full-size surface. A translated
-      // rectangle can expose its edges when tilted (especially in Safari).
-      layer.style.backgroundPosition=`${(50+dx*43).toFixed(2)}% ${(50-dy*76).toFixed(2)}%`;
-      layer.style.animation=lightingActive?'none':'';
-      layer.style.opacity=lightingActive?(reduced.matches?'0.000':intensity.toFixed(3)):'';
-    }
+    const movingLight=!!drag||Math.abs(pose.yaw-yaw)>.05||Math.abs(pose.pitch)>.05;
+    // Continuous cross-fade, including the end of drag: no reset or sudden jump
+    // to the beginning of a separate idle animation.
+    lightBlend+=(Number(movingLight)-lightBlend)*(1-Math.exp(-dt/(movingLight?90:230)));
+    if(Math.abs(lightBlend-Number(movingLight))<.001)lightBlend=Number(movingLight);
+    lightClock=(lightClock+dt/1000)%12;
+    const phase=lightClock*Math.PI*2/12;
+    const light=studioReflection(tilt,pose.pitch,phase,lightBlend);
+    const style=flip.style;
+    style.setProperty('--spec-x',light.x.toFixed(2)+'%');
+    style.setProperty('--spec-y',light.y.toFixed(2)+'%');
+    style.setProperty('--spec-angle',light.angle.toFixed(2)+'deg');
+    style.setProperty('--spec-strength',light.strength.toFixed(3));
+    style.setProperty('--fill-x',light.fillX.toFixed(2)+'%');
+    style.setProperty('--fill-y',light.fillY.toFixed(2)+'%');
+    style.setProperty('--fill-strength',light.fillStrength.toFixed(3));
   }
   function animate(time){
     const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
-    lastFrame=time;const weight=1-Math.exp(-dt/(drag?48:94));let moving=false;
+    lastFrame=time;const weight=1-Math.exp(-dt/(drag?48:94));let moving=false,poseChanged=false;
     for(const key of Object.keys(goal)){
       const delta=goal[key]-pose[key],threshold=.05;
-      if(Math.abs(delta)>threshold){pose[key]+=delta*weight;moving=true;}else pose[key]=goal[key];
+      if(Math.abs(delta)>threshold){pose[key]+=delta*weight;moving=true;poseChanged=true;}
+      else if(delta!==0){pose[key]=goal[key];poseChanged=true;}
     }
-    paint();
-    if(moving)motionFrame=requestAnimationFrame(animate);else{motionFrame=0;lastFrame=0;}
+    if(poseChanged)paint();
+    const visible=lightingVisible();
+    // Use 60 fps while handled and cap the imperceptibly slow idle drift to
+    // ~30 fps; the fixed clip and movable highlights remain GPU-friendly.
+    if(visible&&(moving||drag||time-lastReflectionFrame>=31)){
+      paintReflection(lastReflectionFrame?Math.min(64,time-lastReflectionFrame):16.7);
+      lastReflectionFrame=time;
+    }
+    if(moving||visible)motionFrame=requestAnimationFrame(animate);
+    else{motionFrame=0;lastFrame=0;lastReflectionFrame=0;}
+  }
+  function syncLighting(){
+    if(lightingVisible()&&!motionFrame)motionFrame=requestAnimationFrame(animate);
   }
   function moveTo(values){
     Object.assign(goal,values);
-    if(drag||Math.abs(goal.yaw-pose.yaw)>.05||Math.abs(goal.pitch-pose.pitch)>.05)flip.classList.add('is-motion-light');
     if(reduced.matches){Object.assign(pose,goal);paint();return;}
     if(!motionFrame)motionFrame=requestAnimationFrame(animate);
   }
+  // Stop idle work when the card is hidden, offscreen, while forging, or while
+  // the wallet iframe is closed. Resuming retains the light's previous phase.
+  if(typeof IntersectionObserver==='function'){
+    new IntersectionObserver(entries=>{cardInView=entries[0].isIntersecting;syncLighting();},{threshold:0}).observe(flip);
+  }
+  if(typeof MutationObserver==='function'){
+    new MutationObserver(syncLighting).observe(document.body,{attributes:true,attributeFilter:['class']});
+  }
+  document.addEventListener('visibilitychange',syncLighting);
+  reduced.addEventListener?.('change',syncLighting);
   const status = message => { $('license-status').textContent = message; };
   const cleanName = str => [...String(str || '').replace(/[\u0000-\u001f\u007f]/g,'').trim()].slice(0,18).join('');
   const serial = value => Number(/^GTZ - (\d{4,})$/.exec(value || '')?.[1] || 0);
@@ -336,7 +381,7 @@
   flip.addEventListener('pointerdown',e=>{
     if(e.button!==0||drag)return;
     ignoreClick=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:pose.yaw,pitch:pose.pitch,moved:false};
-    flip.setPointerCapture(e.pointerId);flip.classList.add('is-dragging','is-motion-light');
+    flip.setPointerCapture(e.pointerId);flip.classList.add('is-dragging');
   });
   flip.addEventListener('pointermove',e=>{
     if(drag&&drag.id!==e.pointerId)return;
@@ -447,7 +492,7 @@
   }
   $('download-both').addEventListener('click',download);
   window.addEventListener('storage',event=>{if(event.key!==KEY)return;record=restore();if(!record){input.value='';resetOath();setSelected(0);}viewEdit(!record);setSide(false);});
-  record=restore(); viewEdit(!record);
+  record=restore(); viewEdit(!record);syncLighting();
   if(wallet&&!record){
     const preview=document.querySelector('.license-preview');preview.hidden=true;
     const empty=document.createElement('a');empty.className='license-wallet-empty';empty.href='license.html';empty.target='_top';empty.textContent='아직 발급된 카드가 없어요. 나만의 라이센스 만들기 ↗';document.querySelector('.license-layout').append(empty);

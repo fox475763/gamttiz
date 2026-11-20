@@ -503,3 +503,49 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
 @media(max-width:760px){
   body.license-page.has-license:not(.license-wallet-view) .license-main{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
 }
+
+
+/* POLISHED METAL LIGHT ONLY. All existing card pixels, shapes and geometry
+   stay untouched. Two oversized, softly feathered studio reflections move
+   within a stationary clipped surface; they never expose a moving rectangle. */
+.license-page .license-motion-gloss {
+  position:absolute;inset:0;z-index:3;display:block;
+  overflow:hidden;border-radius:inherit;pointer-events:none;
+  background:none;opacity:1;transform:none!important;animation:none!important;
+  mix-blend-mode:screen;will-change:auto;
+}
+.license-page .license-motion-gloss::before,
+.license-page .license-motion-gloss::after {
+  content:"";position:absolute;pointer-events:none;
+  will-change:transform,opacity;
+}
+.license-page .license-motion-gloss::before {
+  /* Single continuous softbox: gently feathered shoulders, broad bright
+     specular core and a narrow neutral-white reflection, not glitter stripes. */
+  inset:-51% -66%;
+  background:linear-gradient(107deg,
+    transparent 24%,rgba(255,236,204,.025) 30%,
+    rgba(255,241,217,.09) 36%,rgba(255,245,226,.22) 41%,
+    rgba(255,249,236,.47) 45%,rgba(255,253,246,.69) 48%,
+    rgba(255,254,250,.83) 50%,rgba(255,253,246,.68) 51.6%,
+    rgba(255,249,235,.39) 55%,rgba(255,244,220,.14) 61%,
+    rgba(255,234,198,.04) 66%,transparent 73%);
+  transform:translate3d(var(--spec-x,-12%),var(--spec-y,3%),0) rotate(var(--spec-angle,-7deg));
+  opacity:var(--spec-strength,.50);
+}
+.license-page .license-motion-gloss::after {
+  /* Broad low-energy fill from a second studio panel, for a rounded, smooth
+     metallic reflection rather than a flat moving gold overlay. */
+  inset:-35% -42%;
+  background:radial-gradient(ellipse at 52% 48%,
+    rgba(255,248,231,.38) 0%,rgba(255,243,218,.19) 23%,
+    rgba(255,234,202,.06) 46%,transparent 70%);
+  transform:translate3d(var(--fill-x,-12%),var(--fill-y,5%),0) rotate(12deg);
+  opacity:var(--fill-strength,.30);
+}
+@media(prefers-reduced-motion:reduce){
+  .license-page .license-motion-gloss,
+  .license-page .license-flip.is-motion-light .license-motion-gloss{opacity:1}
+  .license-page .license-motion-gloss::before{transform:translate3d(-11%,4%,0) rotate(-7deg);opacity:.28}
+  .license-page .license-motion-gloss::after{transform:translate3d(-12%,5%,0);opacity:.13}
+}
