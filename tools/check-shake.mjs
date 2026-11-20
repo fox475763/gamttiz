@@ -58,17 +58,18 @@ test('no license and active Member measurement tools suppress shake activation',
 test('cold Safari launch reuses a grant silently; no permission popup',async()=>{
   const store=saved();store.set(KEY,'1');const page=createPage(store,'granted',true,false);
   await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);
-  page.shake();assert.ok(page.sheet.classes.has('is-open'));assert.equal(page.recovery.hidden,true);assert.equal(store.get(KEY),'1');
+  page.shake();assert.ok(page.sheet.classes.has('is-open'));assert.equal(page.recovery,undefined);assert.equal(store.get(KEY),'1');
 });
-test('expired Safari permission shows recovery only after missing sensor events',async()=>{
+test('expired Safari permission preserves preference without floating button',async()=>{
   const store=saved();store.set(KEY,'1');const page=createPage(store,'gesture',true,false);
-  await page.tap();assert.equal(page.requests,0);assert.equal(page.recovery.hidden,true);
-  await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);assert.equal(page.recovery.hidden,false);assert.equal(store.get(KEY),'1');
-  await page.press(page.recovery);assert.equal(page.requests,2);assert.equal(page.prompts,1);page.shake();assert.ok(page.sheet.classes.has('is-open'));assert.equal(page.recovery.hidden,true);
+  await page.tap();assert.equal(page.requests,0);assert.equal(page.recovery,undefined);
+  await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);assert.equal(page.recovery,undefined);assert.equal(store.get(KEY),'1');
+  const id=createPage(store,'gesture',true,true);await id.runWatchdog();
+  assert.equal(id.reconnect.hidden,false);await id.press(id.reconnect);assert.equal(id.requests,2);assert.equal(id.prompts,1);id.shake();assert.ok(id.sheet.classes.has('is-open'));assert.equal(id.recovery,undefined);
 });
 test('foreground recovery re-arms and does not ask during issuance',async()=>{
   const store=saved();store.set(KEY,'1');const page=createPage(store,'gesture',true,false);
   page.doc.body.classList.add('license-animating');await page.runWatchdog();assert.equal(page.requests,0);
   page.doc.body.classList.remove('license-animating');page.doc.hidden=true;page.doc.fire('visibilitychange');page.doc.hidden=false;page.doc.fire('visibilitychange');
-  await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);assert.equal(page.recovery.hidden,false);
+  await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);assert.equal(page.recovery,undefined);
 });

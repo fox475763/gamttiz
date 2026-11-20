@@ -9,14 +9,6 @@
 .gtz-shake-reconnect{display:block;margin:8px auto 0;padding:5px 9px;border:0;border-bottom:1px solid #c9ad77;background:transparent;color:#816349;font:inherit;font-size:11px;cursor:pointer;min-height:32px}
 .gtz-shake-reconnect[hidden]{display:none!important}
 .gtz-shake-reconnect:disabled{opacity:.5}
-.gtz-shake-recovery{display:none}
-.gtz-shake-recovery[hidden]{display:none!important}
-@media(max-width:900px){
-  .gtz-shake-recovery:not([hidden]){display:block;position:fixed;left:14px;bottom:calc(21px + env(safe-area-inset-bottom,0px));z-index:1190;max-width:calc(100vw - 108px);min-height:40px;padding:9px 13px;border:1px solid #c9ad77;border-radius:22px;background:#fff9ef;color:#751317;box-shadow:0 3px 12px #49201320;font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:opacity .18s,transform .18s}
-  .gtz-shake-recovery:active{transform:scale(.97)}.gtz-shake-recovery:disabled{opacity:.55}
-  .gtz-shake-recovery:focus-visible{outline:2px solid #aa843e;outline-offset:3px}
-  body:has(.control-dock[data-mode]:not([data-mode="closed"])) .gtz-shake-recovery,body.license-animating .gtz-shake-recovery,html.gtz-wallet-open .gtz-shake-recovery{display:none}
-}
 .gtz-shake-button,.gtz-shake-reconnect,.gtz-wallet-close,.gtz-wallet-detail{transition:background-color .2s,color .2s,border-color .2s,opacity .2s,transform .18s cubic-bezier(.22,.8,.3,1)}
 .gtz-shake-button:not(:disabled):active{transform:scale(.985)}
 .gtz-shake-reconnect:not(:disabled):active,.gtz-wallet-close:active{transform:scale(.94)}
@@ -38,6 +30,6 @@
   .gtz-wallet-detail{font-size:12px;color:#850000;text-decoration:none;padding:8px}
 }
 @media(hover:hover) and (pointer:fine){.gtz-shake-button:not(:disabled):hover{background:#f4ead6}.gtz-shake-reconnect:hover,.gtz-wallet-detail:hover{color:#a6803d}.gtz-wallet-close:hover{background:#85000018}}
-@media(prefers-reduced-motion:reduce){.gtz-wallet-backdrop,.gtz-wallet-content,.gtz-shake-button,.gtz-shake-reconnect,.gtz-wallet-close,.gtz-wallet-detail,.gtz-shake-recovery{transition:none!important}.gtz-shake-button,.gtz-shake-reconnect,.gtz-wallet-close,.gtz-shake-recovery{transform:none!important}}
+@media(prefers-reduced-motion:reduce){.gtz-wallet-backdrop,.gtz-wallet-content,.gtz-shake-button,.gtz-shake-reconnect,.gtz-wallet-close,.gtz-wallet-detail{transition:none!important}.gtz-shake-button,.gtz-shake-reconnect,.gtz-wallet-close{transform:none!important}}
 
 

@@ -224,8 +224,6 @@ const walletMedia=matchMedia('(max-width: 900px)');
   shakeSettings.append(shakeButton,shakeReconnect,shakeStatus);
   const shakeMount=document.getElementById('license-shake-setting-mount');
   if(shakeMount)shakeMount.append(shakeSettings);
-  const recovery=make('button','gtz-shake-recovery','카드 센서 다시 연결');recovery.type='button';recovery.hidden=true;
-  document.body.append(recovery);
   const shakeKey='gamttiz-license-shake-enabled-v1';
   let enabled=false,sensorSeen=false,sessionAllowed=false,requesting=false,open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,lastExists=null;
   let recoveryTimer=0,recoveryNeeded=false,silentAttempted=false,silentPending=false,recoveryEpoch=0;
@@ -250,8 +248,6 @@ const walletMedia=matchMedia('(max-width: 900px)');
     shakeButton.setAttribute('aria-pressed',String(enabled));
     shakeReconnect.hidden=!enabled||sensorSeen||(!recoveryNeeded&&sessionAllowed)||!needsPermission();
     shakeReconnect.disabled=requesting;
-    recovery.hidden=!!shakeMount||!mayRecover()||!recoveryNeeded||sensorSeen||presented;
-    recovery.disabled=requesting;
     if(!canMotion())shakeStatus.textContent='이 브라우저는 움직임 센서를 지원하지 않아요. MY ID 메뉴를 이용해주세요.';
     else if(enabled&&!sensorSeen&&!sessionAllowed&&!requesting&&!shakeStatus.textContent)shakeStatus.textContent=needsPermission()?'활성화 설정이 저장되어 있어요. 연결이 필요하면 센서 권한 다시 연결을 눌러주세요.':'휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
   }
@@ -282,8 +278,8 @@ const walletMedia=matchMedia('(max-width: 900px)');
       if(sensorSeen||requesting||!mayRecover())return;
       // Only check an existing grant WITHOUT transient activation. A new
       // permission prompt is forbidden without that activation by WebKit.
-      // If Safari discarded the grant the call rejects; show a deliberate
-      // one-tap reconnect instead of requesting permission on arbitrary taps.
+      // If Safari discarded the grant the call rejects; retain the setting
+      // and offer manual reconnection only on the issued MY ID page.
       if(!silentAttempted&&navigator.userActivation?.isActive===false){
         silentAttempted=true;silentPending=true;
         const epoch=recoveryEpoch;
@@ -310,12 +306,11 @@ const walletMedia=matchMedia('(max-width: 900px)');
     return connectSensor();
   });
   shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
-  recovery.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
   function notifyFrame(active){if(frameStarted)frame.contentWindow?.postMessage({type:'gamttiz-wallet-visibility',active},location.origin);}
   frame.addEventListener('load',()=>notifyFrame(presented));
   function startFrame(){
     if(frameStarted||!mobile())return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120reopen5';
+    frameStarted=true;frame.src='license.html?wallet=1&v=20261120reopen6';
   }
   function warm(){
     if(frameStarted||warmTimer||!enabled||!hasCard()||!mobile())return;
@@ -327,7 +322,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      frame.src='license.html?wallet=1&v=20261120reopen5';
+      frame.src='license.html?wallet=1&v=20261120reopen6';
     }
     lastExists=exists;updateSetting();
     if(!mobile()||!exists||!enabled){clearRecovery();updateSetting();if(presented&&!exists)settle(false);return;}
