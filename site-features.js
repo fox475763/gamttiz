@@ -220,7 +220,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   frame.addEventListener('load',()=>notifyFrame(presented));
   function startFrame(){
     if(frameStarted||!walletMedia.matches)return;
-    frameStarted=true;frame.src='license.html?wallet=1&v=20261120profile9';
+    frameStarted=true;frame.src='license.html?wallet=1&v=20261120royal10';
   }
   function warm(){
     if(frameStarted||warmTimer||!hasCard())return;
@@ -232,7 +232,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   function sync(){
     const exists=hasCard();walletBar.hidden=!walletMedia.matches;
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
-      frame.src='license.html?wallet=1&v=20261120profile9';
+      frame.src='license.html?wallet=1&v=20261120royal10';
     }
     lastExists=exists;
     if(!walletMedia.matches){if(presented)settle(false);return;}

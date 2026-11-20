@@ -237,6 +237,83 @@
 .license-face::after{z-index:4}
 @media(prefers-reduced-motion:reduce){.license-motion-gloss{display:none}}
 
+/* Reflect several softly feathered light sources of different widths.
+   These gradients are static textures: the only moving properties are
+   transform and opacity, so even the mobile single-face renderer stays light. */
+.license-face::before{
+  background:linear-gradient(119deg,
+    transparent 4%,#e3a84610 9%,#f7d68168 12%,#fff1c2a0 14%,#f1c66548 17%,transparent 22%,
+    transparent 29%,#d9a34416 32%,#f7d27c70 37%,#fff2c3ba 42%,#ffe5a381 46%,#d9aa492e 51%,transparent 56%,
+    transparent 61%,#fff3c57c 64%,#fff6dbb0 65%,#ebbe5954 66%,transparent 70%,
+    transparent 77%,#e3b76322 80%,#ffe6aa72 84%,#f9cf6850 87%,transparent 94%);
+}
+.license-motion-gloss{
+  background:linear-gradient(118deg,
+    transparent 1%,#e8b64f18 7%,#f8d88a70 11%,#fff4d2c0 13%,#e8b45545 16%,transparent 21%,
+    transparent 26%,#f2cb7432 28%,#fff6d3d0 30%,#fbdc8960 31%,transparent 34%,
+    transparent 38%,#d8a34a1a 41%,#edc06b68 45%,#ffeab2b0 48%,#fff8dbe0 51%,#ffe4a18c 55%,#c88b312b 60%,transparent 65%,
+    transparent 69%,#fbdc8572 71%,#fff7dad8 72%,#e6b14d50 74%,transparent 77%,
+    transparent 80%,#dca13f24 83%,#f8d48a74 87%,#fff0bdb0 89%,#f9cc6a36 92%,transparent 98%);
+}
+.license-flip.is-motion-light .license-face::before,.license-flip.is-motion-light .license-face::after{
+  visibility:hidden;opacity:0!important;animation-play-state:paused!important;
+}
+
+/* One premium stationery system for both application and issued state.
+   Keep the site-wide menu and the original card artwork untouched. */
+body.license-page:not(.license-wallet-view){
+  --id-paper:#fbf7ed;--id-ink:#5d1519;--id-gold:#aa843e;--id-rule:#d9c6a4;
+  background:#fbf7ed radial-gradient(ellipse at 50% 25%,#fffdf8 0%,#f8f1e3 75%,#f5ebd9 100%);
+  color:#4d3027;
+}
+body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
+.license-page:not(.license-wallet-view) .license-heading{margin-bottom:32px}
+.license-page:not(.license-wallet-view) .license-heading h1,
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading h1{
+  font-family:Georgia,"Times New Roman",serif;font-size:clamp(45px,6vw,72px);font-weight:500;letter-spacing:.09em;line-height:1.06;margin:0;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-heading h1{color:var(--id-ink)}
+.license-page:not(.license-wallet-view) .license-heading::after{content:"";display:block;width:38px;height:1px;background:#b28f4e;margin:16px auto 0}
+.license-page.has-license:not(.license-wallet-view) .license-heading h1{
+  font-family:Georgia,"Times New Roman",serif;font-size:clamp(43px,6vw,66px);font-weight:500;letter-spacing:.075em;
+}
+.license-page:not(.has-license):not(.license-wallet-view) .license-layout{max-width:860px;gap:clamp(35px,6vw,76px)}
+.license-page:not(.has-license):not(.license-wallet-view) .license-preview::before{background:radial-gradient(ellipse at 50% 55%,#bd8b3c20,transparent 69%)}
+.license-page:not(.has-license):not(.license-wallet-view) .license-panel{border-color:var(--id-rule);padding-top:18px;padding-bottom:18px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-panel h2{color:var(--id-ink);font-size:21px;font-weight:620;letter-spacing:-.045em;margin-bottom:24px}
+.license-page:not(.has-license):not(.license-wallet-view) .license-label{font-size:12px;font-weight:600;color:#79594a}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name{border-color:var(--id-rule);color:#471b18;font-weight:550}
+.license-page:not(.has-license):not(.license-wallet-view) #license-name:focus{border-bottom-color:#ab8139}
+.license-page:not(.has-license):not(.license-wallet-view) .license-badge{font-size:10px;letter-spacing:.26em;color:#987847}
+.license-profile-picker{border-block:1px solid #d9c6a47a;padding:7px 0}
+.license-profile-count{font-size:10px;color:#886d45;letter-spacing:.18em}
+.license-page:not(.license-wallet-view) .license-primary,
+.license-page:not(.has-license):not(.license-wallet-view) .license-primary{
+  min-height:50px;border:1px solid #c9a558;border-radius:5px;background:#751317;color:#fff3d5;font-weight:600;font-size:13px;letter-spacing:.03em;box-shadow:0 5px 10px #61151010;
+  transition:background .2s,border-color .2s,box-shadow .2s;
+}
+.license-page:not(.license-wallet-view) .license-primary:hover:not(:disabled){background:#8c2021;border-color:#d5b768;box-shadow:0 6px 16px #61151020}
+.license-page:not(.license-wallet-view) .license-secondary{border-radius:5px;border:1px solid #d5bc91;color:#751317;background:transparent;font-size:13px}
+.license-page.has-license:not(.license-wallet-view) .license-main{padding-top:clamp(30px,5vw,62px)}
+.license-page.has-license:not(.license-wallet-view) .license-layout{gap:21px}
+.license-page.has-license:not(.license-wallet-view) .license-preview{gap:16px}
+.license-page.has-license:not(.license-wallet-view) .license-celebration{font-size:13px;color:#785238;font-weight:550;letter-spacing:-.035em;margin:0}
+.license-page.has-license:not(.license-wallet-view) .license-panel{width:min(100%,310px)}
+.license-page.has-license:not(.license-wallet-view) .license-manage{margin-top:12px;gap:0}
+.license-page.has-license:not(.license-wallet-view) .license-link{font-size:12px;color:#816349;padding:5px 15px}
+.license-page.has-license:not(.license-wallet-view) .license-link+.license-link{border-left:1px solid #d9c6a4}
+@media(max-width:760px){
+  body.license-page:not(.license-wallet-view) .license-main{padding-top:28px;padding-bottom:83px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-heading{margin-bottom:20px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-heading h1{font-size:44px}
+  .license-page.has-license:not(.license-wallet-view) .license-heading h1{font-size:43px}
+  .license-page:not(.license-wallet-view) .license-heading::after{margin-top:12px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-layout{gap:19px}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-panel{padding-top:24px;padding-bottom:0}
+  .license-page:not(.has-license):not(.license-wallet-view) .license-panel h2{font-size:20px;margin-bottom:20px}
+  .license-page.has-license:not(.license-wallet-view) .license-layout{gap:18px}
+}
+
 
 
 

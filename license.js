@@ -50,9 +50,13 @@
     const tilt=pose.yaw-Math.round(pose.yaw/180)*180;
     const dx=Math.sin(tilt*Math.PI/180),dy=Math.sin(pose.pitch*Math.PI/180);
     const intensity=Math.min(.92,Math.abs(dx)*.83+Math.abs(dy)*1.55);
+    const lightingActive=!!drag||Math.abs(pose.yaw-yaw)>.05||Math.abs(pose.pitch)>.05||Math.abs(tilt)>.05;
+    // During the complete gesture and spring-back, hide and pause both idle
+    // effects. Only angle-responsive reflections are visible until settled.
+    flip.classList.toggle('is-motion-light',lightingActive);
     for(const layer of glossFaces){if(!layer)continue;
       layer.style.transform=`translate3d(${(dx*44).toFixed(2)}%,${(-dy*56).toFixed(2)}%,0) rotate(${(pose.pitch*.28).toFixed(2)}deg)`;
-      layer.style.opacity=reduced.matches?'0':intensity.toFixed(3);
+      layer.style.opacity=reduced.matches||!lightingActive?'0.000':intensity.toFixed(3);
     }
   }
   function animate(time){
@@ -67,6 +71,7 @@
   }
   function moveTo(values){
     Object.assign(goal,values);
+    if(drag||Math.abs(goal.yaw-pose.yaw)>.05||Math.abs(goal.pitch-pose.pitch)>.05)flip.classList.add('is-motion-light');
     if(reduced.matches){Object.assign(pose,goal);paint();return;}
     if(!motionFrame)motionFrame=requestAnimationFrame(animate);
   }
@@ -289,7 +294,7 @@
   flip.addEventListener('pointerdown',e=>{
     if(e.button!==0||drag)return;
     ignoreClick=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,yaw:pose.yaw,pitch:pose.pitch,moved:false};
-    flip.setPointerCapture(e.pointerId);flip.classList.add('is-dragging');
+    flip.setPointerCapture(e.pointerId);flip.classList.add('is-dragging','is-motion-light');
   });
   flip.addEventListener('pointermove',e=>{
     if(drag&&drag.id!==e.pointerId)return;
