@@ -35,6 +35,23 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      await scroll.evaluate(el=>{el.scrollTop=el.scrollHeight;});
      const reachable=await scroll.evaluate(el=>el.scrollHeight-el.clientHeight-el.scrollTop<=3);
      assert.ok(reachable,filename+' last menu item unreachable');
+     if(filename==='index.html'){
+       await page.locator('.control-menu-links button').filter({hasText:'Contact'}).click();
+       const contact=page.locator('.control-contact');
+       await contact.locator('.contact-copy').waitFor({state:'visible'});
+       await page.mouse.move(0,0);
+       const material=await page.evaluate(()=>{
+         const menu=document.querySelector('.control-menu'),contact=document.querySelector('.control-contact');
+         const link=contact.querySelector('.control-contact-links a'),copy=contact.querySelector('.contact-copy');
+         const a=getComputedStyle(link),b=getComputedStyle(copy);
+         return {frame:getComputedStyle(menu,'::before').backgroundImage===getComputedStyle(contact,'::before').backgroundImage,
+           border:getComputedStyle(contact).borderTopWidth,button:a.backgroundColor===b.backgroundColor&&a.borderRadius===b.borderRadius&&a.boxShadow===b.boxShadow,
+           sweep:getComputedStyle(copy,'::before').backgroundImage.includes('conic-gradient'),height:copy.getBoundingClientRect().height};
+       });
+       assert.ok(material.frame&&material.border==='0px'&&material.button&&material.sweep&&material.height>=44,'Contact liquid glass material mismatch');
+       await contact.locator('.contact-copy').click();
+       await page.waitForFunction(()=>document.querySelector('.contact-copy-status').textContent.length>0);
+     }
      await trigger.click();
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
      assert.ok(overflow<=2,filename+' horizontal overflow '+overflow+'px at '+viewport.width);

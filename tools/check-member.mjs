@@ -118,8 +118,8 @@ test('Every main page uses the original bottom-right Menu without local repositi
   for(const file of ['license.css','license-wallet.css','license-gallery.css','member.css','editorial.css']){
     assert.doesNotMatch(src(file),/\.control-dock\b/,file+' should inherit the common anchor');
   }
-  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261120menu2'));
-  assert.ok(src('member-sw.js').includes('site-features.css?v=20261120menu2'));
+  for(const page of ['index','member','license','combo','products','play','project','quiz','news'])assert.ok(src(page+'.html').includes('site-features.css?v=20261121contact1'));
+  assert.ok(src('member-sw.js').includes('site-features.css?v=20261121contact1'));
 });
 
 test('Menu glass frame and scrolling content are separate and selection stays brand red',()=>{
@@ -141,4 +141,12 @@ test('Current menu selection follows Home, Collection and Member deep links with
   const location={href:'https://example.test/gamttiz/'};
   const ctx={location,URL,menuLinks:{querySelectorAll:()=>links}};vm.createContext(ctx);vm.runInContext(fn,ctx);
   for(const [href,index] of [['https://example.test/gamttiz/',0],['https://example.test/gamttiz/index.html#collection',1],['https://example.test/gamttiz/member.html#radar',2],['https://example.test/gamttiz/license.html',3]]){location.href=href;vm.runInContext('syncCurrentMenuLink()',ctx);assert.deepEqual(links.map(l=>l.attrs['aria-current']==='page'),links.map((_,i)=>i===index));}
+});
+
+ test('Contact shares the menu border gradient and copy button material',()=>{
+  const css=src('site-features.css'),js=src('site-features.js');
+  assert.match(css,/\.control-menu,\.control-contact,\.control-search-results,\.control-search\{border:0;/);
+  assert.match(css,/\.control-menu::before,\.control-contact::before,\.control-search::before,\.control-trigger::before\{border-width:2px;background:conic-gradient/);
+  assert.match(css,/\.control-contact-links :is\(a,button\)::before\s*,/);
+  assert.ok(js.includes("navigator.clipboard.writeText("));
 });
