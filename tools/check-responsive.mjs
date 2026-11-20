@@ -23,7 +23,7 @@ for(const engine of [chromium,webkit])test('Shake opens a mobile 3D license with
    await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
    const page=await context.newPage();
    await page.goto(base+'index.html',{waitUntil:'domcontentloaded'});
-   const card=page.locator('.gtz-wallet-rotator'),turn=page.locator('.gtz-wallet-turn');
+   const card=page.locator('.gtz-wallet-rotator');
    const assertFace=async side=>{
      try{await page.waitForFunction(side=>{
        const card=document.querySelector('.gtz-wallet-rotator');if(!card||card.dataset.side!==side)return false;
@@ -37,22 +37,28 @@ for(const engine of [chromium,webkit])test('Shake opens a mobile 3D license with
    },x);
    const shake=async()=>{
      await fire(18);await page.waitForTimeout(150);await fire(-18);
-     await turn.waitFor({state:'visible'});
+     await card.waitFor({state:'visible'});
      await assertFace('front');
      await page.waitForTimeout(450);
    };
    await shake();
+   assert.equal(await page.locator('.gtz-wallet-turn').count(),0);
+   assert.equal(await page.locator('.gtz-wallet-shine').evaluate(el=>getComputedStyle(el).mixBlendMode),'normal');
+   assert.equal(await page.locator('.gtz-wallet-shine').evaluate(el=>getComputedStyle(el).animationName),'none');
+   await page.evaluate(()=>{window.walletFaceMutations=0;new MutationObserver(records=>window.walletFaceMutations+=records.length).observe(document.querySelector('.gtz-wallet-plane'),{subtree:true,attributes:true,attributeFilter:['hidden']});});
    assert.equal(await page.locator('.gtz-wallet-sheet').getAttribute('aria-hidden'),'false');
    const b=await card.boundingBox();assert.ok(b&&b.height>200&&b.y>=0&&b.y+b.height<844);
    let x=b.x+b.width/2,y=b.y+b.height/2;
    assert.equal(await page.evaluate(({x,y})=>document.elementFromPoint(x,y).className,{x,y}),'gtz-wallet-rotator');
    await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+45,y-25,{steps:5});
    await page.waitForFunction(()=>!new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.gtz-wallet-rotator-inner')).transform).isIdentity);
+   assert.equal(await page.evaluate(()=>window.walletFaceMutations),0,'face visibility must stay stable during same-side rotation');
    await page.mouse.move(x+110,y-25,{steps:5});await page.mouse.up();
    await assertFace('back');
+   assert.equal(await page.evaluate(()=>window.walletFaceMutations),2,'face visibility changes once on crossover');
    await card.tap();await assertFace('front');
-   await turn.tap();await assertFace('back');
-   await turn.tap();await assertFace('front');
+   await card.tap();await assertFace('back');
+   await card.tap();await assertFace('front');
    await page.locator('.gtz-wallet-close').tap();
    await page.waitForFunction(()=>!document.querySelector('.gtz-wallet-sheet').classList.contains('is-visible'));
    await page.waitForTimeout(2250);await shake();
