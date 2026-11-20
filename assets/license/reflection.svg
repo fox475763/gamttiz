@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1145" viewBox="0 0 720 1145">
+  <title>Softly curved warm studio reflections</title>
+  <defs>
+    <filter id="halo" filterUnits="userSpaceOnUse" x="-70" y="-70" width="860" height="1285" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="19"/>
+    </filter>
+    <filter id="soft" filterUnits="userSpaceOnUse" x="-70" y="-70" width="860" height="1285" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="7.5"/>
+    </filter>
+    <filter id="crest" filterUnits="userSpaceOnUse" x="-70" y="-70" width="860" height="1285" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3.5"/>
+    </filter>
+    <linearGradient id="warm" x1="0" y1="0" x2="0.3" y2="1">
+      <stop stop-color="#e3ae57" stop-opacity=".30"/>
+      <stop offset=".28" stop-color="#ffe0a8" stop-opacity=".78"/>
+      <stop offset=".54" stop-color="#fff1ca" stop-opacity=".95"/>
+      <stop offset=".82" stop-color="#ffdf9c" stop-opacity=".65"/>
+      <stop offset="1" stop-color="#e2aa50" stop-opacity=".30"/>
+    </linearGradient>
+  </defs>
+  <!-- A quiet sweep of light, with subtly different bends rather than
+       parallel straight stripes. All ends remain outside the viewed area. -->
+  <g fill="none" stroke="#f5c76c" filter="url(#halo)" stroke-linecap="round">
+    <path d="M-330 1320 C-25 1050 -105 380 295 -180" stroke-width="84" opacity=".18"/>
+    <path d="M-120 1320 C198 1030 83 380 480 -180" stroke-width="113" opacity=".37"/>
+    <path d="M88 1320 C385 1040 246 400 652 -180" stroke-width="128" opacity=".42"/>
+    <path d="M295 1320 C581 1045 445 385 837 -180" stroke-width="90" opacity=".24"/>
+  </g>
+  <g fill="none" stroke="url(#warm)" filter="url(#soft)" stroke-linecap="round">
+    <path d="M-330 1320 C-25 1050 -105 380 295 -180" stroke-width="17" opacity=".35"/>
+    <path d="M-120 1320 C198 1030 83 380 480 -180" stroke-width="32" opacity=".67"/>
+    <path d="M88 1320 C385 1040 246 400 652 -180" stroke-width="41" opacity=".78"/>
+    <path d="M295 1320 C581 1045 445 385 837 -180" stroke-width="20" opacity=".47"/>
+  </g>
+  <g fill="none" stroke="#fff1c8" filter="url(#crest)" stroke-linecap="round">
+    <path d="M-111 1320 C207 1030 92 380 489 -180" stroke-width="5.5" opacity=".55"/>
+    <path d="M96 1320 C393 1040 254 400 660 -180" stroke-width="9" opacity=".60"/>
+  </g>
+</svg>

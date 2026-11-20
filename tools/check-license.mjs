@@ -59,30 +59,14 @@ test('a failed PNG must not replace the visible card',async()=>{
   assert.equal(replacements.length,0);
 });
 
-test('studio light follows true surface orientation and blends idle into movement',()=>{
-  const start=source.indexOf('  function studioReflection('),end=source.indexOf('  function paint()',start);
-  const context=vm.createContext({});
-  vm.runInContext(source.slice(start,end)+'\nthis.light=studioReflection;',context);
-  const light=context.light;
-  const neutral=light(0,0,0,1),tilted=light(25,-12,0,1),edge=light(89,0,0,1);
-  assert.ok(tilted.x>neutral.x);assert.ok(tilted.y>neutral.y);
-  assert.ok(edge.strength<neutral.strength);
-  for(let tilt=-90;tilt<=90;tilt+=10)for(let pitch=-33;pitch<=33;pitch+=11){
-    const state=light(tilt,pitch,1.3,.7);
-    for(const value of Object.values(state))assert.ok(Number.isFinite(value));
-    assert.ok(state.strength>=0&&state.strength<=1);
-    assert.ok(Math.abs(state.x)<=31&&Math.abs(state.y)<=16);
-  }
-  for(const key of Object.keys(light(0,0,0,0)))assert.ok(Math.abs(light(0,0,0,0)[key]-light(0,0,Math.PI*2,0)[key])<1e-8);
-  const idle=light(15,10,1,0),active=light(15,10,1,1),middle=light(15,10,1,.5);
-  assert.ok(Math.abs(middle.x-(idle.x+active.x)/2)<1e-8);
-  assert.ok(Math.abs(middle.strength-(idle.strength+active.strength)/2)<1e-8);
-});
-test('reflection is a clipped overlay and leaves the original image export pipeline alone',()=>{
+test('curved reflection retains the previous fixed-surface movement and source artwork',()=>{
   const css=fs.readFileSync(new URL('../license.css',import.meta.url),'utf8');
-  assert.match(css,/POLISHED METAL LIGHT ONLY/);
-  assert.match(css,/\.license-page \.license-motion-gloss\s*\{[^}]*overflow:hidden/);
-  assert.match(css,/\.license-page \.license-motion-gloss::before/);
+  const reflection=fs.readFileSync(new URL('../assets/license/reflection.svg',import.meta.url),'utf8');
+  assert.match(css,/background-image:url\("assets\/license\/reflection\.svg/);
+  assert.match(css,/background-size:240% 240%/);
+  assert.match(css,/animation:license-surface-idle 8s ease-in-out infinite alternate/);
+  assert.match(reflection,/feGaussianBlur/);
+  assert.ok((reflection.match(/<path d="M[^"]* C/g)||[]).length>=4);
+  assert.match(source,/layer\.style\.backgroundPosition=/);
   assert.match(source,/ctx\.drawImage\(img,0,CROP_Y,W,H,0,0,W,H\)/);
-  assert.match(source,/classes\.contains\('license-wallet-inactive'\)/);
 });
