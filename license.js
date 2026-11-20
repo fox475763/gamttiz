@@ -7,6 +7,7 @@
   const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
   const $ = id => document.getElementById(id);
   const form = $('license-form'), input = $('license-name'), friends = $('license-friends');
+  const oathChecks = Array.from({length:5},(_,i)=>$('license-oath-'+(i+1)));
   const flip = $('license-flip'), front = $('license-front'), back = $('license-back');
   const W = 1080, H = 1718, CROP_Y = 101;
   const mobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
@@ -253,6 +254,8 @@
     document.body.classList.toggle('has-license',!!record&&!editing);
     $('license-heading-title').textContent=record&&!editing?'WELCOME':'MY ID';
     form.hidden = !editing; $('license-actions').hidden = editing;
+    $('license-oath').hidden = !!record;
+    oathChecks.forEach(check=>{check.disabled=!!record;});
     $('license-badge').textContent = record && !editing ? 'MY LICENSE' : record ? 'EDIT PREVIEW' : 'PREVIEW';
     $('license-panel-title').textContent = editing&&record?'라이센스 정보 수정':'라이센스 발급 신청서';
     $('license-submit').textContent = record?'수정 내용 저장':'라이센스 발급 신청';
@@ -261,9 +264,12 @@
     celebration.hidden=editing||!record||wallet;
     celebration.textContent=record?`이 브라우저에서 ${serial(record.number)}번째로 라이센스가 발급되었습니다!`:'';
     if(record){ input.value=record.name; setSelected(record.character); }else setSelected(selected);
-    $('license-submit').disabled = !ready || saving || !cleanName(input.value);
+    updateSubmit();
     return render();
   }
+  function acceptedOath(){return !!record||oathChecks.every(check=>check.checked);}
+  function updateSubmit(){$('license-submit').disabled=!ready||saving||!cleanName(input.value)||!acceptedOath();}
+  function resetOath(){oathChecks.forEach(check=>{check.checked=false;});}
   if(!wallet)names.forEach((name,index)=>{
     const label=document.createElement('label'); label.className='license-friend';
     const radio=document.createElement('input'); radio.type='radio'; radio.name='character'; radio.value=String(index); radio.setAttribute('aria-label',name); radio.checked=index===0;
@@ -320,10 +326,12 @@
   flip.addEventListener('pointerup',e=>finishDrag(e));flip.addEventListener('pointercancel',e=>finishDrag(e,true));flip.addEventListener('lostpointercapture',e=>finishDrag(e,true));
   flip.addEventListener('pointerleave',()=>{if(!drag)resetPose();});
   flip.addEventListener('click',e=>{if(ignoreClick&&e.detail!==0){ignoreClick=false;return;}ignoreClick=false;setSide(!isBack);}); $('license-turn').addEventListener('click',()=>setSide(!isBack));
-  input.addEventListener('input',()=>{$('license-submit').disabled=!ready||saving||!cleanName(input.value);render();});
+  input.addEventListener('input',()=>{updateSubmit();render();});
+  oathChecks.forEach(check=>check.addEventListener('change',()=>{updateSubmit();if(acceptedOath())status('');}));
   form.addEventListener('submit',async event=>{
     event.preventDefault(); if(!ready || saving) return;
     const name = cleanName(input.value); if(!name){status('이름을 입력해주세요.');input.focus();return;}
+    if(!acceptedOath()){status('감자튀김 애호가 약관에 모두 동의해주세요.');oathChecks.find(check=>!check.checked)?.focus();return;}
     saving=true; $('license-submit').disabled=true;
     try {
       await image(imagePath(selected));
@@ -351,14 +359,14 @@
       }else status('');
     }
     catch { document.body.classList.remove('license-animating');$('license-issuing').hidden=true;$('license-issuing').classList.remove('is-signing');$('license-signature').setAttribute('aria-hidden','true');status('저장하지 못했어요. 브라우저 저장 설정과 네트워크를 확인해주세요.');return; }
-    finally {saving=false;$('license-submit').disabled=!ready||!cleanName(input.value);}
+    finally {saving=false;updateSubmit();}
   });
   $('license-edit').addEventListener('click',()=>{viewEdit(true);setSide(true);status('');input.focus();});
   $('license-cancel').addEventListener('click',()=>{viewEdit(false);status('');});
   $('license-delete').addEventListener('click',()=>{
     if(!confirm('이 브라우저에 저장된 라이센스를 삭제할까요? 삭제하면 복구할 수 없어요.'))return;
     try {localStorage.removeItem(KEY);}catch{status('삭제하지 못했어요. 브라우저 저장 설정을 확인해주세요.');return;}
-    record=null;input.value='';setSelected(0);$('license-celebration').hidden=true;viewEdit(true);setSide(false);status('라이센스를 삭제했어요.');changed();
+    record=null;input.value='';resetOath();setSelected(0);$('license-celebration').hidden=true;viewEdit(true);setSide(false);status('라이센스를 삭제했어요.');changed();
   });
   const saveDialog=$('license-save-dialog');
   let manualUrls=[];
@@ -400,7 +408,7 @@
     }catch{manualSave(files);}
   }
   $('download-both').addEventListener('click',download);
-  window.addEventListener('storage',event=>{if(event.key!==KEY)return;record=restore();if(!record){input.value='';setSelected(0);}viewEdit(!record);setSide(false);});
+  window.addEventListener('storage',event=>{if(event.key!==KEY)return;record=restore();if(!record){input.value='';resetOath();setSelected(0);}viewEdit(!record);setSide(false);});
   record=restore(); viewEdit(!record);
   if(wallet&&!record){
     const preview=document.querySelector('.license-preview');preview.hidden=true;
