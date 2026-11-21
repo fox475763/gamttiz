@@ -31,7 +31,7 @@
 .home-cinema.home-fullpage #main>.stories{display:block}
 .home-cinema.home-fullpage #main .story-row:not(.reverse){grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);gap:clamp(22px,4vw,62px)}
 .home-cinema.home-fullpage #main .story-row:not(.reverse) .story-copy{display:block;order:1}
-.home-cinema.home-fullpage #main .story-row:not(.reverse) .story-copy>p:not(.eyebrow){margin-top:16px;max-width:none}
+.home-cinema.home-fullpage #main .story-row:not(.reverse) .story-copy>p:not(.eyebrow){margin-top:16px;max-width:none;justify-self:start;text-align:left}
 .home-cinema.home-fullpage #main .story-row:not(.reverse) .story-copy :is(.story-number,.eyebrow){margin-bottom:12px}
 .home-cinema.home-fullpage #main .story-row .story-image img{height:auto;max-height:min(50vh,480px);aspect-ratio:16/9;object-fit:contain;object-position:center}
 .home-cinema.home-fullpage #main .story-row.reverse .story-image{align-self:center}
@@ -103,4 +103,29 @@
  .home-cinema.home-fullpage .hero-foot{margin-top:6px;padding-top:5px}
  .home-cinema.home-fullpage .hero-poster .poster-viewport{height:clamp(92px,23vh,145px)}
  .home-cinema.home-fullpage #main .guide-grid article>p{font-size:12px}
+}
+/* A short landscape frame has more useful width than height. Reflow into
+   columns before resorting to the last-resort proportional fit guard. */
+@media(max-height:540px) and (min-width:440px){
+ .home-cinema.home-fullpage>.header{min-height:0;padding-block:6px}
+ .home-cinema.home-fullpage>.header .wordmark{font-size:clamp(21px,3vw,30px)}
+ .home-cinema.home-fullpage>.header .wordmark span{font-size:8px}
+ .home-cinema.home-fullpage #main>.hero{grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:9px 24px}
+ .home-cinema.home-fullpage .hero-film{font-size:clamp(30px,5.1vw,55px);margin:8px 0}
+ .home-cinema.home-fullpage .hero-poster{max-width:350px}
+ .home-cinema.home-fullpage .hero-poster .poster-viewport{height:clamp(86px,43vh,200px)}
+ .home-cinema.home-fullpage .hero .ticker{padding:3px 0}
+ .home-cinema.home-fullpage .hero-foot{margin-top:8px;padding-top:6px}
+ .home-cinema.home-fullpage #main .story-row:not(.reverse),.home-cinema.home-fullpage #main .story-row.reverse,.home-cinema.home-fullpage #main>.holder,.home-cinema.home-fullpage #main>.home-package{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+ .home-cinema.home-fullpage #main .story-row .story-image img,.home-cinema.home-fullpage #main .holder-image img,.home-cinema.home-fullpage #main .home-package-image img{max-height:47vh;height:auto;object-fit:contain}
+ .home-cinema.home-fullpage #main .collection .gallery .card.friend-carousel-card{flex-basis:clamp(92px,28vh,165px)}
+ .home-cinema.home-fullpage #main .collection .gallery .friend-carousel-card .card-label{min-height:42px;padding-block:5px;font-size:13px}
+ .home-cinema.home-fullpage #main .experience-links{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .home-cinema.home-fullpage #main .experience-links>a+a{border-left:1px solid currentColor;border-top:0}
+ .home-cinema.home-fullpage #main .guide-grid{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px}
+ .home-cinema.home-fullpage #main .guide-grid article{display:block;padding:8px 9px}
+ .home-cinema.home-fullpage #main .guide-grid article+article{border-top:0;border-left:1px solid var(--ed-line)}
+ .home-cinema.home-fullpage #main .guide-grid article>span{margin-bottom:6px;font-size:20px}
+ .home-cinema.home-fullpage #main .guide-grid article>p{font-size:12px;line-height:1.45}
+ .home-cinema.home-fullpage #main .home-news-feed-card{padding-block:7px}
 }
