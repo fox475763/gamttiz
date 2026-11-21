@@ -3,22 +3,23 @@
 body.home-cinema{isolation:isolate}
 .home-cinema .home-ambient{
   position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
-  background:#fbf8ef;contain:strict;
+  background:#f7f7f5;contain:strict;
 }
 .home-cinema .home-ambient::before{
   content:'';position:absolute;inset:-14%;
   background:
-    radial-gradient(ellipse at 15% 18%,#ffb51e40 0%,#ffb51e13 29%,transparent 57%),
-    radial-gradient(ellipse at 92% 78%,#e936362b 0%,#e936360b 32%,transparent 62%),
-    radial-gradient(ellipse at 74% 4%,#ffe7a65c 0%,transparent 55%),
-    url("assets/home-ambient.svg") center/cover no-repeat;
+    url("assets/home-ambient.svg?v=20261121satin1") center/cover no-repeat,
+    radial-gradient(ellipse at 83% 17%,#e8dedc62 0%,transparent 53%),
+    radial-gradient(ellipse at 11% 89%,#e2dfd94d 0%,transparent 52%),
+    radial-gradient(ellipse at 50% 40%,#ffffff 0%,transparent 68%);
   transform-origin:50% 50%;
-  animation:gtz-ambient-drift 26s ease-in-out infinite;
+  animation:gtz-ambient-drift 32s ease-in-out infinite;
 }
 @keyframes gtz-ambient-drift{
-  0%,100%{transform:translate3d(-3%,-2%,0) rotate(-5deg) scale(1.025)}
-  33%{transform:translate3d(4%,2%,0) rotate(3deg) scale(1.08)}
-  66%{transform:translate3d(-1%,4%,0) rotate(7deg) scale(1.035)}
+  0%,100%{transform:translate3d(-3%,-1%,0) rotate(-4deg) scale(1.015)}
+  30%{transform:translate3d(3%,-3%,0) rotate(3deg) scale(1.07)}
+  64%{transform:translate3d(1%,4%,0) rotate(6deg) scale(1.035)}
+  83%{transform:translate3d(-2%,2%,0) rotate(1deg) scale(1.045)}
 }
 .home-cinema #main{background:none}
 
@@ -87,7 +88,7 @@ body.home-cinema{isolation:isolate}
 
 @media(max-width:620px){
   .home-cinema .home-ambient::before{
-    inset:-10%;background-size:auto,auto,auto,cover;animation-duration:24s;
+    inset:-12%;background-size:cover,auto,auto,auto;animation-duration:28s;
   }
   .home-cinema #main .story-row:not(.reverse),
   .home-cinema #main .story-row.reverse{gap:20px}
