@@ -96,7 +96,7 @@
     setPalette(to.palette);
     Promise.allSettled([a.finished,b.finished]).then(()=>{a.cancel();b.cancel();done();});
   }
-  const overlayOpen=()=>!!document.querySelector('dialog[open],.control-dock:not([data-mode="closed"]),.gtz-wallet-sheet:not([hidden])');
+  const overlayOpen=()=>!!document.querySelector('dialog[open],.control-dock:not([data-mode="closed"]),.gtz-wallet-sheet[aria-hidden="false"]');
   let wheelDistance=0,lastWheel=-Infinity,wheelConsumed=false;
   viewport.addEventListener('wheel',e=>{
     if(e.ctrlKey||overlayOpen()||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
