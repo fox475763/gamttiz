@@ -2,7 +2,7 @@
 body.home-cinema{isolation:isolate}
 .home-cinema .home-ambient{
   position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
-  background:#faf9f8;contain:strict;
+  background:#faf9f7;contain:strict;
 }
 .home-cinema .home-ambient::before,.home-cinema .home-ambient::after{
   content:'';position:absolute;inset:-32%;
@@ -10,12 +10,12 @@ body.home-cinema{isolation:isolate}
   animation:gtz-ambient-drift 12s ease-in-out infinite;
 }
 .home-cinema .home-ambient::before{
-  background:radial-gradient(ellipse at 76% 28%,#e6acaf 0%,#f2d9d9 17%,transparent 45%),
-  radial-gradient(ellipse at 23% 77%,#d8d4d4 0%,#ebe8e8 22%,transparent 50%);
+  background:radial-gradient(ellipse at 76% 28%,#e1d8c7 0%,#f0ece3 17%,transparent 45%),
+  radial-gradient(ellipse at 23% 77%,#d8d6d1 0%,#ebe9e5 22%,transparent 50%);
 }
 .home-cinema .home-ambient::after{
   background:radial-gradient(ellipse at 29% 20%,#fff 0%,#ffffffb8 20%,transparent 48%),
-  radial-gradient(ellipse at 73% 76%,#eac3c4 0%,transparent 47%);
+  radial-gradient(ellipse at 73% 76%,#e8dfce 0%,transparent 47%);
   animation:gtz-ambient-light 15s ease-in-out infinite;
 }
 .home-cinema .home-ambient :is(canvas,video){position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;z-index:1;opacity:0;transform:translateZ(0)}
@@ -93,6 +93,39 @@ body.home-cinema{isolation:isolate}
 .home-cinema #main .social .button{color:var(--ed-red);border-color:currentColor}
 .home-cinema #main .social .button:hover{color:#a61e28;border-color:currentColor}
 .home-cinema>footer{background:none}
+
+/* Editorial ink is kept separate from the moving light. Only content below
+   the original hero is recoloured; preserve the floating glass controls. */
+.home-cinema #main>:is(.collection,.stories,.holder,.home-package,.experience-teaser,.radar-preview,.home-news,.home-news-feed,.guide,.home-contact,.social){
+  --ed-ink:#211e1b;--ed-muted:#47433e;--ed-red:#b51b25;--ed-line:#51463e36;
+  color:var(--ed-ink);
+}
+.home-cinema #main>:not(.hero) :is(.section-heading h2,.radar-preview-heading h2,.story-copy h2,.holder-copy h2,.home-package-copy h2,.home-news-feed-head h2,.home-news h2,.guide>h2,.home-contact h2,.social h2),
+.home-cinema #main .story-row:not(.reverse) .story-copy h2,
+.home-cinema #main .story-row.reverse .story-copy h2{color:var(--ed-ink)}
+.home-cinema #main .collection .section-heading h2,
+.home-cinema #main .collection .section-heading h2 a,
+.home-cinema #main .home-package-copy h2 em{color:var(--ed-red)}
+.home-cinema #main .collection .section-heading h2 a:hover{color:#8f111a}
+.home-cinema #main>:not(.hero) .eyebrow,
+.home-cinema #main .story-row.reverse :is(.story-number,.eyebrow),
+.home-cinema #main .story-number,
+.home-cinema #main .guide-grid article>span,
+.home-cinema #main .experience-links>a :is(span,b){color:var(--ed-red)}
+.home-cinema #main>:not(.hero) :is(.section-heading,.radar-preview-heading)>p,
+.home-cinema #main .radar-preview-heading p,
+.home-cinema #main .story-row:not(.reverse) .story-copy>p:not(.eyebrow),
+.home-cinema #main .story-row.reverse .story-copy>p:not(.eyebrow),
+.home-cinema #main :is(.holder-copy,.home-package-copy,.home-contact,.home-news)>p:not(.eyebrow),
+.home-cinema #main .experience-links>a>small,
+.home-cinema #main .guide-grid p,
+.home-cinema #main .home-news-feed-copy :is(p,small){color:var(--ed-muted);opacity:1}
+.home-cinema #main .collection .gallery .friend-carousel-card .card-label{color:var(--ed-ink);border-color:#51463e36}
+.home-cinema #main .collection .gallery .friend-carousel-card .friend-english{color:var(--ed-muted)}
+.home-cinema #main .collection .gallery .friend-carousel-card:is(:hover,:focus-visible) .card-label{color:var(--ed-red);border-color:var(--ed-red)}
+.home-cinema #main .holder-image .holder-open{color:var(--ed-ink)}
+.home-cinema #main .experience-links>a>strong{color:var(--ed-ink)}
+.home-cinema #main .experience-links>a:is(:hover,:focus-visible)>strong{color:var(--ed-red)}
 
 @media(max-width:620px){
   .home-cinema #main .story-row:not(.reverse),

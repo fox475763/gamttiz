@@ -12,7 +12,7 @@
     video.defaultMuted=video.muted=true;video.playsInline=true;
     video.loop=true;video.preload='none';video.disablePictureInPicture=true;
     video.setAttribute('muted','');video.setAttribute('playsinline','');
-    video.src='assets/home-ambient-motion.mp4?v=20261121living3';
+    video.src='assets/home-ambient-motion.mp4?v=20261121brandlight1';
     host.append(video);
     const sync=()=>{
       if(document.hidden||reduced.matches){video.pause();return;}
@@ -67,15 +67,17 @@
       float glow=exp(-g*g);
       float fold=exp(-f*f);
       float envelope=.3+.7*max(r,shade);
-      vec3 c=vec3(.98,.978,.975);
-      c=mix(c,vec3(.82,.811,.813),shade*.58+shade2*.38);
-      c=mix(c,vec3(.903,.565,.589),r*.54);
-      c=mix(c,vec3(.935,.715,.722),r2*.50);
-      c=mix(c,vec3(.82,.806,.812),fold*.19*envelope);
+      // Clean paper white, neutral shadow and a restrained golden fry tint.
+      // Red belongs to the brand content, not a pink wash behind it.
+      vec3 c=vec3(.987,.985,.980);
+      c=mix(c,vec3(.81,.805,.79),shade*.58+shade2*.38);
+      c=mix(c,vec3(.875,.827,.735),r*.54);
+      c=mix(c,vec3(.94,.89,.78),r2*.50);
+      c=mix(c,vec3(.82,.81,.785),fold*.19*envelope);
       c=mix(c,vec3(1.0),glow*.44*envelope);
       c=mix(c,vec3(1.0),light*.65);
       // Preserve a bright reading area and suppress overly chromatic edges.
-      c=mix(c,vec3(.992,.99,.986),.14);
+      c=mix(c,vec3(.995,.993,.988),.14);
       float grain=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)-.5;
       gl_FragColor=vec4(c+grain*.003,1.0);
     }`;
