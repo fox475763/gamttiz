@@ -1,45 +1,23 @@
 (() => {
-  'use strict';
-  const body=document.body;
-  const scenes=[...document.querySelectorAll('#main > section[data-chapter]')];
-  if(!scenes.length)return;
-  const indexEl=document.querySelector('[data-edition-index]'),labelEl=document.querySelector('[data-edition-label]');
-  const prev=document.querySelector('[data-edition-prev]'),next=document.querySelector('[data-edition-next]');
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
-  function syncChapters(){
-    const index=Math.max(0,Math.min(scenes.length-1,Number(body.dataset.homeScene)||0));
-    indexEl.textContent=String(index+1).padStart(2,'0')+' / '+String(scenes.length).padStart(2,'0');
-    labelEl.textContent=scenes[index].dataset.chapter;
-    for(const [control,delta] of [[prev,-1],[next,1]]){
-      const target=scenes[index+delta];
-      control.setAttribute('aria-disabled',String(!target));
-      control.href='#'+(target||scenes[index]).id;
-      control.tabIndex=target?0:-1;
-    }
-  }
-  for(const button of [prev,next])button.addEventListener('click',e=>{if(button.getAttribute('aria-disabled')==='true'){e.preventDefault();e.stopPropagation();}});
-  document.addEventListener('gtz-home-scene',syncChapters);syncChapters();
-  const groups=new Map();
-  document.querySelectorAll('[data-strip]').forEach(button=>{
-    const track=document.getElementById(button.dataset.strip);if(!track)return;
-    if(!groups.has(track))groups.set(track,[]);
-    groups.get(track).push(button);
-    button.addEventListener('click',()=>{
-      const card=track.firstElementChild;
-      const step=card?card.getBoundingClientRect().width+parseFloat(getComputedStyle(track).columnGap||0):track.clientWidth*.7;
-      track.scrollBy({left:Number(button.dataset.dir)*Math.max(80,step),behavior:reduced.matches?'auto':'smooth'});
-    });
-  });
-  for(const [track,buttons] of groups){
-    let frame=0;
-    const update=()=>{
-      frame=0;
-      const end=Math.max(0,track.scrollWidth-track.clientWidth);
-      buttons.forEach(button=>button.disabled=Number(button.dataset.dir)<0?track.scrollLeft<=2:track.scrollLeft>=end-2);
-    };
-    const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
-    track.addEventListener('scroll',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});
-    if('ResizeObserver' in window)new ResizeObserver(schedule).observe(track);
-    document.addEventListener('gtz-home-scene',schedule);update();
-  }
+'use strict';
+// Native swiping and keyboard scrolling; desktop mouse drag only when the
+// responsive gallery actually overflows. No frame loop or scroll interception.
+for(const track of document.querySelectorAll('.clean-gallery')){
+ let gesture=null, suppress=false;
+ track.addEventListener('pointerdown',e=>{
+  if(e.pointerType!=='mouse'||e.button!==0||track.scrollWidth<=track.clientWidth+2)return;
+  gesture={id:e.pointerId,x:e.clientX,left:track.scrollLeft,drag:false};
+ });
+ track.addEventListener('pointermove',e=>{
+  if(!gesture||gesture.id!==e.pointerId)return;
+  if(!gesture.drag&&Math.abs(e.clientX-gesture.x)<7)return;
+  if(!gesture.drag){gesture.drag=true;track.setPointerCapture(e.pointerId);}
+  track.scrollLeft=gesture.left+gesture.x-e.clientX;e.preventDefault();
+ });
+ const end=e=>{if(!gesture||gesture.id!==e.pointerId)return;suppress=gesture.drag;gesture=null;if(suppress)setTimeout(()=>suppress=false,0);};
+ track.addEventListener('pointerup',end);track.addEventListener('pointercancel',end);
+ track.addEventListener('click',e=>{if(suppress){e.preventDefault();e.stopImmediatePropagation();}},true);
+ track.addEventListener('dragstart',e=>e.preventDefault());
+ track.addEventListener('keydown',e=>{if(e.target!==track||!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();track.scrollBy({left:(e.key==='ArrowRight'?1:-1)*track.clientWidth*.65,behavior:'smooth'});});
+}
 })();

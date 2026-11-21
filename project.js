@@ -38,7 +38,7 @@
       const button=document.createElement('button');button.type='button';button.className='edition-character';button.setAttribute('aria-label',name+' 원본 일러스트와 특징 보기');
       const no=document.createElement('span');no.textContent='NO. '+String(i+1).padStart(2,'0');
       const art=document.createElement('img');art.src=path(i);art.alt=name;art.loading='lazy';art.decoding='async';
-      const caption=document.createElement('strong');caption.textContent=name+' ↗';
+      const caption=document.createElement('strong');caption.textContent=name;
       button.append(no,art,caption);button.addEventListener('click',()=>show(i));fragment.append(button);
     });
     lineup.append(fragment);
@@ -46,17 +46,5 @@
     dialog.querySelectorAll('[data-char-dir]').forEach(button=>button.addEventListener('click',()=>show(selected+Number(button.dataset.charDir))));
     dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
   }
-  const specimen=document.getElementById('type-preview');
-  const weights=[...document.querySelectorAll('[data-type-weight]')];
-  weights.forEach(button=>button.addEventListener('click',()=>{
-    if(!specimen)return;
-    specimen.style.fontWeight=button.dataset.typeWeight;
-    weights.forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-  }));
-  const colorStatus=document.getElementById('color-copy-status');
-  document.querySelectorAll('[data-hex]').forEach(button=>button.addEventListener('click',async()=>{
-    const hex=button.dataset.hex;
-    try{await navigator.clipboard.writeText(hex);colorStatus.textContent=hex+' · 복사했어요.';}
-    catch{colorStatus.textContent=hex+' · 색상 코드';}
-  }));
+
 })();

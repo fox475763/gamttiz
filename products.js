@@ -27,8 +27,7 @@ catalogProducts.forEach(([name, english, description], index) => {
   const text = document.createElement('span'); text.className = 'catalog-card-text';
   const num = document.createElement('small'); num.textContent = `No. ${number}`;
   const title = document.createElement('strong'); title.textContent = name;
-  const arrow = document.createElement('b'); arrow.textContent = '↗'; arrow.setAttribute('aria-hidden', 'true');
-  text.append(num, title, arrow); card.append(img, text);
+  text.append(num, title); card.append(img, text);
   card.addEventListener('click', () => {
     document.getElementById('catalog-dialog-image').src = image;
     document.getElementById('catalog-dialog-image').alt = `${name} 키링 제품 소개 이미지`;
