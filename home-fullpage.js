@@ -31,7 +31,9 @@
   viewport.setAttribute('aria-label','홈 콘텐츠, 휠 또는 스와이프와 위아래 방향키로 장면 이동');
   body.classList.add('home-fullpage','home-palette-ready');
   scenes.forEach((el,i)=>{el.classList.add('home-scene');el.dataset.scene=String(i);el.inert=true;el.setAttribute('aria-hidden','true');});
-  let current=0,desired=0,active=null,direct=false,targetFocus=false,instantRequested=false,inMotion=false,frameHeight=0,measureQueued=false,inkTimer=0;
+  let current=0,position=0,goal=0,frame=0,lastFrame=0,snapping=false,dragging=false,dragPosition=0,targetFocus=false,inMotion=false,frameHeight=0,measureQueued=false,inkTimer=0,paletteIndex=-1;
+  let wheelTimer=0,lastWheel=-Infinity,wheelDirection=0,wheelOrigin=0;
+  const previewed=new Set();
   const clampIndex=index=>Math.max(0,Math.min(scenes.length-1,index));
   const setPalette=(palette,duration=440)=>{
     const previous=host.dataset.palette;
@@ -55,15 +57,15 @@
       s.fit=fit;s.el.style.setProperty('--scene-fit',String(fit));
     }
   }
-  const scheduleMeasure=()=>{if(!measureQueued){measureQueued=true;requestAnimationFrame(measure);}};
+  const scheduleMeasure=()=>{if(!measureQueued){measureQueued=true;requestAnimationFrame(()=>{measure();if(inMotion)requestFrame();});}};
   function setActive(index,announce=true){
     current=index;
     scenes.forEach((el,i)=>{
       const selected=i===index;
-      el.classList.toggle('is-current',selected);el.classList.toggle('is-before',i<index);el.classList.remove('is-leaving');
+      el.classList.toggle('is-current',selected);el.classList.toggle('is-before',i<index);el.classList.remove('is-leaving','is-preview');el.style.removeProperty('transform');
       el.inert=!selected;el.setAttribute('aria-hidden',String(!selected));
     });
-    body.dataset.homeScene=String(index);body.dataset.homeSceneCount=String(scenes.length);
+    previewed.clear();body.dataset.homeScene=String(index);body.dataset.homeSceneCount=String(scenes.length);
     if(announce){const heading=scenes[index].querySelector('h1,h2');status.textContent=`${index+1} / ${scenes.length} · ${heading?.textContent.trim()||'감띠즈'}`;}
     document.dispatchEvent(new Event('gtz-home-scene'));
   }
@@ -74,96 +76,139 @@
     document.dispatchEvent(new Event('gtz-home-scroll-state'));
   }
   const transform=(offset,fit)=>`translate3d(0,calc(-50% + ${offset}px),0) scale(${fit})`;
-  function go(index,{focus=false,instant=false}={}){
-    desired=clampIndex(index);direct=true;targetFocus=focus;instantRequested=instant;
-    if(active)accelerate();else pump();
-  }
-  // A small rolling buffer preserves intentional input even during motion.
-  // Opposite input drops the old direction's backlog instead of fighting it.
-  function stepBy(direction,count=1,focus=false){
-    const anchor=active?active.index:current;
-    if(direct||((desired-anchor)*direction<0))desired=anchor;
-    desired=clampIndex(Math.max(anchor-4,Math.min(anchor+4,desired+direction*count)));
-    direct=false;targetFocus=focus;instantRequested=false;
-    if(active)accelerate();else pump();
-  }
-  function accelerate(){
-    if(!active?.animations?.length)return;
-    const backlog=Math.abs(desired-active.index);
-    if(!backlog)return;
-    const rate=Math.min(2.65,Math.max(1.25+backlog*.42,active.rate),active.duration/115);
-    if(rate<=active.rate)return;
-    active.rate=rate;
-    for(const animation of active.animations){if(animation.updatePlaybackRate)animation.updatePlaybackRate(rate);else animation.playbackRate=rate;}
-    host.style.setProperty('--stage-speed',`${Math.round(active.duration/rate)}ms`);
-  }
-  function pump(){
-    if(active)return;
-    if(desired===current){motion(false);direct=false;if(targetFocus)viewport.focus({preventScroll:true});targetFocus=false;return;}
-    const backlog=Math.abs(desired-current);
-    const index=direct?desired:current+Math.sign(desired-current);
-    const instant=instantRequested;direct=false;instantRequested=false;
-    const from=order[current],to=order[index],dir=index>current?1:-1;
-    if(from.el.contains(document.activeElement))viewport.focus({preventScroll:true});
-    if(measureQueued||!frameHeight)measure();
-    motion(true);
-    const duration=backlog>=3?190:backlog===2?265:440;
-    const record={index,duration,rate:1,animations:[]};active=record;
-    from.el.classList.remove('is-current');from.el.classList.add('is-leaving');from.el.inert=true;from.el.setAttribute('aria-hidden','true');
-    to.el.classList.add('is-current');to.el.classList.remove('is-before');to.el.inert=true;
-    const done=()=>{
-      if(active!==record)return;
-      setActive(index,index===desired);active=null;
-      if(index===desired)setPalette(to.palette,duration);
-      pump();
-    };
-    if(instant||reduced.matches||typeof from.el.animate!=='function'){setPalette(to.palette);done();return;}
-    // Only the outgoing and incoming scenes move; the fixed stage, header,
-    // and glass menu never move. No per-frame layout or forced scrolling.
-    const h=frameHeight+12;
-    const options={duration,easing:backlog>1?'cubic-bezier(.28,.45,.65,.92)':'cubic-bezier(.22,.72,.25,1)',fill:'both'};
-    const a=from.el.animate([{transform:transform(0,from.fit)},{transform:transform(-dir*h,from.fit)}],options);
-    const b=to.el.animate([{transform:transform(dir*h,to.fit)},{transform:transform(0,to.fit)}],options);
-    record.animations=[a,b];setPalette(to.palette,duration);
-    Promise.allSettled([a.finished,b.finished]).then(()=>{a.cancel();b.cancel();done();});
-  }
   const overlayOpen=()=>!!document.querySelector('dialog[open],.control-dock:not([data-mode="closed"]),.gtz-wallet-sheet[aria-hidden="false"]');
-  let wheelDistance=0,lastWheel=-Infinity,wheelStarted=false,wheelDirection=0;
+  // One continuous virtual dial: only the two adjacent scenes receive a
+  // compositor transform. Neither the document nor the stage scrolls.
+  function syncPalette(index){
+    if(paletteIndex===index)return;
+    paletteIndex=index;setPalette(order[index].palette,300);
+    body.dataset.homeScene=String(index);document.dispatchEvent(new Event('gtz-home-scene'));
+  }
+  function paint(){
+    const lower=Math.floor(position),upper=Math.ceil(position);
+    const next=new Set([lower,upper]);
+    for(const i of previewed)if(!next.has(i)){const el=order[i].el;el.classList.remove('is-preview');el.style.removeProperty('transform');previewed.delete(i);}
+    for(const i of next){
+      const {el,fit}=order[i];
+      if(!previewed.has(i)){el.classList.add('is-preview');previewed.add(i);}
+      el.style.transform=transform((i-position)*frameHeight,fit);
+    }
+    syncPalette(Math.round(position));
+  }
+  function begin(){
+    if(inMotion)return;
+    if(order[current].el.contains(document.activeElement))viewport.focus({preventScroll:true});
+    // Keep the actual section inert while its contents are in transit.
+    order[current].el.classList.remove('is-current');order[current].el.inert=true;order[current].el.setAttribute('aria-hidden','true');
+    motion(true);paint();
+  }
+  function finish(index){
+    clearTimeout(wheelTimer);wheelTimer=0;
+    if(frame)cancelAnimationFrame(frame);frame=0;lastFrame=0;
+    dragging=false;snapping=false;position=goal=clampIndex(index);
+    syncPalette(position);setActive(position);motion(false);
+    if(targetFocus)viewport.focus({preventScroll:true});targetFocus=false;
+  }
+  function requestFrame(){if(!frame)frame=requestAnimationFrame(tick);}
+  function tick(now){
+    frame=0;
+    if(!inMotion){lastFrame=0;return;}
+    if(overlayOpen()){finish(Math.round(position));return;}
+    if(dragging){position=dragPosition;paint();lastFrame=0;return;}
+    // Time-based damping is continuous across input events: no per-page lock,
+    // no backlog of animations, and no sudden acceleration at each boundary.
+    const dt=lastFrame?Math.max(1,Math.min(48,now-lastFrame)):16;lastFrame=now;
+    const factor=reduced.matches?1:1-Math.exp(-dt/(snapping?82:58));
+    position=clampIndex(position+(goal-position)*factor);
+    if(Math.abs(goal-position)<.005){position=goal;paint();if(snapping)finish(Math.round(goal));else lastFrame=0;return;}
+    paint();requestFrame();
+  }
+  function snapTo(index,focus=false){
+    clearTimeout(wheelTimer);wheelTimer=0;
+    targetFocus=focus;goal=clampIndex(Math.round(index));dragging=false;snapping=true;
+    if(reduced.matches||Math.abs(position-goal)<.005){finish(goal);return;}
+    begin();requestFrame();
+  }
+  function go(index,{focus=false,instant=false}={}){
+    const next=clampIndex(index);targetFocus=focus;
+    // Explicit links can jump to a distant section without playing every
+    // intervening chapter. Adjacent moves retain the same soft landing.
+    if(instant||reduced.matches||Math.abs(next-position)>1.45){finish(next);return;}
+    snapTo(next,focus);
+  }
+  function stepBy(direction,count=1,focus=false){
+    const base=Math.round(goal);
+    snapTo(clampIndex(base+direction*count),focus);
+  }
+  function wheelSettle(){
+    wheelTimer=0;
+    let target=Math.round(goal);
+    if(target===wheelOrigin&&Math.abs(goal-wheelOrigin)>=.10)target=wheelOrigin+wheelDirection;
+    lastWheel=-Infinity;
+    snapTo(clampIndex(target));
+  }
   viewport.addEventListener('wheel',e=>{
     if(e.ctrlKey||overlayOpen()||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
     e.preventDefault();
     const now=performance.now();
     const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?frameHeight:1);
     const direction=Math.sign(delta);if(!direction)return;
-    if(now-lastWheel>160||direction!==wheelDirection){wheelDistance=0;wheelStarted=false;}
+    if(now-lastWheel>170||direction!==wheelDirection){
+      if(direction!==wheelDirection&&inMotion)goal=position;
+      wheelOrigin=Math.round(goal);
+    }
     lastWheel=now;wheelDirection=direction;
-    const stride=Math.max(105,Math.min(165,frameHeight*.19));
-    wheelDistance+=Math.min(Math.abs(delta),stride*5);
-    let steps=0;
-    if(!wheelStarted&&wheelDistance>=30){wheelDistance-=30;wheelStarted=true;steps++;}
-    if(wheelStarted&&wheelDistance>=stride){steps+=Math.floor(wheelDistance/stride);wheelDistance%=stride;}
-    if(steps)stepBy(direction,Math.min(steps,5));
+    // About one screen per 340–520 input pixels. Limit the untravelled
+    // lead to a little over one scene so flings cannot queue many pages.
+    const stride=Math.max(340,Math.min(520,frameHeight*.55));
+    const amount=Math.min(.85,Math.abs(delta)/stride)*direction;
+    goal=clampIndex(Math.max(position-1.12,Math.min(position+1.12,goal+amount)));
+    if(Math.abs(goal-position)<.0001&&!inMotion)return;
+    targetFocus=false;dragging=false;snapping=false;begin();requestFrame();
+    clearTimeout(wheelTimer);wheelTimer=setTimeout(wheelSettle,125);
   },{passive:false});
   let gesture=null,ignoreClicksUntil=0;
+  function cancelGesture(){
+    if(gesture?.axis==='y'){position=dragPosition;dragging=false;snapTo(Math.round(position));}
+    gesture=null;
+  }
   viewport.addEventListener('touchstart',e=>{
-    if(e.touches.length!==1||overlayOpen()){gesture=null;return;}
-    const t=e.touches[0];gesture={x:t.clientX,y:t.clientY,axis:null,time:performance.now()};
+    if(e.touches.length!==1||overlayOpen()){cancelGesture();return;}
+    const t=e.touches[0],now=performance.now();gesture={x:t.clientX,y:t.clientY,axis:null,base:position,lastY:t.clientY,lastTime:now,velocity:0};
   },{passive:true});
   viewport.addEventListener('touchmove',e=>{
-    if(!gesture||e.touches.length!==1){gesture=null;return;}
+    if(!gesture||e.touches.length!==1){cancelGesture();return;}
     const t=e.touches[0],dx=t.clientX-gesture.x,dy=t.clientY-gesture.y;
-    if(!gesture.axis&&Math.max(Math.abs(dx),Math.abs(dy))>9)gesture.axis=Math.abs(dy)>Math.abs(dx)*1.15?'y':'x';
-    if(gesture.axis==='y'&&e.cancelable)e.preventDefault();
+    if(!gesture.axis&&Math.max(Math.abs(dx),Math.abs(dy))>8){
+      gesture.axis=Math.abs(dy)>Math.abs(dx)*1.15?'y':'x';
+      if(gesture.axis==='y'){
+        clearTimeout(wheelTimer);wheelTimer=0;
+        gesture.base=position;goal=position;dragging=true;snapping=false;targetFocus=false;begin();
+      }
+    }
+    if(gesture.axis!=='y')return;
+    if(e.cancelable)e.preventDefault();
+    const now=performance.now(),dt=Math.max(1,now-gesture.lastTime);
+    gesture.velocity=(gesture.lastY-t.clientY)/dt;gesture.lastY=t.clientY;gesture.lastTime=now;
+    // The content follows the finger immediately, rather than waiting for
+    // touchend. One gesture is limited to the adjacent scene in either direction.
+    dragPosition=clampIndex(Math.max(gesture.base-1,Math.min(gesture.base+1,gesture.base-dy/Math.max(1,frameHeight))));
+    requestFrame();
   },{passive:false});
   viewport.addEventListener('touchend',e=>{
     if(!gesture)return;
-    const t=e.changedTouches[0],dx=t.clientX-gesture.x,dy=t.clientY-gesture.y;
-    const vertical=gesture.axis!=='x'&&Math.abs(dy)>44&&Math.abs(dy)>Math.abs(dx)*1.25;
-    const fast=Math.abs(dy)>Math.max(170,frameHeight*.40)&&Math.abs(dy)/Math.max(1,performance.now()-gesture.time)>1.05;
-    gesture=null;
-    if(vertical&&!overlayOpen()){ignoreClicksUntil=performance.now()+350;stepBy(dy<0?1:-1,fast?2:1);}
+    const t=e.changedTouches[0],dy=t.clientY-gesture.y,g=gesture;gesture=null;
+    if(g.axis!=='y')return;
+    position=dragPosition;dragging=false;
+    const now=performance.now(),velocity=now-g.lastTime<110?g.velocity:0;
+    const base=Math.round(g.base),direction=Math.sign(-dy);
+    const projected=position+Math.max(-.22,Math.min(.22,velocity*115/Math.max(1,frameHeight)));
+    let next=Math.round(projected);
+    if(next===base&&Math.abs(dy)>42&&(Math.abs(position-g.base)>.16||Math.abs(velocity)>.65))next=base+direction;
+    next=clampIndex(Math.max(base-1,Math.min(base+1,next)));
+    ignoreClicksUntil=now+300;snapTo(next);
   },{passive:true});
-  viewport.addEventListener('touchcancel',()=>{gesture=null;},{passive:true});
+  viewport.addEventListener('touchcancel',cancelGesture,{passive:true});
   viewport.addEventListener('click',e=>{if(performance.now()<ignoreClicksUntil){e.preventDefault();e.stopImmediatePropagation();}},true);
   document.addEventListener('keydown',e=>{
     if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey||overlayOpen()||e.target.closest?.('input,textarea,select,[contenteditable]'))return;
@@ -190,7 +235,7 @@
   const syncHash=()=>{const index=indexFromHash(location.hash);if(index>=0)go(index,{focus:true});};
   addEventListener('hashchange',syncHash);addEventListener('popstate',syncHash);
   const initial=Math.max(0,indexFromHash(location.hash));
-  desired=initial;host.classList.add('stage-initial');setPalette(order[initial].palette);measure();setActive(initial,false);
+  position=goal=initial;paletteIndex=initial;host.classList.add('stage-initial');setPalette(order[initial].palette);measure();setActive(initial,false);
   requestAnimationFrame(()=>requestAnimationFrame(()=>host.classList.remove('stage-initial')));
   const syncMotion=()=>host.classList.toggle('stage-paused',document.hidden||reduced.matches);
   document.addEventListener('visibilitychange',syncMotion);reduced.addEventListener?.('change',syncMotion);syncMotion();

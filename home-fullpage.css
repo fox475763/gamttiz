@@ -18,6 +18,7 @@
   visibility:visible;transform:translate3d(0,-50%,0) scale(var(--scene-fit,1));
 }
 .home-cinema.home-fullpage #main>.home-scene.is-current{pointer-events:auto}
+.home-cinema.home-fullpage #main>.home-scene.is-preview{visibility:visible;pointer-events:none;will-change:transform}
 .home-cinema.home-fullpage #main>.hero{grid-template-columns:minmax(0,1fr) minmax(0,.96fr);width:100%;padding-inline:max(5%,calc((100% - 1240px)/2));gap:clamp(14px,3vw,56px);align-items:center;}
 .home-cinema.home-fullpage .hero-copy{padding:0;min-height:0;animation:none;translate:none;text-align:left}
 .home-cinema.home-fullpage .hero-poster{animation:none;translate:none;max-width:510px;margin:0;min-width:0;padding:clamp(10px,1.8vw,22px)}
