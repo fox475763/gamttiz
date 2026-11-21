@@ -84,6 +84,21 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
      assert.equal(catalog.photos,14);
      assert.ok(catalog.borders.every(r=>r==='0px'),'editorial content must not revert to a rounded card grid');
      assert.equal(await page.locator('#friends-count,#friends-prev,#friends-next,#friends-pause,.home-friend-index,.home-friend-arrow').count(),0);
+     // Fixed-width indicator slots must not wrap or shift as any item is selected.
+     if(mobile)for(const width of [320,375,390,430]){
+       await page.setViewportSize({width,height:844});
+       await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().length>0);
+       const dots=page.locator('#friends-dots button');
+       for(let i=0;i<14;i++){
+         await dots.nth(i).click();
+         assert.equal(await dots.nth(i).getAttribute('aria-pressed'),'true');
+         const bounds=await page.locator('#friends-dots').evaluate(el=>{
+           const b=el.getBoundingClientRect(),r=[...el.children].map(d=>d.getBoundingClientRect());
+           return {fits:r.every(d=>d.left>=b.left-1&&d.right<=b.right+1&&Math.abs(d.top-r[0].top)<1),active:el.querySelectorAll('.is-active').length,overflow:document.documentElement.scrollWidth-innerWidth};
+         });
+         assert.ok(bounds.fits&&bounds.active===1&&bounds.overflow<=2,'dots stay in one row at '+width+'px, item '+i);
+       }
+     }
      await page.locator('#friends-dots button').nth(6).click();
      assert.equal(await page.locator('#friends-dots button').nth(6).getAttribute('aria-pressed'),'true');
      await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='paused'));
