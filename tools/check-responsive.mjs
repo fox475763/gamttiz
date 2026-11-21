@@ -29,6 +29,25 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
      assert.equal(await page.locator('#friends-dots button').count(),14);
      assert.equal(await page.locator('.control-trigger').count(),1);
      assert.equal(await page.locator('.cinema-opening,.cinema-chapter,.is-pinned').count(),0);
+     const ambient=await page.evaluate(async()=>{
+       const layer=document.querySelector('.home-ambient');
+       const rect=()=>{const r=layer.getBoundingClientRect();return [r.x,r.y,r.width,r.height]};
+       const frames=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+       const first=rect(),at=scrollY;
+       document.documentElement.style.scrollBehavior='auto';
+       window.scrollTo(0,at+240);await frames();
+       const second=rect(),style=getComputedStyle(layer,'::before');
+       return {first,second,delta:scrollY-at,position:getComputedStyle(layer).position,
+         pointer:getComputedStyle(layer).pointerEvents,animation:style.animationName,playing:style.animationPlayState,
+         backgrounds:[...document.querySelectorAll('#main>:is(.collection,.stories,.holder,.home-package,.experience-teaser,.radar-preview,.home-news-feed,.guide,.home-contact,.social),.story-row,.experience-links>a,.guide-grid article,.collection-carousel-window,.friend-photo')].map(el=>getComputedStyle(el).backgroundColor)};
+     });
+     assert.deepEqual(ambient.first,ambient.second,'background stays at the same viewport coordinates during scroll');
+     assert.ok(ambient.delta>=200);
+     assert.equal(ambient.position,'fixed');
+     assert.equal(ambient.pointer,'none');
+     assert.equal(ambient.animation,'gtz-ambient-drift');
+     assert.equal(ambient.playing,'running');
+     assert.ok(ambient.backgrounds.every(color=>color==='rgba(0, 0, 0, 0)'||color==='transparent'),'content sections must be transparent over the fixed canvas');
      const top=await page.evaluate(()=>{
        document.documentElement.style.scrollBehavior='auto';
        const snapshot=()=>['.hero','.hero-copy','.hero-film','.hero-description','.hero .button','.hero-foot','.hero-poster','.poster-viewport'].map(selector=>{
@@ -103,6 +122,7 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
      assert.equal(await page.locator('#friends-dots button').nth(6).getAttribute('aria-pressed'),'true');
      await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='paused'));
      await page.emulateMedia({reducedMotion:'reduce'});
+     assert.equal(await page.locator('.home-ambient').evaluate(el=>getComputedStyle(el,'::before').animationName),'none');
      assert.equal(await page.locator('.is-pinned').count(),0);
      await context.close();
    }
