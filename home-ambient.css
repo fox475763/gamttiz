@@ -99,7 +99,7 @@ body.home-cinema{isolation:isolate;height:100vh;height:100dvh;overflow:hidden;di
 .home-cinema #main .story-row.reverse .story-copy .text-button{color:var(--ed-ink);border-color:currentColor}
 .home-cinema #main .story-row.reverse .story-copy .text-button:hover{color:var(--ed-red)}
 .home-cinema #main :is(.story-image,.holder-image){background:none;box-shadow:none;isolation:auto}
-.home-cinema #main .story-row:not(.reverse) .story-image,
+.home-cinema #main .story-row:not(.reverse) .story-image{background:none;mix-blend-mode:normal}
 .home-cinema #main .holder-image{background:none;mix-blend-mode:multiply}
 .home-cinema #main .story-row:not(.reverse) .story-image img,
 .home-cinema #main .holder-image img{mix-blend-mode:normal;background:none}
