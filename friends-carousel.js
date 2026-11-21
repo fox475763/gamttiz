@@ -31,9 +31,10 @@
   let step=0;
   let activeIndex=-1;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
-  let visible=true, dotTimer=0, manuallyPaused=false, interacting=false, focused=false, holdTimer=0, manualHold=false;
+  let visible=true, dotTimer=0, manuallyPaused=false, interacting=false, focused=false, holdTimer=0, manualHold=false, selectionMotion=null;
   function syncMotion(){
     if(!animation)return;
+    if(window.GTZHomeMotion?.scrolling||reduced.matches||!visible){selectionMotion?.cancel();selectionMotion=null;}
     const running=visible&&!document.hidden&&!reduced.matches&&!window.GTZHomeMotion?.scrolling&&!manuallyPaused&&!interacting&&!focused&&!manualHold;
     if(running){animation.play();if(!dotTimer)dotTimer=setInterval(updateDots,200);}
     else {animation.pause();clearInterval(dotTimer);dotTimer=0;}
@@ -92,9 +93,20 @@
     if(!animation||!duration||!step)return;
     index=(index+originals.length)%originals.length;
     manualHold=true;clearTimeout(holdTimer);
+    selectionMotion?.cancel();selectionMotion=null;
+    // Brief compositor-only slide on explicit selection; no scroll-linked frame loop.
+    const loopDistance=duration*speed/1000;
+    let from=(((Number(animation.currentTime)||0)%duration+duration)%duration)*speed/1000;
+    let target=index*step;
+    if(target-from>loopDistance/2)from+=loopDistance;
+    else if(from-target>loopDistance/2)target+=loopDistance;
     animation.currentTime=(index*step/speed*1000)%duration;
     updateDots();
     syncMotion();
+    if(!reduced.matches&&visible&&!window.GTZHomeMotion?.scrolling&&Math.abs(target-from)<=step*2.1){
+      selectionMotion=track.animate([{transform:`translate3d(${-from}px,0,0)`},{transform:`translate3d(${-target}px,0,0)`}],{duration:280,easing:'cubic-bezier(.2,.7,.24,1)'});
+      const motion=selectionMotion;motion.finished.catch(()=>{}).then(()=>{if(selectionMotion===motion)selectionMotion=null;});
+    }
     holdTimer=setTimeout(()=>{manualHold=false;syncMotion();},3000);
   }
 

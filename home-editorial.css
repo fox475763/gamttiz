@@ -98,6 +98,7 @@
 .home-cinema #main .radar-preview-item h3{color:var(--catalog-ink);text-shadow:none;font-size:15px;line-height:1.4;letter-spacing:-.028em}
 .home-cinema #main .radar-preview-item:hover{border-color:var(--catalog-red)}
 .home-cinema #main .radar-preview-navigation{justify-content:center;margin:12px 0 0;min-height:8px}
+.home-cinema #main .radar-preview-navigation:has(#radar-preview-dots:empty),.home-cinema #main .radar-preview-navigation:has(#radar-preview-dots>button:only-child){display:none}
 .home-cinema #main>.home-news{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 30px;margin-top:var(--catalog-gap);padding:clamp(24px,4vw,46px);border:1px solid var(--catalog-line);border-radius:var(--catalog-radius);background:#eeece6}
 .home-cinema #main>.home-news-feed{width:min(calc(100% - 2 * var(--catalog-gutter)),var(--catalog-width));max-width:var(--catalog-width);margin:var(--catalog-gap) auto 0;padding:clamp(22px,3.6vw,46px);background:#eeece6;border:1px solid var(--catalog-line);border-radius:var(--catalog-radius);box-shadow:none;color:var(--catalog-ink)}
 .home-cinema #main .home-news-feed-head{gap:16px;border-bottom:1px solid var(--catalog-line);padding-bottom:20px}
@@ -121,6 +122,9 @@
 
 /* 06 / A three-column numbered guide and decisive brand sign-off. */
 .home-cinema #main .guide>h2{margin-bottom:clamp(24px,3vw,40px)}
+.home-cinema #main :is(.guide,.social,.home-contact) .eyebrow{display:flex;align-items:center;gap:10px;font:750 11px/1.35 var(--type-sans);letter-spacing:.13em}
+.home-cinema #main :is(.guide,.social,.home-contact) .eyebrow::before{content:'';width:18px;height:3px;flex:0 0 18px;background:var(--catalog-yellow);border-radius:2px}
+.home-cinema #main .guide>.eyebrow{color:var(--catalog-red);margin:0 0 14px}
 .home-cinema #main .guide-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--catalog-gap)}
 .home-cinema #main .guide-grid article{min-width:0;min-height:218px;margin:0;padding:clamp(20px,2.4vw,32px);background:white;border:1px solid var(--catalog-line);border-radius:var(--catalog-radius);box-shadow:none;display:flex;flex-direction:column;align-items:start}
 .home-cinema #main .guide-grid article>span{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#fff0d1;color:#a42429;font:800 15px/1 var(--type-sans);margin-bottom:18px}
