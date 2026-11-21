@@ -327,7 +327,7 @@
 .home-cinema #main>.home-contact{gap:clamp(24px,5vw,68px);padding-top:clamp(36px,4.7vw,64px);padding-bottom:clamp(36px,4.7vw,64px)}
 .home-cinema #main .home-contact .site-contact-actions{border-top:2px solid var(--ed-red)}
 .home-cinema #main>.social{isolation:isolate;background:#be222c;padding-top:clamp(44px,6vw,80px);padding-bottom:clamp(44px,6vw,80px)}
-.home-cinema #main>.social::before{content:'';position:absolute;z-index:-1;right:-56px;top:-85px;width:410px;height:410px;border-radius:50%;border:2px solid #ffcf6b44;box-shadow:0 0 0 24px #ffcf6b13,0 0 0 48px #ffcf6b12,0 0 0 72px #ffcf6b0c;background:url('assets/brand-white.png') center/61% auto no-repeat;opacity:.44;pointer-events:none}
+.home-cinema #main>.social::before{content:'';position:absolute;z-index:-1;right:-56px;top:-85px;width:410px;height:410px;border-radius:50%;border:2px solid #ffcf6b44;box-shadow:0 0 0 24px #ffcf6b13,0 0 0 48px #ffcf6b12,0 0 0 72px #ffcf6b0c;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 110' fill='none' stroke='%23ffd460' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 46 15 14l12-3 9 37m2 0V6h13v42m5 0 8-40 13 3-8 39m4 1 14-27 9 5-16 26M8 41q42 22 84 0L82 99H18L8 41Z'/%3E%3Ccircle cx='50' cy='75' r='13'/%3E%3Cpath d='M45 71v5m10-5v5m-10 4q5 5 10 0'/%3E%3C/svg%3E") 50% 44%/38% auto no-repeat;opacity:.38;pointer-events:none}
 .home-cinema #main .social h2{max-width:21ch}
 @media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
  .home-cinema #main .experience-links>a:hover::before{transform:rotate(2deg) translateY(-5px)}
@@ -346,7 +346,6 @@
  .home-cinema #main>:not(.hero) :is(.section-heading,.radar-preview-heading)>p{font-size:13px;line-height:1.65}
  .home-cinema #main>:not(.hero) :is(.story-copy,.holder-copy,.home-package-copy)>p:not(.eyebrow){font-size:14px;line-height:1.75;margin-top:12px}
  .home-cinema #main .collection .section-heading{gap:8px;margin-bottom:16px}
- .home-cinema #main .collection .section-heading>p br{display:none}
  .home-cinema #main .collection-tools{gap:8px;padding:6px 0 10px;font-size:13px}
  .home-cinema #main .collection-tools #random{font-size:12px;min-height:38px;padding:7px 10px;gap:0}
  .home-cinema #main .collection .gallery .card.friend-carousel-card{flex-basis:clamp(132px,44vw,205px);padding:0 9px}
