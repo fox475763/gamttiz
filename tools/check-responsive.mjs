@@ -39,6 +39,7 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
        const second=rect(),style=getComputedStyle(layer,'::before');
        return {first,second,delta:scrollY-at,position:getComputedStyle(layer).position,
          pointer:getComputedStyle(layer).pointerEvents,animation:style.animationName,playing:style.animationPlayState,
+         live:layer.classList.contains('is-live'),hasRenderer:!!layer.querySelector('canvas,video'),
          backgrounds:[...document.querySelectorAll('#main>:is(.collection,.stories,.holder,.home-package,.experience-teaser,.radar-preview,.home-news-feed,.guide,.home-contact,.social),.story-row,.experience-links>a,.guide-grid article,.collection-carousel-window,.friend-photo')].map(el=>getComputedStyle(el).backgroundColor)};
      });
      assert.deepEqual(ambient.first,ambient.second,'background stays at the same viewport coordinates during scroll');
@@ -46,7 +47,8 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
      assert.equal(ambient.position,'fixed');
      assert.equal(ambient.pointer,'none');
      assert.equal(ambient.animation,'gtz-ambient-drift');
-     assert.equal(ambient.playing,'running');
+     assert.equal(ambient.playing,ambient.live?'paused':'running');
+     if(ambient.live)assert.ok(ambient.hasRenderer,'active motion has a real canvas or video renderer');
      assert.ok(ambient.backgrounds.every(color=>color==='rgba(0, 0, 0, 0)'||color==='transparent'),'content sections must be transparent over the fixed canvas');
      const top=await page.evaluate(()=>{
        document.documentElement.style.scrollBehavior='auto';
