@@ -12,7 +12,7 @@ const syncIdle=()=>{
   scrollIdleTimer=0;homeMotion.scrolling=false;
   document.dispatchEvent(new Event('gtz-home-scroll-state'));
 };
-window.addEventListener('scroll',()=>{
+(document.querySelector('.home-scroll-viewport')||window).addEventListener('scroll',()=>{
   lastPageScroll=performance.now();
   if(homeMotion.scrolling)return;
   homeMotion.scrolling=true;

@@ -221,8 +221,9 @@ function updateMenuTextColor() {
     }
   }
 
-  let isRed = false;
+  let isRed = homeColorTracking&&document.body.dataset.homeInk==='white';
   for (let el = behind; el; el = el.parentElement) {
+    if(homeColorTracking&&document.body.dataset.homeInk&&(el===document.body||el===document.documentElement))break;
     const rgb = getComputedStyle(el).backgroundColor.match(/[\d.]+/g)?.map(Number);
     if (!rgb || (rgb[3] ?? 1) < 0.8) continue;
     const [r, g, b] = rgb;
@@ -244,7 +245,8 @@ function scheduleMenuTextColorUpdate() {
   });
 }
 
-window.addEventListener('scroll', scheduleMenuTextColorUpdate, { passive: true });
+(document.querySelector('.home-scroll-viewport')||window).addEventListener('scroll', scheduleMenuTextColorUpdate, { passive: true });
+document.addEventListener('gtz-home-palette',scheduleMenuTextColorUpdate);
 window.addEventListener('resize', scheduleMenuTextColorUpdate);
 window.addEventListener('load', scheduleMenuTextColorUpdate);
 updateMenuTextColor();

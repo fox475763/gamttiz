@@ -7,13 +7,14 @@
   document.body.append(progress);
 
   const home = document.body.classList.contains('home-cinema');
-  const nativeProgress = home && !reducedMotion.matches && CSS.supports('animation-timeline: scroll(root block)');
+  const homeViewport=home&&document.querySelector('.home-scroll-viewport');
+  const nativeProgress = home && !homeViewport && !reducedMotion.matches && CSS.supports('animation-timeline: scroll(root block)');
   let homeMax=0;
-  const measureHome=()=>{homeMax=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);};
+  const measureHome=()=>{homeMax=Math.max(0,homeViewport?homeViewport.scrollHeight-homeViewport.clientHeight:document.documentElement.scrollHeight-window.innerHeight);};
   let scrollQueued = false;
   const updateProgress = () => {
     const max = home ? homeMax : document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0})`;
+    progress.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, (homeViewport?homeViewport.scrollTop:window.scrollY) / max)) : 0})`;
     scrollQueued = false;
   };
   if(nativeProgress){
@@ -21,9 +22,9 @@
   }else{
   if(home){
     measureHome();
-    if('ResizeObserver' in window)new ResizeObserver(()=>{measureHome();updateProgress();}).observe(document.body);
+    if('ResizeObserver' in window){const observer=new ResizeObserver(()=>{measureHome();updateProgress();});observer.observe(homeViewport||document.body);if(homeViewport)observer.observe(document.querySelector('#main'));}
   }
-  window.addEventListener('scroll', () => {
+  (homeViewport||window).addEventListener('scroll', () => {
     if (!scrollQueued) {
       scrollQueued = true;
       requestAnimationFrame(updateProgress);

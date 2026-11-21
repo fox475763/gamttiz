@@ -1,26 +1,45 @@
 /* One continuous GAMTTIZ stage. Only its palette changes between chapters. */
-body.home-cinema{isolation:isolate}
+html:has(body.home-cinema){overflow:hidden;overscroll-behavior:none}
+body.home-cinema{isolation:isolate;height:100vh;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+.home-cinema>.header{flex:0 0 auto}
+.home-cinema .home-scroll-viewport{
+  flex:1 1 0;min-height:0;min-width:0;width:100%;overflow-x:hidden;overflow-y:auto;
+  overscroll-behavior-y:contain;scroll-behavior:smooth;scroll-padding-top:0;
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:#25232145 transparent;
+  scroll-timeline-name:--home-stage-scroll;scroll-timeline-axis:block;
+}
+.home-cinema .home-scroll-viewport:focus{outline:none}
+.home-cinema .home-scroll-viewport:focus-visible{outline:2px solid #d62c30;outline-offset:-2px}
+.home-cinema .home-scroll-viewport>footer{width:min(calc(100% - 2 * clamp(24px,5vw,80px)),1320px);max-width:none;margin:0 auto;padding:24px 0 34px;border:0;background:none;color:var(--stage-ink,#211e1b);font-size:12px}
+@media(max-width:620px){.home-cinema .home-scroll-viewport>footer{width:calc(100% - 2 * clamp(16px,5vw,22px));gap:10px;font-size:10px}}
+/* The stage itself never moves: the native scroll surface carries its content.
+   The very first exit gets a small compositor-only offset, with no zoom or pin. */
+@supports(animation-timeline:--home-stage-scroll){
+  @media(prefers-reduced-motion:no-preference){
+    .home-cinema .home-scroll-viewport .hero-copy{animation:gtz-opening-copy linear both;animation-timeline:--home-stage-scroll;animation-range:0px 52vh}
+    .home-cinema .home-scroll-viewport .hero-poster{animation:gtz-opening-photo linear both;animation-timeline:--home-stage-scroll;animation-range:0px 52vh}
+    @keyframes gtz-opening-copy{from{translate:0 0}to{translate:0 -34px}}
+    @keyframes gtz-opening-photo{from{translate:0 0}to{translate:0 -18px}}
+    @media(max-width:620px){@keyframes gtz-opening-copy{from{translate:0 0}to{translate:0 -20px}}@keyframes gtz-opening-photo{from{translate:0 0}to{translate:0 -10px}}}
+  }
+}
 .home-cinema .home-ambient{
   position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
-  --stage-base:#fff5dc;--stage-motif:#bc232a;
-  --stage-fries:.15;--stage-dots:.20;
+  --stage-base:#fff;--stage-motif:#e93636;
+  --stage-fries:.12;--stage-dots:.16;
   background-color:var(--stage-base);contain:strict;
-  transition:background-color .95s cubic-bezier(.22,.61,.36,1);
+  transition:background-color .48s cubic-bezier(.22,.61,.36,1);
 }
 .home-cinema .home-ambient[data-palette="red"]{
-  --stage-base:#e93636;--stage-motif:#ffb511;
+  --stage-base:#d62c30;--stage-motif:#ffb511;
   --stage-fries:.75;--stage-dots:.32;
 }
-.home-cinema .home-ambient[data-palette="gold"]{
-  --stage-base:#ffdf86;--stage-motif:#be262a;
+.home-cinema .home-ambient[data-palette="yellow"]{
+  --stage-base:#ffb511;--stage-motif:#b72127;
   --stage-fries:.18;--stage-dots:.20;
 }
-.home-cinema .home-ambient[data-palette="coral"]{
-  --stage-base:#ffcebd;--stage-motif:#ba2228;
-  --stage-fries:.14;--stage-dots:.17;
-}
 .home-cinema .home-ambient[data-palette="white"]{
-  --stage-base:#fffcf5;--stage-motif:#e93636;
+  --stage-base:#fff;--stage-motif:#e93636;
   --stage-fries:.12;--stage-dots:.16;
 }
 /* Same silhouettes, repeat spacing and travel, recoloured without remounting. */
@@ -30,14 +49,14 @@ body.home-cinema{isolation:isolate}
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100' viewBox='0 0 96 100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='white'/%3E%3C/svg%3E") 0 100%/96px 100px repeat-x;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100' viewBox='0 0 96 100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='white'/%3E%3C/svg%3E") 0 100%/96px 100px repeat-x;
   animation:gtz-stage-fries 8s ease-in-out infinite alternate;
-  transition:background-color .95s,opacity .95s;
+  transition:background-color .48s,opacity .48s;
 }
 .home-cinema .home-ambient::after{
   content:'';position:absolute;inset:-25%;
   background-color:var(--stage-motif);opacity:var(--stage-dots);
   --stage-dot-mask:radial-gradient(circle at 13% 17%,#fff 0 4px,transparent 5px),radial-gradient(circle at 29% 45%,#fff 0 7px,transparent 8px),radial-gradient(circle at 46% 22%,#fff 0 3px,transparent 4px),radial-gradient(circle at 67% 31%,#fff 0 6px,transparent 7px),radial-gradient(circle at 83% 59%,#fff 0 4px,transparent 5px),radial-gradient(circle at 22% 78%,#fff 0 5px,transparent 6px),radial-gradient(circle at 58% 69%,#fff 0 8px,transparent 9px),radial-gradient(circle at 74% 86%,#fff 0 3px,transparent 4px);
   -webkit-mask-image:var(--stage-dot-mask);mask-image:var(--stage-dot-mask);
-  animation:hero-dots 70s linear infinite;transition:background-color .95s,opacity .95s;
+  animation:hero-dots 70s linear infinite;transition:background-color .48s,opacity .48s;
 }
 @keyframes gtz-stage-fries{from{transform:translateX(0)}to{transform:translateX(42px)}}
 .home-cinema .home-ambient.stage-paused::before,.home-cinema .home-ambient.stage-paused::after{animation-play-state:paused}
@@ -142,6 +161,22 @@ body.home-cinema{isolation:isolate}
 .home-cinema #main .experience-links>a>strong{color:var(--ed-ink)}
 .home-cinema #main .experience-links>a:is(:hover,:focus-visible)>strong{color:var(--ed-red)}
 
+/* The stage changes ink as well as paint, preserving contrast on red chapters. */
+.home-cinema[data-home-ink="white"]{--stage-ink:#fff}
+.home-cinema[data-home-ink="white"] #main>:is(.collection,.stories,.holder,.home-package,.experience-teaser,.radar-preview,.home-news,.home-news-feed,.guide,.home-contact,.social){--ed-ink:#fff;--ed-muted:#fff;--ed-red:#fff;--ed-line:#ffffff66;color:#fff}
+.home-cinema[data-home-ink="white"] #main .collection .section-heading h2,
+.home-cinema[data-home-ink="white"] #main .collection .section-heading h2 a,
+.home-cinema[data-home-ink="white"] #main .home-package-copy h2 em,
+.home-cinema[data-home-ink="white"] #main .social .button:hover,
+.home-cinema[data-home-ink="white"] #main .collection-tools #random:hover{color:#fff}
+.home-cinema[data-home-ink="white"] #main :is(.collection-carousel-window,.story-row:not(.reverse) .story-image,.holder-image){mix-blend-mode:normal}
+.home-cinema[data-home-ink="white"] #main :is(.collection-tools,.experience-links,.guide-grid,.home-contact .site-contact-actions){border-color:#ffffff66}
+.home-cinema[data-home-ink="white"] #main :is(.friend-carousel-card .card-label,.experience-links>a+a,.guide-grid article+article,.radar-preview-overlay){border-color:#ffffff55}
+.home-cinema[data-home-ink="white"] #main .carousel-dots .carousel-dot{background:#ffffff65}
+.home-cinema[data-home-ink="white"] #main .carousel-dots .carousel-dot.is-active{background:#ffb511}
+.home-cinema[data-home-ink="dark"] .hero .brand-letters span,.home-cinema[data-home-ink="dark"] .hero :is(.hero-description,.hero-foot,.eyebrow){color:#211e1b}
+.home-cinema[data-home-ink="dark"] .hero .brand-subtitle{color:#8b161b}
+
 @media(max-width:620px){
   .home-cinema #main .story-row:not(.reverse),
   .home-cinema #main .story-row.reverse{gap:20px}
@@ -150,4 +185,5 @@ body.home-cinema{isolation:isolate}
 }
 @media(prefers-reduced-motion:reduce){
   .home-cinema .home-ambient,.home-cinema .home-ambient::before,.home-cinema .home-ambient::after{animation:none;transition:none;transform:none}
+  .home-cinema .home-scroll-viewport{scroll-behavior:auto}
 }
