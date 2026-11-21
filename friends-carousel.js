@@ -7,13 +7,11 @@
 
   const originals=Array.from(track.querySelectorAll('.friend-carousel-card'));
   if(originals.length<2)return;
-  const count=document.getElementById('friends-count');
-  const pauseButton=document.getElementById('friends-pause');
-  const controls=document.querySelector('.home-carousel-controls');
   const region=document.getElementById('friends-carousel');
   originals.forEach((card,i)=>{
-    const index=document.createElement('span');index.className='home-friend-index';index.textContent='NO. '+String(i+1).padStart(2,'0');index.setAttribute('aria-hidden','true');card.prepend(index);
-    const arrow=document.createElement('span');arrow.className='home-friend-arrow';arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');card.querySelector('.card-label')?.append(arrow);
+    const img=card.querySelector('img');
+    if(img){const photo=document.createElement('span');photo.className='friend-photo';img.before(photo);photo.append(img);}
+    const english=document.createElement('small');english.className='friend-english';english.textContent=products[i]?.english||'';card.querySelector('.card-label')?.append(english);
   });
 
   // Two identical sequences create a seamless endless loop.
@@ -31,11 +29,11 @@
   let step=0;
   let activeIndex=-1;
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
-  let visible=true, dotTimer=0, manuallyPaused=false, interacting=false, focused=false, holdTimer=0, manualHold=false, selectionMotion=null;
+  let visible=true, dotTimer=0, interacting=false, focused=false, holdTimer=0, manualHold=false, selectionMotion=null;
   function syncMotion(){
     if(!animation)return;
     if(window.GTZHomeMotion?.scrolling||reduced.matches||!visible){selectionMotion?.cancel();selectionMotion=null;}
-    const running=visible&&!document.hidden&&!reduced.matches&&!window.GTZHomeMotion?.scrolling&&!manuallyPaused&&!interacting&&!focused&&!manualHold;
+    const running=visible&&!document.hidden&&!reduced.matches&&!window.GTZHomeMotion?.scrolling&&!interacting&&!focused&&!manualHold;
     if(running){animation.play();if(!dotTimer)dotTimer=setInterval(updateDots,200);}
     else {animation.pause();clearInterval(dotTimer);dotTimer=0;}
     updateDots();
@@ -58,7 +56,6 @@
     const index=Math.floor((progress*speed/1000+step/2)/step)%originals.length;
     if(index===activeIndex)return;
     activeIndex=index;
-    if(count)count.textContent=String(index+1).padStart(2,'0');
     dotButtons.forEach((dot,i)=>{
       const selected=i===index;
       dot.classList.toggle('is-active',selected);
@@ -110,19 +107,10 @@
     holdTimer=setTimeout(()=>{manualHold=false;syncMotion();},3000);
   }
 
-  document.getElementById('friends-prev')?.addEventListener('click',()=>jumpTo(activeIndex-1));
-  document.getElementById('friends-next')?.addEventListener('click',()=>jumpTo(activeIndex+1));
-  pauseButton?.addEventListener('click',()=>{
-    manuallyPaused=!manuallyPaused;
-    pauseButton.setAttribute('aria-pressed',String(manuallyPaused));
-    pauseButton.setAttribute('aria-label',manuallyPaused?'자동 재생 시작':'자동 재생 일시 정지');
-    pauseButton.querySelector('path')?.setAttribute('d',manuallyPaused?'M9 5l11 7-11 7z':'M9 5v14M15 5v14');
-    syncMotion();
-  });
   viewport.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'){interacting=true;syncMotion();}});
   viewport.addEventListener('pointerleave',()=>{interacting=false;syncMotion();});
-  region?.addEventListener('focusin',e=>{if(!controls?.contains(e.target)){focused=true;syncMotion();}});
-  region?.addEventListener('focusout',e=>{if(!region.contains(e.relatedTarget)||controls?.contains(e.relatedTarget)){focused=false;syncMotion();}});
+  region?.addEventListener('focusin',()=>{focused=true;syncMotion();});
+  region?.addEventListener('focusout',e=>{if(!region.contains(e.relatedTarget)){focused=false;syncMotion();}});
   // Touch swipes change only the horizontal selection. Do not intercept vertical scrolling.
   let origin=null,suppressClick=false;
   viewport.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'){origin={x:e.clientX,y:e.clientY};interacting=true;syncMotion();}},{passive:true});

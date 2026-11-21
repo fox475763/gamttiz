@@ -64,7 +64,7 @@ const storyGroups=[
   {element:document.querySelector('.story-row.reverse .story-image'),indexes:[5,8]}
 ];
 storyGroups.forEach((group,groupIndex)=>{
-  if(!group.element)return;
+  if(!group.element||group.element.hasAttribute('data-static-photo'))return;
   const images=[...group.element.querySelectorAll('img')];
   images.forEach(img=>{const slot=document.createElement('div');slot.className='story-slot';img.before(slot);slot.append(img);});
   let turn=0;

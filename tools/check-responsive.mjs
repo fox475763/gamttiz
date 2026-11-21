@@ -74,24 +74,19 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
      assert.ok(overflow<=2,'native home must not cause horizontal overflow');
      const catalog=await page.evaluate(()=>{
        const sections=[...document.querySelectorAll('#main>:is(.collection,.stories,.holder,.home-package,.experience-teaser,.radar-preview,.home-news-feed,.guide,.home-contact,.social)')];
-       const edges=sections.map(e=>{const r=e.getBoundingClientRect();return [e.className,r.left,r.right]});
+       const edges=sections.map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return [e.className,r.left+parseFloat(s.paddingLeft),r.right-parseFloat(s.paddingRight)]});
        const label=getComputedStyle(document.querySelector('.friend-carousel-card .card-label'));
-       return {edges,labelPosition:label.position,labelColor:label.color,friendIndex:document.querySelectorAll('#gallery .card:not([aria-hidden]) .home-friend-index').length};
+       return {edges,labelPosition:label.position,photos:document.querySelectorAll('#gallery .card:not([aria-hidden]) .friend-photo').length,borders:[...document.querySelectorAll('.friend-carousel-card,.story-image,.holder-image,.experience-links>a,.guide-grid article,.home-news-feed-card')].map(e=>getComputedStyle(e).borderRadius)};
      });
      assert.equal(catalog.edges.length,10);
      for(const [name,left,right] of catalog.edges){assert.ok(Math.abs(left-catalog.edges[0][1])<=2&&Math.abs(right-catalog.edges[0][2])<=2,name+' follows the shared catalog grid');}
      assert.equal(catalog.labelPosition,'static','card captions must be separate from product art');
-     assert.equal(catalog.friendIndex,14);
-     await page.locator('#friends-pause').click();
-     assert.equal(await page.locator('#friends-pause').getAttribute('aria-pressed'),'true');
+     assert.equal(catalog.photos,14);
+     assert.ok(catalog.borders.every(r=>r==='0px'),'editorial content must not revert to a rounded card grid');
+     assert.equal(await page.locator('#friends-count,#friends-prev,#friends-next,#friends-pause,.home-friend-index,.home-friend-arrow').count(),0);
+     await page.locator('#friends-dots button').nth(6).click();
+     assert.equal(await page.locator('#friends-dots button').nth(6).getAttribute('aria-pressed'),'true');
      await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='paused'));
-     const beforeIndex=Number(await page.locator('#friends-count').innerText());
-     await page.locator('#friends-next').click();
-     assert.equal(Number(await page.locator('#friends-count').innerText()),beforeIndex%14+1);
-     await page.locator('#friends-prev').click();
-     assert.equal(Number(await page.locator('#friends-count').innerText()),beforeIndex);
-     await page.locator('#friends-pause').click();
-     assert.equal(await page.locator('#friends-pause').getAttribute('aria-pressed'),'false');
      await page.emulateMedia({reducedMotion:'reduce'});
      assert.equal(await page.locator('.is-pinned').count(),0);
      await context.close();
