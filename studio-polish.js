@@ -21,7 +21,7 @@
   window.addEventListener('resize', updateProgress, { passive: true });
   updateProgress();
 
-  if (reducedMotion.matches || !('IntersectionObserver' in window)) return;
+  if (document.body.classList.contains('home-cinema') || reducedMotion.matches || !('IntersectionObserver' in window)) return;
   const targets = document.querySelectorAll(
     '.story-row, .section-heading, .guide-grid article, .project-top, ' +
     '.project-facts, .project-ideas article, .project-system, .project-subhead, ' +

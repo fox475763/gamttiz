@@ -12,6 +12,52 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const base='http://127.0.0.1:'+server.address().port+'/';
 const pages=['index.html','member.html','license.html','play.html','collection.html','draw.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar'];
 const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2026-11-20T00:00:00Z',character:0};
+
+for(const engine of [chromium,webkit])test('Cinematic home preserves content and native scroll: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+   for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
+     const context=await browser.newContext({viewport,serviceWorkers:'block',reducedMotion:'no-preference'});
+     await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+     const page=await context.newPage();
+     await page.goto(base+'index.html',{waitUntil:'domcontentloaded'});
+     await page.waitForFunction(()=>document.body.classList.contains('is-cinematic')&&document.querySelector('.cinema-opening').style.getPropertyValue('--cinema-hero-height'));
+     assert.equal(await page.locator('#main section').count(),11);
+     assert.equal(await page.locator('.story-row').count(),2);
+     assert.equal(await page.locator('#gallery .friend-carousel-card:not([aria-hidden])').count(),14);
+     assert.equal(await page.locator('#friends-dots button').count(),14);
+     assert.equal(await page.locator('.control-trigger').count(),1);
+     const top=await page.evaluate(()=>({pinned:document.querySelector('.cinema-opening').classList.contains('is-pinned'),hero:document.querySelector('.hero').offsetHeight,available:innerHeight-document.querySelector('.header').offsetHeight}));
+     assert.equal(top.pinned,viewport.width>900&&top.hero<=top.available+3);
+     if(top.pinned){
+       await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';const opening=document.querySelector('.cinema-opening'),header=document.querySelector('.header');window.scrollTo(0,opening.offsetTop-header.offsetHeight+parseFloat(opening.style.getPropertyValue('--cinema-runway'))*.6);});
+       await page.waitForFunction(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-scale'))>1);
+       const position=await page.evaluate(()=>({hero:document.querySelector('.hero').getBoundingClientRect().top,header:document.querySelector('.header').getBoundingClientRect().bottom}));
+       assert.ok(Math.abs(position.hero-position.header)<4,'opening remains pinned beneath the header');
+     }
+     await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,0);});
+     const scene=page.locator('.story-row').first();
+     const go=async fraction=>page.evaluate(f=>{const row=document.querySelector('.story-row');window.scrollTo(0,window.scrollY+row.getBoundingClientRect().top-innerHeight*f);},fraction);
+     await go(.86);
+     await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))<.99);
+     const before=await scene.evaluate(el=>Number(el.style.getPropertyValue('--cinema-image-scale')));
+     await go(.28);
+     await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))>.99);
+     const after=await scene.evaluate(el=>Number(el.style.getPropertyValue('--cinema-image-scale')));
+     assert.ok(after>before,'scroll progress drives visual depth');
+     await go(.86);
+     await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))<.99);
+     await page.evaluate(()=>{document.querySelector('#collection').scrollIntoView({block:'start'});});
+     await page.waitForFunction(()=>document.querySelector('#collection').getBoundingClientRect().top<innerHeight*.5);
+     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
+     assert.ok(overflow<=2,'cinematic elements must not cause horizontal overflow');
+     await page.emulateMedia({reducedMotion:'reduce'});
+     await page.waitForFunction(()=>!document.body.classList.contains('is-cinematic'));
+     assert.equal(await page.locator('.cinema-opening.is-pinned').count(),0);
+     await context.close();
+   }
+ }finally{await browser.close();}
+});
 for(const engine of [chromium,webkit])test('Shake opens a mobile 3D license with working face changes: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
  try{
