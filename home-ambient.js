@@ -5,6 +5,26 @@
   const host = document.querySelector('.home-ambient');
   if (!host) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // A small, pre-rendered version of the same continuous field for browsers
+  // without a fast WebGL context. It is muted, inline, and hardware-decodable.
+  const startVideo=()=>{
+    const video=document.createElement('video');
+    video.defaultMuted=video.muted=true;video.playsInline=true;
+    video.loop=true;video.preload='none';video.disablePictureInPicture=true;
+    video.setAttribute('muted','');video.setAttribute('playsinline','');
+    video.src='assets/home-ambient-motion.mp4?v=20261121living3';
+    host.append(video);
+    const sync=()=>{
+      if(document.hidden||reduced.matches){video.pause();return;}
+      video.play().catch(()=>{});
+    };
+    video.addEventListener('playing',()=>host.classList.add('is-live'));
+    video.addEventListener('error',()=>host.classList.remove('is-live'));
+    document.addEventListener('visibilitychange',sync);
+    if(reduced.addEventListener)reduced.addEventListener('change',sync);
+    else reduced.addListener(sync);
+    sync();
+  };
   const canvas = document.createElement('canvas');
   host.append(canvas);
   let gl;
@@ -13,7 +33,7 @@
     preserveDrawingBuffer: false, powerPreference: 'low-power',
     failIfMajorPerformanceCaveat: true
   }); } catch (_) { /* use the CSS motion fallback */ }
-  if (!gl) { canvas.remove(); return; }
+  if (!gl) { canvas.remove(); startVideo(); return; }
   const vert = `attribute vec2 a; void main(){gl_Position=vec4(a,0.,1.);}`;
   const frag = `
     precision mediump float;
@@ -66,10 +86,10 @@
     return s;
   };
   const vs=compile(gl.VERTEX_SHADER,vert), fs=compile(gl.FRAGMENT_SHADER,frag);
-  if(!vs||!fs){canvas.remove();return;}
+  if(!vs||!fs){canvas.remove();startVideo();return;}
   const program=gl.createProgram();
   gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
-  if(!gl.getProgramParameter(program,gl.LINK_STATUS)){canvas.remove();return;}
+  if(!gl.getProgramParameter(program,gl.LINK_STATUS)){canvas.remove();startVideo();return;}
   gl.deleteShader(vs);gl.deleteShader(fs);
   gl.useProgram(program);
   const buffer=gl.createBuffer();
@@ -119,6 +139,7 @@
     window.removeEventListener('resize',resize);document.removeEventListener('visibilitychange',sync);
     if(reduced.removeEventListener)reduced.removeEventListener('change',sync);
     else reduced.removeListener(sync);
+    startVideo();
   },{once:true});
   draw();sync();
 })();
