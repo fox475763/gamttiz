@@ -28,16 +28,22 @@ for(const engine of [chromium,webkit])test('Cinematic home preserves content and
      assert.equal(await page.locator('#friends-dots button').count(),14);
      assert.equal(await page.locator('.control-trigger').count(),1);
      const top=await page.evaluate(()=>({pinned:document.querySelector('.cinema-opening').classList.contains('is-pinned'),hero:document.querySelector('.hero').offsetHeight,available:innerHeight-document.querySelector('.header').offsetHeight}));
-     assert.equal(top.pinned,viewport.width>900&&top.hero<=top.available+3);
+     assert.equal(top.pinned,top.available>=470&&top.hero<=top.available+5);
+     assert.equal(await page.locator('.cinema-chapter').count(),4);
+     if(viewport.width>700)assert.ok(top.pinned,'desktop opening should pin');
      if(top.pinned){
        await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';const opening=document.querySelector('.cinema-opening'),header=document.querySelector('.header');window.scrollTo(0,opening.offsetTop-header.offsetHeight+parseFloat(opening.style.getPropertyValue('--cinema-runway'))*.6);});
-       await page.waitForFunction(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-scale'))>1);
+       await page.waitForFunction(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-inner-scale'))>1.12);
+       if(viewport.width>700){
+         assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-scale'))>1.25));
+         assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-poster-x'))<-180));
+       }
        const position=await page.evaluate(()=>({hero:document.querySelector('.hero').getBoundingClientRect().top,header:document.querySelector('.header').getBoundingClientRect().bottom}));
        assert.ok(Math.abs(position.hero-position.header)<4,'opening remains pinned beneath the header');
      }
      await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,0);});
      const scene=page.locator('.story-row').first();
-     const go=async fraction=>page.evaluate(f=>{const row=document.querySelector('.story-row');window.scrollTo(0,window.scrollY+row.getBoundingClientRect().top-innerHeight*f);},fraction);
+     const go=async fraction=>page.evaluate(f=>{const row=document.querySelector('.story-row').parentElement;window.scrollTo(0,window.scrollY+row.getBoundingClientRect().top-innerHeight*f);},fraction);
      await go(.86);
      await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))<.99);
      const before=await scene.evaluate(el=>Number(el.style.getPropertyValue('--cinema-image-scale')));
@@ -45,6 +51,13 @@ for(const engine of [chromium,webkit])test('Cinematic home preserves content and
      await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))>.99);
      const after=await scene.evaluate(el=>Number(el.style.getPropertyValue('--cinema-image-scale')));
      assert.ok(after>before,'scroll progress drives visual depth');
+     if(viewport.width>700){
+       const chapter=await page.evaluate(()=>{const el=document.querySelector('.cinema-chapter'),header=document.querySelector('.header');return {pinned:el.classList.contains('is-pinned'),target:scrollY+el.getBoundingClientRect().top-header.offsetHeight+parseFloat(el.style.getPropertyValue('--cinema-runway'))*.65};});
+       assert.ok(chapter.pinned,'story chapter should pin on desktop');
+       await page.evaluate(y=>window.scrollTo(0,y),chapter.target);
+       await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-detail-scale'))>1.08);
+       assert.ok(await page.evaluate(()=>Math.abs(document.querySelector('.story-row').getBoundingClientRect().top-document.querySelector('.header').getBoundingClientRect().bottom)<4));
+     }
      await go(.86);
      await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))<.99);
      await page.evaluate(()=>{document.querySelector('#collection').scrollIntoView({block:'start'});});
@@ -54,6 +67,7 @@ for(const engine of [chromium,webkit])test('Cinematic home preserves content and
      await page.emulateMedia({reducedMotion:'reduce'});
      await page.waitForFunction(()=>!document.body.classList.contains('is-cinematic'));
      assert.equal(await page.locator('.cinema-opening.is-pinned').count(),0);
+     assert.equal(await page.locator('.cinema-chapter.is-pinned').count(),0);
      await context.close();
    }
  }finally{await browser.close();}
