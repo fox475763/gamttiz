@@ -205,3 +205,30 @@ body.products-edition #main .catalog-spec-link h2{margin:16px 0 24px;max-width:1
  .edition-nav{flex-basis:38px}
 }
 @media(prefers-reduced-motion:reduce){.edition-page #main .edition-strip{scroll-behavior:auto}.edition-page #main .edition-link{transition:none}}
+
+/* Explicit image grid bounds prevent intrinsic portrait SVGs from overflowing their scene. */
+body.edition-page #main .principle-art{display:flex;align-items:center;justify-content:center;overflow:hidden}
+body.edition-page #main .principle-art img{display:block;width:100%;height:100%;max-height:100%;min-height:0;min-width:0;object-fit:contain;flex-shrink:1}
+body.edition-page[data-home-ink="white"] #main .eyebrow{color:var(--edition-accent)!important}
+body.products-edition[data-home-ink="white"] #main .catalog-contents a{color:#fff!important}
+@media (max-height:560px) and (min-width:440px){
+ body.edition-page #main :is(.edition-hero,.catalog-hero),body.products-edition #main .catalog-holder,body.edition-page #main>.edition-contact{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px}
+ body.edition-page #main h1{font-size:clamp(30px,5.9vw,45px)}
+ body.edition-page #main h2{font-size:clamp(25px,4.5vw,34px)}
+ body.edition-page #main .edition-hero-tag{font-size:19px!important}
+ body.edition-page #main :is(.edition-hero-copy,.catalog-hero-copy) h1{margin:6px 0 10px}
+ body.edition-page #main p:not(.eyebrow):not(.edition-micro){font-size:12px;line-height:1.5}
+ body.edition-page #main :is(.edition-heading,.catalog-section-heading){display:grid;grid-template-columns:1.08fr .92fr;gap:4px 16px;margin-bottom:10px}
+ body.edition-page #main :is(.edition-heading,.catalog-section-heading)>h2{margin:0}
+ .edition-origin-grid,.edition-identity-grid{grid-template-columns:1fr 1fr;gap:14px}
+ .edition-origin-notes article{padding:6px 0}
+ .edition-principles{padding-top:8px;gap:10px}
+ .principle-art{height:clamp(72px,25vh,145px)}
+ .edition-swatch{min-height:108px}
+ .edition-process-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .edition-process-grid article:nth-child(3){border-left:1px solid var(--edition-line);border-top:0}.edition-process-grid article:nth-child(4){border-top:0}
+ body.edition-page #main .edition-spec-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .edition-spec-grid article{grid-template-columns:1fr;display:block}
+ .edition-spec-art{height:72px}
+ body.edition-page #main .edition-spec-grid strong{font-size:18px}
+}
