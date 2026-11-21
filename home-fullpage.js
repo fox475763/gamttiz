@@ -25,10 +25,10 @@
   if(footer&&social)social.append(footer);
   const scenes=[...main.children].filter(el=>el.matches('section'));
   if(!scenes.length)return;
-  const paletteFor=el=>el.matches('.hero,.experience-teaser,.home-contact')||el.querySelector('.story-row.reverse')?'red':el.matches('.home-package,.home-news,.home-news-feed,.social')||el.querySelector('.story-row:not(.reverse)')?'yellow':'white';
+  const paletteFor=el=>['red','yellow','white'].includes(el.dataset.palette)?el.dataset.palette:el.matches('.hero,.experience-teaser,.home-contact')||el.querySelector('.story-row.reverse')?'red':el.matches('.home-package,.home-news,.home-news-feed,.social')||el.querySelector('.story-row:not(.reverse)')?'yellow':'white';
   const order=scenes.map(el=>({el,palette:paletteFor(el),fit:1}));
   const status=document.createElement('p');status.className='home-scene-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');viewport.append(status);
-  viewport.setAttribute('aria-label','홈 콘텐츠, 휠 또는 스와이프와 위아래 방향키로 장면 이동');
+  viewport.setAttribute('aria-label',body.classList.contains('edition-page')?'콘텐츠, 휠 또는 스와이프와 위아래 방향키로 장면 이동':'홈 콘텐츠, 휠 또는 스와이프와 위아래 방향키로 장면 이동');
   body.classList.add('home-fullpage','home-palette-ready');
   // On touch screens let the browser's asynchronous scrolling compositor do
   // the work. The document/header/background remain fixed; only this inner
@@ -37,7 +37,7 @@
   const touchNative=matchMedia('(pointer: coarse), (max-width: 700px)').matches;
   if(touchNative){
     body.classList.add('home-native-touch');
-    viewport.setAttribute('aria-label','홈 콘텐츠, 위아래 스와이프로 장면 이동');
+    viewport.setAttribute('aria-label',body.classList.contains('edition-page')?'콘텐츠, 위아래 스와이프로 장면 이동':'홈 콘텐츠, 위아래 스와이프로 장면 이동');
     const layers=['white','yellow','red'].map(palette=>{
       const layer=document.createElement('div');layer.className='stage-color-layer';layer.dataset.color=palette;host.append(layer);return layer;
     });
