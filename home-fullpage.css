@@ -1,5 +1,6 @@
 /* A scene is a fixed canvas, never a scroll container. Existing section
    styles stay intact; this last layer sizes them to the visible frame. */
+.home-cinema.home-fullpage .home-ambient,.home-cinema.home-fullpage .home-ambient::before,.home-cinema.home-fullpage .home-ambient::after{transition-duration:var(--stage-speed,440ms)}
 .home-cinema.home-fullpage .home-scroll-viewport{
   position:relative;overflow:hidden;overflow:clip;touch-action:pan-x pinch-zoom;
   scroll-timeline-name:none;scroll-behavior:auto;overscroll-behavior:none;
