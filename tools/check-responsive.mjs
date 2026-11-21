@@ -27,19 +27,29 @@ for(const engine of [chromium,webkit])test('Cinematic home preserves content and
      assert.equal(await page.locator('#gallery .friend-carousel-card:not([aria-hidden])').count(),14);
      assert.equal(await page.locator('#friends-dots button').count(),14);
      assert.equal(await page.locator('.control-trigger').count(),1);
-     const top=await page.evaluate(()=>({pinned:document.querySelector('.cinema-opening').classList.contains('is-pinned'),hero:document.querySelector('.hero').offsetHeight,available:innerHeight-document.querySelector('.header').offsetHeight}));
-     assert.equal(top.pinned,top.available>=470&&top.hero<=top.available+5);
+     const top=await page.evaluate(()=>{
+       const opening=document.querySelector('.cinema-opening'),hero=document.querySelector('.hero'),poster=document.querySelector('.hero-poster'),header=document.querySelector('.header');
+       const snapshot=()=>['.hero','.hero-copy','.hero-film','.hero-description','.hero .button','.hero-foot','.hero-poster','.poster-viewport'].map(selector=>{
+         const el=document.querySelector(selector),s=getComputedStyle(el);return [selector,el.offsetWidth,el.offsetHeight,s.textAlign,s.fontSize,s.lineHeight,s.padding,s.margin,s.gap,s.borderWidth];
+       });
+       const actual=snapshot();document.body.classList.remove('is-cinematic');const original=snapshot();document.body.classList.add('is-cinematic');
+       return {actual,original,pinned:opening.classList.contains('is-pinned'),hero:hero.offsetHeight,poster:poster.offsetHeight,available:innerHeight-header.offsetHeight,opacity:parseFloat(hero.style.getPropertyValue('--cinema-hero-opacity')),initialScale:parseFloat(hero.style.getPropertyValue('--cinema-hero-scale'))};
+     });
+     assert.deepEqual(top.actual,top.original,'cinema must not change original layout, text alignment, font sizes or image proportions');
+     assert.equal(top.opacity,1);assert.equal(top.initialScale,1);
+     if(viewport.width<700)assert.notEqual(top.actual.find(x=>x[0]==='.hero-description')[3],'center','restore the original mobile description alignment');
+     assert.equal(top.pinned,top.available>=350&&top.poster<=top.available*1.25);
      assert.equal(await page.locator('.cinema-chapter').count(),4);
-     if(viewport.width>700)assert.ok(top.pinned,'desktop opening should pin');
+     assert.ok(top.pinned,'the original desktop and mobile opening should pin when the poster fits');
      if(top.pinned){
-       await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';const opening=document.querySelector('.cinema-opening'),header=document.querySelector('.header');window.scrollTo(0,opening.offsetTop-header.offsetHeight+parseFloat(opening.style.getPropertyValue('--cinema-runway'))*.6);});
-       await page.waitForFunction(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-inner-scale'))>1.12);
+       await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';const opening=document.querySelector('.cinema-opening'),header=document.querySelector('.header');window.scrollTo(0,opening.offsetTop-header.offsetHeight+parseFloat(opening.style.getPropertyValue('--cinema-pin-offset'))+parseFloat(opening.style.getPropertyValue('--cinema-runway'))*.58);});
+       await page.waitForFunction(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-inner-scale'))>1.27);
        if(viewport.width>700){
-         assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-scale'))>1.25));
+         assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-scale'))>1.35));
          assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-poster-x'))<-180));
-       }
-       const position=await page.evaluate(()=>({hero:document.querySelector('.hero').getBoundingClientRect().top,header:document.querySelector('.header').getBoundingClientRect().bottom}));
-       assert.ok(Math.abs(position.hero-position.header)<4,'opening remains pinned beneath the header');
+       }else assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-inner-scale'))>1.48),'mobile closeup is visibly stronger');
+       const position=await page.evaluate(()=>({hero:document.querySelector('.hero').getBoundingClientRect().top,pinTop:parseFloat(document.querySelector('.cinema-opening').style.getPropertyValue('--cinema-pin-top'))}));
+       assert.ok(Math.abs(position.hero-position.pinTop)<4,'original tall hero holds at the bottom without changing layout');
      }
      await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,0);});
      const scene=page.locator('.story-row').first();
@@ -52,11 +62,11 @@ for(const engine of [chromium,webkit])test('Cinematic home preserves content and
      const after=await scene.evaluate(el=>Number(el.style.getPropertyValue('--cinema-image-scale')));
      assert.ok(after>before,'scroll progress drives visual depth');
      if(viewport.width>700){
-       const chapter=await page.evaluate(()=>{const el=document.querySelector('.cinema-chapter'),header=document.querySelector('.header');return {pinned:el.classList.contains('is-pinned'),target:scrollY+el.getBoundingClientRect().top-header.offsetHeight+parseFloat(el.style.getPropertyValue('--cinema-runway'))*.65};});
+       const chapter=await page.evaluate(()=>{const el=document.querySelector('.cinema-chapter'),stage=el.firstElementChild;return {pinned:el.classList.contains('is-pinned'),target:scrollY+el.getBoundingClientRect().top+(parseFloat(getComputedStyle(stage).marginTop)||0)-parseFloat(el.style.getPropertyValue('--cinema-pin-top'))+parseFloat(el.style.getPropertyValue('--cinema-runway'))*.5};});
        assert.ok(chapter.pinned,'story chapter should pin on desktop');
        await page.evaluate(y=>window.scrollTo(0,y),chapter.target);
-       await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-detail-scale'))>1.08);
-       assert.ok(await page.evaluate(()=>Math.abs(document.querySelector('.story-row').getBoundingClientRect().top-document.querySelector('.header').getBoundingClientRect().bottom)<4));
+       await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-detail-scale'))>1.20);
+       assert.ok(await page.evaluate(()=>Math.abs(document.querySelector('.story-row').getBoundingClientRect().top-parseFloat(document.querySelector('.cinema-chapter').style.getPropertyValue('--cinema-pin-top')))<4));
      }
      await go(.86);
      await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))<.99);
