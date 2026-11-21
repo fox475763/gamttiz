@@ -13,71 +13,67 @@ const base='http://127.0.0.1:'+server.address().port+'/';
 const pages=['index.html','member.html','license.html','play.html','collection.html','draw.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar'];
 const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2026-11-20T00:00:00Z',character:0};
 
-for(const engine of [chromium,webkit])test('Cinematic home preserves content and native scroll: '+engine.name(),{timeout:45000},async()=>{
+for(const engine of [chromium,webkit])test('Home scroll is native, stable and readable: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
  try{
    for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
-     const context=await browser.newContext({viewport,serviceWorkers:'block',reducedMotion:'no-preference'});
+     const mobile=viewport.width<700;
+     const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'no-preference'});
      await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
      const page=await context.newPage();
      await page.goto(base+'index.html',{waitUntil:'domcontentloaded'});
-     await page.waitForFunction(()=>document.body.classList.contains('is-cinematic')&&document.querySelector('.cinema-opening').style.getPropertyValue('--cinema-hero-height'));
+     await page.waitForFunction(()=>window.GTZHomeMotion&&document.querySelectorAll('#friends-dots button').length===14);
      assert.equal(await page.locator('#main section').count(),11);
      assert.equal(await page.locator('.story-row').count(),2);
      assert.equal(await page.locator('#gallery .friend-carousel-card:not([aria-hidden])').count(),14);
      assert.equal(await page.locator('#friends-dots button').count(),14);
      assert.equal(await page.locator('.control-trigger').count(),1);
+     assert.equal(await page.locator('.cinema-opening,.cinema-chapter,.is-pinned').count(),0);
      const top=await page.evaluate(()=>{
-       const opening=document.querySelector('.cinema-opening'),hero=document.querySelector('.hero'),poster=document.querySelector('.hero-poster'),header=document.querySelector('.header');
+       document.documentElement.style.scrollBehavior='auto';
        const snapshot=()=>['.hero','.hero-copy','.hero-film','.hero-description','.hero .button','.hero-foot','.hero-poster','.poster-viewport'].map(selector=>{
          const el=document.querySelector(selector),s=getComputedStyle(el);return [selector,el.offsetWidth,el.offsetHeight,s.textAlign,s.fontSize,s.lineHeight,s.padding,s.margin,s.gap,s.borderWidth];
        });
-       const actual=snapshot();document.body.classList.remove('is-cinematic');const original=snapshot();document.body.classList.add('is-cinematic');
-       return {actual,original,pinned:opening.classList.contains('is-pinned'),hero:hero.offsetHeight,poster:poster.offsetHeight,available:innerHeight-header.offsetHeight,opacity:parseFloat(hero.style.getPropertyValue('--cinema-hero-opacity')),initialScale:parseFloat(hero.style.getPropertyValue('--cinema-hero-scale'))};
+       const actual=snapshot();document.body.classList.remove('home-cinema');const original=snapshot();document.body.classList.add('home-cinema');
+       return {actual,original};
      });
-     assert.deepEqual(top.actual,top.original,'cinema must not change original layout, text alignment, font sizes or image proportions');
-     assert.equal(top.opacity,1);assert.equal(top.initialScale,1);
-     if(viewport.width<700)assert.notEqual(top.actual.find(x=>x[0]==='.hero-description')[3],'center','restore the original mobile description alignment');
-     assert.equal(top.pinned,top.available>=350&&top.poster<=top.available*1.25);
-     assert.equal(await page.locator('.cinema-chapter').count(),4);
-     assert.ok(top.pinned,'the original desktop and mobile opening should pin when the poster fits');
-     if(top.pinned){
-       await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';const opening=document.querySelector('.cinema-opening'),header=document.querySelector('.header');window.scrollTo(0,opening.offsetTop-header.offsetHeight+parseFloat(opening.style.getPropertyValue('--cinema-pin-offset'))+parseFloat(opening.style.getPropertyValue('--cinema-runway'))*.58);});
-       await page.waitForFunction(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-inner-scale'))>1.27);
-       if(viewport.width>700){
-         assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-scale'))>1.35));
-         assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-hero-poster-x'))<-180));
-       }else assert.ok(await page.evaluate(()=>parseFloat(document.querySelector('.hero').style.getPropertyValue('--cinema-inner-scale'))>1.48),'mobile closeup is visibly stronger');
-       const position=await page.evaluate(()=>({hero:document.querySelector('.hero').getBoundingClientRect().top,pinTop:parseFloat(document.querySelector('.cinema-opening').style.getPropertyValue('--cinema-pin-top'))}));
-       assert.ok(Math.abs(position.hero-position.pinTop)<4,'original tall hero holds at the bottom without changing layout');
+     assert.deepEqual(top.actual,top.original,'original first-screen sizing and typography must remain unchanged');
+     if(mobile)assert.notEqual(top.actual.find(x=>x[0]==='.hero-description')[3],'center');
+     const stable=await page.evaluate(async()=>{
+       const selectors=['.hero','.hero-copy','.hero-poster','.story-row:not(.reverse)','.story-row:not(.reverse) .story-image','.story-row:not(.reverse) .story-copy','.story-row.reverse','.story-row.reverse .story-image','.story-row.reverse .story-copy'];
+       const frames=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+       const styles=()=>selectors.map(s=>{const e=document.querySelector(s),c=getComputedStyle(e);return {s,top:e.getBoundingClientRect().top,opacity:c.opacity,transform:c.transform,scale:c.scale,translate:c.translate,rotate:c.rotate,position:c.position}});
+       const result=[];
+       for(const scene of ['.hero','.story-row:not(.reverse)','.story-row.reverse']){
+         const start=Math.max(0,scrollY+document.querySelector(scene).getBoundingClientRect().top-innerHeight*.22);
+         window.scrollTo(0,start);await frames();
+         const before=styles(),y=scrollY;
+         window.scrollTo(0,y+120);await frames();
+         const after=styles(),delta=scrollY-y;
+         result.push({scene,delta,before,after});
+       }
+       return result;
+     });
+     for(const {scene,delta,before,after} of stable){
+       assert.ok(delta>=100,scene+' accepts native scroll rather than pinning');
+       for(let i=0;i<before.length;i++){
+         const a=before[i],b=after[i];
+         assert.ok(Math.abs(a.top-b.top-delta)<3,a.s+' moves only with the page');
+         assert.equal(b.opacity,'1',b.s+' remains fully readable');
+         assert.equal(b.transform,'none');
+         assert.equal(b.scale,'none');assert.equal(b.translate,'none');assert.equal(b.rotate,'none');
+         assert.notEqual(b.position,'sticky');
+       }
      }
-     await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';window.scrollTo(0,0);});
-     const scene=page.locator('.story-row').first();
-     const go=async fraction=>page.evaluate(f=>{const row=document.querySelector('.story-row').parentElement;window.scrollTo(0,window.scrollY+row.getBoundingClientRect().top-innerHeight*f);},fraction);
-     await go(.86);
-     await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))<.99);
-     const before=await scene.evaluate(el=>Number(el.style.getPropertyValue('--cinema-image-scale')));
-     await go(.28);
-     await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))>.99);
-     const after=await scene.evaluate(el=>Number(el.style.getPropertyValue('--cinema-image-scale')));
-     assert.ok(after>before,'scroll progress drives visual depth');
-     if(viewport.width>700){
-       const chapter=await page.evaluate(()=>{const el=document.querySelector('.cinema-chapter'),stage=el.firstElementChild;return {pinned:el.classList.contains('is-pinned'),target:scrollY+el.getBoundingClientRect().top+(parseFloat(getComputedStyle(stage).marginTop)||0)-parseFloat(el.style.getPropertyValue('--cinema-pin-top'))+parseFloat(el.style.getPropertyValue('--cinema-runway'))*.5};});
-       assert.ok(chapter.pinned,'story chapter should pin on desktop');
-       await page.evaluate(y=>window.scrollTo(0,y),chapter.target);
-       await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-detail-scale'))>1.20);
-       assert.ok(await page.evaluate(()=>Math.abs(document.querySelector('.story-row').getBoundingClientRect().top-parseFloat(document.querySelector('.cinema-chapter').style.getPropertyValue('--cinema-pin-top')))<4));
-     }
-     await go(.86);
-     await page.waitForFunction(()=>parseFloat(document.querySelector('.story-row').style.getPropertyValue('--cinema-image-scale'))<.99);
-     await page.evaluate(()=>{document.querySelector('#collection').scrollIntoView({block:'start'});});
-     await page.waitForFunction(()=>document.querySelector('#collection').getBoundingClientRect().top<innerHeight*.5);
+     await page.evaluate(()=>document.querySelector('#collection').scrollIntoView({block:'start'}));
+     await page.waitForFunction(()=>window.GTZHomeMotion.scrolling);
+     await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='paused'));
+     await page.waitForFunction(()=>!window.GTZHomeMotion.scrolling);
+     await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='running'));
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
-     assert.ok(overflow<=2,'cinematic elements must not cause horizontal overflow');
+     assert.ok(overflow<=2,'native home must not cause horizontal overflow');
      await page.emulateMedia({reducedMotion:'reduce'});
-     await page.waitForFunction(()=>!document.body.classList.contains('is-cinematic'));
-     assert.equal(await page.locator('.cinema-opening.is-pinned').count(),0);
-     assert.equal(await page.locator('.cinema-chapter.is-pinned').count(),0);
+     assert.equal(await page.locator('.is-pinned').count(),0);
      await context.close();
    }
  }finally{await browser.close();}

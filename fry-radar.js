@@ -249,7 +249,7 @@
     stopPreviewTimer();
     if(!isActive()||!preview||previewStops().length<2||prefersReducedMotion?.matches)return;
     previewTimer=window.setInterval(()=>{
-      if(!isActive()||document.hidden||!previewCarousel)return;
+      if(!isActive()||document.hidden||!previewCarousel||window.GTZHomeMotion?.scrolling)return;
       const bounds=previewCarousel.getBoundingClientRect();
       if(bounds.bottom<0||bounds.top>window.innerHeight)return;
       if(previewCarousel.matches(':hover')||preview.contains(document.activeElement))return;

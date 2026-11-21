@@ -1,93 +1,42 @@
-/* Scroll-only film layer. The original home stylesheet owns all typography,
-   alignment, spacing, backgrounds, image proportions and card layouts. */
-.home-cinema .cinema-opening,.home-cinema .cinema-chapter{position:relative;display:flow-root}
+/* Home: native scrolling and stable reading surfaces.
+   No pins, scroll snapping, scroll-linked transforms or hidden copy. */
 .home-cinema #main{overflow-x:clip}
-.home-cinema.is-cinematic .cinema-opening.is-pinned,
-.home-cinema.is-cinematic .cinema-chapter.is-pinned{
-  min-height:calc(var(--cinema-stage-height,0px) + var(--cinema-stage-margins,0px) + var(--cinema-runway,0px));
+/* These old infinite effects painted the full red hero even during scrolling.
+   Keep the exact original design, but freeze the decorative pattern. */
+.home-cinema .hero::before,
+.home-cinema .hero::after,
+.home-cinema .brand-letters span{animation:none}
+.home-cinema .ticker:not(.home-ticker-visible) div{animation-play-state:paused}
+.home-cinema :is(.hero-poster,.story-image,.story-copy,.holder-image,.holder-copy,.section-heading h2,.social h2){
+  transform:none;translate:none;scale:none;rotate:none;opacity:1;
+  transition:none;
 }
-.home-cinema.is-cinematic .cinema-opening.is-pinned{background:var(--red)}
-.home-cinema.is-cinematic .cinema-opening.is-pinned>.hero,
-.home-cinema.is-cinematic .cinema-chapter.is-pinned>.cinema-stage{
-  position:sticky;top:var(--cinema-pin-top,0px);
+/* A pointer resting on the screen must not trigger bouncing as a row passes it. */
+.home-cinema :is(.hero-poster:hover,.story-image:hover,.holder-image:hover),
+.home-cinema :is(.story-row:hover .story-copy,.holder:hover .holder-copy,.section-heading:hover h2,.social:hover h2){transform:none}
+/* The fixed header is a large repaint surface on iOS. Match its existing
+   neutral base color without a live backdrop blur. The glass Menu is untouched. */
+@media(max-width:900px), (pointer:coarse){
+  .home-cinema .header{
+    background:#f8f8f6;
+    -webkit-backdrop-filter:none;
+    backdrop-filter:none;
+  }
 }
-/* Individual transforms leave the original hover/carousel transforms and
-   hero pattern animation intact. All variables start at their neutral values. */
-.home-cinema.is-cinematic .hero-copy{
-  translate:var(--cinema-hero-copy-x,0px) var(--cinema-hero-copy,0px);
-  opacity:var(--cinema-hero-opacity,1);
-  pointer-events:var(--cinema-copy-events,auto);
+/* Optional desktop-only editorial finish, once per image. No copy moves,
+   no enlargement, no scroll-dependent layout, no retained GPU layers. */
+@media (min-width:901px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  .home-cinema .home-image-arrival{animation:home-image-arrival 260ms cubic-bezier(.22,.61,.36,1)}
 }
-.home-cinema.is-cinematic .hero-poster{
-  z-index:2;
-  translate:var(--cinema-hero-poster-x,0px) var(--cinema-hero-poster,0px);
-  scale:var(--cinema-hero-scale,1);
-  rotate:var(--cinema-hero-tilt,0deg);
-  opacity:var(--cinema-poster-opacity,1);
-  transform-origin:center center;
+@keyframes home-image-arrival{
+  from{opacity:.98;translate:0 5px}
+  to{opacity:1;translate:0 0}
 }
-.home-cinema.is-cinematic .hero::before,.home-cinema.is-cinematic .hero::after{
-  translate:0 var(--cinema-hero-pattern,0px);
-}
-.home-cinema.is-cinematic .poster-viewport img{
-  scale:var(--cinema-inner-scale,1);
-  translate:0 var(--cinema-inner-y,0px);
-  transform-origin:50% 42%;
-}
-.home-cinema.is-cinematic .hero-copy:focus-within{translate:none;opacity:1;z-index:3;pointer-events:auto}
-.home-cinema.is-cinematic .hero-poster:focus-within{translate:none;scale:1;rotate:none;opacity:1}
-.home-cinema.is-cinematic :is(.collection,.experience-teaser)>.section-heading,
-.home-cinema.is-cinematic .radar-preview-heading,
-.home-cinema.is-cinematic .guide>.eyebrow,
-.home-cinema.is-cinematic .guide>h2,
-.home-cinema.is-cinematic .home-news>:is(.eyebrow,h2,p,a),
-.home-cinema.is-cinematic .home-contact>div,
-.home-cinema.is-cinematic .social>:is(.eyebrow,h2,a){
-  translate:0 var(--cinema-lift,0px);
-  opacity:var(--cinema-opacity,1);
-}
-.home-cinema.is-cinematic :is(.collection-tools,.collection-carousel,.experience-links,.radar-preview-carousel,.guide-grid){
-  translate:0 var(--cinema-deep-lift,0px);
-  opacity:var(--cinema-opacity,1);
-}
-.home-cinema.is-cinematic :is(.story-image,.holder-image,.home-package-image){
-  translate:var(--cinema-image-x,0px) var(--cinema-image-y,0px);
-  scale:var(--cinema-image-scale,1);
-  rotate:var(--cinema-image-roll,0deg);
-  opacity:var(--cinema-image-opacity,1);
-  transform-origin:center;
-}
-.home-cinema.is-cinematic .cinema-chapter .story-image{overflow:hidden}
-.home-cinema.is-cinematic .cinema-chapter :is(.story-image,.holder-image,.home-package-image) img{
-  scale:var(--cinema-detail-scale,1);
-  translate:var(--cinema-detail-x,0px) var(--cinema-detail-y,0px);
-  transform-origin:50% 48%;
-}
-.home-cinema.is-cinematic .cinema-chapter .story-image img:nth-child(2){
-  translate:calc(-1 * var(--cinema-detail-x,0px)) calc(-1 * var(--cinema-detail-y,0px));
-}
-.home-cinema.is-cinematic :is(.story-copy,.holder-copy,.home-package-copy){
-  translate:var(--cinema-copy-x,0px) var(--cinema-lift,0px);
-  opacity:var(--cinema-opacity,1);
-}
-.home-cinema.is-cinematic .experience-links>a,.home-cinema.is-cinematic .guide-grid>article{
-  translate:0 var(--cinema-stagger,0px);
-  opacity:var(--cinema-card-opacity,1);
-}
-.home-cinema.is-cinematic :is(.experience-links>a,.guide-grid>article):nth-child(2){translate:0 calc(var(--cinema-stagger,0px)*1.65)}
-.home-cinema.is-cinematic .guide-grid>article:nth-child(3){translate:0 calc(var(--cinema-stagger,0px)*2.3)}
-.home-cinema.is-cinematic .cinema-stage:focus-within :is(.story-image,.story-copy,.holder-image,.holder-copy,.home-package-image,.home-package-copy){
-  translate:none;scale:1;rotate:none;opacity:1;
-}
-.home-cinema.is-cinematic :is(.collection,.experience-teaser,.radar-preview,.guide,.home-news,.home-contact,.social):focus-within :is(.section-heading,.collection-tools,.collection-carousel,.experience-links,.radar-preview-heading,.radar-preview-carousel,.guide-grid,.site-contact-actions){
-  translate:none;opacity:1;
-}
-.home-cinema.is-cinematic .cinema-in-view :is(.hero-copy,.hero-poster,.poster-viewport img,.story-image,.story-image img,.holder-image,.holder-image img,.home-package-image,.home-package-image img,.collection-carousel,.radar-preview-carousel,.experience-links>a,.guide-grid>article){
-  will-change:translate,scale,opacity;
-}
-@media(prefers-reduced-motion:reduce){
-  .home-cinema.is-cinematic .cinema-opening.is-pinned,
-  .home-cinema.is-cinematic .cinema-chapter.is-pinned{min-height:0}
-  .home-cinema.is-cinematic .cinema-opening.is-pinned>.hero,
-  .home-cinema.is-cinematic .cinema-chapter.is-pinned>.cinema-stage{position:relative;top:auto}
+@supports(animation-timeline:scroll(root block)){
+  .home-cinema .reading-progress.home-native-progress{
+    animation:home-reading-progress linear both;
+    animation-timeline:scroll(root block);
+    animation-duration:auto;
+  }
+  @keyframes home-reading-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 }

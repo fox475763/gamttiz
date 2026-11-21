@@ -189,6 +189,7 @@
   
 let colorFrame = 0;
 let lastButtonColor = '';
+const homeColorTracking = document.body.classList.contains('home-cinema');
 
 function setButtonColor(color) {
   if (color === lastButtonColor) return;
@@ -203,20 +204,21 @@ function updateMenuTextColor() {
   }
 
   const rect = trigger.getBoundingClientRect();
-  const dockVisibility = dock.style.visibility;
-  const scrimVisibility = scrim.style.visibility;
-  dock.style.visibility = 'hidden';
-  scrim.style.visibility = 'hidden';
-
   let behind;
-  try {
-    behind = document.elementFromPoint(
-      rect.left + rect.width / 2,
-      rect.top + rect.height / 2
-    );
-  } finally {
-    dock.style.visibility = dockVisibility;
-    scrim.style.visibility = scrimVisibility;
+  const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
+  if(homeColorTracking&&document.elementsFromPoint){
+    // Inspect the underlying surface without hiding/repainting the glass dock.
+    behind=document.elementsFromPoint(x,y).find(el=>!dock.contains(el)&&!scrim.contains(el));
+  }else{
+    const dockVisibility = dock.style.visibility;
+    const scrimVisibility = scrim.style.visibility;
+    dock.style.visibility = 'hidden';
+    scrim.style.visibility = 'hidden';
+    try {behind = document.elementFromPoint(x,y);}
+    finally {
+      dock.style.visibility = dockVisibility;
+      scrim.style.visibility = scrimVisibility;
+    }
   }
 
   let isRed = false;
@@ -232,6 +234,10 @@ function updateMenuTextColor() {
 
 function scheduleMenuTextColorUpdate() {
   if (colorFrame) return;
+  if(homeColorTracking){
+    colorFrame=setTimeout(()=>{colorFrame=0;updateMenuTextColor();},110);
+    return;
+  }
   colorFrame = requestAnimationFrame(() => {
     colorFrame = 0;
     updateMenuTextColor();

@@ -26,7 +26,7 @@
   let visible=true, dotTimer=0;
   function syncMotion(){
     if(!animation)return;
-    const running=visible&&!document.hidden&&!reduced.matches;
+    const running=visible&&!document.hidden&&!reduced.matches&&!window.GTZHomeMotion?.scrolling;
     if(running){animation.play();if(!dotTimer)dotTimer=setInterval(updateDots,200);}
     else {animation.pause();clearInterval(dotTimer);dotTimer=0;}
     updateDots();
@@ -101,5 +101,6 @@
   if(reduced.addEventListener)reduced.addEventListener('change',syncMotion);
   else reduced.addListener?.(syncMotion);
   if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;syncMotion();}).observe(viewport);
+  document.addEventListener('gtz-home-scroll-state',syncMotion);
   layout();
 })();

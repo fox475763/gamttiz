@@ -6,22 +6,34 @@
   progress.setAttribute('aria-hidden', 'true');
   document.body.append(progress);
 
+  const home = document.body.classList.contains('home-cinema');
+  const nativeProgress = home && !reducedMotion.matches && CSS.supports('animation-timeline: scroll(root block)');
+  let homeMax=0;
+  const measureHome=()=>{homeMax=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);};
   let scrollQueued = false;
   const updateProgress = () => {
-    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const max = home ? homeMax : document.documentElement.scrollHeight - window.innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0})`;
     scrollQueued = false;
   };
+  if(nativeProgress){
+    progress.classList.add('home-native-progress');
+  }else{
+  if(home){
+    measureHome();
+    if('ResizeObserver' in window)new ResizeObserver(()=>{measureHome();updateProgress();}).observe(document.body);
+  }
   window.addEventListener('scroll', () => {
     if (!scrollQueued) {
       scrollQueued = true;
       requestAnimationFrame(updateProgress);
     }
   }, { passive: true });
-  window.addEventListener('resize', updateProgress, { passive: true });
+  window.addEventListener('resize', () => {if(home)measureHome();updateProgress();}, { passive: true });
   updateProgress();
+  }
 
-  if (document.body.classList.contains('home-cinema') || reducedMotion.matches || !('IntersectionObserver' in window)) return;
+  if (home || reducedMotion.matches || !('IntersectionObserver' in window)) return;
   const targets = document.querySelectorAll(
     '.story-row, .section-heading, .guide-grid article, .project-top, ' +
     '.project-facts, .project-ideas article, .project-system, .project-subhead, ' +
