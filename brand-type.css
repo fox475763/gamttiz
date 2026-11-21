@@ -1,0 +1,118 @@
+/* GAMTTIZ — editorial typography | final cascade, after page-specific design.
+ * The identity wordmark, liquid glass controls and printed ID are intentionally untouched.
+ */
+:root {
+  --gtz-display: clamp(40px, 5vw, 76px);
+  --gtz-section: clamp(28px, 3vw, 46px);
+  --gtz-subhead: clamp(20px, 1.85vw, 28px);
+  --gtz-lead: clamp(16px, 1.28vw, 19px);
+  --gtz-body: clamp(15px, 1.08vw, 16px);
+  --gtz-label: 11px;
+  --gtz-display-weight: 800;
+  --gtz-heading-weight: 750;
+}
+body { font-kerning: normal; font-optical-sizing: auto; }
+body :is(.header,.experience-header) nav[aria-label="주 메뉴"] a {
+  font-family: var(--type-sans); font-size: 13px; font-weight: 650;
+  letter-spacing: -.015em; line-height: 1.35;
+}
+body:not(.license-page):not(.home-cinema) #main :is(h1,h2,h3,h4),
+body.home-cinema #main :is(h2,h3,h4) {
+  font-family: var(--type-sans);
+  font-synthesis: none; word-break: keep-all; overflow-wrap: anywhere;
+}
+body:not(.license-page):not(.home-cinema) #main :is(.project-top h1,.catalog-hero h1,.news-hero h1,.dex-masthead h1,.play-hub>h1,.experience-intro h1,.fx-heading h1,.member-hub h1,.member-locked h1,.member-tool h1) {
+  font-size: var(--gtz-display); font-weight: var(--gtz-display-weight);
+  line-height: 1.12; letter-spacing: -.048em; text-wrap: balance;
+}
+body:not(.license-page):not(.home-cinema) #main :is(.project-ideas h3,.project-world h3,.project-specifications h3,.project-packaging h3,.project-system h3,.project-subhead h3,.catalog-section h2,.news-list-head h2,.playground h2,.notebook h2,.fry-quiz h2,.dex-library h2,.site-contact-band h2,.radar-board h2) {
+  font-size: var(--gtz-section); font-weight: var(--gtz-heading-weight);
+  letter-spacing: -.038em; line-height: 1.22; text-wrap: balance;
+}
+body:not(.license-page):not(.home-cinema) #main :is(.hub-grid h2,.member-tile h2,.draw-machine h2,.project-specifications h4,.news-card-info h3,.radar-card h3,.catalog-card-text strong) {
+  font-size: var(--gtz-subhead); font-weight: 720; letter-spacing: -.032em;
+  line-height: 1.3; text-wrap: balance;
+}
+body:not(.license-page):not(.home-cinema) #main :is(.project-lead,.catalog-hero-copy>p:not(.eyebrow),.news-hero>p:not(.eyebrow),.play-hub>p:not(.eyebrow),.experience-intro>p:not(.eyebrow),.fx-heading>p:not(.eyebrow),.member-intro,.member-lock-lead) {
+  font-size: var(--gtz-lead); font-weight: 440; line-height: 1.68;
+  letter-spacing: -.015em; max-inline-size: 55ch; text-wrap: pretty;
+}
+body:not(.license-page):not(.home-cinema) #main :is(.project-world>p:not(.eyebrow),.project-ideas p,.project-system>div>p:not(.eyebrow),.project-facts dd,.catalog-section-heading>p:not(.eyebrow),.catalog-holder-copy>p:not(.eyebrow),.site-contact-band p:not(.eyebrow),.news-body,.hub-grid p,.quiz-story,.quiz-reason,.member-note p,.radar-card p) {
+  font-size: var(--gtz-body); font-weight: 440; line-height: 1.73;
+  letter-spacing: -.012em; text-wrap: pretty;
+}
+body:not(.license-page) #main :is(.eyebrow,.fx-kicker,.member-kicker,.radar-kicker,.hub-index,.project-facts dt,.project-ideas article>span) {
+  font-family: var(--type-sans); font-size: var(--gtz-label); font-weight: 750;
+  line-height: 1.45; letter-spacing: .095em;
+}
+body:not(.license-page) #main :is(figcaption,.catalog-caption,.spec-note,.fx-footnote,.radar-updated,.news-card-info small,.catalog-card-text small,.project-fonts p) {
+  font-size: 12px; font-weight: 500; line-height: 1.55; letter-spacing: -.005em;
+}
+body:not(.license-page) #main :is(.button,.text-button,.hub-action,.catalog-jump,.quiz-option,.quiz-save,.quiz-share,.quiz-copy,.project-back) {
+  font-weight: 680; letter-spacing: -.014em; line-height: 1.4;
+}
+body #main :is(.story-number,.member-tile-number,.tile-index,.dex-tile-no,#dex-dial-number,.radar-count,#tray-count,#draw-date) {
+  font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
+}
+/* Home: maintain the approved viewport-sized scenes and left-aligned story copy.
+   Typography is compact enough to fit without shrinking a complete scene. */
+body.home-cinema.home-fullpage #main .hero .hero-description {
+  font-size: clamp(15px,1.25vw,18px); font-weight: 450; line-height: 1.65;
+  letter-spacing: -.014em; text-wrap: pretty;
+}
+body.home-cinema.home-fullpage #main>:not(.hero) :is(.section-heading h2,.radar-preview-heading h2,.story-copy h2,.holder-copy h2,.home-package-copy h2,.home-news-feed-head h2,.home-news h2,.guide>h2,.home-contact h2,.social h2) {
+  font-size: clamp(32px,3.7vw,55px); font-weight: 790;
+  letter-spacing: -.045em; line-height: 1.2; text-wrap: balance;
+}
+body.home-cinema.home-fullpage #main :is(.story-copy,.holder-copy,.home-package-copy,.home-contact,.home-news) > p:not(.eyebrow),
+body.home-cinema.home-fullpage #main :is(.section-heading,.radar-preview-heading)>p:not(.eyebrow) {
+  font-size: clamp(15px,1.17vw,17px); font-weight: 440;
+  line-height: 1.66; letter-spacing: -.012em; text-wrap: pretty;
+}
+body.home-cinema.home-fullpage #main :is(.guide-grid h3,.home-news-feed-copy h3,.radar-preview-item h3) {
+  font-weight: 730; letter-spacing: -.028em; line-height: 1.3;
+}
+body.home-cinema.home-fullpage #main :is(.guide-grid p,.home-news-feed-copy p,.radar-preview-item p) {
+  font-weight: 440; letter-spacing: -.01em; line-height: 1.61;
+}
+body.home-cinema.home-fullpage #main .story-number {
+  font-weight: 720; letter-spacing: -.045em;
+}
+body.home-cinema.home-fullpage #main .experience-links>a>strong {
+  font-weight: 760; letter-spacing: -.035em; line-height: 1.23;
+}
+body.home-cinema.home-fullpage #main .experience-links>a>b {font-weight: 680; letter-spacing: -.025em;}
+/* Application form only — preserve the card, foil, wallet and issued title. */
+body.license-page #main .license-panel h2 {
+  font-family: var(--type-sans); font-size: clamp(24px,3vw,38px);
+  font-weight: 750; line-height: 1.25; letter-spacing: -.035em;
+}
+body.license-page #main .license-panel .license-label {
+  font-size: 15px; font-weight: 690; letter-spacing: -.018em; line-height: 1.45;
+}
+body.license-page #main .license-panel :is(input,select,textarea) {
+  font-family: var(--type-sans); line-height: 1.5;
+}
+@media (max-width: 900px) {
+  :root { --gtz-display: clamp(35px,7.1vw,56px); --gtz-section: clamp(26px,5.1vw,37px); --gtz-subhead: clamp(19px,2.9vw,24px); --gtz-lead: 16px; --gtz-body: 15px; }
+  body :is(.header,.experience-header) nav[aria-label="주 메뉴"] a {font-size: 12px;}
+}
+@media (max-width: 720px) {
+  body:not(.license-page):not(.home-cinema) #main :is(.project-top h1,.catalog-hero h1,.news-hero h1,.dex-masthead h1,.play-hub>h1,.experience-intro h1,.fx-heading h1,.member-hub h1,.member-locked h1,.member-tool h1) {
+    line-height: 1.16; letter-spacing: -.04em;
+  }
+  body.home-cinema.home-fullpage #main>:not(.hero) :is(.section-heading h2,.radar-preview-heading h2,.story-copy h2,.holder-copy h2,.home-package-copy h2,.home-news-feed-head h2,.home-news h2,.guide>h2,.home-contact h2,.social h2) {
+    font-size: clamp(27px,7.6vw,36px); line-height: 1.23; letter-spacing: -.04em;
+  }
+  body.home-cinema.home-fullpage #main :is(.story-copy,.holder-copy,.home-package-copy,.home-contact,.home-news)>p:not(.eyebrow),
+  body.home-cinema.home-fullpage #main :is(.section-heading,.radar-preview-heading)>p:not(.eyebrow) {
+    font-size: 14px; line-height: 1.58;
+  }
+  body.home-cinema.home-fullpage #main .hero .hero-description {font-size: 13px; line-height: 1.55;}
+  body #main :is(input:not([type=checkbox]):not([type=radio]),select,textarea) {font-size: 16px;}
+}
+@media (max-height: 680px) {
+  body.home-cinema.home-fullpage #main>:not(.hero) :is(.section-heading h2,.radar-preview-heading h2,.story-copy h2,.holder-copy h2,.home-package-copy h2,.home-news-feed-head h2,.home-news h2,.guide>h2,.home-contact h2,.social h2) {font-size: clamp(25px,4.2vw,42px);}
+  body.home-cinema.home-fullpage #main .hero .hero-description {font-size: 13px;line-height:1.5;}
+  body.home-cinema.home-fullpage #main :is(.story-copy,.holder-copy,.home-package-copy)>p:not(.eyebrow) {line-height:1.5;}
+}

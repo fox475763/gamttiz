@@ -10,12 +10,16 @@ const fallback = document.querySelector('#combo-static');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(30, 1, .005, 2);
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+const coarsePointer = matchMedia('(pointer: coarse)');
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarsePointer.matches ? 1.5 : 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = .82;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+// Lights and model are stationary: orbiting the camera does not change their shadows.
+renderer.shadowMap.autoUpdate = false;
+renderer.shadowMap.needsUpdate = true;
 renderer.setClearColor(0xe8e3dc, 1);
 renderer.domElement.className = 'combo-3d-canvas';
 renderer.domElement.setAttribute('aria-hidden', 'true');
@@ -30,7 +34,8 @@ scene.add(new THREE.HemisphereLight(0xfff4e9, 0x665550, .66));
 const key = new THREE.DirectionalLight(0xffebd8, 2.15);
 key.position.set(-.12, .23, .18);
 key.castShadow = true;
-key.shadow.mapSize.set(2048, 2048);
+const shadowSize = coarsePointer.matches ? 1024 : 2048;
+key.shadow.mapSize.set(shadowSize, shadowSize);
 key.shadow.camera.left = key.shadow.camera.bottom = -.14;
 key.shadow.camera.right = key.shadow.camera.top = .14;
 key.shadow.camera.near = .01;
@@ -134,6 +139,8 @@ const textureCache = new Map();
 let ready = false;
 let currentPicks = [];
 let loadSerial = 0;
+let previous = 0, frame = 0, visible = true, dirty = true, interacting = false;
+let settled = 0;
 
 function textureFor(index) {
   if (!textureCache.has(index)) {
@@ -155,6 +162,7 @@ function resize() {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
   renderer.setSize(width, height, false);
+  invalidate();
 }
 if('ResizeObserver' in window)new ResizeObserver(resize).observe(tray);else window.addEventListener('resize',resize);
 
@@ -168,14 +176,17 @@ controls.maxPolarAngle = 2.05;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 controls.autoRotate = !reducedMotion.matches;
 controls.autoRotateSpeed = .45;
-const changeMotion = event => { controls.autoRotate = !event.matches; };
+const changeMotion = event => { controls.autoRotate = !event.matches; invalidate(); };
 if(reducedMotion.addEventListener)reducedMotion.addEventListener('change',changeMotion);else reducedMotion.addListener?.(changeMotion);
 controls.target.set(0, .044, 0);
 camera.position.set(0, .072, .205);
 controls.update();
 controls.saveState();
-renderer.domElement.addEventListener('pointerdown', () => { controls.autoRotate = false; });
-reset.addEventListener('click', () => { controls.reset(); controls.autoRotate = !reducedMotion.matches; });
+controls.addEventListener('start', () => { interacting = true; controls.autoRotate = false; invalidate(); });
+controls.addEventListener('end', () => { interacting = false; invalidate(); });
+controls.addEventListener('change', invalidate);
+renderer.domElement.addEventListener('pointerdown', () => { controls.autoRotate = false; invalidate(); });
+reset.addEventListener('click', () => { controls.reset(); controls.autoRotate = !reducedMotion.matches; invalidate(); });
 
 function layout(count, index) {
   // The fry cutouts sit inside the holder cavity, behind the real front wall.
@@ -207,6 +218,8 @@ async function setFriends(indices) {
     face.rotation.y = (i - (indices.length - 1) / 2) * -.04;
     friends.add(face);
   });
+  renderer.shadowMap.needsUpdate = true;
+  invalidate();
 }
 
 function createPng(indices) {
@@ -317,6 +330,7 @@ loader.load('assets/holder-fbx.glb', gltf => {
     object.receiveShadow = true;
   });
   holder.add(gltf.scene);
+  renderer.shadowMap.needsUpdate = true;
   ready = true;
   tray.classList.add('is-3d-ready');
   fallback?.setAttribute('aria-hidden', 'true');
@@ -328,18 +342,41 @@ loader.load('assets/holder-fbx.glb', gltf => {
   status.textContent = '3D 화면을 불러오지 못했어요. 원래 조합 화면을 이용해 주세요.';
 });
 
-let previous=0, frame=0;
-let visible=true;
-function syncFrame(){
-  if(visible&&!document.hidden){if(!frame)frame=requestAnimationFrame(animate);}
-  else{if(frame)cancelAnimationFrame(frame);frame=0;previous=0;}
+// Demand rendering: maintain automatic orbit, drag and damping, but sleep once
+// the model is still; asynchronous textures, resize and restored visibility wake it.
+function invalidate() {
+  dirty = true;
+  settled = 0;
+  syncFrame();
 }
-function animate(time){
-  frame=0;if(!visible||document.hidden)return;
-  const delta=previous?(time-previous)/1000:0;previous=time;
-  controls.update(Math.min(delta,.05));renderer.render(scene,camera);
-  frame=requestAnimationFrame(animate);
+function syncFrame() {
+  if (visible && !document.hidden) {
+    if (!frame) frame = requestAnimationFrame(animate);
+  } else {
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0; previous = 0;
+  }
 }
-if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0]?.isIntersecting??true;syncFrame();}).observe(tray);
-document.addEventListener('visibilitychange',syncFrame);
-syncFrame();
+function animate(time) {
+  frame = 0;
+  if (!visible || document.hidden) return;
+  const delta = previous ? Math.min((time - previous) / 1000, .05) : 0;
+  previous = time;
+  const changed = controls.update(delta);
+  if (dirty || changed || interacting || controls.autoRotate) {
+    renderer.render(scene, camera);
+    dirty = false;
+    settled = 0;
+  } else settled++;
+  if (controls.autoRotate || interacting || settled < 3) {
+    if (!frame) frame = requestAnimationFrame(animate);
+  } else previous = 0;
+}
+if ('IntersectionObserver' in window) new IntersectionObserver(entries => {
+  visible = entries[0]?.isIntersecting ?? true;
+  if (visible) invalidate(); else syncFrame();
+}).observe(tray);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) syncFrame(); else invalidate();
+});
+invalidate();
