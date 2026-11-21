@@ -1,11 +1,17 @@
 /* Home: native scrolling and stable reading surfaces.
    No pins, scroll snapping, scroll-linked transforms or hidden copy. */
 .home-cinema #main{overflow-x:clip}
-/* These old infinite effects painted the full red hero even during scrolling.
-   Keep the exact original design, but freeze the decorative pattern. */
-.home-cinema .hero::before,
-.home-cinema .hero::after,
-.home-cinema .brand-letters span{animation:none}
+/* Restore the original opening animations. Translate the repeating fries
+   instead of repainting background-position on every animation frame. */
+@media(prefers-reduced-motion:no-preference){
+  .home-cinema .hero::before{
+    left:-96px;animation:home-hero-fries 8s ease-in-out infinite alternate;
+  }
+  @keyframes home-hero-fries{from{transform:translateX(0)}to{transform:translateX(42px)}}
+  .home-cinema.home-hero-managed .hero:not(.home-hero-visible)::before,
+  .home-cinema.home-hero-managed .hero:not(.home-hero-visible)::after,
+  .home-cinema.home-hero-managed .hero:not(.home-hero-visible) .brand-letters span{animation-play-state:paused}
+}
 .home-cinema .ticker:not(.home-ticker-visible) div{animation-play-state:paused}
 .home-cinema :is(.hero-poster,.story-image,.story-copy,.holder-image,.holder-copy,.section-heading h2,.social h2){
   transform:none;translate:none;scale:none;rotate:none;opacity:1;

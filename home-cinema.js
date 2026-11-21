@@ -3,6 +3,17 @@
   'use strict';
   if(!document.body.classList.contains('home-cinema')||!('IntersectionObserver' in window))return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const hero=document.querySelector('.hero');
+  if(hero){
+    let heroVisible=false;
+    const syncHero=()=>hero.classList.toggle('home-hero-visible',heroVisible&&!document.hidden&&!reduced.matches);
+    document.body.classList.add('home-hero-managed');
+    new IntersectionObserver(([entry])=>{
+      heroVisible=entry.isIntersecting;syncHero();
+    }).observe(hero);
+    document.addEventListener('visibilitychange',syncHero);
+    if(reduced.addEventListener)reduced.addEventListener('change',syncHero);else reduced.addListener(syncHero);
+  }
   const ticker=document.querySelector('.ticker');
   let tickerVisible=false;
   const syncTicker=()=>ticker?.classList.toggle('home-ticker-visible',tickerVisible&&!document.hidden&&!reduced.matches&&!window.GTZHomeMotion?.scrolling);

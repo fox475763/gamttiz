@@ -1,4 +1,4 @@
-/* Kinetic silk is rendered offline. A single muted, hardware-decoded
+/* Optical caustics are ray-projected offline. A single muted, hardware-decoded
    loop keeps the background fixed and scrolling independent of rendering. */
 (() => {
   'use strict';
@@ -19,7 +19,7 @@
       if(reduced.matches)host.classList.remove('is-live');
       return;
     }
-    const next='assets/home-silk-motion'+(portrait.matches?'-portrait':'')+'.mp4?v=20261121silk1';
+    const next='assets/home-ambient-motion'+(portrait.matches?'-portrait':'')+'.mp4?v=20261121acrylic1';
     if(source!==next){
       source=next;host.classList.remove('is-live');video.src=next;
     }
