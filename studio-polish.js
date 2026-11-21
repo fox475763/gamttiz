@@ -13,6 +13,11 @@
   const measureHome=()=>{homeMax=Math.max(0,homeViewport?homeViewport.scrollHeight-homeViewport.clientHeight:document.documentElement.scrollHeight-window.innerHeight);};
   let scrollQueued = false;
   const updateProgress = () => {
+    if(home && document.body.classList.contains('home-fullpage')){
+      const index=Number(document.body.dataset.homeScene)||0,count=Number(document.body.dataset.homeSceneCount)||1;
+      progress.style.transform=`scaleX(${count>1?index/(count-1):0})`;
+      scrollQueued=false;return;
+    }
     const max = home ? homeMax : document.documentElement.scrollHeight - window.innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, (homeViewport?homeViewport.scrollTop:window.scrollY) / max)) : 0})`;
     scrollQueued = false;
@@ -31,6 +36,7 @@
     }
   }, { passive: true });
   window.addEventListener('resize', () => {if(home)measureHome();updateProgress();}, { passive: true });
+  document.addEventListener('gtz-home-scene',updateProgress);
   updateProgress();
   }
 
