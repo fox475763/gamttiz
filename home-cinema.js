@@ -4,7 +4,7 @@
   const body=document.body,main=document.getElementById('main');
   const opening=main?.querySelector('.cinema-opening'),hero=opening?.querySelector('.hero');
   if(!body.classList.contains('home-cinema')||!opening||!hero)return;
-  const header=document.querySelector('.header'),preference=matchMedia('(prefers-reduced-motion: reduce)');
+  const header=document.querySelector('.header'),poster=hero.querySelector('.hero-poster'),preference=matchMedia('(prefers-reduced-motion: reduce)');
   const nodes=[...main.querySelectorAll('#collection,.story-row,#holder,.home-package,#experiences,#fry-radar-preview,.home-news,#guide,#contact,.social')];
   const scenes=nodes.map(element=>{
     let chapter=null;
@@ -18,7 +18,7 @@
   const ease=x=>{x=clamp(x);return x*x*(3-2*x);};
   const px=n=>Math.round(n)+'px',num=n=>n.toFixed(3);
   const write=(el,props)=>{for(const [key,value] of Object.entries(props))el.style.setProperty(key,value);};
-  let viewport=0,width=0,openingTop=0,heroHeight=0,runway=0,headerHeight=0,active=false,raf=0,needsMeasure=true,heroKey='',heroNear=false;
+  let viewport=0,width=0,openingTop=0,heroHeight=0,runway=0,headerHeight=0,centerX=0,centerY=0,active=false,raf=0,needsMeasure=true,heroKey='',heroNear=false;
   function measure(){
     const y=window.scrollY;
     // A stable viewport avoids resizing the film when Safari's address bar moves.
@@ -27,6 +27,8 @@
     const available=viewport-headerHeight;
     write(opening,{'--cinema-header':px(headerHeight)});
     heroHeight=hero.offsetHeight;
+    centerX=hero.clientWidth/2-(poster.offsetLeft+poster.offsetWidth/2);
+    centerY=heroHeight/2-(poster.offsetTop+poster.offsetHeight/2);
     const pin=available>=470&&heroHeight<=available+5;
     runway=pin?Math.round(Math.min(820,available*(width<=700?.72:.95))):0;
     opening.classList.toggle('is-pinned',pin);
@@ -69,11 +71,12 @@
         // frame while the brand copy moves out, then ease into the next scene.
         write(hero,{
           '--cinema-hero-copy-x':px(mobile?0:-move*width*.16),
-          '--cinema-hero-copy':px(-move*(mobile?44:70)),
-          '--cinema-hero-opacity':num(1-move*(mobile?.55:.77)),
-          '--cinema-hero-poster-x':px(mobile?0:-move*width*.195+settle*width*.025),
-          '--cinema-hero-poster':px(-move*(mobile?28:10)-settle*(mobile?16:40)),
-          '--cinema-hero-scale':num(1+move*(mobile?.075:.32)-settle*(mobile?.025:.045)),
+          '--cinema-hero-copy':px(-move*(mobile?72:70)),
+          '--cinema-hero-opacity':num(1-ease(p/(mobile?.64:.58))),
+          '--cinema-copy-events':p>(mobile?.62:.56)?'none':'auto',
+          '--cinema-hero-poster-x':px(move*centerX),
+          '--cinema-hero-poster':px(move*(mobile?Math.max(-165,Math.min(-15,centerY)):centerY)-settle*(mobile?16:28)),
+          '--cinema-hero-scale':num(1+move*(mobile?.10:.32)-settle*(mobile?.025:.045)),
           '--cinema-inner-scale':num(1+move*(mobile?.34:.16)),
           '--cinema-hero-tilt':num(mobile?0:-move*3+settle*3)+'deg',
           '--cinema-hero-pattern':px(move*92+settle*65)
