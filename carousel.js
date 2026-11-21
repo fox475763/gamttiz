@@ -13,6 +13,7 @@ const syncIdle=()=>{
   document.dispatchEvent(new Event('gtz-home-scroll-state'));
 };
 (document.querySelector('.home-scroll-viewport')||window).addEventListener('scroll',()=>{
+  if(document.body.classList.contains('home-native-touch'))return;
   lastPageScroll=performance.now();
   if(homeMotion.scrolling)return;
   homeMotion.scrolling=true;

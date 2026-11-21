@@ -203,6 +203,10 @@ function updateMenuTextColor() {
     return;
   }
 
+  if(document.body.classList.contains('home-native-touch')){
+    setButtonColor(document.body.dataset.homeInk==='white'?'#ffffff':'#e93636');
+    return;
+  }
   const rect = trigger.getBoundingClientRect();
   let behind;
   const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
@@ -245,7 +249,7 @@ function scheduleMenuTextColorUpdate() {
   });
 }
 
-(document.querySelector('.home-scroll-viewport')||window).addEventListener('scroll', scheduleMenuTextColorUpdate, { passive: true });
+(document.querySelector('.home-scroll-viewport')||window).addEventListener('scroll', () => {if(!document.body.classList.contains('home-native-touch'))scheduleMenuTextColorUpdate();}, { passive: true });
 document.addEventListener('gtz-home-palette',scheduleMenuTextColorUpdate);
 window.addEventListener('resize', scheduleMenuTextColorUpdate);
 window.addEventListener('load', scheduleMenuTextColorUpdate);

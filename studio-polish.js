@@ -30,6 +30,7 @@
     if('ResizeObserver' in window){const observer=new ResizeObserver(()=>{measureHome();updateProgress();});observer.observe(homeViewport||document.body);if(homeViewport)observer.observe(document.querySelector('#main'));}
   }
   (homeViewport||window).addEventListener('scroll', () => {
+    if(home && document.body.classList.contains('home-native-touch'))return;
     if (!scrollQueued) {
       scrollQueued = true;
       requestAnimationFrame(updateProgress);

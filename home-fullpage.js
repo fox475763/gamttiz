@@ -30,6 +30,127 @@
   const status=document.createElement('p');status.className='home-scene-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');viewport.append(status);
   viewport.setAttribute('aria-label','홈 콘텐츠, 휠 또는 스와이프와 위아래 방향키로 장면 이동');
   body.classList.add('home-fullpage','home-palette-ready');
+  // On touch screens let the browser's asynchronous scrolling compositor do
+  // the work. The document/header/background remain fixed; only this inner
+  // viewport scrolls. CSS snap supplies the soft native landing, without
+  // cancelling touchmove, simulating momentum or repainting transforms per frame.
+  const touchNative=matchMedia('(pointer: coarse), (max-width: 700px)').matches;
+  if(touchNative){
+    body.classList.add('home-native-touch');
+    viewport.setAttribute('aria-label','홈 콘텐츠, 위아래 스와이프로 장면 이동');
+    const layers=['white','yellow','red'].map(palette=>{
+      const layer=document.createElement('div');layer.className='stage-color-layer';layer.dataset.color=palette;host.append(layer);return layer;
+    });
+    const sceneCount=scenes.length;
+    viewport.style.setProperty('--scene-count',String(sceneCount));
+    scenes.forEach((el,i)=>{
+      el.classList.add('home-scene');el.dataset.scene=String(i);
+      // Every scene is a real snap target; do not make native scrolled content inert.
+    });
+    let nativeIndex=0, nativeHeight=0, measureRequest=0, scrollRequest=0, idleTimer=0, scrolling=false;
+    let pendingMeasure=false, paletteTimer=0, layerTimer=0;
+    const indexAt=()=>Math.max(0,Math.min(sceneCount-1,Math.round(viewport.scrollTop/Math.max(1,nativeHeight))));
+    const indexFromHash=hash=>{
+      if(!hash||hash==='#')return 0;
+      if(hash==='#main')return nativeIndex;
+      let id;try{id=decodeURIComponent(hash.slice(1));}catch{return -1;}
+      const target=document.getElementById(id);return target?scenes.findIndex(el=>el===target||el.contains(target)):-1;
+    };
+    const selectScene=(index,announce=false)=>{
+      if(index===nativeIndex&&body.dataset.homeScene!==undefined&&!announce)return;
+      nativeIndex=index;
+      const palette=order[index].palette;
+      if(host.dataset.palette!==palette){
+        const previousPalette=host.dataset.palette;
+        host.dataset.palette=palette;body.dataset.homePalette=palette;
+        // Fade prepainted layers rather than animating the full viewport's
+        // background-color and two large masked gradients.
+        clearTimeout(layerTimer);
+        layers.forEach(layer=>{
+          layer.classList.toggle('is-outgoing',layer.dataset.color===previousPalette&&layer.dataset.color!==palette);
+          layer.classList.toggle('is-palette',layer.dataset.color===palette);
+        });
+        layerTimer=setTimeout(()=>layers.forEach(layer=>layer.classList.remove('is-outgoing')),300);
+        clearTimeout(paletteTimer);
+        const ink=palette==='red'?'white':'dark';
+        const changeInk=()=>{body.dataset.homeInk=ink;document.dispatchEvent(new Event('gtz-home-palette'));};
+        if(!body.dataset.homeInk||reduced.matches)changeInk();else paletteTimer=setTimeout(changeInk,palette==='red'?80:45);
+      }
+      body.dataset.homeScene=String(index);body.dataset.homeSceneCount=String(sceneCount);
+      document.dispatchEvent(new Event('gtz-home-scene'));
+      if(announce){const heading=scenes[index].querySelector('h1,h2');status.textContent=`${index+1} / ${sceneCount} · ${heading?.textContent.trim()||'감띠즈'}`;}
+    };
+    const setMoving=active=>{
+      if(scrolling===active)return;
+      scrolling=active;
+      body.classList.toggle('home-native-moving',active);
+      // carousel.js owns the same flag; keep its visibility and idle work in sync.
+      if(window.GTZHomeMotion)window.GTZHomeMotion.scrolling=active;
+      document.dispatchEvent(new Event('gtz-home-scroll-state'));
+    };
+    function measureNative(){
+      measureRequest=0;
+      if(scrolling){pendingMeasure=true;return;}
+      pendingMeasure=false;
+      const height=viewport.clientHeight;
+      if(!height)return;
+      const changedHeight=height!==nativeHeight;
+      const previousIndex=nativeHeight?indexAt():nativeIndex;
+      nativeHeight=height;
+      if(changedHeight)viewport.style.setProperty('--scene-h',height+'px');
+      // Read all natural sizes together, then write margins/fit together.
+      // One native scroll slot always occupies exactly one viewport.
+      const heights=scenes.map(el=>Math.max(el.offsetHeight,el.scrollHeight));
+      scenes.forEach((el,i)=>{
+        const natural=Math.max(1,heights[i]);
+        const fit=Math.min(1,Math.max(.35,(height-8)/natural));
+        const gap=(height-natural)/2;
+        const size=fit.toFixed(5),space=gap.toFixed(2)+'px';
+        if(el.style.getPropertyValue('--scene-fit')!==size)el.style.setProperty('--scene-fit',size);
+        if(el.style.getPropertyValue('--scene-space')!==space)el.style.setProperty('--scene-space',space);
+      });
+      if(changedHeight)viewport.scrollTop=previousIndex*height;
+    }
+    const queueMeasure=()=>{if(scrolling){pendingMeasure=true;return;}if(!measureRequest)measureRequest=requestAnimationFrame(measureNative);};
+    function settle(){
+      clearTimeout(idleTimer);idleTimer=0;
+      setMoving(false);selectScene(indexAt(),true);
+      if(pendingMeasure)queueMeasure();
+    }
+    viewport.addEventListener('scroll',()=>{
+      setMoving(true);
+      if(indexAt()!==nativeIndex&&!scrollRequest)scrollRequest=requestAnimationFrame(()=>{scrollRequest=0;selectScene(indexAt());});
+      clearTimeout(idleTimer);idleTimer=setTimeout(settle,180);
+    },{passive:true});
+    if('onscrollend' in viewport)viewport.addEventListener('scrollend',settle,{passive:true});
+    const goNative=(i,instant=false)=>{
+      const index=Math.max(0,Math.min(sceneCount-1,i));
+      viewport.scrollTo({top:index*nativeHeight,behavior:instant||reduced.matches?'instant':'smooth'});
+      if(instant)selectScene(index,true);
+    };
+    document.addEventListener('click',e=>{
+      const link=e.target.closest?.('a[href^="#"]');
+      if(!link||e.defaultPrevented||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey)return;
+      const hash=link.getAttribute('href'),i=indexFromHash(hash);
+      if(i<0)return;e.preventDefault();
+      if(hash==='#main'){viewport.focus({preventScroll:true});return;}
+      const url=location.pathname+location.search+(hash==='#'?'':hash);
+      if(url!==location.pathname+location.search+location.hash)history.pushState(null,'',url);
+      goNative(i,Math.abs(i-nativeIndex)>1);
+    });
+    const syncHash=()=>{const i=indexFromHash(location.hash);if(i>=0)goNative(i,true);};
+    addEventListener('hashchange',syncHash);addEventListener('popstate',syncHash);
+    const initial=Math.max(0,indexFromHash(location.hash));
+    nativeIndex=initial;host.classList.add('stage-initial');measureNative();selectScene(initial,true);goNative(initial,true);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>host.classList.remove('stage-initial')));
+    addEventListener('resize',queueMeasure,{passive:true});
+    addEventListener('pageshow',queueMeasure);addEventListener('load',queueMeasure,{once:true});
+    document.fonts?.ready.then(queueMeasure);
+    if('ResizeObserver' in window){const observer=new ResizeObserver(queueMeasure);observer.observe(viewport);scenes.forEach(el=>observer.observe(el));}
+    const syncPaused=()=>host.classList.toggle('stage-paused',document.hidden||reduced.matches);
+    document.addEventListener('visibilitychange',syncPaused);reduced.addEventListener?.('change',syncPaused);syncPaused();
+    return;
+  }
   scenes.forEach((el,i)=>{el.classList.add('home-scene');el.dataset.scene=String(i);el.inert=true;el.setAttribute('aria-hidden','true');});
   let current=0,position=0,goal=0,frame=0,lastFrame=0,snapping=false,dragging=false,dragPosition=0,targetFocus=false,inMotion=false,frameHeight=0,measureQueued=false,inkTimer=0,paletteIndex=-1;
   let wheelTimer=0,lastWheel=-Infinity,wheelDirection=0,wheelOrigin=0;

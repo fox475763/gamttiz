@@ -131,3 +131,73 @@
  .home-cinema.home-fullpage #main .guide-grid article>p{font-size:12px;line-height:1.45}
  .home-cinema.home-fullpage #main .home-news-feed-card{padding-block:7px}
 }
+
+/* Touch scrolling: draw the same fixed stage, but make the content layer a
+   browser-native scrolling surface. No per-frame transforms or touchmove
+   cancellation. Each chapter still occupies one full visible viewport. */
+.home-cinema.home-fullpage.home-native-touch .home-scroll-viewport{
+  position:relative;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  touch-action:auto;scroll-snap-type:y mandatory;scroll-behavior:auto;
+  overscroll-behavior-y:contain;scrollbar-width:none;overflow-anchor:none;
+}
+.home-cinema.home-fullpage.home-native-touch .home-scroll-viewport::-webkit-scrollbar{display:none}
+.home-cinema.home-fullpage.home-native-touch #main{
+  position:relative;inset:auto;display:flex;flex-direction:column;align-items:stretch;
+  width:100%;height:calc(var(--scene-h,100svh) * var(--scene-count,12));min-height:0;
+  overflow:hidden;overflow:clip;max-width:none;margin:0;padding:0;
+}
+.home-cinema.home-fullpage.home-native-touch #main>.home-scene{
+  position:relative;inset:auto;top:auto;flex:0 0 auto;visibility:visible;pointer-events:auto;
+  margin-block:var(--scene-space,0px);margin-inline:auto;
+  height:auto;min-height:0;max-height:none;
+  transform:scale(var(--scene-fit,1));transform-origin:center;
+  scroll-snap-align:center;scroll-snap-stop:normal;scroll-margin:0;
+  transition:none;will-change:auto;
+}
+/* Preserve horizontal cards. A vertical gesture over a card belongs to the
+   native stage instead of being captured by a synthetic slider. */
+.home-cinema.home-fullpage.home-native-touch #main .collection-carousel-window{touch-action:pan-y pinch-zoom;mix-blend-mode:normal}
+.home-cinema.home-fullpage.home-native-touch #main .radar-preview-track{touch-action:auto;overscroll-behavior:contain}
+.home-cinema.home-fullpage.home-native-touch #main .holder-image{mix-blend-mode:normal}
+.home-cinema.home-fullpage.home-native-touch .home-ambient{
+  background:#fff;transition:none;isolation:isolate;overflow:hidden;
+}
+.home-cinema.home-fullpage.home-native-touch .home-ambient::before,
+.home-cinema.home-fullpage.home-native-touch .home-ambient::after{content:none;animation:none;mask:none;-webkit-mask:none}
+.home-native-touch .stage-color-layer{
+  position:absolute;inset:0;overflow:hidden;opacity:0;pointer-events:none;
+  background:var(--stage-color,#fff);transition:opacity .28s cubic-bezier(.22,.61,.36,1);
+}
+.home-native-touch .stage-color-layer.is-palette{opacity:1;z-index:2}
+.home-native-touch .stage-color-layer.is-outgoing{opacity:1;z-index:1;transition:none}
+.home-native-touch .stage-color-layer[data-color="white"]{--stage-color:#fff;--fries-opacity:.12;--dots-opacity:.16;--fries-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='%23e93636'/%3E%3C/svg%3E");--dots-color:#e93636}
+.home-native-touch .stage-color-layer[data-color="yellow"]{--stage-color:#ffb511;--fries-opacity:.18;--dots-opacity:.2;--fries-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='%23b72127'/%3E%3C/svg%3E");--dots-color:#b72127}
+.home-native-touch .stage-color-layer[data-color="red"]{--stage-color:#d62c30;--fries-opacity:.75;--dots-opacity:.32;--fries-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='%23ffb511'/%3E%3C/svg%3E");--dots-color:#ffb511}
+.home-native-touch .stage-color-layer::before{
+  content:"";position:absolute;left:-96px;right:0;bottom:0;height:100px;
+  background:var(--fries-image) 0 100%/96px 100px repeat-x;
+  opacity:var(--fries-opacity);animation:gtz-stage-fries 8s ease-in-out infinite alternate;
+}
+.home-native-touch .stage-color-layer::after{
+  content:"";position:absolute;inset:0;opacity:var(--dots-opacity);
+  background:radial-gradient(circle at 13% 17%,var(--dots-color) 0 4px,transparent 5px),
+    radial-gradient(circle at 29% 45%,var(--dots-color) 0 7px,transparent 8px),
+    radial-gradient(circle at 46% 22%,var(--dots-color) 0 3px,transparent 4px),
+    radial-gradient(circle at 67% 31%,var(--dots-color) 0 6px,transparent 7px),
+    radial-gradient(circle at 83% 59%,var(--dots-color) 0 4px,transparent 5px),
+    radial-gradient(circle at 22% 78%,var(--dots-color) 0 5px,transparent 6px),
+    radial-gradient(circle at 58% 69%,var(--dots-color) 0 8px,transparent 9px),
+    radial-gradient(circle at 74% 86%,var(--dots-color) 0 3px,transparent 4px);
+  animation:gtz-touch-dots 24s ease-in-out infinite alternate;
+}
+@keyframes gtz-touch-dots{from{transform:translate3d(-2%,1%,0)}to{transform:translate3d(2%,-2%,0)}}
+.home-native-touch .stage-color-layer:not(.is-palette)::before,
+.home-native-touch .stage-color-layer:not(.is-palette)::after,
+.home-native-touch.home-native-moving .stage-color-layer::after,
+.home-native-touch .home-ambient.stage-paused .stage-color-layer::before,
+.home-native-touch .home-ambient.stage-paused .stage-color-layer::after{animation-play-state:paused}
+.home-native-touch .home-ambient.stage-initial .stage-color-layer{transition:none}
+@media(prefers-reduced-motion:reduce){
+  .home-native-touch .stage-color-layer{transition:none}
+  .home-native-touch .stage-color-layer::before,.home-native-touch .stage-color-layer::after{animation:none}
+}
