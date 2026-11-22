@@ -114,7 +114,7 @@
     opticsPrepared=true;
     // WebKit can parse URL backdrops but not render them safely, so use the
     // CSS lens there. Chromium's accelerated reference filters do support it.
-    if(!/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)||/iPhone|iPad|iPod/.test(navigator.userAgent)||!window.CSS?.supports('backdrop-filter','url(#gtz-menu-refraction)'))return false;
+    if(!/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)||/Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent)||!window.CSS?.supports('backdrop-filter','url(#gtz-menu-refraction)'))return false;
     try{
       const w=256,h=44,r=21,depth=10.5,canvas=document.createElement('canvas');
       canvas.width=w;canvas.height=h;
@@ -212,7 +212,11 @@
     let cachedScene=null,sceneTime=0,sceneKey='';
     function render(now){
       if(mobileLens!==m||dock.dataset.mode!=='menu')return;
-      m.frame=requestAnimationFrame(render);if(now-m.last<(m.interval||34))return;m.last=now;const started=performance.now();
+      m.frame=requestAnimationFrame(render);
+      if(document.documentElement.classList.contains('gtz-liquid-scrolling')||document.body.classList.contains('home-native-moving')){
+        canvas.removeAttribute('data-lens-ready');cachedScene=null;return;
+      }
+      if(now-m.last<(m.interval||40))return;m.last=now;const started=performance.now();
       try{
         const clip=menuScroll.getBoundingClientRect(),left=Math.max(0,Math.floor(clip.left-14)),top=Math.max(0,Math.floor(clip.top-14));
         const w=Math.min(innerWidth-left,Math.ceil(clip.right-left+14)),h=Math.min(innerHeight-top,Math.ceil(clip.bottom-top+14));
@@ -251,7 +255,7 @@
             dst[i+3]=Math.round(235*Math.min(1,delta/8)*Math.min(1,strength*2.6));
           }
         }
-        out.putImageData(pixels,0,0);if(dock.dataset.menuRefraction!=='canvas')dock.dataset.menuRefraction='canvas';
+        out.putImageData(pixels,0,0);canvas.setAttribute('data-lens-ready','');if(dock.dataset.menuRefraction!=='canvas')dock.dataset.menuRefraction='canvas';
         m.interval=Math.max(30,Math.min(60,(performance.now()-started)*2.4));
       }catch{/* Keep the previous complete frame; never flash a cleared layer. */}
     }

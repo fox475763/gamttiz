@@ -184,6 +184,24 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
  }finally{await browser.close();}
 });
 
+// The mobile home scroll compositor must never drag a stale sampled rim.
+test('WebKit home scroll keeps actual transparent backdrop and suspends sampled pixels', {timeout:30000}, async()=>{
+ const browser=await webkit.launch();
+ try{
+  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block',reducedMotion:'no-preference'});
+  await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+  const page=await context.newPage();await page.goto(base+'index.html',{waitUntil:'load'});
+  await page.waitForFunction(()=>document.querySelector('.control-trigger .gtz-liquid-optics canvas[data-lens-ready]')&&!document.body.classList.contains('home-native-moving'));
+  await page.evaluate(()=>{const v=document.querySelector('.home-scroll-viewport');v.scrollTo({top:v.clientHeight*1.8,behavior:'smooth'});});
+  await page.waitForFunction(()=>document.body.classList.contains('home-native-moving'));
+  const moving=await page.evaluate(()=>{const glass=document.querySelector('.control-trigger .gtz-liquid-optics'),canvas=glass.querySelector('canvas');return {blur:getComputedStyle(glass).backdropFilter,visibility:getComputedStyle(canvas).visibility,ready:canvas.hasAttribute('data-lens-ready')};});
+  assert.ok(moving.blur.includes('blur(1.25px)')&&moving.visibility==='hidden'&&!moving.ready,JSON.stringify(moving));
+  await page.waitForFunction(()=>!document.body.classList.contains('home-native-moving')&&!!document.querySelector('.control-trigger .gtz-liquid-optics canvas[data-lens-ready]'));
+  assert.equal(await page.locator('.control-trigger .gtz-liquid-optics canvas').evaluate(el=>getComputedStyle(el).visibility),'visible');
+  await context.close();
+ }finally{await browser.close();}
+});
+
 // Home entry should reset the real stage, not only the outer document.
 for(const engine of [chromium,webkit])test('Home always opens on the first scene with mobile breathing room: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();

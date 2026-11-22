@@ -94,3 +94,25 @@
   .control-dock .gtz-liquid-surface.gtz-liquid-surface{background-color:#272126!important;color:white!important}
   .gtz-liquid-optics{display:none!important}
 }
+
+/* Mobile scrolling is native-composited: never display a stale sampled rim.
+   Fresh idle pixels fade in softly, without affecting the real glass face. */
+.gtz-liquid-optics > canvas{opacity:0;visibility:hidden;transition:opacity .16s ease}
+.gtz-liquid-optics > canvas[data-lens-ready]{opacity:1;visibility:visible}
+html.gtz-liquid-scrolling .gtz-liquid-optics > canvas,
+body.home-native-moving .gtz-liquid-optics > canvas{
+  opacity:0!important;visibility:hidden!important;transition:none!important;
+}
+/* Menu alone gets a brighter, thin optical rim — not a raised bevel. */
+.control-dock .control-trigger.gtz-liquid-surface::before{
+  border-width:1.5px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.77),rgba(255,255,255,.25) 29%,rgba(255,255,255,.10) 50%,rgba(255,249,223,.44) 76%,rgba(255,255,255,.66)) border-box!important;
+}
+.control-dock .control-trigger.gtz-liquid-surface > .gtz-liquid-optics::after{
+  padding:1.5px;
+  background:radial-gradient(ellipse 32% 92% at 17% -10%,rgba(255,255,255,.91),rgba(255,242,221,.38) 43%,transparent 85%),conic-gradient(from 0deg,transparent 0deg,rgba(255,255,255,.13) 45deg,rgba(255,248,226,.70) 72deg,transparent 108deg,transparent 218deg,rgba(255,221,168,.49) 255deg,transparent 292deg);
+}
+.control-dock .control-trigger.gtz-liquid-surface > .gtz-liquid-optics::before{
+  width:36%;animation-duration:10s;
+  background:radial-gradient(ellipse 65% 13% at 50% 2%,rgba(255,255,255,.88),transparent 95%),radial-gradient(ellipse 65% 13% at 50% 98%,rgba(255,238,203,.68),transparent 95%),linear-gradient(100deg,transparent 8%,rgba(255,255,255,.055) 50%,transparent 92%);
+}

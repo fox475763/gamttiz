@@ -927,3 +927,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 }
 
 .control-dock:not([data-mode="menu"]):not([data-menu-closing]) .control-menu{visibility:hidden;transition:none}
+
+.control-menu-edge-canvas{opacity:0;visibility:hidden;transition:opacity .16s ease}
+.control-menu-edge-canvas[data-lens-ready]{opacity:1;visibility:visible}
+html.gtz-liquid-scrolling .control-menu-edge-canvas,body.home-native-moving .control-menu-edge-canvas{opacity:0!important;visibility:hidden!important;transition:none!important}

@@ -5,7 +5,7 @@
   'use strict';
   const selector=".control-trigger,.control-search,.control-search-results,.control-contact,.control-contact-links > :is(a,button),.control-result,.member-page .radar-tool .radar-glass-field,.member-page .radar-tool .radar-filter-panel,.license-page.has-license:not(.license-wallet-view) .license-member-link";
   const reduced=matchMedia('(prefers-reduced-transparency: reduce)');
-  const native=/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)&&!/iPhone|iPad|iPod/.test(navigator.userAgent)&&CSS.supports('backdrop-filter','url(#gtz-liquid-test)');
+  const native=/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)&&!/Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent)&&CSS.supports('backdrop-filter','url(#gtz-liquid-test)');
   const tracked=new Map(),visible=new Set(),filterCache=new Map(),ns='http://www.w3.org/2000/svg';
   let svg=null,source=null,ctx=null,frame=0,last=0,cursor=0,serial=0;
   const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>{
@@ -66,16 +66,12 @@
     }
     state.layer.style.setProperty('--gtz-liquid-filter','url(#'+id+') blur(1.25px) saturate(1.04)');state.key=key;
   }
-  // The browser composites the clear central face on every display frame.
-  // Safari's rim samples locally, then reprojects its cached scene with
-  // the current scroll offset between fresh samples so that it follows
-  // the real content instead of dragging a stale screenshot behind.
-  function scrollPosition(){
-    const stage=document.querySelector('.home-scroll-viewport');
-    return {x:scrollX+(stage?.scrollLeft||0),y:scrollY+(stage?.scrollTop||0)};
-  }
-  function snapshot(el,state,r,optics,now,pos){
-    const margin=38,left=Math.floor(r.left-margin),top=Math.floor(r.top-margin),right=Math.ceil(r.right+margin),bottom=Math.ceil(r.bottom+margin);
+  // A native transparent backdrop remains live at display refresh rate.
+  // Never translate an old DOM sample across scrolling content: WebKit's
+  // asynchronously scrolled, fixed and transformed layers do not share one
+  // scroll offset. Idle rim sampling is deliberately separate from scrolling.
+  function snapshot(el,state,r,optics,now){
+    const margin=12,left=Math.floor(r.left-margin),top=Math.floor(r.top-margin),right=Math.ceil(r.right+margin),bottom=Math.ceil(r.bottom+margin);
     const w=right-left,h=bottom-top;if(w<2||h<2||w*h>600000)return null;
     const b={left,top,right,bottom};
     if(!source){source=document.createElement('canvas');ctx=source.getContext('2d',{willReadFrequently:true});}
@@ -86,42 +82,32 @@
     const dock=document.querySelector('.control-dock'),scrim=document.querySelector('.control-scrim'),inDock=!!el.closest('.control-dock');
     optics.paintBackdrop(ctx,b,node=>node===el||node===dock||node===scrim);
     if(inDock&&scrim?.classList.contains('is-open')){ctx.fillStyle=getComputedStyle(scrim).backgroundColor;ctx.fillRect(left,top,w,h);}
-    return {data:ctx.getImageData(0,0,w,h).data,left,top,w,h,time:now,x:pos.x,y:pos.y,mode:dock?.dataset.mode||''};
+    return {data:ctx.getImageData(0,0,w,h).data,left,top,w,h,time:now,mode:dock?.dataset.mode||''};
   }
-  function canvasFilter(el,state,r,style,optics,now,pos){
+  function canvasFilter(el,state,r,style,optics,now){
     if(r.width*r.height>500000)return;
-    let sample=state.sample;
-    const mode=document.querySelector('.control-dock')?.dataset.mode||'';
-    const delta=sample?Math.max(Math.abs(pos.x-sample.x),Math.abs(pos.y-sample.y)):Infinity;
-    // Capture at measured intervals; intermediate display frames sample the
-    // cached padded crop. Large movements request a fresh capture promptly.
-    if(!sample||sample.mode!==mode||now-sample.time>95||delta>25&&now-sample.time>28||
-       r.left+pos.x-sample.x<sample.left+8||r.right+pos.x-sample.x>sample.left+sample.w-8||
-       r.top+pos.y-sample.y<sample.top+8||r.bottom+pos.y-sample.y>sample.top+sample.h-8){
-      sample=snapshot(el,state,r,optics,now,pos);if(!sample)return;state.sample=sample;
-    }
-    const {data,w,h,left,top}=sample,dx=pos.x-sample.x,dy=pos.y-sample.y;
-    const frameKey=[sample.time,dx,dy,r.left,r.top,r.width,r.height].map(n=>Math.round(n*2)/2).join(',');
-    if(state.frameKey===frameKey)return;state.frameKey=frameKey;
+    const sample=snapshot(el,state,r,optics,now);if(!sample)return;
+    const {data,w,h,left,top}=sample;
     const cw=Math.max(1,Math.ceil(r.width)),ch=Math.max(1,Math.ceil(r.height));
     if(!state.canvas){state.canvas=document.createElement('canvas');state.canvas.setAttribute('aria-hidden','true');state.layer.prepend(state.canvas);}
     const canvas=state.canvas,output=canvas.getContext('2d');if(!output)return;
     if(canvas.width!==cw||canvas.height!==ch){canvas.width=cw;canvas.height=ch;state.output=null;}
     const img=state.output||(state.output=output.createImageData(cw,ch)),dst=img.data;dst.fill(0);
     const rad=radius(style,r.width,r.height),depth=Math.min(9.5,r.width*.25,r.height*.25);
+    const trigger=el.classList.contains('control-trigger'),horizontal=trigger?3.8:6,vertical=trigger?2.2:3.4;
     for(let y=0;y<ch;y++)for(let x=0;x<cw;x++){
       const px=x+.5-r.width/2,py=y+.5-r.height/2;
       if(Math.abs(px)<r.width/2-rad&&Math.abs(py)<r.height/2-depth)continue;
       const [nx,ny]=optics.edgeVector(px,py,r.width,r.height,rad,depth),strength=Math.hypot(nx,ny);
       if(strength<.005)continue;
-      const bx=x+r.left-left+dx,by=y+r.top-top+dy;
+      const bx=x+r.left-left,by=y+r.top-top;
       if(bx<1||by<1||bx>=w-1||by>=h-1)continue;
-      const sx=Math.max(0,Math.min(w-1.001,bx-nx*8)),sy=Math.max(0,Math.min(h-1.001,by-ny*4.5));
+      const sx=Math.max(0,Math.min(w-1.001,bx-nx*horizontal)),sy=Math.max(0,Math.min(h-1.001,by-ny*vertical));
       const ix=Math.floor(sx),iy=Math.floor(sy),fx=sx-ix,fy=sy-iy,a=4*(iy*w+ix),i=4*(y*cw+x),base=4*(Math.floor(by)*w+Math.floor(bx));let diff=0;
       for(let k=0;k<3;k++){const v=(data[a+k]*(1-fx)+data[a+4+k]*fx)*(1-fy)+(data[a+4*w+k]*(1-fx)+data[a+4*w+4+k]*fx)*fy;dst[i+k]=v;diff=Math.max(diff,Math.abs(v-data[base+k]));}
-      dst[i+3]=Math.round(235*Math.min(1,diff/8)*Math.min(1,strength*2.6));
+      dst[i+3]=Math.round((trigger?145:200)*Math.min(1,diff/8)*Math.min(1,strength*2.6));
     }
-    output.putImageData(img,0,0);
+    output.putImageData(img,0,0);canvas.setAttribute('data-lens-ready','');
   }
   function isActive(el){
     if(!el.isConnected||!el.getClientRects().length)return false;
@@ -130,26 +116,51 @@
     if(!native&&document.querySelector('.control-dock[data-mode="menu"]')&&(!dock||el.classList.contains('control-trigger')))return false;
     return true;
   }
+  let moving=false,settleTimer=0,idleTimer=0;
+  function suspendRims(){
+    if(native||reduced.matches)return;
+    if(!moving){
+      moving=true;document.documentElement.classList.add('gtz-liquid-scrolling');
+      if(frame)cancelAnimationFrame(frame);frame=0;
+      clearTimeout(idleTimer);idleTimer=0;
+      for(const state of tracked.values())state.canvas?.removeAttribute('data-lens-ready');
+    }
+    clearTimeout(settleTimer);settleTimer=setTimeout(resumeRims,220);
+  }
+  function resumeRims(){
+    if(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling){
+      settleTimer=setTimeout(resumeRims,100);return;
+    }
+    moving=false;settleTimer=0;
+    // Each rim stays invisible until it receives a new complete pixel buffer.
+    document.documentElement.classList.remove('gtz-liquid-scrolling');
+    schedule();
+  }
   function render(now){
-    frame=0;if(document.hidden||reduced.matches||!visible.size)return;
-    const optics=window.GAMTTIZGlassOptics;
-    if(!optics)return;
-    if(now-last<(native?120:16)){schedule();return;}last=now;
-    const active=[...visible].filter(isActive);
-    if(!active.length)return;
-    const pos=native?null:scrollPosition();
-    // Chromium only prepares filters when geometry changes. Mobile updates
-    // one visible surface per tick; the menu's own lens remains priority.
-    const trigger=active.find(el=>el.classList.contains('control-trigger')),others=active.filter(el=>el!==trigger);
-    const turn=cursor++;const batch=native?active:active.length?[trigger&&(!others.length||turn%2===0)?trigger:others[(trigger?Math.floor(turn/2):turn)%others.length]]:[];
+    frame=0;if(document.hidden||reduced.matches||!visible.size||moving)return;
+    if(!native&&(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling)){suspendRims();return;}
+    const optics=window.GAMTTIZGlassOptics;if(!optics)return;
+    const active=[...visible].filter(isActive);if(!active.length)return;
+    // No DOM rasterization at 60Hz. Refresh just one visible idle rim per
+    // timer tick, prioritizing the small floating Menu. Actual background
+    // transparency and sheen are handled by the native compositor.
+    const trigger=active.find(el=>el.classList.contains('control-trigger')),others=active.filter(el=>el!==trigger),turn=cursor++;
+    const batch=native?active:active.length?[trigger&&(!others.length||turn%2===0)?trigger:others[(trigger?Math.floor(turn/2):turn)%others.length]]:[];
+    const began=performance.now();
     for(const el of batch){
       const state=tracked.get(el),r=el.getBoundingClientRect(),style=getComputedStyle(el);
       if(!state||r.width<2||r.height<2||style.visibility==='hidden'||Number(style.opacity)<.05)continue;
-      try{if(native)nativeFilter(el,state,r,style,optics);else canvasFilter(el,state,r,style,optics,now,pos);}catch{/* Stable CSS glass remains if sampling fails. */}
+      try{if(native)nativeFilter(el,state,r,style,optics);else canvasFilter(el,state,r,style,optics,now);}catch{/* Native clear face stays visible. */}
     }
-    if(!native)schedule();
+    if(!native&&!moving){
+      clearTimeout(idleTimer);idleTimer=setTimeout(schedule,Math.max(280,Math.min(750,(performance.now()-began)*14)));
+    }
   }
-  function schedule(){if(!frame&&!document.hidden&&!reduced.matches)frame=requestAnimationFrame(render);}
+  function schedule(){
+    if(moving||frame||document.hidden||reduced.matches)return;
+    if(!native&&idleTimer){clearTimeout(idleTimer);idleTimer=0;}
+    frame=requestAnimationFrame(render);
+  }
   function init(){
     scan(document);schedule();
     new MutationObserver(records=>{
@@ -157,7 +168,17 @@
         if(record.target.nodeType===1&&tracked.has(record.target)&&!tracked.get(record.target).layer.isConnected)add(record.target);}
       scanRemoved();schedule();
     }).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-mode','aria-hidden']});
-    addEventListener('resize',schedule,{passive:true});addEventListener('scroll',schedule,{passive:true,capture:true});document.addEventListener('visibilitychange',schedule);reduced.addEventListener?.('change',schedule);
+    addEventListener('resize',()=>{if(native)schedule();else suspendRims();},{passive:true});
+    addEventListener('scroll',native?schedule:suspendRims,{passive:true,capture:true});
+    // Touchmove is delivered before native inertial scrolling begins.
+    // The home scroll-state signal also covers programmatic page transitions.
+    if(!native){
+      addEventListener('touchstart',event=>{if(document.body.classList.contains('home-native-touch')&&!event.target.closest?.('.control-dock'))suspendRims();},{passive:true,capture:true});
+      addEventListener('touchmove',suspendRims,{passive:true,capture:true});
+      document.addEventListener('gtz-home-scroll-state',()=>{if(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling)suspendRims();else if(moving){clearTimeout(settleTimer);settleTimer=setTimeout(resumeRims,220);}});
+      document.addEventListener('gtz-home-palette',()=>{if(moving)return;suspendRims();});
+    }
+    document.addEventListener('visibilitychange',schedule);reduced.addEventListener?.('change',schedule);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else if(document.readyState==='interactive')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
