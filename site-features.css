@@ -870,33 +870,60 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 /* A compact vertical dock: layout hit zones stay fixed while the glass
    scales around its right-center. Only the pointed row is highlighted. */
 .control-dock .control-menu .control-menu-links[data-guided]{gap:3px;touch-action:none}
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button){
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button){
   --guide-size:.80;
-  transform:scale(var(--guide-size))!important;
+  transform:scale(var(--guide-live-size,var(--guide-size)))!important;
   z-index:1;
   transition-property:translate,scale,opacity,transform,background-color,box-shadow,color;
-  transition-duration:.58s,.58s,.29s,.28s,.20s,.20s,.20s;
-  transition-timing-function:var(--menu-ease),var(--menu-ease),ease,cubic-bezier(.20,1.12,.36,1),ease,ease,ease;
+  transition-duration:.66s,.66s,.36s,0s,.32s,.32s,.32s;
+  transition-timing-function:var(--menu-ease),var(--menu-ease),ease,linear,cubic-bezier(.22,1,.36,1),ease,cubic-bezier(.22,1,.36,1);
   background-color:rgba(20,12,18,.10);
   color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.73);box-shadow:none;
 }
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button) .control-menu-subtitle{color:rgba(255,255,255,.72)}
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button) .control-menu-optics{opacity:1}
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-near,
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button):has(+ [aria-current="page"]),
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided]:not([data-following]) > [aria-current="page"] + :is(a,button){
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button) .control-menu-subtitle{color:rgba(255,255,255,.72)}
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button) .control-menu-optics{opacity:1}
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-near,
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button):has(+ [aria-current="page"]),
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided]:not([data-following]) > [aria-current="page"] + :is(a,button){
   --guide-size:.90;z-index:2;
 }
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-active,
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button)[aria-current="page"]{
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-active,
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button)[aria-current="page"]{
   --guide-size:1.04;z-index:3;
   background-color:rgba(255,255,255,.92);color:#e93636;text-shadow:none;box-shadow:none;
 }
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-active .control-menu-subtitle,
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button)[aria-current="page"] .control-menu-subtitle{color:#e93636}
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-active .control-menu-optics,
-.control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button)[aria-current="page"] .control-menu-optics{opacity:.28}
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-active .control-menu-subtitle,
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button)[aria-current="page"] .control-menu-subtitle{color:#e93636}
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button).menu-guide-active .control-menu-optics,
+.control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided]:not([data-following]) > :is(a,button)[aria-current="page"] .control-menu-optics{opacity:.28}
 @media(prefers-reduced-transparency:reduce){
-  .control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided] > :is(a,button):not(.menu-guide-active){background-color:rgba(24,19,23,.86)}
-  .control-dock[data-mode="menu"] .control-menu .control-menu-links[data-guided]:not([data-following]) > [aria-current="page"]{background-color:rgba(255,255,255,.92)}
+  .control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button):not(.menu-guide-active){background-color:rgba(24,19,23,.86)}
+  .control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided]:not([data-following]) > [aria-current="page"]{background-color:rgba(255,255,255,.92)}
 }
+
+/* Rejoin the trigger in a bottom-up, accelerating, soft-lens collapse.
+   The closing state keeps the existing glass material and guided size. */
+.control-dock[data-menu-closing] .control-menu{
+  visibility:visible;pointer-events:none;transition:none;
+}
+.control-dock[data-menu-closing] .control-menu .control-panel-scroll{overflow:visible;pointer-events:none}
+.control-dock[data-menu-closing] .control-menu .control-menu-links{translate:0 var(--menu-close-scroll,0px)}
+.control-dock[data-menu-closing] .control-menu .control-menu-links[data-guided] > :is(a,button){
+  translate:var(--menu-close-x,0px) var(--menu-close-y,0px);
+  scale:.12 .28;
+  opacity:0;
+  transition-duration:.63s,.63s,.43s,0s,.32s,.32s,.32s;
+  transition-timing-function:cubic-bezier(.36,.03,.28,1),cubic-bezier(.46,.04,.22,1),cubic-bezier(.44,.02,.78,1),linear,ease,ease,ease;
+  transition-delay:calc(var(--menu-reverse,0)*14ms),calc(var(--menu-reverse,0)*14ms),calc(145ms + var(--menu-reverse,0)*14ms),0s,0s,0s,0s;
+}
+.control-dock[data-menu-closing] .control-menu .control-menu-links > [data-close-offscreen]{visibility:hidden;transition:none!important}
+.control-dock[data-menu-closing] .control-menu .control-panel-label{
+  opacity:0;translate:0 13px;transition:opacity .26s ease,translate .36s cubic-bezier(.35,0,.55,1);
+}
+.control-dock[data-menu-closing][data-menu-refraction="ready"] .control-menu .control-menu-optics{backdrop-filter:url(#gtz-menu-refraction) blur(1.25px) saturate(1.04)}
+.control-dock[data-menu-closing] .control-menu .control-menu-optics::before{animation:menu-light-slide 12s ease-in-out infinite;animation-delay:calc(var(--menu-index,0)*-.71s)}
+@media(prefers-reduced-motion:reduce){
+  .control-dock .control-menu .control-menu-links[data-guided] > :is(a,button){transition:none!important}
+}
+
+.control-dock:not([data-mode="menu"]):not([data-menu-closing]) .control-menu{visibility:hidden;transition:none}

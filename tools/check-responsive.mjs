@@ -133,7 +133,7 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
      const read=()=>page.evaluate(()=>{const c=document.querySelector('.control-menu-edge-canvas'),p=c.getBoundingClientRect(),r=document.querySelectorAll('.control-menu-links > :is(a,button)')[1].getBoundingClientRect(),ctx=c.getContext('2d'),d=ctx.getImageData(0,0,c.width,c.height).data;let count=0,hash=0;for(let i=3;i<d.length;i+=4){if(d[i]>0){count++;hash=(hash+Math.imul(i,d[i]))|0;}}const center=ctx.getImageData(Math.floor(r.x+r.width/2-p.x),Math.floor(r.y+r.height/2-p.y),1,1).data[3];return {count,hash,center};});
      await page.waitForTimeout(350);const first=await read();assert.ok(first.count>30&&first.center===0,JSON.stringify(first));
      await page.evaluate(()=>{document.querySelector('#lens-test-stripes').style.transform='translateX(3px)';});
-     await page.waitForTimeout(350);const moved=await read();assert.ok(moved.count>30&&moved.hash!==first.hash,JSON.stringify({first,moved}));
+     let moved=await read();for(let retry=0;retry<14&&moved.hash===first.hash;retry++){await page.waitForTimeout(150);moved=await read();}assert.ok(moved.count>30&&moved.hash!==first.hash,JSON.stringify({first,moved}));
      await page.evaluate(()=>document.querySelector('#lens-test-stripes').remove());
    }else{
      const pixels=await page.evaluate(async()=>{const f=document.querySelector('#gtz-menu-refraction feImage'),image=new Image();image.src=f.getAttribute('href');await image.decode();const c=document.createElement('canvas');c.width=image.naturalWidth;c.height=image.naturalHeight;const ctx=c.getContext('2d');ctx.drawImage(image,0,0);const read=(x,y)=>Array.from(ctx.getImageData(Math.floor(x),Math.floor(y),1,1).data).slice(0,2);return {center:read(c.width/2,c.height/2),left:read(2,c.height/2),top:read(c.width/2,2)};});
@@ -147,7 +147,7 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    const point=box=>({clientX:box.x+box.width/2,clientY:box.y+box.height/2});
    if(mobile)await target.dispatchEvent('pointerdown',{pointerType:'touch',pointerId:7,bubbles:true,...point(a)});
    else await page.mouse.move(a.x+a.width/2,a.y+a.height/2);
-   await page.waitForTimeout(430);
+   await page.waitForTimeout(520);
    assert.ok(await target.evaluate(el=>el.classList.contains('menu-guide-active')&&el.style.getPropertyValue('--menu-light-x').endsWith('%')));
    const enlarged=await target.boundingBox(),middle=await neighbor.boundingBox(),still=await far.boundingBox();
    assert.ok(enlarged.width>middle.width*1.10&&middle.width>still.width*1.08&&Math.abs(still.width-f.width)<1.5,JSON.stringify({enlarged,middle,still}));
@@ -168,7 +168,12 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    assert.ok(await scroll.evaluate(el=>el.scrollHeight-el.clientHeight-el.scrollTop<=3));
    const bounds=await menu.boundingBox(),btn=await trigger.boundingBox();
    assert.ok(bounds.x>=-1&&bounds.y>=-2&&bounds.x+bounds.width<=viewport.width+1&&bounds.y+bounds.height<=btn.y+3);
+   const retiring=items.last(),before=await retiring.boundingBox();
    await trigger.click();
+   assert.equal(await page.locator('.control-dock').getAttribute('data-menu-closing'),'');
+   await page.waitForTimeout(210);
+   const transit=await retiring.boundingBox();
+   assert.ok(transit&&transit.y>before.y&&transit.width<before.width,JSON.stringify({before,transit}));
    await page.waitForFunction(()=>document.querySelector('.control-menu').getAttribute('aria-hidden')==='true'&&getComputedStyle(document.querySelector('.control-menu')).visibility==='hidden');
    assert.equal(await page.locator('.control-menu-edge-canvas').count(),0);
    await context.close();

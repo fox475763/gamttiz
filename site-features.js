@@ -203,6 +203,7 @@
       }
       ctx.restore();
     }
+    let cachedScene=null,sceneTime=0,sceneKey='';
     function render(now){
       if(mobileLens!==m||dock.dataset.mode!=='menu')return;
       m.frame=requestAnimationFrame(render);if(now-m.last<65)return;m.last=now;
@@ -213,20 +214,26 @@
         const b={left,top,right:left+w,bottom:top+h};
         if(canvas.width!==w||canvas.height!==h){canvas.width=source.width=w;canvas.height=source.height=h;}
         canvas.style.left=left+'px';canvas.style.top=top+'px';canvas.style.width=w+'px';canvas.style.height=h+'px';
+        const key=[left,top,w,h].join(',');
+        if(!cachedScene||now-sceneTime>130||key!==sceneKey){
         ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
         ctx.setTransform(1,0,0,1,-left,-top);
         const root=getComputedStyle(document.documentElement).backgroundColor;
         if(visibleColor(root)){ctx.fillStyle=root;ctx.fillRect(left,top,w,h);}
         paint(document.body,b);
         ctx.fillStyle=getComputedStyle(scrim).backgroundColor;ctx.fillRect(left,top,w,h);
-        const data=ctx.getImageData(0,0,w,h).data,pixels=out.createImageData(w,h),dst=pixels.data;
+        cachedScene=ctx.getImageData(0,0,w,h).data;sceneTime=now;sceneKey=key;
+        }
+        const data=cachedScene,pixels=out.createImageData(w,h),dst=pixels.data;
         for(const el of menuLinks.children){
           const r=el.getBoundingClientRect(),s=getComputedStyle(el);
           if(Number(s.opacity)<.97||!overlaps(r,clip))continue;
           const radius=Math.min(parseFloat(s.borderTopLeftRadius)||20,r.width/2,r.height/2),depth=Math.min(MENU_EDGE_DEPTH,r.height*.25);
           for(let y=Math.max(0,Math.ceil(r.top-top),Math.ceil(clip.top-top));y<Math.min(h,r.bottom-top,clip.bottom-top);y++)
           for(let x=Math.max(0,Math.ceil(r.left-left),Math.ceil(clip.left-left));x<Math.min(w,r.right-left,clip.right-left);x++){
-            const [nx,ny]=menuEdgeVector(x+.5+left-r.left-r.width/2,y+.5+top-r.top-r.height/2,r.width,r.height,radius,depth);
+            const px=x+.5+left-r.left-r.width/2,py=y+.5+top-r.top-r.height/2;
+            if(Math.abs(px)<r.width/2-radius&&Math.abs(py)<r.height/2-depth)continue;
+            const [nx,ny]=menuEdgeVector(px,py,r.width,r.height,radius,depth);
             const strength=Math.hypot(nx,ny);if(strength<.005)continue;
             const sx=Math.max(0,Math.min(w-1.001,x-nx*8)),sy=Math.max(0,Math.min(h-1.001,y-ny*4.5));
             const ix=Math.floor(sx),iy=Math.floor(sy),fx=sx-ix,fy=sy-iy,i=4*(y*w+x),a=4*(iy*w+ix);
@@ -253,6 +260,49 @@
   const guideItems=[...menuLinks.children];
   menuLinks.dataset.guided='';
   let guideIndex=-1,guideTouch=null,blockTouchClickUntil=0,guideScrollFrame=0;
+  // Integrate a damped spring on the display's animation clock. Retargeting
+  // preserves velocity rather than restarting a CSS easing on every move.
+  const guideMotion=guideItems.map(()=>({size:.8,velocity:0,target:.8}));
+  let guideFrame=0,guideTime=0;
+  function guideTarget(i,index){
+    const distance=Math.abs(i-index);
+    return index<0?.8:distance===0?1.04:distance===1?.9:.8;
+  }
+  function currentGuideIndex(){return guideIndex>=0?guideIndex:guideItems.findIndex(item=>item.hasAttribute('aria-current'));}
+  function stopGuideSpring(){
+    if(guideFrame)cancelAnimationFrame(guideFrame);guideFrame=0;guideTime=0;
+  }
+  function resetGuideSpring(){
+    stopGuideSpring();
+    const index=currentGuideIndex();
+    guideMotion.forEach((motion,i)=>{
+      motion.size=motion.target=guideTarget(i,index);motion.velocity=0;
+      guideItems[i].style.setProperty('--guide-live-size',motion.size);
+    });
+  }
+  function guideSpring(now){
+    guideFrame=0;
+    if(dock.dataset.mode!=='menu')return;
+    const dt=Math.min(.05,Math.max(.001,(now-guideTime)/1000));guideTime=now;
+    let busy=false;
+    for(let i=0;i<guideMotion.length;i++){
+      const m=guideMotion[i],previous=m.size;
+      // Closed-form underdamped solution, stable even at 120Hz or dropped frames.
+      const displacement=m.size-m.target,omega=21,zeta=.84,decay=omega*zeta,wd=omega*Math.sqrt(1-zeta*zeta);
+      const b=(m.velocity+decay*displacement)/wd,angle=wd*dt,cos=Math.cos(angle),sin=Math.sin(angle),env=Math.exp(-decay*dt);
+      m.size=m.target+env*(displacement*cos+b*sin);
+      m.velocity=env*((-decay*displacement+b*wd)*cos+(-decay*b-displacement*wd)*sin);
+      if(Math.abs(m.size-m.target)<.0003&&Math.abs(m.velocity)<.005){m.size=m.target;m.velocity=0;}else busy=true;
+      if(Math.abs(m.size-previous)>.00001)guideItems[i].style.setProperty('--guide-live-size',m.size.toFixed(5));
+    }
+    if(busy)guideFrame=requestAnimationFrame(guideSpring);else guideTime=0;
+  }
+  function retargetGuide(){
+    const index=currentGuideIndex();
+    guideMotion.forEach((m,i)=>{m.target=guideTarget(i,index);});
+    if(motionReduced.matches){resetGuideSpring();return;}
+    if(!guideFrame){guideTime=performance.now();guideFrame=requestAnimationFrame(guideSpring);}
+  }
   function guideSelection(index){
     if(index===guideIndex)return;
     guideIndex=index;
@@ -262,6 +312,7 @@
       item.classList.toggle('menu-guide-active',index>=0&&distance===0);
       item.classList.toggle('menu-guide-near',index>=0&&distance===1);
     });
+    retargetGuide();
   }
   function guideAt(x,y){
     const box=menuLinks.getBoundingClientRect(),clip=menuScroll.getBoundingClientRect();
@@ -294,13 +345,14 @@
     return index;
   }
   function clearGuide(){
+    if(dock.hasAttribute('data-menu-closing'))return;
     guideSelection(-1);resetMenuLight();
   }
-  function stopGuideTouch(){
+  function stopGuideTouch(preserve=false){
     if(guideScrollFrame)cancelAnimationFrame(guideScrollFrame);guideScrollFrame=0;
     const touch=guideTouch;guideTouch=null;
     if(touch&&menuLinks.hasPointerCapture?.(touch.id))menuLinks.releasePointerCapture(touch.id);
-    clearGuide();
+    if(preserve===true){stopGuideSpring();resetMenuLight();}else clearGuide();
   }
   function scrollGuide(){
     if(!guideTouch){guideScrollFrame=0;return;}
@@ -350,8 +402,9 @@
   menuLinks.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))guideSelection(guideItems.indexOf(event.target));});
   menuLinks.addEventListener('focusout',event=>{if(!menuLinks.contains(event.relatedTarget)&&!guideTouch)clearGuide();});
   function toggleMenuRefraction(active){
-    clearTimeout(refractionTimer);delete dock.dataset.menuRefraction;
-    if(!active){stopGuideTouch();stopMobileLens();return;}
+    clearTimeout(refractionTimer);
+    if(!active){stopGuideTouch(dock.hasAttribute('data-menu-closing'));stopMobileLens();if(!dock.hasAttribute('data-menu-closing'))delete dock.dataset.menuRefraction;return;}
+    delete dock.dataset.menuRefraction;
     if(transparencyReduced.matches)return;
     // Enable the more expensive optical pass only once the entry springs settle.
     refractionTimer=window.setTimeout(()=>{if(dock.dataset.mode==='menu'){if(prepareMenuRefraction())dock.dataset.menuRefraction='ready';else startMobileLens();}},motionReduced.matches?0:820);
@@ -412,11 +465,43 @@
     if(!results.length){searchResults.append(make('p','control-no-results','검색 결과가 없어요. 다른 단어로 찾아보세요.'));return;}
     results.forEach(item=>{const link=make('a','control-result');link.href=item.url;link.append(make('strong','',item.title),make('span','',item.description),make('b','','↗'));searchResults.append(link);});
   }
+  // Hold the visible scale and scroll offset during collapse; calculate
+  // the actual trigger center for each row, including a scrolled menu.
+  let menuCloseTimer=0;
+  function finishMenuClose(){
+    clearTimeout(menuCloseTimer);menuCloseTimer=0;delete dock.dataset.menuClosing;
+    menuLinks.style.removeProperty('--menu-close-scroll');
+    for(const item of guideItems){
+      item.removeAttribute('data-close-offscreen');
+      item.style.removeProperty('--menu-close-x');item.style.removeProperty('--menu-close-y');
+    }
+    if(dock.dataset.mode!=='menu'){delete dock.dataset.menuRefraction;clearGuide();stopGuideSpring();}
+  }
+  function beginMenuClose(){
+    if(motionReduced.matches)return;
+    const button=trigger.getBoundingClientRect(),viewport=menuScroll.getBoundingClientRect();
+    const tx=button.left+button.width/2,ty=button.top+button.height/2;
+    for(const item of guideItems){
+      const r=item.getBoundingClientRect();
+      item.style.setProperty('--menu-close-x',(tx-r.right+17).toFixed(2)+'px');
+      item.style.setProperty('--menu-close-y',(ty-(r.top+r.bottom)/2).toFixed(2)+'px');
+      item.toggleAttribute('data-close-offscreen',r.bottom<viewport.top||r.top>viewport.bottom);
+    }
+    menuLinks.style.setProperty('--menu-close-scroll',-menuScroll.scrollTop+'px');
+    dock.dataset.menuClosing='';
+    stopGuideSpring();
+    // Small settling pulse synchronized with returning droplets.
+    trigger.animate?.([{scale:'1',offset:0},{scale:'.955',offset:.53},{scale:'1.035',offset:.79},{scale:'1',offset:1}],{duration:690,easing:'cubic-bezier(.3,.7,.23,1)'});
+    menuCloseTimer=window.setTimeout(finishMenuClose,870);
+  }
   function setMode(mode){
     const next=dock.dataset.mode===mode?'closed':mode;
+    const wasMenu=dock.dataset.mode==='menu';
+    if(dock.hasAttribute('data-menu-closing'))finishMenuClose();
+    if(wasMenu&&next==='closed')beginMenuClose();
     dock.dataset.mode=next;
     toggleMenuRefraction(next==='menu');
-    if(next==='menu'){syncCurrentMenuLink();clearGuide();menuScroll.scrollTop=0;}
+    if(next==='menu'){syncCurrentMenuLink();clearGuide();resetGuideSpring();menuScroll.scrollTop=0;}
     if(next==='contact')contactScroll.scrollTop=0;
     updateMenuTextColor();
     scrim.classList.toggle('is-open',next!=='closed');
