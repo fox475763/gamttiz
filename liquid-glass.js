@@ -8,7 +8,7 @@
   const native=/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)&&!/Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent)&&CSS.supports('backdrop-filter','url(#gtz-liquid-test)');
   const tracked=new Map(),visible=new Set(),filterCache=new Map(),ns='http://www.w3.org/2000/svg';
   let svg=null,source=null,ctx=null,frame=0,last=0,cursor=0,serial=0;
-  const walletOpen=()=>document.documentElement.classList.contains('gtz-wallet-open');
+  const walletOpen=()=>!!document.documentElement?.classList?.contains('gtz-wallet-open');
   const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>{
     for(const entry of entries){const el=entry.target;el.classList.toggle('gtz-liquid-visible',entry.isIntersecting);if(entry.isIntersecting)visible.add(el);else visible.delete(el);}
     schedule();
