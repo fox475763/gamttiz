@@ -127,8 +127,10 @@ test('Transparent menu layout and independent liquid glass surfaces keep selecte
   assert.match(css,/\.control-dock \.control-menu::before\{content:none;display:none\}/);
   assert.ok(js.includes("item.style.setProperty('--menu-reverse',items.length-1-index)"));
   assert.match(js,/feDisplacementMap/);
-  assert.match(css,/\.control-menu-optics\{[\s\S]*?backdrop-filter:blur\(1\.5px\)/);
+  assert.match(css,/\.control-menu-optics\{[\s\S]*?backdrop-filter:blur\(\.65px\)/);
   assert.match(css,/backdrop-filter:url\(#gtz-menu-refraction\)/);
+  assert.match(css,/background-color:rgba\(20,12,18,\.035\)/);
+  assert.match(css,/\.control-menu-optics::after\{[\s\S]*?radial-gradient\(ellipse 14% 10%/);
 });
 
 test('Current menu selection follows Home, Collection and Member deep links without double selection',()=>{
