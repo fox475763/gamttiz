@@ -125,10 +125,9 @@
       const note=el('span','radar-image-note',item.imageNote);
       media.append(note);
     }
-    const summary=el('p','',item.summary||'원문에서 자세히 확인해 주세요.');
-    const bottom=el('div','radar-card-bottom');
-    bottom.append(el('span','radar-source',item.source||'출처 확인'),el('span','radar-read-link','원문 보기 ↗'));
-    node.append(media,top,title,summary,bottom);
+    // The feed is a visual index; read the full story at its original source.
+    // Summaries remain in the data for search and verification, not in the UI.
+    node.append(media,title,top);
     return node;
   };
   // 지난 소식은 큰 카드 대신 제목만 표시하는 가로형 링크 목록으로 보여줍니다.
@@ -149,15 +148,17 @@
     wrap.id='post-'+item.id;
     const link=past?archiveRow(item):card(item);
     const actions=el('div','radar-entry-actions');
-    const save=el('button','radar-action',saved.has(item.id)?'★ 저장됨':'☆ 즐겨찾기');
+    const save=el('button','radar-action',saved.has(item.id)?'★':'☆');
     save.type='button';save.setAttribute('aria-pressed',String(saved.has(item.id)));
     save.setAttribute('aria-label',item.title+' 즐겨찾기');
+    save.title=saved.has(item.id)?'즐겨찾기 해제':'즐겨찾기 추가';
     save.addEventListener('click',()=>{
       if(!isActive())return;
       if(saved.has(item.id))saved.delete(item.id);else saved.add(item.id);
       storageWrite(sessionKey+':saved',[...saved]);
       if(view==='saved'){render();tabs[1]?.focus();return;}
-      save.textContent=saved.has(item.id)?'★ 저장됨':'☆ 즐겨찾기';
+      save.textContent=saved.has(item.id)?'★':'☆';
+      save.title=saved.has(item.id)?'즐겨찾기 해제':'즐겨찾기 추가';
       save.setAttribute('aria-pressed',String(saved.has(item.id)));
     });
     actions.append(save);

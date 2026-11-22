@@ -1,110 +1,118 @@
-/* FRY RADER — editorial reading grid, scoped to the unlocked Member view. */
+/* FRY RADER — compact visual index, scoped to Member only.
+   Match the home page's quiet paper palette and aligned photo grid.
+   Native vertical scrolling and all data/filter behavior remain unchanged. */
 .member-page #main:has(.radar-tool:not([hidden])) {
-  --press-ink:#242321; --press-muted:#686765; --press-line:#dfded9;
-  --press-red:#c52a2d; --press-paper:#faf9f7;
+  --press-ink:#252320;
+  --press-muted:#6e6b65;
+  --press-line:#e4e0da;
+  --press-red:#d92e32;
+  --press-paper:#f8f7f4;
   background:var(--press-paper);
-  padding:clamp(26px,4vw,60px) max(24px,calc((100vw - 1080px)/2)) 112px;
+  padding:clamp(24px,3.8vw,54px) max(6%,calc((100vw - 1120px)/2)) 108px;
 }
 .member-page #main:has(.radar-tool:not([hidden])) .member-ambient {display:none}
-.member-page #main .radar-tool {max-width:1080px;color:var(--press-ink)}
-.member-page #main .radar-tool .member-back {margin:0 0 23px;color:var(--press-muted)}
-.member-page #main .radar-tool .member-tool-head {max-width:none;margin:0 0 clamp(25px,4vw,48px);padding-bottom:clamp(24px,4vw,40px);border-bottom:3px solid var(--press-ink)}
-.member-page #main .radar-tool .member-kicker {font-size:12px;font-weight:750;letter-spacing:.1em;color:var(--press-red);margin:0 0 13px}
-.member-page #main .radar-tool h1 {font-size:clamp(45px,8.4vw,100px);font-weight:850;letter-spacing:-.065em;line-height:.98;margin:0 0 17px;color:var(--press-ink)}
+.member-page #main .radar-tool {max-width:1120px;color:var(--press-ink)}
+.member-page #main .radar-tool .member-back {margin:0 0 20px;color:var(--press-muted);font-size:12px}
+.member-page #main .radar-tool .member-tool-head {max-width:none;margin:0 0 34px;padding:0 0 25px;border-bottom:1px solid var(--press-line)}
+.member-page #main .radar-tool .member-kicker {font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--press-red);margin:0 0 9px}
+.member-page #main .radar-tool h1 {font-size:clamp(38px,5.1vw,68px);font-weight:800;letter-spacing:-.055em;line-height:1.05;margin:0 0 10px;color:var(--press-ink)}
 .member-page #main .radar-tool h1 span {color:var(--press-red)}
-.member-page #main .radar-tool .member-intro {max-width:650px;font-size:clamp(15px,1.6vw,17px);line-height:1.75;letter-spacing:-.015em;color:var(--press-muted)}
+.member-page #main .radar-tool .member-intro {max-width:560px;font-size:14px;line-height:1.65;letter-spacing:-.015em;color:var(--press-muted)}
 .member-page #main .radar-tool .radar-board {padding:0 0 44px;margin:0;background:transparent;max-width:none}
-.member-page #main .radar-tool .radar-board-heading {flex-direction:row;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 0 15px;border-bottom:1px solid var(--press-line)}
-.member-page #main .radar-tool .radar-kicker {font-size:10px;font-weight:750;letter-spacing:.13em;color:var(--press-red);margin:0 0 6px}
-.member-page #main .radar-tool .radar-board-heading h2 {font-size:clamp(24px,3.2vw,35px);font-weight:780;line-height:1.25;letter-spacing:-.045em;color:var(--press-ink);margin:0}
-.member-page #main .radar-tool .radar-updated {font-size:12px;line-height:1.45;color:var(--press-muted);text-align:right;margin:0;font-variant-numeric:tabular-nums}
-.member-page #main .radar-tool .radar-controls {grid-template-columns:minmax(0,2.1fr) repeat(3,minmax(0,1fr));gap:12px;margin:24px 0 15px}
-.member-page #main .radar-tool .radar-controls label {min-width:0;gap:7px;font-size:12px;font-weight:700;line-height:1.4;color:var(--press-muted);letter-spacing:0}
+.member-page #main .radar-tool .radar-board-heading {flex-direction:row;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 0 11px;border-bottom:1px solid var(--press-line)}
+.member-page #main .radar-tool .radar-kicker {font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--press-red);margin:0 0 5px}
+.member-page #main .radar-tool .radar-board-heading h2 {font-size:clamp(20px,2.3vw,28px);font-weight:750;line-height:1.25;letter-spacing:-.04em;color:var(--press-ink);margin:0}
+.member-page #main .radar-tool .radar-updated {font-size:11px;line-height:1.45;color:var(--press-muted);text-align:right;margin:0;font-variant-numeric:tabular-nums}
+.member-page #main .radar-tool .radar-controls {grid-template-columns:minmax(0,2fr) repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 12px}
+.member-page #main .radar-tool .radar-controls label {min-width:0;gap:5px;font-size:11px;font-weight:550;line-height:1.4;color:var(--press-muted);letter-spacing:0}
 .member-page #main .radar-tool .radar-glass-field {min-width:0;border-radius:12px}
-.member-page #main .radar-tool .radar-controls :is(input,select) {min-width:0;min-height:48px;padding-inline:12px;font-size:16px;line-height:1.4;letter-spacing:-.025em}
-.member-page #main .radar-tool .radar-search-label input {padding-left:40px}
+.member-page #main .radar-tool .radar-controls .radar-glass-field :is(input,select) {min-width:0;min-height:44px;padding-inline:11px;font-size:13px;font-weight:500;line-height:1.4;letter-spacing:-.015em;border:0;background:transparent;box-shadow:none}
+.member-page #main .radar-tool .radar-controls .radar-glass-field input {padding-left:34px}
 .member-page #main .radar-tool .radar-search-label .radar-glass-field {position:relative}
-.member-page #main .radar-tool .radar-search-label .radar-glass-field::after {content:"";position:absolute;left:15px;top:50%;width:17px;height:17px;transform:translateY(-50%);pointer-events:none;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23686765' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='10.8' cy='10.8' r='6.8'/%3E%3Cpath d='m16 16 4.3 4.3'/%3E%3C/svg%3E")}
-.member-page #main .radar-tool .radar-view-tabs {display:flex;flex-wrap:wrap;gap:8px;margin:19px 0 26px}
-.member-page #main .radar-tool .radar-view-tabs button {flex:0 0 auto;min-height:40px;padding:9px 16px;font-size:13px;font-weight:650;white-space:nowrap;letter-spacing:-.015em}
-.member-page #main .radar-tool :is(.radar-view-tabs button,.radar-action)[aria-pressed="true"] {color:var(--press-red);font-weight:800;border-color:#c52a2d80!important}
-.member-page #main .radar-tool .radar-view-tabs button[aria-pressed="true"]::after {content:"";position:absolute;bottom:5px;left:calc(50% - 2px);width:4px;height:4px;background:var(--press-red);border-radius:50%;pointer-events:none}
-.member-page #main .radar-tool .radar-results-heading {display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:6px 16px;padding:0 0 12px;border-bottom:2px solid var(--press-ink)}
-.member-page #main .radar-tool .radar-count {min-height:0;color:var(--press-ink);font-size:15px;font-weight:750;line-height:1.4;margin:0;letter-spacing:-.025em}
-.member-page #main .radar-tool .radar-health {color:var(--press-muted);font-size:12px;line-height:1.55;margin:0}
+.member-page #main .radar-tool .radar-search-label .radar-glass-field::after {content:"";position:absolute;left:12px;top:50%;width:15px;height:15px;transform:translateY(-50%);pointer-events:none;background:center/contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23686765' stroke-width='1.8' stroke-linecap='round'%3E%3Ccircle cx='10.8' cy='10.8' r='6.8'/%3E%3Cpath d='m16 16 4.3 4.3'/%3E%3C/svg%3E")}
+.member-page #main .radar-tool .radar-view-tabs {display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 20px}
+.member-page #main .radar-tool .radar-view-tabs button {flex:0 0 auto;min-height:38px;padding:7px 13px;font-size:12px;font-weight:550;white-space:nowrap;letter-spacing:-.015em}
+.member-page #main .radar-tool :is(.radar-view-tabs button,.radar-action)[aria-pressed="true"] {color:var(--press-red);font-weight:700;border-color:#d92e3266!important}
+.member-page #main .radar-tool .radar-results-heading {display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:4px 12px;padding:0 0 10px;border-bottom:1px solid var(--press-line)}
+.member-page #main .radar-tool .radar-count {min-height:0;color:var(--press-ink);font-size:12px;font-weight:650;line-height:1.4;margin:0;letter-spacing:-.015em}
+.member-page #main .radar-tool .radar-health {color:var(--press-muted);font-size:11px;line-height:1.5;margin:0}
 .member-page #main .radar-tool .radar-health-partial {color:#925020}
-.member-page #main .radar-tool .radar-list {display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:0}
-.member-page #main .radar-tool .radar-entry {display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0;padding:clamp(20px,3vw,32px) 0 19px;border-bottom:1px solid var(--press-line)}
-.member-page #main .radar-tool .radar-card {display:grid;grid-template-columns:minmax(0,30%) minmax(0,1fr);grid-template-rows:auto auto 1fr auto;column-gap:clamp(20px,3.4vw,38px);row-gap:9px;min-height:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;transform:none;transition:none;align-items:start;color:var(--press-ink)}
-.member-page #main .radar-tool .radar-card-media {grid-column:1;grid-row:1/5;width:100%;aspect-ratio:auto;margin:0;background:transparent;border-radius:0;overflow:visible;min-width:0}
-.member-page #main .radar-tool .radar-card-photo {width:100%;aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:#eeeae2;isolation:isolate}
+.member-page #main .radar-tool .radar-list {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px clamp(18px,2.6vw,32px);margin:20px 0 0}
+.member-page #main .radar-tool .radar-entry {position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:0;min-width:0;padding:0 0 12px;border-bottom:1px solid var(--press-line)}
+.member-page #main .radar-tool .radar-card {display:flex;flex-direction:column;gap:7px;min-width:0;min-height:0;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;transform:none;transition:none;color:var(--press-ink)}
+.member-page #main .radar-tool .radar-card-media {width:100%;aspect-ratio:auto;margin:0 0 3px;background:transparent;border-radius:0;overflow:visible;min-width:0}
+.member-page #main .radar-tool .radar-card-photo {width:100%;aspect-ratio:16/10;border-radius:9px;overflow:hidden;background:#eeeae2;isolation:isolate}
 .member-page #main .radar-tool .radar-card-image {width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
-.member-page #main .radar-tool .radar-image-note {position:static;display:block;background:none;color:var(--press-muted);padding:6px 0 0;font-size:11px;line-height:1.45;letter-spacing:0;border-radius:0}
-.member-page #main .radar-tool .radar-card-top {grid-column:2;display:flex;align-items:center;justify-content:flex-start;gap:5px 8px;flex-wrap:wrap;font-size:12px;line-height:1.45;color:var(--press-muted);margin:0}
-.member-page #main .radar-tool .radar-badge {color:var(--press-red);font-size:12px;font-weight:800;padding:0;background:transparent;border-radius:0}
-.member-page #main .radar-tool .radar-status {font-size:11px;line-height:1.4;font-weight:700;padding:3px 7px;border-radius:4px}
-.member-page #main .radar-tool .radar-new {font-size:10px;padding:3px 6px;line-height:1.4;border-radius:4px;background:#fce8e6;color:#ad2929}
-.member-page #main .radar-tool .radar-card-top time {font-size:12px;font-variant-numeric:tabular-nums;color:var(--press-muted);white-space:normal}
-.member-page #main .radar-tool .radar-card h3 {grid-column:2;font-size:clamp(21px,2.15vw,28px);font-weight:780;line-height:1.37;letter-spacing:-.04em;margin:0;word-break:keep-all;overflow-wrap:anywhere;color:var(--press-ink);transition:color .18s}
-.member-page #main .radar-tool .radar-card p {grid-column:2;font-size:15px;line-height:1.75;color:#565553;letter-spacing:-.015em;word-break:keep-all;overflow-wrap:anywhere;margin:0}
-.member-page #main .radar-tool .radar-card-bottom {grid-column:2;display:flex;align-items:center;justify-content:space-between;gap:8px 14px;flex-wrap:wrap;margin:0;padding:5px 0 0;font-size:12px;line-height:1.5;color:var(--press-muted)}
-.member-page #main .radar-tool .radar-card-bottom .radar-source {font-weight:650;min-width:0;overflow-wrap:anywhere}
-.member-page #main .radar-tool .radar-card-bottom .radar-read-link {color:var(--press-red);font-weight:700;font-size:12px;white-space:nowrap}
-.member-page #main .radar-tool .radar-entry-actions {justify-content:flex-end;gap:8px;margin:0}
-.member-page #main .radar-tool .radar-action {min-height:40px;padding:8px 13px;font-size:12px;line-height:1.4;white-space:nowrap}
-.member-page #main .radar-tool .radar-archive {padding:22px 0 32px;border-top:3px solid var(--press-ink)}
-.member-page #main .radar-tool .radar-archive-note {font-size:13px;line-height:1.65;color:var(--press-muted);margin:13px 0 18px;max-width:730px;word-break:keep-all}
-.member-page #main .radar-tool .radar-entry-past {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:11px 0}
-.member-page #main .radar-tool .radar-archive-row {padding:9px 0;min-height:44px;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--press-ink)}
-.member-page #main .radar-tool .radar-archive-title {white-space:normal;overflow:visible;text-overflow:clip;font-size:15px;font-weight:650;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere}
-.member-page #main .radar-tool .radar-empty {background:transparent;border:0;border-radius:0;padding:48px 16px;border-bottom:1px solid var(--press-line)}
-.member-page #main .radar-tool .radar-empty strong {font-size:19px;letter-spacing:-.035em}
-.member-page #main .radar-tool .radar-empty p {font-size:14px;line-height:1.65}
-.member-page #main .radar-tool .radar-deal-panel {margin:0 0 24px;padding:20px;border-radius:15px}
-.member-page #main .radar-tool .radar-deal-panel h3 {font-size:20px;letter-spacing:-.04em}
-.member-page #main .radar-tool .radar-deal-panel p {font-size:14px;line-height:1.65}
-.member-page #main .radar-tool .radar-owner {margin:0}
+.member-page #main .radar-tool .radar-image-note {position:static;display:block;background:none;color:var(--press-muted);padding:5px 0 0;font-size:10px;line-height:1.4;letter-spacing:0;border-radius:0}
+.member-page #main .radar-tool .radar-card h3 {font-size:clamp(15px,1.45vw,18px);font-weight:700;line-height:1.43;letter-spacing:-.025em;margin:0;word-break:keep-all;overflow-wrap:anywhere;text-wrap:pretty;color:var(--press-ink);transition:color .18s}
+.member-page #main .radar-tool .radar-card-top {display:flex;align-items:center;justify-content:flex-start;gap:3px 6px;flex-wrap:wrap;font-size:10px;line-height:1.4;color:var(--press-muted);margin:0}
+.member-page #main .radar-tool .radar-badge {color:var(--press-red);font-size:10px;font-weight:700;padding:0;background:transparent;border-radius:0}
+.member-page #main .radar-tool .radar-status {font-size:10px;line-height:1.4;font-weight:550;padding:0;border-radius:0;background:none;color:var(--press-muted)}
+.member-page #main .radar-tool .radar-status-ongoing {color:#236b3c}
+.member-page #main .radar-tool .radar-new {font-size:9px;padding:0;line-height:1.4;border-radius:0;background:none;color:#ad2929}
+.member-page #main .radar-tool .radar-card-top time {font-size:10px;font-variant-numeric:tabular-nums;color:var(--press-muted);white-space:normal}
+.member-page #main .radar-tool .radar-entry-actions {position:absolute;top:7px;right:7px;justify-content:center;gap:0;margin:0}
+.member-page #main .radar-tool .radar-action {display:grid;place-items:center;width:38px;height:38px;min-height:38px;padding:0;font-size:19px;line-height:1;white-space:nowrap;border-radius:50%}
+.member-page #main .radar-tool .radar-archive {padding:22px 0 32px;border-top:1px solid var(--press-line)}
+.member-page #main .radar-tool .radar-archive-note {font-size:11px;line-height:1.65;color:var(--press-muted);margin:10px 0 14px;max-width:730px;word-break:keep-all}
+.member-page #main .radar-tool .radar-archive .radar-list {grid-template-columns:minmax(0,1fr);gap:0;margin:0}
+.member-page #main .radar-tool .radar-entry-past {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:5px 0}
+.member-page #main .radar-tool .radar-entry-past .radar-entry-actions {position:static}
+.member-page #main .radar-tool .radar-archive-row {padding:8px 0;min-height:44px;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--press-ink)}
+.member-page #main .radar-tool .radar-archive-title {white-space:normal;overflow:visible;text-overflow:clip;font-size:13px;font-weight:600;line-height:1.55;word-break:keep-all;overflow-wrap:anywhere}
+.member-page #main .radar-tool .radar-empty {background:transparent;border:0;border-radius:0;padding:40px 16px;border-bottom:1px solid var(--press-line)}
+.member-page #main .radar-tool .radar-empty strong {font-size:16px;letter-spacing:-.035em}
+.member-page #main .radar-tool .radar-empty p {font-size:13px;line-height:1.65}
+.member-page #main .radar-tool .radar-deal-panel {margin:0 0 20px;padding:16px;border-radius:15px}
+.member-page #main .radar-tool .radar-deal-panel h3 {font-size:17px;letter-spacing:-.03em}
+.member-page #main .radar-tool .radar-deal-panel p {font-size:12px;line-height:1.65}
+.member-page #main .radar-tool .radar-owner {margin:0;font-size:13px}
 @media(hover:hover) {
   .member-page #main .radar-tool .radar-card:hover h3,.member-page #main .radar-tool .radar-archive-row:hover .radar-archive-title {color:var(--press-red)}
   .member-page #main .radar-tool .radar-card:hover .radar-card-image {transform:scale(1.025)}
 }
-@media(max-width:780px) {
-  .member-page #main:has(.radar-tool:not([hidden])) {padding:26px 22px 105px}
-  .member-page #main .radar-tool .radar-controls {grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media(max-width:850px) {
+  .member-page #main:has(.radar-tool:not([hidden])) {padding:26px 6% 104px}
+  .member-page #main .radar-tool .radar-controls {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .member-page #main .radar-tool .radar-search-label {grid-column:1/-1}
-  .member-page #main .radar-tool .radar-card {grid-template-columns:minmax(0,32%) minmax(0,1fr);column-gap:20px}
+  .member-page #main .radar-tool .radar-list {grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 }
 @media(max-width:560px) {
-  .member-page #main:has(.radar-tool:not([hidden])) {padding:22px 18px 100px}
-  .member-page #main .radar-tool .member-back {margin-bottom:16px}
-  .member-page #main .radar-tool .radar-updated {font-size:11px;max-width:115px}
-  .member-page #main .radar-tool .radar-controls {gap:8px;margin:18px 0 12px}
-  .member-page #main .radar-tool .radar-controls select {padding-inline:7px;font-size:16px;letter-spacing:-.045em}
-  .member-page #main .radar-tool .radar-view-tabs {gap:6px;margin:15px 0 21px}
-  .member-page #main .radar-tool .radar-view-tabs button {flex:1 0 auto;font-size:12px;min-height:40px;padding:8px 9px}
-  .member-page #main .radar-tool .radar-entry {padding:19px 0 13px;gap:8px}
-  .member-page #main .radar-tool .radar-card {grid-template-columns:minmax(0,34%) minmax(0,1fr);grid-template-rows:auto auto auto auto;gap:7px 13px;align-items:start}
-  .member-page #main .radar-tool .radar-card-media {grid-column:1;grid-row:1/3}
-  .member-page #main .radar-tool .radar-card-photo {aspect-ratio:1;border-radius:6px}
-  .member-page #main .radar-tool .radar-card-top {grid-row:1;gap:4px 6px}
-  .member-page #main .radar-tool .radar-card-top time {font-size:11px}
-  .member-page #main .radar-tool .radar-card h3 {grid-row:2;font-size:19px;line-height:1.37;letter-spacing:-.035em}
-  .member-page #main .radar-tool .radar-card p {grid-column:1/-1;grid-row:3;font-size:14px;line-height:1.7;padding-top:5px}
-  .member-page #main .radar-tool .radar-card-bottom {grid-column:1/-1;grid-row:4;padding-top:3px}
-  .member-page #main .radar-tool .radar-image-note {font-size:10px}
-  .member-page #main .radar-tool .radar-fries-sticks {transform:translateX(-50%) scale(.58);transform-origin:bottom center}
-  .member-page #main .radar-tool .radar-fries-pack {transform:translateX(-50%) scale(.58);transform-origin:bottom center}
+  .member-page #main:has(.radar-tool:not([hidden])) {padding:24px 24px 100px}
+  .member-page #main .radar-tool .member-back {margin-bottom:13px}
+  .member-page #main .radar-tool .member-tool-head {margin-bottom:24px;padding-bottom:20px}
+  .member-page #main .radar-tool h1 {font-size:clamp(34px,9.8vw,46px)}
+  .member-page #main .radar-tool .member-intro {font-size:13px}
+  .member-page #main .radar-tool .radar-updated {font-size:10px;max-width:115px}
+  .member-page #main .radar-tool .radar-controls {gap:7px;margin:14px 0 10px}
+  .member-page #main .radar-tool .radar-controls .radar-glass-field select {padding-inline:7px;font-size:12px;font-weight:500;letter-spacing:-.02em}
+  /* Keep mobile search at 16px to prevent focus zoom; selects remain compact. */
+  .member-page #main .radar-tool .radar-controls .radar-glass-field input {font-size:16px}
+  .member-page #main .radar-tool .radar-view-tabs {gap:5px;margin:10px 0 17px}
+  .member-page #main .radar-tool .radar-view-tabs button {flex:1 0 auto;font-size:11px;min-height:38px;padding:7px 9px}
+  .member-page #main .radar-tool .radar-list {grid-template-columns:minmax(0,1fr);gap:0;margin:0}
+  .member-page #main .radar-tool .radar-entry {grid-template-columns:minmax(0,1fr) 36px;gap:7px;align-items:center;padding:12px 0}
+  .member-page #main .radar-tool .radar-card {display:grid;grid-template-columns:minmax(0,35%) minmax(0,1fr);grid-template-rows:auto auto;gap:5px 11px;align-items:start;align-content:center}
+  .member-page #main .radar-tool .radar-card-media {grid-column:1;grid-row:1/3;margin:0;align-self:center}
+  .member-page #main .radar-tool .radar-card-photo {aspect-ratio:4/3;border-radius:7px}
+  .member-page #main .radar-tool .radar-card h3 {grid-column:2;grid-row:1;font-size:14px;line-height:1.45;letter-spacing:-.025em;align-self:end}
+  .member-page #main .radar-tool .radar-card-top {grid-column:2;grid-row:2;gap:3px 5px;align-self:start}
+  .member-page #main .radar-tool .radar-card-top time {font-size:10px}
+  .member-page #main .radar-tool .radar-image-note {font-size:9px}
+  .member-page #main .radar-tool .radar-entry-actions {position:static;align-self:center}
+  .member-page #main .radar-tool .radar-action {width:36px;height:36px;min-height:36px;font-size:17px}
+  .member-page #main .radar-tool .radar-fries-sticks {transform:translateX(-50%) scale(.53);transform-origin:bottom center}
+  .member-page #main .radar-tool .radar-fries-pack {transform:translateX(-50%) scale(.53);transform-origin:bottom center}
   .member-page #main .radar-tool .radar-art-label {display:none}
-  .member-page #main .radar-tool .radar-entry-past {grid-template-columns:minmax(0,1fr);gap:3px;padding:9px 0}
-  .member-page #main .radar-tool .radar-archive-title {font-size:14px}
-  .member-page #main .radar-tool .radar-archive .radar-board-heading h2 {font-size:22px}
+  .member-page #main .radar-tool .radar-entry-past {grid-template-columns:minmax(0,1fr) 36px;gap:8px;padding:5px 0}
+  .member-page #main .radar-tool .radar-archive .radar-board-heading h2 {font-size:20px}
 }
 @media(max-width:359px) {
-  .member-page #main:has(.radar-tool:not([hidden])) {padding-inline:14px}
-  .member-page #main .radar-tool h1 {font-size:42px}
+  .member-page #main:has(.radar-tool:not([hidden])) {padding-inline:18px}
   .member-page #main .radar-tool .radar-controls {grid-template-columns:repeat(2,minmax(0,1fr))}
   .member-page #main .radar-tool .radar-controls label:last-child {grid-column:1/-1}
-  .member-page #main .radar-tool .radar-card h3 {font-size:18px}
+  .member-page #main .radar-tool .radar-card {grid-template-columns:minmax(0,32%) minmax(0,1fr)}
+  .member-page #main .radar-tool .radar-card h3 {font-size:13px}
 }
 @media(prefers-reduced-motion:reduce) {
   .member-page #main .radar-tool .radar-card :is(h3,img) {transition:none;transform:none}
