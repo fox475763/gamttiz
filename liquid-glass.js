@@ -8,6 +8,7 @@
   const native=/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)&&!/Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent)&&CSS.supports('backdrop-filter','url(#gtz-liquid-test)');
   const tracked=new Map(),visible=new Set(),filterCache=new Map(),ns='http://www.w3.org/2000/svg';
   let svg=null,source=null,ctx=null,frame=0,last=0,cursor=0,serial=0;
+  const walletOpen=()=>document.documentElement.classList.contains('gtz-wallet-open');
   const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>{
     for(const entry of entries){const el=entry.target;el.classList.toggle('gtz-liquid-visible',entry.isIntersecting);if(entry.isIntersecting)visible.add(el);else visible.delete(el);}
     schedule();
@@ -137,7 +138,7 @@
     schedule();
   }
   function render(now){
-    frame=0;if(document.hidden||reduced.matches||!visible.size||moving)return;
+    frame=0;if(document.hidden||walletOpen()||reduced.matches||!visible.size||moving)return;
     if(!native&&(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling)){suspendRims();return;}
     const optics=window.GAMTTIZGlassOptics;if(!optics)return;
     const active=[...visible].filter(isActive);if(!active.length)return;
@@ -153,13 +154,21 @@
       try{if(native)nativeFilter(el,state,r,style,optics);else canvasFilter(el,state,r,style,optics,now);}catch{/* Native clear face stays visible. */}
     }
     if(!native&&!moving){
-      clearTimeout(idleTimer);idleTimer=setTimeout(schedule,Math.max(280,Math.min(750,(performance.now()-began)*14)));
+      clearTimeout(idleTimer);idleTimer=setTimeout(()=>{idleTimer=0;schedule();},Math.max(320,Math.min(950,(performance.now()-began)*16)));
     }
   }
   function schedule(){
-    if(moving||frame||document.hidden||reduced.matches)return;
-    if(!native&&idleTimer){clearTimeout(idleTimer);idleTimer=0;}
+    if(moving||frame||document.hidden||walletOpen()||reduced.matches)return;
+    // Unrelated DOM edits must not bypass the mobile sampling budget.
+    if(!native&&idleTimer)return;
     frame=requestAnimationFrame(render);
+  }
+  function syncVisibility(){
+    if(document.hidden||walletOpen()){
+      if(frame)cancelAnimationFrame(frame);frame=0;
+      clearTimeout(idleTimer);idleTimer=0;
+      for(const state of tracked.values())state.canvas?.removeAttribute('data-lens-ready');
+    }else schedule();
   }
   function init(){
     scan(document);schedule();
@@ -178,7 +187,8 @@
       document.addEventListener('gtz-home-scroll-state',()=>{if(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling)suspendRims();else if(moving){clearTimeout(settleTimer);settleTimer=setTimeout(resumeRims,220);}});
       document.addEventListener('gtz-home-palette',()=>{if(moving)return;suspendRims();});
     }
-    document.addEventListener('visibilitychange',schedule);reduced.addEventListener?.('change',schedule);
+    document.addEventListener('visibilitychange',syncVisibility);document.addEventListener('gtz-wallet-visibility',syncVisibility);reduced.addEventListener?.('change',schedule);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else if(document.readyState==='interactive')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
+

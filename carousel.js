@@ -1,5 +1,6 @@
 // Rotate only the supplied product introduction images.
 const carouselMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+const walletOpen=()=>document.documentElement.classList.contains('gtz-wallet-open');
 const posterViewport=document.querySelector('.poster-viewport');
 let posterIndex=0;
 // Avoid starting image decoding/animation while the touch scroll is in motion.
@@ -38,17 +39,19 @@ function slideProduct(viewport,nextIndex,onComplete){
   const start=async()=>{
     try{await nextImage.decode?.();}catch{}
     if(!nextImage.naturalWidth){release();return;}
-    if(homeMotion.scrolling||!visible(viewport)||document.hidden){release();return;}
+    if(walletOpen()||homeMotion.scrolling||!visible(viewport)||document.hidden){release();return;}
     viewport.append(nextImage);
     if(typeof oldImage.animate!=='function'||carouselMotion.matches){finish();return;}
     const oldMotion=oldImage.animate([{transform:'translateX(0)'},{transform:'translateX(-100%)'}],{duration:420,easing:'cubic-bezier(.25,.6,.35,1)'});
     const newMotion=nextImage.animate([{transform:'translateX(100%)'},{transform:'translateX(0)'}],{duration:420,easing:'cubic-bezier(.25,.6,.35,1)'});
     // If scrolling starts mid-slide, commit the already decoded image, with
     // no concurrent moving layers left behind.
-    const onScroll=()=>{if(homeMotion.scrolling){oldMotion.cancel();newMotion.cancel();}};
+    const onScroll=()=>{if(walletOpen()||homeMotion.scrolling){oldMotion.cancel();newMotion.cancel();}};
     document.addEventListener('gtz-home-scroll-state',onScroll);
+    document.addEventListener('gtz-wallet-visibility',onScroll);
     Promise.all([oldMotion.finished,newMotion.finished]).catch(()=>{}).then(()=>{
       document.removeEventListener('gtz-home-scroll-state',onScroll);finish();
+      document.removeEventListener('gtz-wallet-visibility',onScroll);
     });
   };
   nextImage.addEventListener('load',start,{once:true});
@@ -58,7 +61,7 @@ function slideProduct(viewport,nextIndex,onComplete){
   nextImage.src=product.image;
 }
 if(posterViewport){
-  setInterval(()=>{if(homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(posterViewport)||posterViewport.closest('.hero-poster:hover'))return;const next=(posterIndex+1)%products.length;slideProduct(posterViewport,next,()=>{posterIndex=next;});},4200);
+  setInterval(()=>{if(walletOpen()||homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(posterViewport)||posterViewport.closest('.hero-poster:hover'))return;const next=(posterIndex+1)%products.length;slideProduct(posterViewport,next,()=>{posterIndex=next;});},4200);
 }
 const storyGroups=[
   {element:document.querySelector('.story-row:not(.reverse) .story-image'),indexes:[7,13]},
@@ -70,9 +73,10 @@ storyGroups.forEach((group,groupIndex)=>{
   images.forEach(img=>{const slot=document.createElement('div');slot.className='story-slot';img.before(slot);slot.append(img);});
   let turn=0;
   setInterval(()=>{
-    if(homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(group.element)||group.element.matches(':hover'))return;
+    if(walletOpen()||homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(group.element)||group.element.matches(':hover'))return;
     const slotIndex=turn%2,slot=group.element.querySelectorAll('.story-slot')[slotIndex];
     const next=(group.indexes[slotIndex]+2)%products.length;
     slideProduct(slot,next,()=>{group.indexes[slotIndex]=next;turn++;});
   },groupIndex===0?4600:5300);
 });
+

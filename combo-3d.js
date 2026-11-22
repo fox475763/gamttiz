@@ -350,7 +350,7 @@ function invalidate() {
   syncFrame();
 }
 function syncFrame() {
-  if (visible && !document.hidden) {
+  if (visible && !document.hidden && !document.documentElement.classList.contains('gtz-wallet-open')) {
     if (!frame) frame = requestAnimationFrame(animate);
   } else {
     if (frame) cancelAnimationFrame(frame);
@@ -359,7 +359,7 @@ function syncFrame() {
 }
 function animate(time) {
   frame = 0;
-  if (!visible || document.hidden) return;
+  if (!visible || document.hidden || document.documentElement.classList.contains('gtz-wallet-open')) return;
   const delta = previous ? Math.min((time - previous) / 1000, .05) : 0;
   previous = time;
   const changed = controls.update(delta);
@@ -379,4 +379,6 @@ if ('IntersectionObserver' in window) new IntersectionObserver(entries => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) syncFrame(); else invalidate();
 });
+document.addEventListener('gtz-wallet-visibility', () => {if(document.documentElement.classList.contains('gtz-wallet-open'))syncFrame();else invalidate();});
 invalidate();
+

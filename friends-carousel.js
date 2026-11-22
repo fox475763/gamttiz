@@ -32,8 +32,9 @@
   let visible=true, dotTimer=0, interacting=false, focused=false, holdTimer=0, manualHold=false, selectionMotion=null;
   function syncMotion(){
     if(!animation)return;
-    if(window.GTZHomeMotion?.scrolling||reduced.matches||!visible){selectionMotion?.cancel();selectionMotion=null;}
-    const running=visible&&!document.hidden&&!reduced.matches&&!window.GTZHomeMotion?.scrolling&&!interacting&&!focused&&!manualHold;
+    const walletOpen=document.documentElement.classList.contains('gtz-wallet-open');
+    if(walletOpen||window.GTZHomeMotion?.scrolling||reduced.matches||!visible){selectionMotion?.cancel();selectionMotion=null;}
+    const running=visible&&!document.hidden&&!walletOpen&&!reduced.matches&&!window.GTZHomeMotion?.scrolling&&!interacting&&!focused&&!manualHold;
     if(running){animation.play();if(!dotTimer)dotTimer=setInterval(updateDots,200);}
     else {animation.pause();clearInterval(dotTimer);dotTimer=0;}
     updateDots();
@@ -140,5 +141,7 @@
   else reduced.addListener?.(syncMotion);
   if('IntersectionObserver' in window)new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;syncMotion();}).observe(viewport);
   document.addEventListener('gtz-home-scroll-state',syncMotion);
+  document.addEventListener('gtz-wallet-visibility',syncMotion);
   layout();
 })();
+

@@ -51,7 +51,7 @@
   let data=null,key='',loadedKey='',loadingKey='',generation=0,raf=0,lastTime=0,angle=-12,ready=false;
   const load=src=>new Promise((resolve,reject)=>{const image=new Image();image.decoding='async';image.onload=()=>resolve(image);image.onerror=reject;image.src=src;});
   function active(){
-    return !document.hidden&&section.dataset.scene!==undefined&&section.dataset.scene===document.body.dataset.homeScene;
+    return !document.hidden&&!document.documentElement.classList.contains('gtz-wallet-open')&&section.dataset.scene!==undefined&&section.dataset.scene===document.body.dataset.homeScene;
   }
   function paint(){
     const half=Math.floor((angle+90)/180),back=Math.abs(half%2)===1&&ready,rotation=angle-half*180;
@@ -165,8 +165,9 @@
     paint();prepare();motion();
   }
   const scene=()=>{prepare();motion();};
-  document.addEventListener('gtz-home-scene',scene);document.addEventListener('visibilitychange',scene);
+  document.addEventListener('gtz-home-scene',scene);document.addEventListener('visibilitychange',scene);document.addEventListener('gtz-wallet-visibility',scene);
   window.addEventListener('storage',e=>{if(e.key===M.KEY||e.key===null)sync();});
   window.addEventListener('gamttiz:license-change',sync);window.addEventListener('pageshow',sync);
   reduced.addEventListener?.('change',motion);sync();
 })();
+

@@ -7,7 +7,7 @@ function start3d() {
   if (started) return;
   started = true;
   if (status) status.textContent = '3D 홀더를 불러오는 중이에요.';
-  import('./combo-3d.js?v=20261122type1').catch(error => {
+  import('./combo-3d.js?v=20261123walletpay1').catch(error => {
     console.error(error);
     if (status) status.textContent = '3D 화면을 불러오지 못했어요. 이미지 화면으로 조합을 볼 수 있어요.';
   });
@@ -23,3 +23,4 @@ else {
   }, {rootMargin: '600px 0px'});
   observer.observe(target);
 }
+

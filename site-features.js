@@ -148,7 +148,7 @@
   let mobileLens=null;
   function stopMobileLens(){
     if(!mobileLens)return;
-    cancelAnimationFrame(mobileLens.frame);mobileLens.canvas.remove();mobileLens=null;
+    cancelAnimationFrame(mobileLens.frame);clearTimeout(mobileLens.timer);mobileLens.canvas.remove();mobileLens=null;
     if(dock.dataset.menuRefraction==='canvas')delete dock.dataset.menuRefraction;
   }
   function paintGlassBackdrop(ctx,b,skip){
@@ -206,26 +206,28 @@
     canvas.setAttribute('aria-hidden','true');
     const out=canvas.getContext('2d'),ctx=source.getContext('2d',{willReadFrequently:true});
     if(!out||!ctx)return;
-    const m={canvas,frame:0,last:0};mobileLens=m;document.body.append(canvas);
+    const m={canvas,frame:0,timer:0,last:0,interval:84};mobileLens=m;document.body.append(canvas);
     const overlaps=(r,b)=>r.right>b.left&&r.left<b.right&&r.bottom>b.top&&r.top<b.bottom;
     const visibleColor=c=>c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)';
     let cachedScene=null,sceneTime=0,sceneKey='';
+    const queue=()=>{m.timer=setTimeout(()=>{m.timer=0;if(mobileLens===m)m.frame=requestAnimationFrame(render);},document.hidden?1000:m.interval);};
     function render(now){
       if(mobileLens!==m||dock.dataset.mode!=='menu')return;
-      m.frame=requestAnimationFrame(render);
+      m.frame=0;queue();
+      if(document.hidden||document.documentElement.classList.contains('gtz-wallet-open')){canvas.removeAttribute('data-lens-ready');cachedScene=null;return;}
       if(document.documentElement.classList.contains('gtz-liquid-scrolling')||document.body.classList.contains('home-native-moving')){
         canvas.removeAttribute('data-lens-ready');cachedScene=null;return;
       }
-      if(now-m.last<(m.interval||40))return;m.last=now;const started=performance.now();
+      m.last=now;const started=performance.now();
       try{
         const clip=menuScroll.getBoundingClientRect(),left=Math.max(0,Math.floor(clip.left-14)),top=Math.max(0,Math.floor(clip.top-14));
         const w=Math.min(innerWidth-left,Math.ceil(clip.right-left+14)),h=Math.min(innerHeight-top,Math.ceil(clip.bottom-top+14));
         if(w<1||h<1)return;
         const b={left,top,right:left+w,bottom:top+h};
-        if(canvas.width!==w||canvas.height!==h){canvas.width=source.width=w;canvas.height=source.height=h;}
+        if(canvas.width!==w||canvas.height!==h){canvas.width=source.width=w;canvas.height=source.height=h;m.pixels=null;}
         canvas.style.left=left+'px';canvas.style.top=top+'px';canvas.style.width=w+'px';canvas.style.height=h+'px';
         const key=[left,top,w,h].join(',');
-        if(!cachedScene||now-sceneTime>95||key!==sceneKey){
+        if(!cachedScene||now-sceneTime>170||key!==sceneKey){
         ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
         ctx.setTransform(1,0,0,1,-left,-top);
         const root=getComputedStyle(document.documentElement).backgroundColor;
@@ -234,7 +236,7 @@
         ctx.fillStyle=getComputedStyle(scrim).backgroundColor;ctx.fillRect(left,top,w,h);
         cachedScene=ctx.getImageData(0,0,w,h).data;sceneTime=now;sceneKey=key;
         }
-        const data=cachedScene,pixels=out.createImageData(w,h),dst=pixels.data;
+        const data=cachedScene,pixels=m.pixels||(m.pixels=out.createImageData(w,h)),dst=pixels.data;dst.fill(0);
         for(const el of menuLinks.children){
           const r=el.getBoundingClientRect(),s=getComputedStyle(el);
           if(Number(s.opacity)<.97||!overlaps(r,clip))continue;
@@ -256,7 +258,7 @@
           }
         }
         out.putImageData(pixels,0,0);canvas.setAttribute('data-lens-ready','');if(dock.dataset.menuRefraction!=='canvas')dock.dataset.menuRefraction='canvas';
-        m.interval=Math.max(30,Math.min(60,(performance.now()-started)*2.4));
+        m.interval=Math.max(84,Math.min(240,(performance.now()-started)*5));
       }catch{/* Keep the previous complete frame; never flash a cleared layer. */}
     }
     m.frame=requestAnimationFrame(render);
@@ -655,7 +657,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
   const shakeMount=document.getElementById('license-shake-setting-mount');
   if(shakeMount)shakeMount.append(shakeSettings);
   const shakeKey='gamttiz-license-shake-enabled-v1';
-  let enabled=false,sensorSeen=false,sessionAllowed=false,requesting=false,open=false,presented=false,sheetTimer=0,warmTimer=0,frameStarted=false,lastExists=null;
+  let enabled=false,sensorSeen=false,sessionAllowed=false,requesting=false,open=false,presented=false,sheetTimer=0,frameStarted=false,lastExists=null;
   let recoveryTimer=0,recoveryNeeded=false,silentAttempted=false,silentPending=false,recoveryEpoch=0;
   let gravity=null,firstHit=null,lastHit=-Infinity,lastOpened=-Infinity;
   try{enabled=localStorage.getItem(shakeKey)==='1';}catch{}
@@ -690,7 +692,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
       const permission=needsPermission()?await window.DeviceMotionEvent.requestPermission():'granted';
       if(permission!=='granted')throw new Error('sensor permission not granted');
       if(wasEnabled&&!enabled)return;
-      remember(true);sessionAllowed=true;gravity=null;firstHit=null;warm();
+      remember(true);sessionAllowed=true;gravity=null;firstHit=null;
       watchSensor();
       shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
     }catch{
@@ -735,25 +737,10 @@ const walletMedia=matchMedia('(max-width: 900px)');
     return connectSensor();
   });
   shakeReconnect.addEventListener('click',()=>{if(enabled&&!requesting)return connectSensor();});
-  // Use the same mobile-safe rendering model as MY ID: one visible, decoded
-  // image plane in perspective. Never stack live canvas textures in 3D.
-  const walletStyle=document.createElement('style');
-  walletStyle.textContent=`
-.gtz-wallet-lite{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:0;padding:8px 6px;background:transparent!important;border:0!important;box-shadow:none!important}
-.gtz-wallet-lite-error,.gtz-wallet-loading{font-size:13px;color:#7d1616;text-align:center;padding:12px}
-.gtz-wallet-rotator{position:relative;width:min(72vw,290px);width:min(72vw,290px,calc((88dvh - 112px)*.62864));aspect-ratio:1080/1718;touch-action:none!important;user-select:none;-webkit-user-select:none;perspective:1000px;-webkit-perspective:1000px;cursor:grab;flex:none}
-.gtz-wallet-rotator:active{cursor:grabbing}
-.gtz-wallet-rotator-inner{position:absolute;inset:0;transform-style:flat;-webkit-transform-style:flat;pointer-events:none;will-change:transform}
-.gtz-wallet-plane{position:absolute;inset:0;border-radius:12px;overflow:hidden;background:#780708;box-shadow:0 12px 28px #0003,0 0 0 .5px #ad7539;pointer-events:none!important}
-.gtz-wallet-plane img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:fill;pointer-events:none!important;-webkit-user-drag:none}
-.gtz-wallet-plane img[hidden]{display:none!important}
-.gtz-wallet-shine{position:absolute;inset:0;border-radius:inherit;background:radial-gradient(ellipse at 25% 10%,rgba(255,237,196,.24),transparent 65%),linear-gradient(135deg,transparent 15%,rgba(255,246,215,.08) 36%,rgba(255,246,215,.24) 49%,rgba(255,246,215,.06) 62%,transparent 82%);pointer-events:none;opacity:.22;will-change:opacity}
-.gtz-wallet-hint{font-size:12px;color:#7d6a60;margin:0;text-align:center;flex:none}
-html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > :not(.gtz-wallet-sheet) *,html.gtz-wallet-open body > :not(.gtz-wallet-sheet)::before,html.gtz-wallet-open body > :not(.gtz-wallet-sheet)::after,html.gtz-wallet-open body > :not(.gtz-wallet-sheet) *::before,html.gtz-wallet-open body > :not(.gtz-wallet-sheet) *::after{animation-play-state:paused!important}
-@media(prefers-reduced-motion:reduce){.gtz-wallet-shine{opacity:0!important}}
-`;document.head.append(walletStyle);
+  // Presentation styles live in license-wallet.css; only decoded card art
+  // and the touch/sensor lifecycle belong here.
   let disposeWallet=()=>{};
-  const friendNames=['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
+  const friendNames=['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠','버터갈릭감띠','매콤감띠'];
   const qrMatrix=[
     '111111100101010011111011101111111',
     '100000100111011111000100001000001',
@@ -789,7 +776,7 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
     '100000100010101010111111011011100',
     '111111101111101001010001101100010',
   ];
-  function notifyFrame(active){}
+  function notifyFrame(){document.dispatchEvent?.(new Event('gtz-wallet-visibility'));}
   function startFrame(){
     if(!mobile())return;
     let data;try{data=JSON.parse(localStorage.getItem('gamttiz-my-license-v1')||'null')}catch{}
@@ -810,7 +797,7 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
     let paintedSide=null,paintedTransform='',paintedLight='';
     const events=new AbortController();
     const on=(el,type,fn,options={})=>el.addEventListener(type,fn,{...options,signal:events.signal});
-    disposeWallet=()=>{events.abort();if(raf)cancelAnimationFrame(raf);raf=0;drag=null;ready=false;};
+    disposeWallet=()=>{events.abort();if(raf)cancelAnimationFrame(raf);raf=0;drag=null;ready=false;frontCanvas.width=frontCanvas.height=canvas.width=canvas.height=0;};
     function paintPose(time){
       raf=0;
       const dt=lastFrame?Math.min(42,time-lastFrame):16.7;
@@ -832,7 +819,7 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
       const transform='rotateX('+pitch.toFixed(3)+'deg) rotateY('+angle.toFixed(3)+'deg)';
       if(transform!==paintedTransform){paintedTransform=transform;inner.style.transform=transform;}
       const dx=Math.sin(angle*Math.PI/180),dy=Math.sin(pitch*Math.PI/180);
-      const light=reducedWallet.matches?'0':(.22+Math.min(.38,Math.abs(dx)*.28+Math.abs(dy)*.72)).toFixed(2);
+      const light=reducedWallet.matches?'0':(.42+Math.min(.44,Math.abs(dx)*.35+Math.abs(dy)*.72)).toFixed(2);
       if(light!==paintedLight){paintedLight=light;shine.style.opacity=light;}
       if(yaw!==targetYaw||pitch!==targetPitch)raf=requestAnimationFrame(paintPose);else lastFrame=0;
     }
@@ -932,20 +919,19 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
       paintPose(performance.now());
     }).catch(()=>{if(rotator.isConnected&&!events.signal.aborted){loading.textContent='라이센스 이미지를 불러오지 못했어요. MY ID 페이지에서 확인해주세요.';rotator.removeAttribute('aria-busy');}});
   }
-  function warm(){/* Never preload a second license page. */}
   function sync(){
     const exists=hasCard();
     if(lastExists!==null&&lastExists!==exists&&frameStarted){
       frameStarted=false;if(presented)startFrame();else frame.replaceChildren();
     }
     lastExists=exists;updateSetting();
-    if(!mobile()||!exists||!enabled){clearRecovery();updateSetting();if(presented&&!exists)settle(false);return;}
+    if(!mobile()||!exists||!enabled){clearRecovery();updateSetting();if(presented&&(!exists||!mobile()))settle(false);return;}
     if(exists){watchSensor();}
   }
   function present(){
     clearTimeout(sheetTimer);sheetTimer=0;if(presented)return;
     presented=true;sheet.classList.add('is-visible');
-    document.documentElement.classList.add('gtz-wallet-open');startFrame();notifyFrame(true);
+    document.documentElement.classList.add('gtz-wallet-open');notifyFrame();startFrame();
   }
   function settle(next){
     if(next&&(!mobile()||!hasCard()))return;
@@ -954,10 +940,10 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
     open=next;sheet.classList.toggle('is-open',next);
     sheet.setAttribute('aria-hidden',String(!next));sheet.inert=!next;
     clearTimeout(sheetTimer);
-    if(next){if(dock.dataset.mode!=='closed')setMode(dock.dataset.mode);notifyFrame(true);return;}
-    lastOpened=performance.now();firstHit=null;notifyFrame(false);
+    if(next){if(dock.dataset.mode!=='closed')setMode(dock.dataset.mode);return;}
+    lastOpened=performance.now();firstHit=null;
     sheetTimer=setTimeout(()=>{
-      if(!open){presented=false;disposeWallet();frame.replaceChildren();frameStarted=false;sheet.classList.remove('is-visible');document.documentElement.classList.remove('gtz-wallet-open');}
+      if(!open){presented=false;disposeWallet();frame.replaceChildren();frameStarted=false;sheet.classList.remove('is-visible');document.documentElement.classList.remove('gtz-wallet-open');notifyFrame();}
       sheetTimer=0;
     },reducedWallet.matches?0:440);
   }
@@ -1001,3 +987,4 @@ html.gtz-wallet-open body > :not(.gtz-wallet-sheet),html.gtz-wallet-open body > 
 }
 
 })();
+

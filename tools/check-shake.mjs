@@ -8,6 +8,16 @@ const script=fs.readFileSync(new URL(path,root),'utf8');
 const wallet=script.slice(script.indexOf('const walletMedia='),script.lastIndexOf('})();'));
 const KEY='gamttiz-license-shake-enabled-v1',LICENSE='gamttiz-my-license-v1';
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
+test('wallet presentation is separate, composited and supports all 16 characters',()=>{
+  const css=fs.readFileSync(new URL('license-wallet.css',root),'utf8');
+  assert.match(wallet,/버터갈릭감띠','매콤감띠'/);
+  assert.doesNotMatch(wallet,/walletStyle\.textContent/);
+  assert.match(css,/gtz-wallet-reflection 8s/);
+  assert.match(css,/assets\/license\/reflection\.svg/);
+  assert.match(css,/translate3d\(-16%,-12%,0\)/);
+  assert.doesNotMatch(css,/backdrop-filter\s*:/);
+  assert.match(wallet,/gtz-wallet-visibility/);
+});
 function createPage(storage,permission='granted',activationKnown=false,withMount=true){
   const elements=[],timers=new Map();let clock=0,count=0,requests=0,interaction=false,mode=permission,prompts=0;
   class El{
@@ -74,3 +84,4 @@ test('foreground recovery re-arms and does not ask during issuance',async()=>{
   page.doc.body.classList.remove('license-animating');page.doc.hidden=true;page.doc.fire('visibilitychange');page.doc.hidden=false;page.doc.fire('visibilitychange');
   await page.runWatchdog();assert.equal(page.requests,1);assert.equal(page.prompts,0);assert.equal(page.recovery,undefined);
 });
+

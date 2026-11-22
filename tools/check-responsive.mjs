@@ -461,6 +461,9 @@ for(const engine of [chromium,webkit])test('Shake opens a mobile 3D license with
    assert.equal(await page.locator('.gtz-wallet-turn').count(),0);
    assert.equal(await page.locator('.gtz-wallet-shine').evaluate(el=>getComputedStyle(el).mixBlendMode),'normal');
    assert.equal(await page.locator('.gtz-wallet-shine').evaluate(el=>getComputedStyle(el).animationName),'none');
+   assert.equal(await page.locator('.gtz-wallet-shine').evaluate(el=>getComputedStyle(el,'::before').animationName),'gtz-wallet-reflection');
+   assert.equal(await page.locator('.gtz-wallet-content').evaluate(el=>getComputedStyle(el).backdropFilter),'none');
+   assert.equal(await page.locator('.gtz-wallet-sheet').evaluate(el=>document.documentElement.classList.contains('gtz-wallet-open')),true);
    await page.evaluate(()=>{window.walletFaceMutations=0;new MutationObserver(records=>window.walletFaceMutations+=records.length).observe(document.querySelector('.gtz-wallet-plane'),{subtree:true,attributes:true,attributeFilter:['hidden']});});
    assert.equal(await page.locator('.gtz-wallet-sheet').getAttribute('aria-hidden'),'false');
    const b=await card.boundingBox();assert.ok(b&&b.height>200&&b.y>=0&&b.y+b.height<844);
@@ -650,3 +653,4 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
 });
 
 test.after(()=>new Promise(resolve=>server.close(resolve)));
+
