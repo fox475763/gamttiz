@@ -327,29 +327,61 @@
   };
   tabs.forEach(tab=>tab.addEventListener('click',()=>{view=tab.dataset.radarView;tabs.forEach(t=>t.setAttribute('aria-pressed',String(t===tab)));render();}));
   [search,category,sort].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
-  // Keep the live search visible; the secondary filters unfold beneath it.
-  const filterToggle=document.getElementById('radar-filter-toggle');
+  // The real search input is the sole trigger. The panel floats below it,
+  // rather than inserting a second button or moving the news grid.
   const filterPanel=document.getElementById('radar-filter-panel');
-  const toolbar=filterToggle?.closest('.radar-toolbar');
+  const filterScrim=document.getElementById('radar-search-scrim');
+  const toolbar=filterPanel?.closest('.radar-toolbar');
+  let filterOpen=false,filterFrame=0,skipSearchFocus=false;
+  function fitFilterPanel(){
+    filterFrame=0;
+    if(!filterOpen||!toolbar)return;
+    const row=toolbar.querySelector('.radar-search-row');
+    const bounds=row.getBoundingClientRect(),vv=window.visualViewport;
+    const bottom=vv?vv.offsetTop+vv.height:window.innerHeight;
+    const remaining=bottom-bounds.bottom-20;
+    // The software keyboard can leave very little room under the field.
+    // Keep it anchored, and scroll the page just enough to expose controls.
+    if(remaining<170&&bounds.top>(vv?.offsetTop||0)+18){
+      const delta=Math.min(170-remaining,bounds.top-(vv?.offsetTop||0)-18);
+      if(delta>1)window.scrollBy({top:delta,behavior:'instant'});
+    }
+    const available=bottom-row.getBoundingClientRect().bottom-20;
+    filterPanel.style.setProperty('--radar-filter-space',Math.max(76,available)+'px');
+  }
+  function queueFilterFit(){
+    if(filterOpen&&!filterFrame)filterFrame=requestAnimationFrame(fitFilterPanel);
+  }
   function setFilters(open,restoreFocus=false){
-    if(!filterToggle||!filterPanel)return;
-    filterToggle.setAttribute('aria-expanded',String(open));
+    if(!search||!filterPanel||!toolbar)return;
+    if(filterOpen===open)return;
+    filterOpen=open;
+    search.setAttribute('aria-expanded',String(open));
     filterPanel.setAttribute('aria-hidden',String(!open));
     filterPanel.inert=!open;
-    toolbar?.classList.toggle('filters-open',open);
-    if(restoreFocus)filterToggle.focus({preventScroll:true});
+    toolbar.classList.toggle('filters-open',open);
+    filterScrim?.classList.toggle('is-open',open);
+    if(open){fitFilterPanel();queueFilterFit();}
+    else{
+      if(filterFrame)cancelAnimationFrame(filterFrame);filterFrame=0;
+      if(restoreFocus){
+        skipSearchFocus=true;search.focus({preventScroll:true});skipSearchFocus=false;
+      }else if(toolbar.contains(document.activeElement))document.activeElement.blur();
+    }
   }
-  if(filterToggle&&filterPanel){
-    filterToggle.addEventListener('click',()=>setFilters(filterToggle.getAttribute('aria-expanded')!=='true'));
+  if(search&&filterPanel&&toolbar){
+    search.addEventListener('focus',()=>{if(!skipSearchFocus)setFilters(true);});
+    search.addEventListener('click',()=>setFilters(true));
+    filterScrim?.addEventListener('click',()=>setFilters(false));
     toolbar.addEventListener('keydown',event=>{
-      if(event.key==='Escape'&&filterToggle.getAttribute('aria-expanded')==='true'){
-        event.preventDefault();event.stopPropagation();setFilters(false,true);
-      }
+      if(event.key==='Escape'&&filterOpen){event.preventDefault();event.stopPropagation();setFilters(false,true);}
+      else if(event.key==='Enter'&&event.target===search&&!event.isComposing){event.preventDefault();setFilters(!filterOpen);}
     });
-    document.addEventListener('click',event=>{
-      if(filterToggle.getAttribute('aria-expanded')==='true'&&!toolbar.contains(event.target))
-        setFilters(false,filterPanel.contains(document.activeElement));
-    });
+    document.addEventListener('focusin',event=>{if(filterOpen&&!toolbar.contains(event.target))setFilters(false);});
+    window.addEventListener('resize',queueFilterFit,{passive:true});
+    window.addEventListener('scroll',queueFilterFit,{passive:true});
+    window.visualViewport?.addEventListener('resize',queueFilterFit,{passive:true});
+    window.visualViewport?.addEventListener('scroll',queueFilterFit,{passive:true});
   }
   const healthView=document.getElementById('radar-health');
   let refreshing=false,loaded=false,lastSignature='',timer=0,generation=0;

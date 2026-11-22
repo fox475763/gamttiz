@@ -15,7 +15,7 @@ const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2
 
 // Isolated radar regression: validate the actual cascade and layout independently
 // of the Home/Dex scrolling assertions and of live stories aging into the archive.
-for(const engine of [chromium,webkit])test('Fry Rader collapsible glass filters and headline-only feed: '+engine.name(),{timeout:45000},async()=>{
+for(const engine of [chromium,webkit])test('Fry Rader search-anchored glass overlay and headline-only feed: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
  try{
    for(const viewport of [{width:320,height:640},{width:390,height:844},{width:1440,height:900}]){
@@ -28,16 +28,24 @@ for(const engine of [chromium,webkit])test('Fry Rader collapsible glass filters 
      const page=await context.newPage();
      await page.goto(base+'member.html#radar',{waitUntil:'domcontentloaded'});
      await page.waitForFunction(()=>document.querySelectorAll('#radar-list .radar-entry').length===3);
-     const toggle=page.locator('#radar-filter-toggle'),panel=page.locator('#radar-filter-panel');
+     const toggle=page.locator('#radar-search'),panel=page.locator('#radar-filter-panel'),scrim=page.locator('#radar-search-scrim');
+     assert.equal(await page.locator('#radar-filter-toggle').count(),0);
      assert.equal(await toggle.getAttribute('aria-expanded'),'false');
      assert.equal(await panel.evaluate(el=>el.inert),true);
-     assert.ok(await panel.evaluate(el=>el.getBoundingClientRect().height<=1));
+     assert.equal(await panel.evaluate(el=>getComputedStyle(el).visibility),'hidden');
+     assert.equal(await scrim.evaluate(el=>getComputedStyle(el).visibility),'hidden');
      await page.emulateMedia({reducedMotion:'no-preference'});
      assert.equal(await page.locator('.radar-masthead-sweep').evaluate(el=>getComputedStyle(el).animationName),'radar-masthead-turn');
      await page.emulateMedia({reducedMotion:'reduce'});
      await toggle.click();
      assert.equal(await toggle.getAttribute('aria-expanded'),'true');
      assert.equal(await panel.evaluate(el=>el.inert),false);
+     assert.equal(await scrim.evaluate(el=>getComputedStyle(el).visibility),'visible');
+     const overlay=await page.evaluate(()=>{
+       const input=document.querySelector('#radar-search'),p=document.querySelector('#radar-filter-panel').getBoundingClientRect(),s=input.getBoundingClientRect();
+       return {gap:p.top-s.bottom,searchHit:document.elementFromPoint(s.left+s.width/2,s.top+s.height/2)===input,dimHit:document.elementFromPoint(3,3)?.id==='radar-search-scrim',width:Math.abs(p.width-s.width)};
+     });
+     assert.ok(overlay.gap>=7&&overlay.gap<=15&&overlay.searchHit&&overlay.dimHit&&overlay.width<=2,JSON.stringify(overlay));
      const layout=await page.evaluate(()=>{
        const q=s=>document.querySelector(s),style=s=>getComputedStyle(q(s)),rect=s=>q(s).getBoundingClientRect();
        const list=rect('#radar-list'),photo=rect('#radar-list .radar-card-photo');
@@ -70,16 +78,50 @@ for(const engine of [chromium,webkit])test('Fry Rader collapsible glass filters 
      await page.locator('#radar-sort').selectOption('oldest');
      assert.equal(await page.locator('#radar-list .radar-entry').count(),3);
      await page.locator('#radar-sort').selectOption('newest');
+     await toggle.press('Escape');
+     assert.equal(await toggle.getAttribute('aria-expanded'),'false');
      const save=page.locator('#radar-list .radar-action').first();await save.click();
      assert.equal(await save.getAttribute('aria-pressed'),'true');
      if(await toggle.getAttribute('aria-expanded')==='false')await toggle.click();
      await page.locator('[data-radar-view="saved"]').click();
      assert.equal(await page.locator('#radar-list .radar-entry').count(),1);
      await page.locator('[data-radar-view="all"]').click();
+     await scrim.click({position:{x:3,y:3}});
+     assert.equal(await toggle.getAttribute('aria-expanded'),'false');
      assert.equal(await page.locator('.radar-back-link').getAttribute('href'),'#hub');
      assert.equal(await page.locator('#radar-admin').evaluate(el=>el.open),false);
      await page.evaluate(()=>window.scrollTo(0,200));
      await page.waitForFunction(()=>scrollY>0);
+     await context.close();
+   }
+ }finally{await browser.close();}
+});
+
+// Home entry should reset the real stage, not only the outer document.
+for(const engine of [chromium,webkit])test('Home always opens on the first scene with mobile breathing room: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+   for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
+     const mobile=viewport.width<700;
+     const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'reduce'});
+     await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+     const page=await context.newPage();
+     await page.goto(base+'index.html',{waitUntil:'load'});
+     await page.waitForFunction(()=>document.body.dataset.homeScene==='0');
+     assert.equal(await page.getByRole('link',{name:'나의 감띠 찾기'}).count(),0);
+     assert.equal(await page.evaluate(()=>history.scrollRestoration),'manual');
+     if(mobile){
+       assert.ok(await page.locator('.hero-copy').evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)>=24));
+       await page.evaluate(()=>{const v=document.querySelector('.home-scroll-viewport');v.scrollTop=v.clientHeight;});
+     }else{await page.keyboard.press('PageDown');}
+     await page.waitForFunction(()=>Number(document.body.dataset.homeScene)>0);
+     await page.reload({waitUntil:'load'});
+     await page.waitForFunction(()=>document.body.dataset.homeScene==='0');
+     assert.ok(await page.locator('.home-scroll-viewport').evaluate(el=>el.scrollTop<2));
+     await page.goto(base+'index.html#collection',{waitUntil:'load'});
+     await page.waitForFunction(()=>Number(document.body.dataset.homeScene)>0);
+     await page.locator('.wordmark').click();
+     await page.waitForFunction(()=>document.body.dataset.homeScene==='0');
      await context.close();
    }
  }finally{await browser.close();}

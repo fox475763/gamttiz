@@ -1,6 +1,6 @@
 /* Only Member's static UI is cached; no license or personal data is stored here. */
-const CACHE='gamttiz-member-20261122-radar-v26';
-const VERSION='20261122radarsweep1';
+const CACHE='gamttiz-member-20261122-radar-v27';
+const VERSION='20261122radarsearch2';
 const WALLET_VERSION='20261121walletsmooth11';
 const paths=['member.html','member.webmanifest','member-icon.svg','assets/badge.png','style.css','refinement.css','site-font.css','experience.css','studio-polish.css','catalog-news.css','site-features.css?v=20261121droplet1','typography-system.css?v=20261113a','brand-type.css?v=20261122type1','assets/fonts/wanted-sans-variable.woff2','editorial.css?v=20261113glassrestore','license-wallet.css?v=20261120reopen6',`site-features.js?v=${WALLET_VERSION}`,`member.js?v=${WALLET_VERSION}`,...['member.css','member-model.js','fry-radar.css','fry-radar.js','radar-editorial.css','radar-model.js','ui-system.css'].map(p=>`${p}?v=${VERSION}`),...Array.from({length:14},(_,i)=>`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`)];
 paths.push(`member.webmanifest?v=${VERSION}`);

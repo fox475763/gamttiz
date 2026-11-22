@@ -51,6 +51,7 @@
    on narrow viewports. Short screens tighten spacing before any fit fallback. */
 @media(max-width:700px){
  .home-cinema.home-fullpage #main>.hero{grid-template-columns:minmax(0,1fr);gap:clamp(8px,1.65vh,16px);padding-inline:6%}
+ .home-cinema.home-fullpage .hero-copy{padding-top:clamp(24px,5vh,44px)}
  .home-cinema.home-fullpage .hero-film{font-size:clamp(36px,10.5vw,57px);margin:10px 0}
  .home-cinema.home-fullpage .hero-description{font-size:13px;margin-bottom:10px;max-width:none;line-height:1.6}
  .home-cinema.home-fullpage .hero .button{font-size:12px;padding:8px 16px;min-height:40px}
@@ -100,6 +101,7 @@
 }
 @media(max-width:400px) and (max-height:680px){
  .home-cinema.home-fullpage #main>.hero{gap:6px}
+ .home-cinema.home-fullpage .hero-copy{padding-top:clamp(12px,3vh,24px)}
  .home-cinema.home-fullpage .hero-film{font-size:clamp(32px,9.8vw,42px);margin:6px 0}
  .home-cinema.home-fullpage .hero-description{font-size:12px;margin-bottom:6px}
  .home-cinema.home-fullpage .hero-foot{margin-top:6px;padding-top:5px}

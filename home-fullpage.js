@@ -7,6 +7,9 @@
   if(!host||!viewport||!main)return;
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const body=document.body;
+  const isHome=!body.classList.contains('edition-page');
+  const plainHome=()=>isHome&&(!location.hash||location.hash==='#');
+  if(plainHome())viewport.scrollTop=0;
   const hero=main.querySelector('.hero');
   const ticker=main.querySelector('.ticker');
   if(hero&&ticker)hero.append(ticker);
@@ -144,7 +147,10 @@
     nativeIndex=initial;host.classList.add('stage-initial');measureNative();selectScene(initial,true);goNative(initial,true);
     requestAnimationFrame(()=>requestAnimationFrame(()=>host.classList.remove('stage-initial')));
     addEventListener('resize',queueMeasure,{passive:true});
-    addEventListener('pageshow',queueMeasure);addEventListener('load',queueMeasure,{once:true});
+    addEventListener('pageshow',()=>{
+      if(plainHome()){measureNative();goNative(0,true);}
+      queueMeasure();
+    });addEventListener('load',queueMeasure,{once:true});
     document.fonts?.ready.then(queueMeasure);
     if('ResizeObserver' in window){const observer=new ResizeObserver(queueMeasure);observer.observe(viewport);scenes.forEach(el=>observer.observe(el));}
     const syncPaused=()=>host.classList.toggle('stage-paused',document.hidden||reduced.matches);
@@ -360,7 +366,7 @@
   requestAnimationFrame(()=>requestAnimationFrame(()=>host.classList.remove('stage-initial')));
   const syncMotion=()=>host.classList.toggle('stage-paused',document.hidden||reduced.matches);
   document.addEventListener('visibilitychange',syncMotion);reduced.addEventListener?.('change',syncMotion);syncMotion();
-  addEventListener('resize',scheduleMeasure,{passive:true});addEventListener('pageshow',scheduleMeasure);addEventListener('load',scheduleMeasure,{once:true});
+  addEventListener('resize',scheduleMeasure,{passive:true});addEventListener('pageshow',()=>{if(plainHome())go(0,{instant:true});scheduleMeasure();});addEventListener('load',scheduleMeasure,{once:true});
   document.fonts?.ready.then(scheduleMeasure);
   if('ResizeObserver' in window){const ro=new ResizeObserver(scheduleMeasure);ro.observe(viewport);scenes.forEach(el=>ro.observe(el));}
 })();

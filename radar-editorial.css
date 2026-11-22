@@ -43,27 +43,41 @@
 /* Separate search / filters from the feed without repeated card frames. */
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-board {padding:0 0 60px;margin:0;background:transparent;max-width:none}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-toolbar {margin:0 calc(-1 * var(--radar-gutter)) clamp(30px,4vw,54px);padding:clamp(19px,3vw,32px) var(--radar-gutter);background:#f3f2ef;border-bottom:1px solid #dedbd6;--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.66),rgba(255,255,255,.22) 52%,rgba(255,255,255,.38));--gtz-liquid-active:linear-gradient(145deg,rgba(255,255,255,.82),rgba(255,255,255,.46))}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls {display:block;margin:0}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-row {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:10px}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-label {grid-column:auto;min-width:0}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle {display:inline-flex;position:relative;align-items:center;justify-content:center;gap:8px;min-width:92px;min-height:44px;padding:0 15px;border-radius:12px;color:#302b26;font:inherit;font-size:13px;font-weight:650;line-height:1.4;cursor:pointer;transition:transform .28s cubic-bezier(.22,1,.36,1),color .2s ease}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle svg {width:16px;height:16px;flex:none;transition:transform .42s cubic-bezier(.22,1,.36,1)}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle[aria-expanded="true"] {color:var(--press-red);--gtz-liquid-surface:linear-gradient(145deg,#fff8f7,#f2dede)}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle[aria-expanded="true"] svg {transform:rotate(180deg)}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle:active {transform:scale(.96)}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle:focus-visible {outline:2px solid var(--press-red);outline-offset:3px}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-reveal {display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transform:translateY(-9px) scale(.975);transform-origin:top center;transition:grid-template-rows .42s cubic-bezier(.22,1,.36,1),opacity .25s ease,transform .42s cubic-bezier(.22,1,.36,1),visibility 0s linear .42s;pointer-events:none}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-filter-reveal {grid-template-rows:1fr;opacity:1;visibility:visible;transform:translateY(0) scale(1);transition-delay:0s;pointer-events:auto}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-clip {min-height:0;overflow:hidden}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel {display:block;margin:12px 3px 8px;padding:16px;position:relative;border-radius:22px;--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.47),rgba(255,255,255,.14) 52%,rgba(255,255,255,.23));--gtz-liquid-active:var(--gtz-liquid-surface);--gtz-liquid-elevation:0 3px 10px #22252b16,inset 0 1px 2px #fff9,inset 0 -3px 7px #30394c13}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls {display:block;margin:0;position:relative}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-row {display:block}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-label {display:block!important;grid-column:auto;min-width:0}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-label>span:first-child {display:block;margin-bottom:7px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-search-label .radar-glass-field {border-radius:999px;--gtz-liquid-elevation:inset 0 1px 2px #fff9,inset 0 -3px 6px #30394c1a,0 3px 10px #302b261a}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-search-label .radar-glass-field input {min-height:52px;border-radius:999px;cursor:text}
+.member-page #main .radar-search-scrim {position:fixed;inset:0;z-index:100;opacity:0;visibility:hidden;pointer-events:none;background:rgba(12,13,20,.52);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);transition:opacity .3s ease,visibility 0s linear .3s}
+.member-page #main .radar-search-scrim.is-open {opacity:1;visibility:visible;pointer-events:auto;touch-action:none;transition-delay:0s}
+.member-page #main:has(.radar-search-scrim.is-open) {z-index:1301;overflow:visible}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]):has(.filters-open) {animation:none;transform:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-controls {z-index:101}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-search-label>span:first-child {color:#fff;text-shadow:0 1px 4px #0009}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-search-label .radar-glass-field {--gtz-liquid-surface:linear-gradient(145deg,rgba(41,43,54,.42),rgba(18,20,29,.19));--gtz-liquid-active:var(--gtz-liquid-surface);--gtz-liquid-elevation:inset 0 2px 2px #fff5,inset 0 -3px 7px #0004,0 10px 26px #0004}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-search-label .radar-glass-field:focus-within {outline:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-search-label .radar-glass-field input {color:#fff;caret-color:#fff;text-shadow:0 1px 3px #0006}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-search-label input::placeholder {color:#e0e0e3;opacity:1}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-search-label .radar-glass-field::after {filter:brightness(0) invert(1)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-reveal {position:absolute;top:calc(100% + 10px);left:0;right:0;opacity:0;visibility:hidden;transform:translateY(-12px) scale(.965);transform-origin:top center;transition:opacity .25s ease,transform .42s cubic-bezier(.22,1,.36,1),visibility 0s linear .42s;pointer-events:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-filter-reveal {opacity:1;visibility:visible;transform:translateY(0) scale(1);transition-delay:0s;pointer-events:auto}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-clip {min-height:0;overflow:visible}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel {display:flex;flex-direction:column;margin:0;padding:0;position:relative;overflow:hidden;border-radius:24px;max-height:var(--radar-filter-space,min(440px,55dvh));--gtz-liquid-surface:linear-gradient(145deg,rgba(41,43,54,.45),rgba(20,23,32,.18) 52%,rgba(36,38,47,.3));--gtz-liquid-active:var(--gtz-liquid-surface);--gtz-liquid-elevation:inset 0 1px 2px #fff5,inset 0 -3px 8px #12172544,0 18px 38px #080a1340}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel:focus-within {outline:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-panel-content {min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:18px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-glass-field {--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.35))}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button {transition:transform .28s cubic-bezier(.22,1,.36,1),color .2s ease,background .2s ease}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-glass-field {--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.046));--gtz-liquid-active:linear-gradient(145deg,rgba(255,255,255,.32),rgba(255,255,255,.12))}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-filter-panel label {color:#fff;font-weight:550;text-shadow:0 1px 3px #0005}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-filter-panel .radar-glass-field select {color:#fff;text-shadow:0 1px 3px #0005}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel select option {color:#302b26;background:#fff}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button {color:#fff;--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.19),rgba(255,255,255,.07));--gtz-liquid-active:linear-gradient(145deg,rgba(255,255,255,.95),rgba(255,255,255,.76));transition:transform .28s cubic-bezier(.22,1,.36,1),color .2s ease,background .2s ease}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-filter-panel .radar-view-tabs button[aria-pressed="true"] {color:var(--press-red);--gtz-liquid-active:linear-gradient(145deg,#fff,#ffdfe0);background:var(--gtz-liquid-active)}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button:active {transform:scale(.965)}
-@media(hover:hover){.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle:hover,.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button:hover {transform:scale(1.035);color:var(--press-red)}}
+@media(hover:hover){.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button:hover {transform:scale(1.035);color:var(--press-red)}}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls label {min-width:0;gap:7px;font-size:11px;font-weight:600;line-height:1.4;color:#58534e;letter-spacing:0}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls label .radar-glass-field {min-width:0;border-radius:12px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-search-label .radar-glass-field {border-radius:999px}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field :is(input,select) {min-width:0;min-height:44px;padding-inline:12px;font-size:13px;font-weight:500;color:#302b26;line-height:1.4;letter-spacing:-.015em;border:0;background:transparent;box-shadow:none}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field input {padding-left:35px}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls input::placeholder {color:#716b64;opacity:1}
@@ -139,9 +153,7 @@
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-intro {font-size:13px;line-height:1.75}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-toolbar {padding-block:21px 23px;margin-bottom:35px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-updated {font-size:11px;max-width:112px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-row {gap:8px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle {min-width:78px;padding-inline:10px;font-size:12px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel {padding:12px;margin-inline:2px}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-panel-content {padding:12px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-fields {gap:8px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field select {padding-inline:7px;font-size:12px;font-weight:500;letter-spacing:-.02em}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field input {font-size:16px}
@@ -162,10 +174,10 @@
 @media(max-width:359px) {
   .member-page #main:has(.radar-tool:not([hidden])) {--radar-gutter:20px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) h1 {font-size:37px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle {min-width:70px;padding-inline:8px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-card h3 {font-size:17px}
 }
 @media(prefers-reduced-motion:reduce) {
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-card :is(h3,img),.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-reveal {transition:none;transform:none}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-sweep,.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope i {animation:none}
+  .member-page #main .radar-search-scrim {transition:none}
 }
