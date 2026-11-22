@@ -1,25 +1,9 @@
 name: Update Fry Radar
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'tools/collect-fry-radar.mjs'
-      - 'tools/collect-official-fry-radar.mjs'
-      - 'tools/fry-radar-common.mjs'
-      - 'tools/fry-radar-network.mjs'
-      - 'tools/fry-radar-recheck.mjs'
-      - 'tools/fry-radar-schedule.mjs'
-      - 'tools/test-fry-radar.mjs'
-      - 'tools/test-fry-delete.mjs'
-      - 'tools/fry-delete-common.mjs'
-      - 'tools/sync-fry-delete-template.mjs'
-      - 'data/fry-radar.json'
-      - '.github/workflows/fry-radar.yml'
   schedule:
-    # Avoid the busy top of the hour. :47 only recovers stale/failed runs.
-    - cron: '17 * * * *'
-    - cron: '47 * * * *'
+    # Run once per day at 09:17 KST (00:17 UTC).
+    - cron: '17 0 * * *'
   workflow_dispatch:
 
 permissions:
@@ -42,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Skip recovery when a recent collection completed
+      - name: Check whether collection is due
         id: due
         env:
           RADAR_SCHEDULE: ${{ github.event.schedule }}
