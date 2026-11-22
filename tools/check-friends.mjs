@@ -253,7 +253,8 @@ test('Canonical liquid glass is scoped to existing page surfaces and leaves the 
  assert.doesNotMatch(js,/\.control-(?:trigger|search|dock|menu|contact)/);
  assert.doesNotMatch(css,/\.license-flip|\.license-art|\.license-front|\.license-back/);
  assert.match(src('collection.html'),/id="dex-detail-scroll"/);
- assert.equal((src('member.html').match(/class="radar-glass-field"/g)||[]).length,4);
+ assert.equal((src('member.html').match(/class="radar-glass-field"/g)||[]).length,3);
+ assert.doesNotMatch(src('member.html'),/id="radar-brand"/);
  assert.match(src('friend-dex.js'),/detailScroll\.scrollTop=0/);
 });
 
