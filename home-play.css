@@ -1,0 +1,21 @@
+/* Compact home-only Play navigation: the original Play icon artwork, with 3 equally weighted links. */
+body.home-cinema #main #experiences .experience-links{display:grid;grid-template-columns:1fr;gap:0;border-block:1px solid #aa78674a;max-width:100%;background:none}
+body.home-cinema #main #experiences .experience-links>a{display:grid;grid-template-columns:42px minmax(86px,.55fr) minmax(0,1fr) minmax(0,1fr) 22px;grid-template-rows:auto;gap:clamp(10px,1.8vw,25px);align-items:center;padding:14px 7px;min-height:0;border:0;border-radius:0;background:none;box-shadow:none;transform:none;isolation:auto}
+body.home-cinema #main #experiences .experience-links>a+a{border-top:1px solid #aa78674a;border-left:0}
+body.home-cinema #main #experiences .experience-links>a::before{display:none;content:none}
+body.home-cinema #main #experiences .home-game-icon{display:grid;place-items:center;width:38px;height:38px;grid-column:1;grid-row:1;color:var(--ed-red)}
+body.home-cinema #main #experiences .home-game-icon svg{display:block;width:100%;height:100%}
+body.home-cinema #main #experiences .experience-links>a>.home-game-index{grid-column:2;grid-row:1;font-size:10px;letter-spacing:.055em;line-height:1.35;color:var(--ed-red)}
+body.home-cinema #main #experiences .experience-links>a>strong{grid-column:3;grid-row:1;font-size:clamp(17px,1.65vw,24px);letter-spacing:-.04em;line-height:1.2;word-break:keep-all}
+body.home-cinema #main #experiences .experience-links>a>small{grid-column:4;grid-row:1;font-size:clamp(12px,1.1vw,14px);line-height:1.45;word-break:keep-all}
+body.home-cinema #main #experiences .experience-links>a>b{grid-column:5;grid-row:1;align-self:center;font-size:19px;margin:0}
+body.home-cinema[data-home-ink="white"] #main #experiences .experience-links,body.home-cinema[data-home-ink="white"] #main #experiences .experience-links>a+a{border-color:#ffffff66}
+@media(max-width:700px){
+ body.home-cinema #main #experiences .experience-links>a{grid-template-columns:34px minmax(0,1fr) 18px;grid-template-rows:auto auto auto;gap:2px 10px;padding:10px 3px;align-items:start}
+ body.home-cinema #main #experiences .home-game-icon{grid-column:1;grid-row:1/4;width:32px;height:32px;align-self:center}
+ body.home-cinema #main #experiences .experience-links>a>.home-game-index{grid-column:2;grid-row:1;font-size:9px}
+ body.home-cinema #main #experiences .experience-links>a>strong{grid-column:2;grid-row:2;font-size:17px;line-height:1.18}
+ body.home-cinema #main #experiences .experience-links>a>small{grid-column:2;grid-row:3;font-size:11px;line-height:1.35}
+ body.home-cinema #main #experiences .experience-links>a>b{grid-column:3;grid-row:1/4;font-size:17px}
+}
+@media(max-height:650px){body.home-cinema #main #experiences .experience-links>a{padding-block:7px}}

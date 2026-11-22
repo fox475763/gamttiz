@@ -29,7 +29,7 @@
 .home-cinema #main .collection-tools{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:12px 0 20px;border:0;border-top:1px solid var(--ed-line);color:var(--ed-ink);font-size:14px;letter-spacing:-.02em;font-weight:750}
 .home-cinema #main .collection-tools>span a{display:inline-flex;min-height:44px;align-items:center;transition:color .18s}
 .home-cinema #main .collection-tools>span a:hover{color:var(--ed-red)}
-.home-cinema #main .collection-tools #random{color:var(--ed-red);border-color:var(--ed-red);min-height:44px;font-size:14px}
+.home-cinema #main .collection-tools #collection-dex{color:var(--ed-red);border-color:var(--ed-red);min-height:44px;font-size:14px}
 .home-cinema #main .collection-carousel-window{overflow:hidden;border-radius:0;touch-action:pan-y;background:#fff}
 .home-cinema #main .collection .gallery.collection-carousel-track{gap:0;padding:0;width:max-content;will-change:auto}
 .home-cinema #main .collection .gallery .card.friend-carousel-card{display:flex;flex-direction:column;flex:0 0 clamp(192px,20vw,266px);height:auto;aspect-ratio:auto;min-width:0;width:auto;position:relative;background:#fff;color:var(--ed-ink);border:0;border-radius:0;padding:0 13px 0;box-shadow:none;transform:none;overflow:visible;transition:none}
@@ -245,8 +245,8 @@
 .home-cinema #main .collection .section-heading{margin-bottom:20px}
 .home-cinema #main .collection-tools{border-top:2px solid var(--ed-red);padding:8px 0 15px}
 .home-cinema #main .collection-tools>span a{color:var(--ed-ink);font-weight:800}
-.home-cinema #main .collection-tools #random{padding:9px 16px;border:0;background:var(--ed-red);color:white;border-radius:2px;box-shadow:0 2px 0 #a81822;transition:background .2s,color .2s}
-.home-cinema #main .collection-tools #random:hover{background:#aa1722;color:white}
+.home-cinema #main .collection-tools #collection-dex{padding:9px 16px;border:0;background:var(--ed-red);color:white;border-radius:2px;box-shadow:0 2px 0 #a81822;transition:background .2s,color .2s}
+.home-cinema #main .collection-tools #collection-dex:hover{background:#aa1722;color:white}
 .home-cinema #main .collection-carousel-window{background:#f4ead3;border-bottom:2px solid var(--ed-red);border-top:1px solid #ead6a5;isolation:isolate}
 .home-cinema #main .collection .gallery .card.friend-carousel-card{background:transparent;padding:0 14px;flex-basis:clamp(196px,20vw,274px)}
 .home-cinema #main .friend-photo{background:#f4ead3;aspect-ratio:1/1;isolation:isolate}
@@ -347,7 +347,7 @@
  .home-cinema #main>:not(.hero) :is(.story-copy,.holder-copy,.home-package-copy)>p:not(.eyebrow){font-size:14px;line-height:1.75;margin-top:12px}
  .home-cinema #main .collection .section-heading{gap:8px;margin-bottom:16px}
  .home-cinema #main .collection-tools{gap:8px;padding:6px 0 10px;font-size:13px}
- .home-cinema #main .collection-tools #random{font-size:12px;min-height:38px;padding:7px 10px;gap:0}
+ .home-cinema #main .collection-tools #collection-dex{font-size:12px;min-height:38px;padding:7px 10px;gap:0}
  .home-cinema #main .collection .gallery .card.friend-carousel-card{flex-basis:clamp(132px,44vw,205px);padding:0 9px}
  .home-cinema #main .collection .gallery .friend-carousel-card .card-label{font-size:14px;min-height:61px;padding:9px 1px 11px}
  .home-cinema #main .collection .gallery .friend-carousel-card .friend-english{font-size:10px}

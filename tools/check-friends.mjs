@@ -36,7 +36,7 @@ test('Every selected segment lands at the top pointer, including repeated spins'
 });
 test('Home carousel stays in place; Play and search link to the new pages',()=>{
  const home=src('index.html'),play=src('play.html'),shared=src('site-features.js');
- assert.match(home,/id="friends-carousel"/);assert.match(home,/id="random" class="text-button" href="draw.html"/);assert.match(home,/href="collection.html" aria-label="감띠즈를 소개합니다/);
+ assert.match(home,/id="friends-carousel"/);assert.match(home,/id="collection-dex" class="text-button" href="collection.html"/);assert.match(home,/id="experiences"[\s\S]*?href="draw.html"/);assert.match(home,/href="collection.html" aria-label="감띠즈를 소개합니다/);
  assert.match(play,/href="draw.html" class="hub-daily"/);assert.ok(shared.includes("url:'draw.html'")&&shared.includes("url:'collection.html'"));
  assert.match(src('friend-dex.js'),/slots=20/);assert.match(src('friend-dex.js'),/미공개 감띠/);assert.match(src('daily-draw.js'),/saved\?\.date===date/);
 });

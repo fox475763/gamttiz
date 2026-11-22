@@ -8,6 +8,7 @@
   const plane=section.querySelector('.home-license-plane'),reflection=section.querySelector('.home-license-reflection');
   const caption=section.querySelector('#home-license-card-caption'),title=section.querySelector('#home-license-title');
   const description=section.querySelector('#home-license-description'),recordLine=section.querySelector('#home-license-record'),issue=section.querySelector('#home-license-issue');
+  const benefit=section.querySelector('#home-license-benefit'),member=section.querySelector('.home-license-member'),actions=issue.parentElement;
   let frontArt=plane.querySelector('.home-license-front'),backArt=plane.querySelector('.home-license-back');
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   const friendNames=M.names;
@@ -145,7 +146,9 @@
       if(backArt.hasAttribute('src'))backArt.removeAttribute('src');
     }else data=current;
     section.dataset.licenseState=data?'issued':'unissued';
+    benefit.hidden=!!data;
     if(data){
+      if(actions.firstElementChild!==member)actions.prepend(member);
       title.textContent=data.name+'님의 감띠즈 라이센스.';
       description.textContent='나의 라이센스로 감튀 레이더와 멤버 전용 콘텐츠를 만나보세요.';
       recordLine.textContent=M.names[data.character]+' · '+data.number;recordLine.hidden=false;
@@ -153,10 +156,11 @@
       issue.replaceChildren(document.createTextNode('내 라이센스 확인 ↗'));
       card.setAttribute('aria-label',data.name+'님의 발급된 감띠즈 라이센스 카드');
     }else{
-      title.innerHTML='당신만의 감띠즈<br>라이센스.';
-      description.textContent='나의 이름과 좋아하는 감띠를 담은 라이센스를 발급받아 보세요. 라이센스를 발급하면 감튀 레이더 등 멤버 전용 콘텐츠를 이용할 수 있어요.';
+      if(actions.firstElementChild!==issue)actions.prepend(issue);
+      title.innerHTML='라이센스 하나로<br><em>멤버 콘텐츠</em>를 열어보세요.';
+      description.textContent='나의 이름과 좋아하는 감띠를 담은 라이센스를 발급하면 감튀레이더 등 멤버 전용 콘텐츠를 이용할 수 있어요.';
       recordLine.hidden=true;recordLine.textContent='';caption.textContent='LICENSE PREVIEW';
-      issue.textContent='라이센스 발급 받기 ↗';card.setAttribute('aria-label','감띠즈 라이센스 카드 미리보기');
+      issue.textContent='라이센스 발급하고 멤버 되기 ↗';card.setAttribute('aria-label','감띠즈 라이센스 카드 미리보기');
     }
     paint();prepare();motion();
   }

@@ -28,6 +28,8 @@ for(const engine of [chromium,webkit])test('Fry Rader search-anchored glass over
      const page=await context.newPage();
      await page.goto(base+'member.html#radar',{waitUntil:'domcontentloaded'});
      await page.waitForFunction(()=>document.querySelectorAll('#radar-list .radar-entry').length===3);
+     await page.waitForFunction(()=>Array.from(document.querySelectorAll('#radar-list img.radar-thumb-fallback')).every(img=>img.complete&&img.naturalWidth===1280));
+     assert.equal(await page.locator('#radar-list img.radar-thumb-fallback').count(),3);
      const toggle=page.locator('#radar-search'),panel=page.locator('#radar-filter-panel'),scrim=page.locator('#radar-search-scrim');
      assert.equal(await page.locator('#radar-filter-toggle').count(),0);
      assert.equal(await toggle.getAttribute('aria-expanded'),'false');
@@ -158,13 +160,44 @@ for(const engine of [chromium,webkit])test('Home MY ID shows issuance state and 
        assert.ok((await section.locator('.home-license-back').getAttribute('src')).startsWith('data:image/png'));
        await page.waitForFunction(()=>document.querySelector('.home-license-card').dataset.side==='back');
        assert.ok(await section.locator('.home-license-back').isVisible());
+       assert.ok(await section.locator('#home-license-benefit').isHidden());
      }else{
        assert.ok((await section.locator('#home-license-description').textContent()).includes('멤버 전용 콘텐츠'));
        assert.ok(await section.locator('#home-license-record').isHidden());
+       assert.ok(await section.locator('#home-license-benefit').isVisible());
+       assert.match(await section.locator('#home-license-title').innerText(),/멤버 콘텐츠/);
+       assert.equal(await section.locator('.home-license-actions a').first().getAttribute('href'),'license.html');
      }
      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=2));
      await context.close();
    }
+ }finally{await browser.close();}
+});
+
+for(const engine of [chromium,webkit])test('Home highlights all three compact Play links and uses the branded radar fallback: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+  for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
+   const mobile=viewport.width<700,context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'reduce'});
+   await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+   const today=new Date().toISOString(),items=[{id:'home-qa',title:'감튀 소식',summary:'소식',category:'event',source:'QA',url:'https://example.com/story',publishedAt:today,collectedAt:today}];
+   await context.route('**/data/fry-radar.json',route=>route.fulfill({json:{updatedAt:today,items}}));
+   const page=await context.newPage();
+   await page.goto(base+'index.html#experiences',{waitUntil:'load'});
+   await page.waitForFunction(()=>document.body.dataset.homeScene===document.querySelector('#experiences').dataset.scene);
+   const games=page.locator('#experiences .experience-links>a');
+   assert.equal(await games.count(),3);
+   assert.deepEqual(await games.evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['quiz.html','combo.html','draw.html']);
+   assert.equal(await page.locator('#experiences .home-game-icon svg').count(),3);
+   assert.ok(await games.evaluateAll(els=>els.every(el=>el.getBoundingClientRect().height<115)));
+   assert.equal(await page.locator('#collection-dex').getAttribute('href'),'collection.html');
+   assert.equal(await page.locator('#collection a[href="draw.html"]').count(),0);
+   const preview=page.locator('.radar-preview-item img.radar-thumb-fallback');
+   await page.waitForFunction(()=>document.querySelector('.radar-preview-item img.radar-thumb-fallback'));
+   assert.ok(await preview.count()>0);
+   assert.match(await preview.first().getAttribute('src'),/fry-radar-thumbnail\.svg$/);
+   await context.close();
+  }
  }finally{await browser.close();}
 });
 

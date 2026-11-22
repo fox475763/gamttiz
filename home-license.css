@@ -43,3 +43,24 @@
 }
 @media(max-height:680px) and (max-width:400px){.home-license-card{width:min(35vw,135px)}.home-license-stage{padding:3px 0;gap:6px}.home-license-actions{margin-top:10px}}
 @media(prefers-reduced-motion:reduce){.home-license-card-inner{will-change:auto}.home-license-reflection{opacity:0!important}.home-license-actions a{transition:none}}
+
+/* The unissued state must communicate access before the user reads the body. */
+.home-cinema #main .home-license-copy .home-license-benefit{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:7px;background:#fff1dd;color:#aa2529;font-weight:760;line-height:1.35;font-size:clamp(11px,1.15vw,13px);margin:0 0 14px;letter-spacing:-.025em;border:1px solid #ecbf83}
+.home-license-benefit svg{flex:none}
+.home-license-benefit[hidden]{display:none!important}
+.home-license-copy h2 em{font-style:normal;color:#b5272c}
+.home-license[data-license-state="unissued"] .home-license-issue{background:#c5282e;border-color:#c5282e;color:#fff;box-shadow:0 7px 18px #b92a2823;font-weight:760}
+.home-license[data-license-state="unissued"] .home-license-member{background:#fff9;border-color:#d4b9ad;color:#aa252b}
+.home-license[data-license-state="unissued"] .home-license-issue:hover{background:#a81e28}
+@media(max-width:700px){
+ .home-cinema #main .home-license-copy .home-license-benefit{font-size:11px;margin-bottom:9px;padding:6px 8px}
+ .home-cinema #main .home-license[data-license-state="unissued"] .home-license-copy h2{font-size:clamp(24px,6.6vw,34px)}
+ .home-license[data-license-state="unissued"] .home-license-card{width:min(35vw,163px,calc(36vh * .6286))}
+ .home-license[data-license-state="unissued"] .home-license-actions{gap:7px;flex-wrap:wrap}
+ .home-license[data-license-state="unissued"] .home-license-actions a{padding-inline:12px}
+}
+@media(max-width:390px) and (max-height:740px){
+ .home-license[data-license-state="unissued"] .home-license-stage{padding:3px 0;gap:6px}
+ .home-license[data-license-state="unissued"] .home-license-card{width:min(32vw,125px)}
+ .home-license[data-license-state="unissued"] .home-license-copy>p:not(.eyebrow):not(.home-license-benefit){font-size:12px;margin-top:8px}
+}

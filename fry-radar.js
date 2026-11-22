@@ -73,17 +73,17 @@
   };
   const statusLabels={ended:'종료',past:'지난 기사',upcoming:'예정',ongoing:'진행 중',available:'운영 확인',unverified:'판매 여부 확인 필요',recent:'기간 미확인'};
   const isArchived=item=>['ended','past'].includes(statusOf(item));
-  // Brand-neutral artwork authored for GAMTTIZ. No copied product photos or trademarks.
-  const friesArt=()=>{
-    const art=el('div','radar-fries-art');
-    art.setAttribute('aria-hidden','true');
-    const stars=el('div','radar-fries-stars');
-    const fries=el('div','radar-fries-sticks');
-    for(let n=0;n<7;n++)fries.append(el('i','radar-fry-stick'));
-    const pack=el('div','radar-fries-pack');
-    pack.append(el('span','', 'FRY'));
-    art.append(stars,fries,pack,el('span','radar-art-label','GAMTTIZ · Fry Rader'));
-    return art;
+  // Original brand artwork for stories with no usable source photo.
+  // Never pretend a generic illustration depicts the actual event.
+  const fallbackImage=(className)=>{
+    const img=el('img',className+' radar-thumb-fallback');
+    img.src='assets/fry-radar-thumbnail.svg';img.alt='감튀레이더 공통 썸네일 · 실제 기사 사진 아님';
+    img.loading='lazy';img.decoding='async';img.width=1280;img.height=800;
+    return img;
+  };
+  const sourceImage=item=>{
+    if(typeof item.imageUrl!=='string'||/과거 홍보 이미지|행사 배너가 아님|임시 이미지/.test(item.imageNote||''))return null;
+    try{const url=new URL(item.imageUrl);return url.protocol==='https:'&&!/\.(?:svg|ico)(?:\?|$)/i.test(url.pathname)?url.href:null;}catch{return null;}
   };
   const card=item=>{
     const state=statusOf(item);
@@ -98,32 +98,18 @@
     if(model?.isNew(item,previousVisit))top.append(el('span','radar-new','NEW'));
     if(nearEnd(item))top.append(el('span','radar-new',model.daysLeft(item)===0?'오늘 종료':'D-'+model.daysLeft(item)));
     const title=el('h3','',item.title);
-    // Source thumbnail display, retaining the original GAMTTIZ illustration as fallback.
-    const media=el('div','radar-card-media');
-    const picture=el('div','radar-card-photo');
+    // A genuine source photo takes precedence. Missing, broken or explicitly
+    // historical stand-in photos use the same branded thumbnail as Home.
+    const media=el('div','radar-card-media'),picture=el('div','radar-card-photo');
     media.append(picture);
-    let imageAdded=false;
-    if(typeof item.imageUrl==='string'){
-      try{
-        const imageUrl=new URL(item.imageUrl);
-        if(imageUrl.protocol==='https:'&&!/\.(?:svg|ico)(?:\?|$)/i.test(imageUrl.pathname)){
-          const img=el('img','radar-card-image');
-          img.src=imageUrl.href;
-          img.alt=(item.source||'원문')+' 대표 사진';
-          img.loading='lazy';
-          img.decoding='async';
-          img.referrerPolicy='no-referrer';
-          img.addEventListener('error',()=>{img.remove();picture.append(friesArt());},{once:true});
-          picture.append(img);
-          imageAdded=true;
-        }
-      }catch{}
-    }
-    if(!imageAdded)picture.append(friesArt());
-    if(imageAdded && item.imageNote){
-      const note=el('span','radar-image-note',item.imageNote);
-      media.append(note);
-    }
+    const imageUrl=sourceImage(item);
+    const fallback=()=>{picture.replaceChildren(fallbackImage('radar-card-image'));media.querySelector('.radar-image-note')?.remove();};
+    if(imageUrl){
+      const img=el('img','radar-card-image');
+      img.src=imageUrl;img.alt=(item.source||'원문')+' 대표 사진';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+      img.addEventListener('error',fallback,{once:true});picture.append(img);
+      if(item.imageNote)media.append(el('span','radar-image-note',item.imageNote));
+    }else fallback();
     // The feed is a visual index; read the full story at its original source.
     // Summaries remain in the data for search and verification, not in the UI.
     node.append(media,title,top);
@@ -179,18 +165,14 @@
   const previewCard=item=>{
     const node=el('a','radar-preview-item');
     node.href='member.html#post-'+encodeURIComponent(item.id);
-    if(item.imageNote)node.title=item.imageNote;
     const thumb=el('div','radar-preview-thumb');
-    const fallback=()=>thumb.replaceChildren(el('div','radar-preview-thumb-fallback','🍟'));
-    if(typeof item.imageUrl==='string'&&validUrl(item.imageUrl)&&item.imageUrl.startsWith('https:')){
+    const imageUrl=sourceImage(item);
+    const fallback=()=>{node.removeAttribute('title');thumb.replaceChildren(fallbackImage('radar-preview-image'));};
+    if(imageUrl){
+      if(item.imageNote)node.title=item.imageNote;
       const img=el('img','radar-preview-image');
-      img.src=item.imageUrl;
-      img.alt=item.imageNote||'';
-      img.loading='lazy';
-      img.decoding='async';
-      img.referrerPolicy='no-referrer';
-      img.addEventListener('error',fallback,{once:true});
-      thumb.append(img);
+      img.src=imageUrl;img.alt=item.imageNote||'';img.loading='lazy';img.decoding='async';img.referrerPolicy='no-referrer';
+      img.addEventListener('error',fallback,{once:true});thumb.append(img);
     }else fallback();
 
     // Full-bleed photo with only the headline on a bottom-up translucent fade.
