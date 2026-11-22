@@ -157,10 +157,10 @@
       card.setAttribute('aria-label',data.name+'님의 발급된 감띠즈 라이센스 카드');
     }else{
       if(actions.firstElementChild!==issue)actions.prepend(issue);
-      title.innerHTML='무료 라이센스로<br><em>멤버 콘텐츠</em>를 열어보세요.';
-      description.textContent='나의 이름과 좋아하는 감띠를 담아 무료로 발급받으세요. 결제 없이 감튀레이더 등 멤버 전용 콘텐츠를 이용할 수 있어요.';
+      title.textContent='감띠즈 애호가 라이센스';
+      description.textContent='감자튀김과 감띠즈를 사랑하는 애호가임을 증명하고, 멤버 전용 콘텐츠를 즐길 수 있도록 도와주는 나만의 온라인 라이센스 카드예요.';
       recordLine.hidden=true;recordLine.textContent='';caption.textContent='LICENSE PREVIEW';
-      issue.textContent='무료 라이센스 발급하기 ↗';card.setAttribute('aria-label','감띠즈 라이센스 카드 미리보기');
+      issue.textContent='라이센스 발급하기 ↗';card.setAttribute('aria-label','감띠즈 라이센스 카드 미리보기');
     }
     paint();prepare();motion();
   }
