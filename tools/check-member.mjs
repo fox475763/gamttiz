@@ -132,7 +132,15 @@ test('Transparent menu layout and independent liquid glass surfaces keep selecte
   assert.match(css,/animation:menu-liquid-light 14s linear infinite/);
   assert.match(js,/scene\.attachShadow\(\{mode:'open'\}\)/);
   assert.match(js,/gtz-menu-mirror-lens/);
-  assert.match(css,/background-color:rgba\(20,12,18,\.045\)/);
+  assert.match(js,/roundedContour\(a\.x\+d,a\.y\+d,a\.right-d,a\.bottom-d,Math\.max\(0,r-d\),true\)/);
+  const profile=js.slice(js.indexOf('  function menuEdgeVector('),js.indexOf('  function prepareMenuRefraction('));
+  const vmContext=vm.createContext({Math});vm.runInContext(profile,vmContext);
+  const sample=(x,y)=>Array.from(vm.runInContext('menuEdgeVector('+x+','+y+',240,40,20,7.5)',vmContext));
+  assert.deepEqual(sample(0,0),[0,0]);assert.deepEqual(sample(0,10),[0,0]);
+  assert.ok(sample(-118,0)[0]<-.5&&sample(118,0)[0]>.5);
+  assert.ok(sample(0,-18)[1]<-.5&&sample(0,18)[1]>.5);
+  const corner=sample(-113,-13);assert.ok(corner[0]<-.2&&corner[1]<-.2);
+  assert.match(css,/background-color:rgba\(20,12,18,\.025\)/);
   assert.match(css,/\.control-menu-optics::after\{[\s\S]*?radial-gradient\(ellipse 21% 75%/);
 });
 

@@ -134,6 +134,21 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
      await page.evaluate(()=>{document.querySelector('.poster-label').textContent='LIVE LENS TEST';});
      await page.waitForFunction(()=>document.querySelector('.control-menu-mirror-scene').shadowRoot.querySelector('.poster-label').textContent==='LIVE LENS TEST');
    }
+   // Sample the generated displacement texture itself: zero in the center,
+   // strong in both edge directions. WebKit's mirrored center is also clipped out.
+   const pixels=await page.evaluate(async native=>{
+     const f=document.querySelector(native?'#gtz-menu-refraction feImage':'#gtz-menu-mirror-lens feImage');
+     const image=new Image();image.src=f.getAttribute('href');await image.decode();
+     const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+     const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
+     const read=(x,y)=>Array.from(ctx.getImageData(Math.max(0,Math.min(canvas.width-1,Math.floor(x))),Math.max(0,Math.min(canvas.height-1,Math.floor(y))),1,1).data).slice(0,2);
+     if(native)return {center:read(canvas.width/2,canvas.height/2),left:read(2,canvas.height/2),top:read(canvas.width/2,2)};
+     const r=document.querySelectorAll('.control-menu-links > :is(a,button)')[1].getBoundingClientRect(),host=document.querySelector('.control-menu-mirror');
+     const sx=canvas.width/host.clientWidth,sy=canvas.height/host.clientHeight;
+     return {center:read((r.left+r.width/2)*sx,(r.top+r.height/2)*sy),left:read((r.left+2)*sx,(r.top+r.height/2)*sy),top:read((r.left+r.width/2)*sx,(r.top+2)*sy),ring:document.querySelector('.control-menu-mirror-ring').style.clipPath};
+   },engine===chromium);
+   assert.deepEqual(pixels.center,[128,128]);assert.ok(pixels.left[0]>148&&pixels.top[1]>148,JSON.stringify(pixels));
+   if(engine===webkit)assert.ok(pixels.ring.startsWith('path(')&&((pixels.ring.match(/M/g)||[]).length>=4),pixels.ring);
    const driftBefore=await items.nth(1).locator('.control-menu-optics').evaluate(el=>getComputedStyle(el,'::before').transform);
    await page.waitForFunction(previous=>getComputedStyle(document.querySelectorAll('.control-menu-optics')[1],'::before').transform!==previous,driftBefore,{timeout:8000});
    assert.ok(material.width<255&&material.height>=37&&material.height<=44,JSON.stringify(material));

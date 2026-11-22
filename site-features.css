@@ -793,7 +793,8 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 }
 .control-dock .control-menu .control-menu-links > :is(a,button){
   --menu-light-x:22%;--menu-light-y:12%;
-  background-color:rgba(20,12,18,.045);
+  background-color:rgba(20,12,18,.025);
+  border-radius:999px;
   background-image:none;
   -webkit-backdrop-filter:none;backdrop-filter:none;
   box-shadow:none;
@@ -842,7 +843,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 }
 /* Native reference filtering samples the actual backdrop every frame. */
 .control-dock[data-mode="menu"][data-menu-refraction="ready"] .control-menu .control-menu-optics{
-  backdrop-filter:url(#gtz-menu-refraction) blur(.15px) saturate(1.08);
+  backdrop-filter:url(#gtz-menu-refraction);
 }
 /* In WebKit, optics sit over the live, clipped DOM refraction layer. */
 .control-dock[data-mode="menu"][data-menu-refraction="mirror"] .control-menu .control-menu-optics{
@@ -856,7 +857,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   animation:menu-light-slide 12s ease-in-out infinite;animation-delay:calc(var(--menu-index,0)*-.71s);
 }
 .control-menu-mirror{position:fixed;inset:0;z-index:1195;pointer-events:none;overflow:hidden;visibility:hidden;isolation:isolate}
-.control-menu-mirror-scene{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.control-menu-mirror-ring,.control-menu-mirror-scene{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 @media(prefers-reduced-motion:reduce){
  .control-dock .control-menu .control-menu-optics,.control-dock .control-menu .control-menu-optics::before{transition:none;animation:none!important}
  .control-dock .control-menu .control-menu-links > :is(a,button).glass-pressed::before{animation:none}

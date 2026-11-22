@@ -90,6 +90,25 @@
   let opticsPrepared=false,refractionTimer=0,lightFrame=0,lightTarget=null,lightPoint=null;
   const motionReduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   const transparencyReduced=window.matchMedia('(prefers-reduced-transparency: reduce)');
+  // A clear, flat center with an optically curved perimeter. Both renderer
+  // paths use the same rounded-rectangle surface-normal and smooth rim falloff.
+  const MENU_EDGE_DEPTH=7.5;
+  function menuEdgeVector(px,py,w,h,r,depth){
+    const qx=Math.abs(px)-(w/2-r),qy=Math.abs(py)-(h/2-r);
+    const ox=Math.max(qx,0),oy=Math.max(qy,0),outer=Math.hypot(ox,oy);
+    const distance=outer+Math.min(Math.max(qx,qy),0)-r;
+    // Outside the lens and deeper than the narrow optical rim: zero distortion.
+    if(distance>0||distance<=-depth)return [0,0];
+    let nx=0,ny=0;
+    if(outer>0){nx=Math.sign(px)*ox/outer;ny=Math.sign(py)*oy/outer;}
+    else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
+    const t=Math.max(0,Math.min(1,-distance/depth));
+    const falloff=1-t*t*(3-2*t);
+    // Give rounded corners a little more optical power, like a liquid-glass
+    // capsule: the background line curves into the clear central face.
+    const corner=1+.19*Math.abs(nx*ny)*2;
+    return [nx*falloff*corner,ny*falloff*corner];
+  }
   function prepareMenuRefraction(){
     if(opticsPrepared)return !!document.getElementById('gtz-menu-refraction');
     opticsPrepared=true;
@@ -97,22 +116,15 @@
     // CSS lens there. Chromium's accelerated reference filters do support it.
     if(!/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)||/iPhone|iPad|iPod/.test(navigator.userAgent)||!window.CSS?.supports('backdrop-filter','url(#gtz-menu-refraction)'))return false;
     try{
-      const w=256,h=44,r=14,depth=11,canvas=document.createElement('canvas');
+      const w=256,h=44,r=21,depth=8.25,canvas=document.createElement('canvas');
       canvas.width=w;canvas.height=h;
       const ctx=canvas.getContext('2d');if(!ctx)return false;
       const pixels=ctx.createImageData(w,h);
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){
-        const px=x+.5-w/2,py=y+.5-h/2,qx=Math.abs(px)-(w/2-r),qy=Math.abs(py)-(h/2-r);
-        const ox=Math.max(qx,0),oy=Math.max(qy,0),outside=Math.hypot(ox,oy);
-        const distance=outside+Math.min(Math.max(qx,qy),0)-r;
-        let nx=0,ny=0;
-        if(outside>0){nx=Math.sign(px)*ox/outside;ny=Math.sign(py)*oy/outside;}
-        else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
-        const t=Math.min(1,Math.max(0,-distance/depth));
-        const bend=Math.pow(1-t,1.3);
+        const [nx,ny]=menuEdgeVector(x+.5-w/2,y+.5-h/2,w,h,r,depth);
         const i=4*(y*w+x);
-        pixels.data[i]=Math.round(128-nx*bend*32);
-        pixels.data[i+1]=Math.round(128-ny*bend*95);
+        pixels.data[i]=Math.round(128-nx*43);
+        pixels.data[i+1]=Math.round(128-ny*113);
         pixels.data[i+2]=128;pixels.data[i+3]=255;
       }
       ctx.putImageData(pixels,0,0);
@@ -126,7 +138,7 @@
       Object.entries({x:'0',y:'0',width:'1',height:'1',preserveAspectRatio:'none',result:'menuLensMap',href}).forEach(([k,v])=>map.setAttribute(k,v));
       map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
       const distort=document.createElementNS(ns,'feDisplacementMap');
-      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.40',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
+      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.45',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
       filter.append(map,distort);svg.append(filter);document.body.append(svg);
       canvas.width=canvas.height=0;
       return true;
@@ -150,15 +162,15 @@
     stopMenuMirror();
     if(!window.CSS?.supports('filter','url(#gtz-mirror-lens)')||!Element.prototype.attachShadow||
        !window.CSS.supports('clip-path','path("M0 0 L1 0 L1 1 Z")'))return;
-    const generation=mirrorGeneration,host=make('div','control-menu-mirror'),scene=make('div','control-menu-mirror-scene');
-    host.inert=true;host.setAttribute('aria-hidden','true');host.append(scene);
+    const generation=mirrorGeneration,host=make('div','control-menu-mirror'),ring=make('div','control-menu-mirror-ring'),scene=make('div','control-menu-mirror-scene');
+    host.inert=true;host.setAttribute('aria-hidden','true');ring.append(scene);host.append(ring);
     const svg=document.createElementNS(svgNS,'svg');
     svg.setAttribute('width','0');svg.setAttribute('height','0');svg.setAttribute('aria-hidden','true');
     svg.style.cssText='position:absolute;overflow:hidden;pointer-events:none';
     const filter=document.createElementNS(svgNS,'filter'),map=document.createElementNS(svgNS,'feImage'),distort=document.createElementNS(svgNS,'feDisplacementMap');
     Object.entries({id:'gtz-menu-mirror-lens',filterUnits:'userSpaceOnUse',primitiveUnits:'userSpaceOnUse','color-interpolation-filters':'sRGB'}).forEach(([k,v])=>filter.setAttribute(k,v));
     Object.entries({x:'0',y:'0',preserveAspectRatio:'none',result:'lensMap'}).forEach(([k,v])=>map.setAttribute(k,v));
-    Object.entries({in:'SourceGraphic',in2:'lensMap',scale:'34',xChannelSelector:'R',yChannelSelector:'G'}).forEach(([k,v])=>distort.setAttribute(k,v));
+    Object.entries({in:'SourceGraphic',in2:'lensMap',scale:'46',xChannelSelector:'R',yChannelSelector:'G'}).forEach(([k,v])=>distort.setAttribute(k,v));
     filter.append(map,distort);svg.append(filter);document.body.append(svg,host);
     const shadow=scene.attachShadow({mode:'open'}),pairs=new WeakMap(),scrollables=new Set(),canvases=new Set(),videos=new Set();
     const m={host,scene,svg,frame:0,observer:null};menuMirror=m;
@@ -232,37 +244,49 @@
       const opticsLayers=[...menuLinks.querySelectorAll('.control-menu-optics')];
       // All lenses share this viewport-size displacement map. Only regenerate
       // it when the actual on-screen menu geometry changes (open, hover, scroll).
+      // A closed outer contour plus its counter-clockwise inset contour
+      // makes a hollow ring. The real page, not the duplicate, is visible in
+      // the entire central opening, even while text/images animate.
+      function roundedContour(x,y,right,bottom,r,reverse=false){
+        r=Math.max(0,Math.min(r,(right-x)/2,(bottom-y)/2));
+        const arc=(endX,endY,dir)=>' A'+r+' '+r+' 0 0 '+dir+' '+endX+' '+endY;
+        if(reverse)return 'M'+(x+r)+' '+y+arc(x,y+r,0)+' V'+(bottom-r)+arc(x+r,bottom,0)+' H'+(right-r)+arc(right,bottom-r,0)+' V'+(y+r)+arc(right-r,y,0)+' H'+(x+r)+' Z ';
+        return 'M'+(x+r)+' '+y+' H'+(right-r)+arc(right,y+r,1)+' V'+(bottom-r)+arc(right-r,bottom,1)+' H'+(x+r)+arc(x,bottom-r,1)+' V'+(y+r)+arc(x+r,y,1)+' Z ';
+      }
       function updateMap(){
         const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return false;
         const clip=menuScroll.getBoundingClientRect();
         const rects=[...menuLinks.children].filter(el=>Number(getComputedStyle(el).opacity)>.97).map(el=>{
-          const r=el.getBoundingClientRect(),rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||13;
-          return {x:Math.max(0,clip.left,r.left),y:Math.max(0,clip.top,r.top),right:Math.min(w,clip.right,r.right),bottom:Math.min(h,clip.bottom,r.bottom),r:rad};
-        }).filter(r=>r.right-r.x>3&&r.bottom-r.y>3);
+          const r=el.getBoundingClientRect(),rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||20;
+          return {x:r.left,y:r.top,right:r.right,bottom:r.bottom,r:rad};
+        }).filter(r=>Math.min(w,clip.right,r.right)-Math.max(0,clip.left,r.x)>3&&Math.min(h,clip.bottom,r.bottom)-Math.max(0,clip.top,r.y)>3);
         if(!rects.length)return false;
-        const key=[w,h,...rects.flatMap(r=>[r.x,r.y,r.right,r.bottom,r.r].map(n=>Math.round(n*2)/2))].join(',');
+        const key=[w,h,clip.left,clip.top,clip.right,clip.bottom,...rects.flatMap(r=>[r.x,r.y,r.right,r.bottom,r.r].map(n=>Math.round(n*2)/2))].join(',');
         if(key===lastGeometry)return true;lastGeometry=key;
-        const step=.65,mw=Math.ceil(w*step),mh=Math.ceil(h*step);canvas.width=mw;canvas.height=mh;
+        const step=.85,mw=Math.ceil(w*step),mh=Math.ceil(h*step);canvas.width=mw;canvas.height=mh;
         const img=ctx.createImageData(mw,mh),data=img.data;
         for(let i=0;i<data.length;i+=4){data[i]=data[i+1]=data[i+2]=128;data[i+3]=255;}
         let path='';
         for(const a of rects){
           const rw=a.right-a.x,rh=a.bottom-a.y,r=Math.min(a.r,rw/2,rh/2),cx=a.x+rw/2,cy=a.y+rh/2;
-          path+='M'+(a.x+r)+' '+a.y+' H'+(a.right-r)+' Q'+a.right+' '+a.y+' '+a.right+' '+(a.y+r)+' V'+(a.bottom-r)+' Q'+a.right+' '+a.bottom+' '+(a.right-r)+' '+a.bottom+' H'+(a.x+r)+' Q'+a.x+' '+a.bottom+' '+a.x+' '+(a.bottom-r)+' V'+(a.y+r)+' Q'+a.x+' '+a.y+' '+(a.x+r)+' '+a.y+' Z ';
+          const d=Math.min(MENU_EDGE_DEPTH,rh*.23,rw*.23);
+          path+=roundedContour(a.x,a.y,a.right,a.bottom,r);
+          path+=roundedContour(a.x+d,a.y+d,a.right-d,a.bottom-d,Math.max(0,r-d),true);
           for(let y=Math.max(0,Math.floor(a.y*step));y<Math.min(mh,Math.ceil(a.bottom*step));y++)for(let x=Math.max(0,Math.floor(a.x*step));x<Math.min(mw,Math.ceil(a.right*step));x++){
-            const px=(x+.5)/step-cx,py=(y+.5)/step-cy,qx=Math.abs(px)-(rw/2-r),qy=Math.abs(py)-(rh/2-r);
-            const ox=Math.max(qx,0),oy=Math.max(qy,0),o=Math.hypot(ox,oy),d=o+Math.min(Math.max(qx,qy),0)-r;
-            if(d>0)continue;
-            let nx=0,ny=0;if(o>0){nx=Math.sign(px)*ox/o;ny=Math.sign(py)*oy/o;}else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
-            const curve=Math.pow(Math.max(0,1+d/11),1.22),i=4*(y*mw+x);
-            data[i]=Math.round(128-nx*curve*62);data[i+1]=Math.round(128-ny*curve*62);
+            const [nx,ny]=menuEdgeVector((x+.5)/step-cx,(y+.5)/step-cy,rw,rh,r,d);
+            if(nx===0&&ny===0)continue;
+            const i=4*(y*mw+x);
+            data[i]=Math.round(128-nx*96);data[i+1]=Math.round(128-ny*47);
           }
         }
         ctx.putImageData(img,0,0);
         for(const el of [filter,map,distort]){el.setAttribute('width',w);el.setAttribute('height',h);}
         filter.setAttribute('x','0');filter.setAttribute('y','0');distort.setAttribute('x','0');distort.setAttribute('y','0');
         const href=canvas.toDataURL('image/png');map.setAttribute('href',href);map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
-        host.style.clipPath='path("'+path+'")';return true;
+        // Clip the whole mirror to the scroll viewport, and separately clip
+        // the refraction to the exact rings, without making fake cut edges.
+        host.style.clipPath='inset('+Math.max(0,clip.top)+'px '+Math.max(0,w-clip.right)+'px '+Math.max(0,h-clip.bottom)+'px '+Math.max(0,clip.left)+'px)';
+        ring.style.clipPath='path("'+path+'")';return true;
       }
       function syncScene(now){
         if(menuMirror!==m||generation!==mirrorGeneration||dock.dataset.mode!=='menu')return;
