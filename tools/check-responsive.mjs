@@ -15,7 +15,7 @@ const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2
 
 // Isolated radar regression: validate the actual cascade and layout independently
 // of the Home/Dex scrolling assertions and of live stories aging into the archive.
-for(const engine of [chromium,webkit])test('Fry Rader brand layout and headline-only feed: '+engine.name(),{timeout:45000},async()=>{
+for(const engine of [chromium,webkit])test('Fry Rader neutral filters and headline-only feed: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
  try{
    for(const viewport of [{width:320,height:640},{width:390,height:844},{width:1440,height:900}]){
@@ -33,15 +33,29 @@ for(const engine of [chromium,webkit])test('Fry Rader brand layout and headline-
        const list=rect('#radar-list'),photo=rect('#radar-list .radar-card-photo');
        return {overflow:document.documentElement.scrollWidth-innerWidth,hero:style('.radar-masthead').backgroundImage,toolbar:style('.radar-toolbar').backgroundColor,
          columns:style('#radar-list').gridTemplateColumns.split(' ').length,rowGap:parseFloat(style('#radar-list').rowGap),left:list.left,right:innerWidth-list.right,
-         photoWidth:photo.width,listWidth:list.width,selectFont:parseFloat(style('#radar-brand').fontSize),selectWeight:style('#radar-brand').fontWeight,
+         photoWidth:photo.width,listWidth:list.width,selectFont:parseFloat(style('#radar-category').fontSize),selectWeight:style('#radar-category').fontWeight,
+         controls:document.querySelectorAll('.radar-controls label').length,brand:!!q('#radar-brand'),filterColumns:style('.radar-controls').gridTemplateColumns.split(' ').length,
          summaries:document.querySelectorAll('#radar-list .radar-card p').length};
      });
      assert.ok(layout.overflow<=2&&layout.left>=19&&layout.right>=19,JSON.stringify(layout));
-     assert.ok(layout.hero.includes('linear-gradient')&&layout.toolbar==='rgb(255, 240, 201)',JSON.stringify(layout));
+     assert.ok(layout.hero.includes('linear-gradient')&&layout.toolbar==='rgb(243, 242, 239)',JSON.stringify(layout));
      assert.equal(layout.columns,viewport.width<600?1:2);
      assert.ok(layout.rowGap>=30&&layout.photoWidth>=layout.listWidth*(viewport.width<600?.95:.43),JSON.stringify(layout));
      assert.ok(layout.selectFont<=13&&Number(layout.selectWeight)<=550,JSON.stringify(layout));
      assert.equal(layout.summaries,0);
+     assert.equal(layout.brand,false);
+     assert.equal(layout.controls,3);
+     assert.equal(layout.filterColumns,viewport.width<=850?2:3);
+     await page.locator('#radar-search').fill('테스트 2');
+     assert.equal(await page.locator('#radar-list .radar-entry').count(),1);
+     await page.locator('#radar-search').fill('');
+     await page.locator('#radar-category').selectOption('discount');
+     assert.equal(await page.locator('#radar-list .radar-entry').count(),0);
+     await page.locator('#radar-category').selectOption('all');
+     assert.equal(await page.locator('#radar-list .radar-entry').count(),3);
+     await page.locator('#radar-sort').selectOption('oldest');
+     assert.equal(await page.locator('#radar-list .radar-entry').count(),3);
+     await page.locator('#radar-sort').selectOption('newest');
      const save=page.locator('#radar-list .radar-action').first();await save.click();
      assert.equal(await save.getAttribute('aria-pressed'),'true');
      await page.locator('[data-radar-view="saved"]').click();

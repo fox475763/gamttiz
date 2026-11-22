@@ -20,7 +20,6 @@
   const MAX_RECENT_DAYS=14;
   let items=[];
   const model=window.GTZRadarModel;
-  const brand=document.getElementById('radar-brand');
   const tabs=document.querySelectorAll?.('[data-radar-view]')||[];
   const dealPanel=document.getElementById('radar-deal-panel'),deals=document.getElementById('radar-deals');
   let view='all',saved=new Set(),previousVisit=0,sessionKey='',visitRecorded=false;
@@ -302,9 +301,8 @@
     const order=sort?.value||'newest';
     const shown=items.filter(item=>
       (group==='all'||item.category===group)&&
-      (!brand||brand.value==='all'||(brand.value==='기타'?!model?.brandNames(item).length:model?.brandNames(item).includes(brand.value)))&&
       (view==='all'||view==='saved'&&saved.has(item.id)||view==='new'&&model?.isNew(item,previousVisit)||view==='ending'&&nearEnd(item)||view==='discount'&&item.category==='discount'&&statusOf(item)==='ongoing')&&
-      (!term||[item.title,item.summary,item.source].some(value=>String(value||'').toLocaleLowerCase().includes(term)))
+      (!term||[item.title,item.summary,item.source,item.brand,...(model?.brandNames(item)||[])].some(value=>String(value||'').toLocaleLowerCase().includes(term)))
     ).sort(byNewest);
     if(order==='oldest')shown.reverse();
     if(order==='ending')shown.sort((a,b)=>(statusOf(a)==='ongoing'?(model?.daysLeft(a)??Infinity):Infinity)-(statusOf(b)==='ongoing'?(model?.daysLeft(b)??Infinity):Infinity));
@@ -328,7 +326,7 @@
     revealAnchor();
   };
   tabs.forEach(tab=>tab.addEventListener('click',()=>{view=tab.dataset.radarView;tabs.forEach(t=>t.setAttribute('aria-pressed',String(t===tab)));render();}));
-  [search,category,sort,brand].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
+  [search,category,sort].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
   const healthView=document.getElementById('radar-health');
   let refreshing=false,loaded=false,lastSignature='',timer=0,generation=0;
   const controllers=new Set();
@@ -386,7 +384,7 @@
     if(!homePreview&&!sessionKey){sessionKey='gtz:radar:'+String(license?.number||member?.license?.number||'local')+':'+String(license?.issuedAt||member?.license?.issuedAt||'');const value=storageRead(sessionKey+':saved',[]);saved=new Set(Array.isArray(value)?value:[]);previousVisit=Number(storageRead(sessionKey+':visit',0))||0;visitRecorded=false;lastSignature='';view='all';tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.radarView==='all')));}
     if(homePreview)homeRunning=true;
     const hash=location.hash.slice(1);
-    if(!homePreview&&hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';if(brand)brand.value='all';view='all';tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.radarView==='all')));render();}}
+    if(!homePreview&&hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';view='all';tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.radarView==='all')));render();}}
     revealAnchor();if(!timer)timer=window.setInterval(refresh,homePreview?300000:120000);
     if(loaded)startPreviewTimer();refresh();
   }
