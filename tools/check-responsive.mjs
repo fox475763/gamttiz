@@ -117,13 +117,13 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    const material=await menu.evaluate(el=>{
      const list=[...el.querySelectorAll('.control-menu-links > :is(a,button)')],root=getComputedStyle(el),row=getComputedStyle(list[1]),optics=list[1].querySelector('.control-menu-optics'),lens=getComputedStyle(optics),edge=getComputedStyle(list[1],'::before'),box=list[1].getBoundingClientRect();
      return {shell:root.backgroundImage,shadow:root.boxShadow,border:root.borderTopWidth,blur:root.backdropFilter,edge:getComputedStyle(el,'::before').display,
-        row:row.backdropFilter,baseColor:row.backgroundColor,gradient:lens.backgroundImage,rim:edge.backgroundImage,rimWidth:edge.borderTopWidth,lens:lens.backdropFilter,bevel:getComputedStyle(optics,'::before').boxShadow,rowShadow:row.boxShadow,light:lens.animationName,glint:getComputedStyle(optics,'::after').backgroundImage,
+        row:row.backdropFilter,baseColor:row.backgroundColor,gradient:lens.backgroundImage,rim:edge.backgroundImage,rimWidth:edge.borderTopWidth,lens:lens.backdropFilter,bevel:getComputedStyle(optics,'::before').boxShadow,rowShadow:row.boxShadow,light:lens.animationName,sheen:getComputedStyle(optics,'::before').animationName,glint:getComputedStyle(optics,'::after').backgroundImage,
         actual:!!document.querySelector('#gtz-menu-refraction feDisplacementMap'),mirror:!!document.querySelector('#gtz-menu-mirror-lens feDisplacementMap'),label:getComputedStyle(list[1].querySelector('.control-menu-text')).zIndex,
         width:box.width,height:box.height,first:getComputedStyle(list[0]).transitionDelay,last:getComputedStyle(list.at(-1)).transitionDelay,
         selected:getComputedStyle(list[0]).color,selectedBackground:getComputedStyle(list[0]).backgroundColor};
    });
    assert.equal(material.shell,'none');assert.equal(material.shadow,'none');assert.equal(material.border,'0px');assert.equal(material.blur,'none');assert.equal(material.edge,'none');
-   assert.ok(material.row==='none'&&material.gradient.includes('linear-gradient')&&material.rim.includes('linear-gradient')&&material.bevel==='none'&&material.rowShadow==='none'&&material.light==='menu-liquid-light'&&material.label==='2',JSON.stringify(material));
+   assert.ok(material.row==='none'&&material.gradient.includes('linear-gradient')&&material.rim.includes('linear-gradient')&&material.bevel==='none'&&material.rowShadow==='none'&&material.sheen==='menu-light-slide'&&material.label==='2',JSON.stringify(material));
    assert.ok(material.baseColor.startsWith('rgba(20, 12, 18, 0.0')&&parseFloat(material.rimWidth)<=1&&material.glint.includes('radial-gradient'),JSON.stringify(material));
    assert.equal(material.actual,engine===chromium);
    assert.equal(material.mirror,engine===webkit);
@@ -134,10 +134,8 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
      await page.evaluate(()=>{document.querySelector('.poster-label').textContent='LIVE LENS TEST';});
      await page.waitForFunction(()=>document.querySelector('.control-menu-mirror-scene').shadowRoot.querySelector('.poster-label').textContent==='LIVE LENS TEST');
    }
-   const driftBefore=await items.nth(1).locator('.control-menu-optics').evaluate(el=>getComputedStyle(el).getPropertyValue('--menu-drift-x'));
-   await page.waitForTimeout(250);
-   const driftAfter=await items.nth(1).locator('.control-menu-optics').evaluate(el=>getComputedStyle(el).getPropertyValue('--menu-drift-x'));
-   assert.notEqual(driftBefore,driftAfter);
+   const driftBefore=await items.nth(1).locator('.control-menu-optics').evaluate(el=>getComputedStyle(el,'::before').transform);
+   await page.waitForFunction(previous=>getComputedStyle(document.querySelectorAll('.control-menu-optics')[1],'::before').transform!==previous,driftBefore,{timeout:8000});
    assert.ok(material.width<255&&material.height>=37&&material.height<=44,JSON.stringify(material));
    assert.notEqual(material.first,material.last);assert.equal(material.selected,'rgb(233, 54, 54)');
    const target=items.nth(2),neighbor=items.nth(3),a=await target.boundingBox(),b=await neighbor.boundingBox();
@@ -491,7 +489,7 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        await contact.locator('.contact-copy').click();
        await page.waitForFunction(()=>document.querySelector('.contact-copy-status').textContent.length>0);
      }
-     if(filename==='member.html')assert.equal(await page.locator('.member-tile').count(),1);
+     if(filename==='member.html')assert.equal(await page.evaluate(()=>document.querySelectorAll('.member-tile').length),1);
      if(filename==='member.html#radar')assert.equal(await page.getByRole('button',{name:'캘린더 추가'}).count(),0);
      await trigger.click();
      const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);

@@ -143,6 +143,7 @@
     if(!menuMirror)return;
     const m=menuMirror;menuMirror=null;
     cancelAnimationFrame(m.frame);m.observer?.disconnect();
+    for(const optics of menuLinks.querySelectorAll('.control-menu-optics')){optics.style.removeProperty('--menu-drift-x');optics.style.removeProperty('--menu-drift-angle');}
     m.host.remove();m.svg.remove();if(dock.dataset.menuRefraction==='mirror')delete dock.dataset.menuRefraction;
   }
   function startMenuMirror(){
@@ -227,7 +228,8 @@
       m.observer.observe(document.documentElement,{attributes:true});
       const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
       if(!ctx){stopMenuMirror();return;}
-      let lastGeometry='',lastTick=0,mediaTick=0;
+      let lastGeometry='',lastTick=0,mediaTick=0,animationTick=0;
+      const opticsLayers=[...menuLinks.querySelectorAll('.control-menu-optics')];
       // All lenses share this viewport-size displacement map. Only regenerate
       // it when the actual on-screen menu geometry changes (open, hover, scroll).
       function updateMap(){
@@ -266,13 +268,16 @@
         if(menuMirror!==m||generation!==mirrorGeneration||dock.dataset.mode!=='menu')return;
         m.frame=requestAnimationFrame(syncScene);
         if(now-lastTick<32)return;lastTick=now;
-        try{cloneHtml.scrollTop=window.scrollY;cloneHtml.scrollLeft=window.scrollX;
-        for(const el of scrollables){const copy=pairs.get(el);if(!el.isConnected){scrollables.delete(el);continue;}if(copy){copy.scrollTop=el.scrollTop;copy.scrollLeft=el.scrollLeft;}}
-        for(const anim of document.getAnimations()){
+        try{if(cloneHtml.scrollTop!==window.scrollY)cloneHtml.scrollTop=window.scrollY;if(cloneHtml.scrollLeft!==window.scrollX)cloneHtml.scrollLeft=window.scrollX;
+        for(const el of scrollables){const copy=pairs.get(el);if(!el.isConnected){scrollables.delete(el);continue;}if(copy){if(copy.scrollTop!==el.scrollTop)copy.scrollTop=el.scrollTop;if(copy.scrollLeft!==el.scrollLeft)copy.scrollLeft=el.scrollLeft;}}
+        // Keep the mirror's own CSS animations running on the compositor;
+        // correct phase only occasionally instead of forcing a repaint at 30Hz.
+        if(now-animationTick>180){animationTick=now;for(const anim of document.getAnimations()){
           const el=anim.effect?.target,copy=pairs.get(el);if(!copy||!copy.getAnimations)continue;
           const same=copy.getAnimations().find(a=>a.animationName===anim.animationName&&a.transitionProperty===anim.transitionProperty);
-          if(same&&anim.currentTime!==null){try{same.pause();same.currentTime=anim.currentTime;}catch{}}
-        }
+          if(same&&anim.currentTime!==null){try{if(anim.playState==='paused'){if(same.playState!=='paused')same.pause();if(same.currentTime!==anim.currentTime)same.currentTime=anim.currentTime;}else{if(same.playState==='paused')same.play();if(same.currentTime===null||Math.abs(Number(same.currentTime)-Number(anim.currentTime))>90)same.currentTime=anim.currentTime;}}catch{}}
+        }}
+        if(!motionReduced.matches){for(let i=0;i<opticsLayers.length;i++){const phase=((now/14000+i*.059)%1),x=50-68*Math.cos(phase*2*Math.PI);opticsLayers[i].style.setProperty('--menu-drift-x',x.toFixed(2)+'%');opticsLayers[i].style.setProperty('--menu-drift-angle',(phase*360).toFixed(2)+'deg');}}
         if(now-mediaTick>70){mediaTick=now;for(const el of [...canvases,...videos]){
           if(!el.isConnected)continue;const copy=pairs.get(el);const r=el.getBoundingClientRect();if(!copy||r.bottom<0||r.top>innerHeight||r.right<0||r.left>innerWidth)continue;
           try{const w=el.videoWidth||el.width,h=el.videoHeight||el.height;if(w&&h){if(copy.width!==w)copy.width=w;if(copy.height!==h)copy.height=h;copy.getContext('2d')?.drawImage(el,0,0,w,h);}}catch{}
@@ -309,6 +314,7 @@
       lightTarget.style.setProperty('--menu-light-y',y.toFixed(1)+'%');
     });
   }
+  menuLinks.addEventListener('pointerover',event=>{if(event.pointerType!=='touch')menuLight(event);},{passive:true});
   menuLinks.addEventListener('pointermove',event=>{if(event.pointerType!=='touch')menuLight(event);},{passive:true});
   menuLinks.addEventListener('pointerdown',menuLight,{passive:true});
   menuLinks.addEventListener('pointerleave',resetMenuLight,{passive:true});
