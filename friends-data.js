@@ -514,6 +514,7 @@
   },
   {
     "id": 15,
+    "isNew": true,
     "name": "버터갈릭감띠",
     "english": "Butter Garlic Gamtti",
     "type": "부드러운 향기형",
@@ -550,6 +551,7 @@
   },
   {
     "id": 16,
+    "isNew": true,
     "name": "매콤감띠",
     "english": "Spicy Gamtti",
     "type": "화끈 열정형",

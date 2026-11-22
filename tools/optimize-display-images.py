@@ -16,7 +16,7 @@ for page in PAGES:
         match = src.search(tag)
         if match:
             paths.add(match.group(1))
-paths.update(f"assets/keyring-{n:02}.png" for n in range(1, 15))
+paths.update(p.relative_to(ROOT).as_posix() for p in ASSET.glob("keyring-*.png"))
 paths.add("assets/holder.png")
 mapping = {}
 total_in = total_out = 0

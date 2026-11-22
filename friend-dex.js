@@ -8,9 +8,9 @@
   const mark='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   for(let id=1;id<=slots;id++){
     const c=characters[id-1],b=document.createElement('button');
-    b.type='button';b.dataset.friendId=String(id);b.className='dex-tile dex-glass'+(c?'':' dex-unknown')+(c?.faceCrops.length>1?' dex-dual-face':'');b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-label','No. '+number(id)+' '+(c?c.name:'미공개 감띠, 물음표'));
+    b.type='button';b.dataset.friendId=String(id);b.className='dex-tile dex-glass'+(c?'':' dex-unknown')+(c?.faceCrops.length>1?' dex-dual-face':'');b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-label','No. '+number(id)+' '+(c?c.name:'미공개 감띠, 물음표')+(c?.isNew?' (새 캐릭터)':''));
     if(c)b.style.setProperty('--dex-friend',c.color);
-    b.innerHTML=`<span class="dex-tile-top"><span class="dex-tile-no">NO. ${number(id)}</span><span class="dex-tile-state" aria-hidden="true"></span></span><span class="dex-tile-portrait">${c?`${facePortrait(id)}`:'<span class="dex-tile-mark" aria-hidden="true">?</span>'}</span><span class="dex-tile-info"><span><strong>${c?c.name:'???'}</strong><small>${c?c.type:'미공개'}</small></span>${mark}</span>`;
+    b.innerHTML=`<span class="dex-tile-top"><span class="dex-tile-no">NO. ${number(id)}</span><span class="dex-tile-state" aria-hidden="true"></span></span><span class="dex-tile-portrait">${c?`${facePortrait(id)}${c.isNew?'<span class="dex-new-badge" aria-hidden="true">NEW</span>':''}`:'<span class="dex-tile-mark" aria-hidden="true">?</span>'}</span><span class="dex-tile-info"><span><strong>${c?c.name:'???'}</strong><small>${c?c.type:'미공개'}</small></span>${mark}</span>`;
     b.addEventListener('click',()=>select(id,true));buttons.push(b);grid.append(b);
   }
   function select(id,update=false){

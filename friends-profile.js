@@ -2,7 +2,7 @@
 (()=>{'use strict';
   const {number,image,facePortrait}=globalThis.GTZFriends;
   globalThis.GTZProfile=(c,{daily=false}={})=>`
-    <div class="profile-art" style="--friend-color:${c.color}"><div class="profile-art-top"><span>NO. ${number(c.id)}</span><span>${daily?'TODAY’S PICK':'GAMTTIZ DEX'}</span></div><img src="${image(c.id)}" alt="${c.name} 캐릭터 일러스트"><span class="profile-type">${c.type}</span>${daily?'':`<div class="profile-face-inset${c.faceCrops.length>1?' is-dual':''}" aria-hidden="true">${facePortrait(c.id)}<span>표정 확대</span></div>`}</div>
+    <div class="profile-art" style="--friend-color:${c.color}"><div class="profile-art-top"><span>NO. ${number(c.id)}</span><span>${daily?'TODAY’S PICK':'GAMTTIZ DEX'}</span></div><img src="${image(c.id)}" alt="${c.name} 캐릭터 일러스트">${!daily&&c.isNew?'<span class="dex-new-badge dex-profile-new" aria-label="새 캐릭터">NEW</span>':''}<span class="profile-type">${c.type}</span>${daily?'':`<div class="profile-face-inset${c.faceCrops.length>1?' is-dual':''}" aria-hidden="true">${facePortrait(c.id)}<span>표정 확대</span></div>`}</div>
     <div class="profile-info"><p class="fx-kicker">${c.english}</p><h2>${c.name}</h2><p class="profile-tagline">${c.tagline}</p><p class="profile-origin">${c.origin}</p><blockquote>“${c.quote}”</blockquote>
     ${daily?`<div class="profile-message"><span>MESSAGE FOR TODAY</span><h3>오늘의 한마디</h3><p>${c.message}</p></div>`:''}
     <h3>감띠 이야기</h3><p class="profile-story">${c.story}</p><dl class="profile-facts"><div><dt>좋아하는 것</dt><dd>${c.likes}</dd></div><div><dt>작은 습관</dt><dd>${c.habit}</dd></div><div><dt>친구 관계</dt><dd>${c.friend}</dd></div></dl>

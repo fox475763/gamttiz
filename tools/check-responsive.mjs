@@ -579,6 +579,8 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      if(filename==='collection.html'){
        assert.equal(await page.locator('.dex-tile').count(),20);
        assert.equal(await page.locator('.dex-unknown').count(),4);
+       assert.equal(await page.locator('.dex-tile .dex-new-badge').count(),2);
+       for(const id of [15,16])assert.equal(await page.locator('[data-friend-id="'+id+'"] .dex-new-badge').textContent(),'NEW');
        assert.equal(await page.locator('.dex-tile .dex-face').count(),17);
        assert.equal(await page.locator('.dex-dual-face .dex-face').count(),2);
        const dial=page.locator('#dex-grid');
@@ -613,6 +615,10 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        await page.locator('#dex-next').click();
        assert.equal(await page.locator('#dex-profile h2').textContent(),'매콤감띠');
        await page.locator('#dex-close').click();
+     }
+     if(filename==='products.html'){
+       const cards=page.locator('#catalog-grid .catalog-card');assert.equal(await cards.count(),16);
+       for(const n of [15,16]){const image=cards.nth(n-1).locator('img');assert.match(await image.getAttribute('src'),new RegExp('keyring-'+n+'\\.png'));}
      }
      if(filename==='draw.html'){
        assert.equal(await page.locator('.fry-choice').count(),5);

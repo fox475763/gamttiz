@@ -28,7 +28,7 @@ for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.css'))){
 // These paths are generated at runtime rather than listed directly in HTML.
 for(let i=1;i<=16;i++){
   const n=String(i).padStart(2,'0');
-  for(const asset of [...(i<=14?[`assets/keyring-${n}.png`]:[]),`assets/illustrations/friend-${n}.svg`,`assets/illustrations-3d/friend-${n}.png`])if(!fs.existsSync(path.join(root,asset)))errors.push(`Missing character asset ${asset}`);
+  for(const asset of [`assets/keyring-${n}.png`,`assets/illustrations/friend-${n}.svg`,`assets/illustrations-3d/friend-${n}.png`])if(!fs.existsSync(path.join(root,asset)))errors.push(`Missing character asset ${asset}`);
 }
 for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.js'))){
   try{execFileSync(process.execPath,['--check',path.join(root,file)],{stdio:'pipe'});}catch(error){errors.push(`${file}: JavaScript syntax error\n${error.stderr?.toString()||''}`);}

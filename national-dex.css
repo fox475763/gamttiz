@@ -252,3 +252,8 @@
 }
 .dex-page #dex-profile :is(.profile-secret,.profile-traits span){background:#fff1e5;border-color:#efddc5}
 @media(hover:hover){.dex-page .dex-tile:hover{background:#fff8e9;box-shadow:0 6px 18px #2924160d}}
+
+/* New release badge: only the newly introduced characters carry it. */
+.dex-page .dex-new-badge{position:absolute;top:3px;right:3px;z-index:5;display:inline-flex;align-items:center;justify-content:center;min-width:24px;padding:3px 5px;border-radius:5px;background:var(--dex-red,#e93636);color:white;font-size:9px;font-weight:900;line-height:1;letter-spacing:.025em;box-shadow:0 1px 2px #53241b24;pointer-events:none}
+.dex-page .dex-profile-new{top:43px;right:18px;font-size:12px;padding:6px 9px;border-radius:7px}
+@media(max-width:520px){.dex-page .dex-dial .dex-new-badge{top:2px;right:1px;font-size:7px;min-width:21px;padding:2px 3px;border-radius:4px}.dex-page .dex-profile-new{top:34px;right:12px}}

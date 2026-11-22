@@ -12,7 +12,9 @@ const catalogProducts = [
   ['웨지감띠','Weji Gamtti','조각 사과처럼 옆으로 누운 감자튀김'],
   ['부스러끼','Bueureokki','겁이 많아서 어딘가에 숨어있는 감자튀김'],
   ['두리감띠','Duri Gamtti','서로 등 부분이 딱 붙어사는 감자튀김'],
-  ['촉촉감띠','Chokchok Gamtti','기름이 흥건해 촉촉하고 흐물흐물한 감자튀김']
+  ['촉촉감띠','Chokchok Gamtti','기름이 흥건해 촉촉하고 흐물흐물한 감자튀김'],
+  ['버터갈릭감띠','Butter Garlic Gamtti','고소한 버터와 마늘 향을 두른 감자튀김'],
+  ['매콤감띠','Spicy Gamtti','매운 양념을 입고 뜨거운 열기를 내뿜는 감자튀김']
 ];
 const catalogGrid = document.getElementById('catalog-grid');
 const catalogDialog = document.getElementById('catalog-dialog');
@@ -23,7 +25,7 @@ catalogProducts.forEach(([name, english, description], index) => {
   card.type = 'button'; card.className = 'catalog-card';
   card.setAttribute('aria-label', `${name} 제품 정보 보기`);
   const img = document.createElement('img');
-  img.src = image; const variants=window.GTZDisplayAssets?.[image];if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 45vw, 300px';} img.alt = `${name} 키링 제품 사진`; img.loading = 'lazy'; img.decoding = 'async';
+  img.src = image; const variants=window.GTZDisplayAssets?.[image];if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 45vw, 300px';} img.alt = `${name} 키링 ${index>=14?'디자인 이미지':'제품 사진'}`; img.loading = 'lazy'; img.decoding = 'async';
   const text = document.createElement('span'); text.className = 'catalog-card-text';
   const num = document.createElement('small'); num.textContent = `No. ${number}`;
   const title = document.createElement('strong'); title.textContent = name;

@@ -27,6 +27,11 @@ test('All 16 entries have face-focused original SVG crops and distinct expanded 
   });
   assert.equal(subtitles.size,16);assert.equal(episodes.size,16);assert.equal(characters[8].faceCrops.length,2);
 });
+test('Only new friends have the NEW badge and every profile opens its keyring image',()=>{
+ assert.deepEqual(Array.from(characters.filter(c=>c.isNew),c=>c.id),[15,16]);
+ for(const c of characters){const profile=ctx.GTZProfile(c);assert.equal(profile.includes('dex-profile-new'),!!c.isNew);assert.ok(profile.includes('assets/keyring-'+number(c.id)+'.png'));assert.ok(!ctx.GTZProfile(c,{daily:true}).includes('dex-profile-new'));}
+ const products=src('products.js'),app=src('app.js');for(const name of ['버터갈릭감띠','매콤감띠']){assert.ok(products.includes(name));assert.ok(app.includes(name));}assert.doesNotMatch(app,/isIllustration/);
+});
 test('Korea midnight changes the daily draw date',()=>{
  assert.equal(dayKey(new Date('2026-11-20T14:59:59Z')),'2026-11-20');
  assert.equal(dayKey(new Date('2026-11-20T15:00:00Z')),'2026-11-21');
@@ -71,7 +76,7 @@ test('National index interaction: filter, exact number search, sort, detail navi
  const mock=vm.createContext({GTZFriends:ctx.GTZFriends,GTZProfile:ctx.GTZProfile,document:doc,URL,URLSearchParams,location,history,window:{addEventListener(k,fn){eventMap[k]=fn;}}});
  vm.runInContext(src('friend-dex.js'),mock);
  const grid=nodes['dex-grid'],search=nodes['dex-search'],sort=nodes['dex-sort'],detail=nodes['dex-detail'],profile=nodes['dex-profile'];
- assert.equal(grid.children.length,20);assert.equal(detail.open,false);assert.equal(grid.children.filter(b=>b.innerHTML.includes('dex-face')).length,16);assert.match(grid.children[8].className,/dex-dual-face/);
+ assert.equal(grid.children.length,20);assert.equal(grid.children.filter(b=>b.innerHTML.includes('dex-new-badge')).length,2);assert.match(grid.children[14].innerHTML,/NEW/);assert.match(grid.children[15].innerHTML,/NEW/);assert.equal(detail.open,false);assert.equal(grid.children.filter(b=>b.innerHTML.includes('dex-face')).length,16);assert.match(grid.children[8].className,/dex-dual-face/);
  filters[2].emit('click');assert.equal(grid.children.filter(b=>!b.hidden).length,4);
  filters[0].emit('click');search.value='No. 07';search.emit('input');assert.equal(grid.children.filter(b=>!b.hidden).length,1);
  grid.children.find(b=>!b.hidden).emit('click');assert.equal(detail.open,true);assert.match(profile.innerHTML,/빙빙이/);

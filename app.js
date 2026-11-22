@@ -15,7 +15,7 @@ const products = [
   ['촉촉감띠','Chokchok Gamtti','기름을 머금어 촉촉하고 흐물흐물한 감자튀김'],
   ["버터갈릭감띠","Butter Garlic Gamtti","고소한 버터와 마늘 향을 두른 감자튀김."],
   ["매콤감띠","Spicy Gamtti","매운 양념을 입고 뜨거운 열기를 내뿜는 감자튀김."]
-].map(([name,english,description],i)=>({name,english,description,image:i<14?`assets/keyring-${String(i+1).padStart(2,'0')}.png`:`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`,isIllustration:i>=14,illustration:`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`}));
+].map(([name,english,description],i)=>({name,english,description,image:`assets/keyring-${String(i+1).padStart(2,'0')}.png`,illustration:`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`}));
 const holder={name:'감띠즈 홀더',english:'GAMTTIZ HOLDER',description:'수집한 감띠즈 키링을 보관할 수 있는 보관통이자 직접 키링을 원하는 대로 걸 수 있는 키링입니다.',image:'assets/holder.png'};
 // 원본 제품 설명을 바탕으로 쓴 사이트용 상상 이야기입니다.
 const stories=[
@@ -40,7 +40,7 @@ const gallery=document.querySelector('#gallery');
 const dialog=document.querySelector('#detail');
 let current=0;
 products.forEach((p,i)=>{
-  const card=document.createElement('button');card.type='button';card.className='card friend-carousel-card'+(p.isIllustration?' is-new-friend':'');card.setAttribute('aria-label',`${p.name} 상세 보기`);
+  const card=document.createElement('button');card.type='button';card.className='card friend-carousel-card';card.setAttribute('aria-label',`${p.name} 상세 보기`);
   const img=document.createElement('img');img.src=p.image;const variants=window.GTZDisplayAssets?.[p.image];if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 45vw, 260px';}img.alt=`${p.name} — ${p.description}`;img.width=1080;img.height=1350;img.loading='lazy';img.decoding='async';
   const label=document.createElement('span');label.className='card-label';
   const name=document.createElement('span');name.textContent=p.name;
@@ -49,7 +49,7 @@ products.forEach((p,i)=>{
 function showDetail(index){
   current=index;const p=index===-1?holder:products[index];
   {const img=document.querySelector('#detail-image'),variants=window.GTZDisplayAssets?.[p.image];img.removeAttribute('srcset');img.src=p.image;if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 92vw, 640px';}}
-  document.querySelector('#detail-image').alt=`${p.name} ${p.isIllustration?'원본 일러스트':'원본 제품 소개'}`;
+  document.querySelector('#detail-image').alt=`${p.name} 키링 제품 소개 이미지`;
   document.querySelector('#detail-title').textContent=p.name;
   document.querySelector('#detail-english').textContent=p.english;
   document.querySelector('#detail-description').textContent=p.description;
