@@ -332,7 +332,7 @@
   const filterPanel=document.getElementById('radar-filter-panel');
   const filterScrim=document.getElementById('radar-search-scrim');
   const toolbar=filterPanel?.closest('.radar-toolbar');
-  let filterOpen=false,filterFrame=0,skipSearchFocus=false;
+  let filterOpen=false,filterFrame=0,skipSearchFocus=false,filterCloseTimer=0;
   function fitFilterPanel(){
     filterFrame=0;
     if(!filterOpen||!toolbar)return;
@@ -356,6 +356,12 @@
     if(!search||!filterPanel||!toolbar)return;
     if(filterOpen===open)return;
     filterOpen=open;
+    clearTimeout(filterCloseTimer);
+    if(open){toolbar.classList.add('filters-visible');filterScrim?.classList.remove('is-closing');}
+    else{
+      filterScrim?.classList.add('is-closing');
+      filterCloseTimer=setTimeout(()=>{toolbar.classList.remove('filters-visible');filterScrim?.classList.remove('is-closing');},480);
+    }
     search.setAttribute('aria-expanded',String(open));
     filterPanel.setAttribute('aria-hidden',String(!open));
     filterPanel.inert=!open;

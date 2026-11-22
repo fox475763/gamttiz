@@ -1,0 +1,45 @@
+/* A standalone MY ID chapter between the random box and Play chapters. */
+.home-cinema #main>.home-license{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);align-items:center;
+  gap:clamp(32px,6vw,90px);width:100%;max-width:1240px;padding-inline:max(6%,calc((100% - 1180px)/2));
+  color:#2c2724;background:transparent;
+}
+.home-license-visual{display:grid;place-items:center;min-width:0}
+.home-license-stage{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,2vh,24px);padding:clamp(16px,3vh,42px) 0;isolation:isolate}
+.home-license-orbit{position:absolute;z-index:-1;width:min(92%,490px);aspect-ratio:1;left:50%;top:48%;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#ffe4a450,transparent 66%);border:1px solid #dcae5a42;pointer-events:none}
+.home-license-orbit::before,.home-license-orbit::after{content:"";position:absolute;inset:13%;border:1px solid #dcae5a32;border-radius:inherit}
+.home-license-orbit::after{inset:26%}
+.home-license-card{position:relative;width:min(59vw,235px,calc(56vh * .6286));aspect-ratio:1080/1718;perspective:850px;-webkit-perspective:850px;flex:none}
+.home-license-card-inner{position:absolute;inset:0;transform:rotateY(-12deg);transform-style:flat;-webkit-transform-style:flat;will-change:transform}
+.home-license-plane{position:absolute;inset:0;overflow:hidden;border-radius:clamp(10px,1.5vw,16px);background:#780708;box-shadow:0 12px 28px #53121135,0 0 0 1px #ad753970}
+.home-license-plane img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;display:block;pointer-events:none}
+.home-license-plane img.home-license-composed{object-fit:fill}
+.home-license-plane img[hidden],.home-license-record[hidden]{display:none!important}
+.home-license-reflection{position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:radial-gradient(ellipse at 25% 10%,#fff6db75,transparent 62%),linear-gradient(135deg,transparent 10%,#fff1cd13 35%,#fff6db96 49%,#fff1cd16 61%,transparent 85%);opacity:.2;will-change:opacity}
+.home-license-card-caption{font-size:10px;font-weight:700;letter-spacing:.13em;color:#8b6738;text-align:center;font-variant-numeric:tabular-nums}
+.home-license-copy{min-width:0;align-self:center}
+.home-cinema #main .home-license-copy .eyebrow{font-size:11px;letter-spacing:.14em;color:#bb292c;margin:0 0 12px}
+.home-cinema #main .home-license-copy h2{font-size:clamp(32px,4.35vw,60px);font-weight:780;line-height:1.12;letter-spacing:-.05em;margin:0;color:#2c2724;word-break:keep-all;overflow-wrap:anywhere;text-wrap:balance}
+.home-license-copy>p:not(.eyebrow){font-size:clamp(14px,1.25vw,17px);margin:clamp(14px,2.1vw,25px) 0 0;line-height:1.7;color:#6d6057;word-break:keep-all}
+.home-license-copy .home-license-record{font-size:12px;font-weight:650;color:#a44c34;margin-top:8px}
+.home-license-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px 16px;margin-top:clamp(17px,3vh,32px)}
+.home-license-actions a{display:inline-flex;align-items:center;justify-content:space-between;gap:14px;min-height:44px;text-decoration:none;font-size:13px;font-weight:670;line-height:1.4;border-radius:999px;padding:10px 17px;transition:transform .38s cubic-bezier(.22,1,.36,1),background .25s,color .25s}
+.home-license-member{color:#fff;background:#c5282e;border:1px solid #c5282e}
+.home-license-issue{color:#b1252b;border:1px solid #d4b9ad;background:rgba(255,255,255,.55)}
+.home-license-actions a:hover{transform:translateY(-2px)}
+.home-license-actions a:focus-visible{outline:2px solid #c5282e;outline-offset:3px}
+@media(max-width:700px){
+ .home-cinema #main>.home-license{grid-template-columns:minmax(0,1fr);gap:clamp(12px,2vh,22px);padding-inline:7%;text-align:center}
+ .home-license-stage{padding:8px 0;gap:10px}
+ .home-license-orbit{width:min(76vw,300px)}
+ .home-license-card{width:min(38vw,180px,calc(40vh * .6286))}
+ .home-license-copy{max-width:440px;margin-inline:auto;text-align:center}
+ .home-cinema #main .home-license-copy .eyebrow{font-size:10px;margin-bottom:6px}
+ .home-cinema #main .home-license-copy h2{font-size:clamp(26px,7vw,36px);line-height:1.18}
+ .home-license-copy>p:not(.eyebrow){font-size:13px;line-height:1.6;margin-top:10px}
+ .home-license-copy .home-license-record{font-size:11px;margin-top:5px}
+ .home-license-actions{justify-content:center;margin-top:14px;gap:8px}
+ .home-license-actions a{min-height:44px;font-size:12px;padding:9px 13px}
+}
+@media(max-height:680px) and (max-width:400px){.home-license-card{width:min(35vw,135px)}.home-license-stage{padding:3px 0;gap:6px}.home-license-actions{margin-top:10px}}
+@media(prefers-reduced-motion:reduce){.home-license-card-inner{will-change:auto}.home-license-reflection{opacity:0!important}.home-license-actions a{transition:none}}

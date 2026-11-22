@@ -56,9 +56,9 @@
  .home-cinema.home-fullpage .hero-description{font-size:13px;margin-bottom:10px;max-width:none;line-height:1.6}
  .home-cinema.home-fullpage .hero .button{font-size:12px;padding:8px 16px;min-height:40px}
  .home-cinema.home-fullpage .hero-foot{margin-top:11px;padding-top:8px;font-size:8px}
- .home-cinema.home-fullpage .hero-poster{width:100%;max-width:400px;justify-self:center;padding:8px 12px;border-width:4px;box-shadow:5px 5px 0 #a82125;border-radius:18px}
- .home-cinema.home-fullpage .hero-poster .poster-viewport{height:clamp(104px,28vh,260px)}
- .home-cinema.home-fullpage .hero-poster :is(.poster-label,.poster-link){font-size:9px;line-height:1.3;padding-block:4px;margin:0}
+ .home-cinema.home-fullpage .hero-poster{width:100%;max-width:400px;justify-self:center;padding:5px 12px;border-width:4px;box-shadow:5px 5px 0 #a82125;border-radius:18px}
+ .home-cinema.home-fullpage .hero-poster .poster-viewport{height:clamp(96px,20.5vh,185px)}
+ .home-cinema.home-fullpage .hero-poster :is(.poster-label,.poster-link){font-size:9px;line-height:1.3;padding-block:3px;margin:0}
  .home-cinema.home-fullpage .hero .ticker{font-size:10px;padding:3px 0}
  .home-cinema.home-fullpage #main .story-row:not(.reverse),.home-cinema.home-fullpage #main .story-row.reverse{grid-template-columns:1fr;gap:16px}
  .home-cinema.home-fullpage #main .story-row .story-image{order:2}
@@ -105,7 +105,7 @@
  .home-cinema.home-fullpage .hero-film{font-size:clamp(32px,9.8vw,42px);margin:6px 0}
  .home-cinema.home-fullpage .hero-description{font-size:12px;margin-bottom:6px}
  .home-cinema.home-fullpage .hero-foot{margin-top:6px;padding-top:5px}
- .home-cinema.home-fullpage .hero-poster .poster-viewport{height:clamp(92px,23vh,145px)}
+ .home-cinema.home-fullpage .hero-poster .poster-viewport{height:clamp(84px,18vh,124px)}
  .home-cinema.home-fullpage #main .guide-grid article>p{font-size:12px}
 }
 /* A short landscape frame has more useful width than height. Reflow into

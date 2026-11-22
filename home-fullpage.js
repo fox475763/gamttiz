@@ -10,6 +10,9 @@
   const isHome=!body.classList.contains('edition-page');
   const plainHome=()=>isHome&&(!location.hash||location.hash==='#');
   if(plainHome())viewport.scrollTop=0;
+  const bootRoot=document.documentElement;
+  const boot=()=>{if(isHome)bootRoot.classList.add('gtz-home-boot');};
+  const unboot=()=>{if(isHome)bootRoot.classList.remove('gtz-home-boot');};
   const hero=main.querySelector('.hero');
   const ticker=main.querySelector('.ticker');
   if(hero&&ticker)hero.append(ticker);
@@ -144,11 +147,25 @@
     const syncHash=()=>{const i=indexFromHash(location.hash);if(i>=0)goNative(i,true);};
     addEventListener('hashchange',syncHash);addEventListener('popstate',syncHash);
     const initial=Math.max(0,indexFromHash(location.hash));
-    nativeIndex=initial;host.classList.add('stage-initial');measureNative();selectScene(initial,true);goNative(initial,true);
-    requestAnimationFrame(()=>requestAnimationFrame(()=>host.classList.remove('stage-initial')));
+    function restoreEntry(index){
+      boot();host.classList.add('stage-initial');
+      clearTimeout(idleTimer);idleTimer=0;setMoving(false);
+      nativeIndex=index;measureNative();viewport.scrollTop=index*nativeHeight;selectScene(index,true);
+      // The snap target and scroll offset must be committed before the first
+      // paint. In particular WebKit can restore an old inner-scroll offset
+      // even though history.scrollRestoration is manual.
+      requestAnimationFrame(()=>{
+        measureNative();viewport.scrollTop=index*nativeHeight;
+        unboot();viewport.scrollTop=index*nativeHeight;selectScene(index,true);
+        requestAnimationFrame(()=>host.classList.remove('stage-initial'));
+      });
+    }
+    restoreEntry(initial);
     addEventListener('resize',queueMeasure,{passive:true});
-    addEventListener('pageshow',()=>{
-      if(plainHome()){measureNative();goNative(0,true);}
+    addEventListener('pagehide',e=>{if(e.persisted&&isHome)boot();});
+    addEventListener('pageshow',e=>{
+      if(e.persisted&&isHome){restoreEntry(plainHome()?0:Math.max(0,indexFromHash(location.hash)));}
+      else if(bootRoot.classList.contains('gtz-home-boot')&&plainHome()){viewport.scrollTop=0;}
       queueMeasure();
     });addEventListener('load',queueMeasure,{once:true});
     document.fonts?.ready.then(queueMeasure);
@@ -363,10 +380,10 @@
   addEventListener('hashchange',syncHash);addEventListener('popstate',syncHash);
   const initial=Math.max(0,indexFromHash(location.hash));
   position=goal=initial;paletteIndex=initial;host.classList.add('stage-initial');setPalette(order[initial].palette);measure();setActive(initial,false);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>host.classList.remove('stage-initial')));
+  requestAnimationFrame(()=>{unboot();requestAnimationFrame(()=>host.classList.remove('stage-initial'));});
   const syncMotion=()=>host.classList.toggle('stage-paused',document.hidden||reduced.matches);
   document.addEventListener('visibilitychange',syncMotion);reduced.addEventListener?.('change',syncMotion);syncMotion();
-  addEventListener('resize',scheduleMeasure,{passive:true});addEventListener('pageshow',()=>{if(plainHome())go(0,{instant:true});scheduleMeasure();});addEventListener('load',scheduleMeasure,{once:true});
+  addEventListener('resize',scheduleMeasure,{passive:true});addEventListener('pagehide',e=>{if(e.persisted&&isHome)boot();});addEventListener('pageshow',e=>{if(e.persisted&&isHome){go(plainHome()?0:Math.max(0,indexFromHash(location.hash)),{instant:true});unboot();}scheduleMeasure();});addEventListener('load',scheduleMeasure,{once:true});
   document.fonts?.ready.then(scheduleMeasure);
   if('ResizeObserver' in window){const ro=new ResizeObserver(scheduleMeasure);ro.observe(viewport);scenes.forEach(el=>ro.observe(el));}
 })();

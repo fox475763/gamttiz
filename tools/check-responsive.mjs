@@ -89,6 +89,7 @@ for(const engine of [chromium,webkit])test('Fry Rader search-anchored glass over
      await scrim.click({position:{x:3,y:3}});
      assert.equal(await toggle.getAttribute('aria-expanded'),'false');
      assert.equal(await page.locator('.radar-back-link').getAttribute('href'),'#hub');
+     assert.equal(await page.locator('.radar-tool h1').evaluate(el=>{el.focus({preventScroll:true});return getComputedStyle(el).outlineStyle;}),'none');
      assert.equal(await page.locator('#radar-admin').evaluate(el=>el.open),false);
      await page.evaluate(()=>window.scrollTo(0,200));
      await page.waitForFunction(()=>scrollY>0);
@@ -106,12 +107,17 @@ for(const engine of [chromium,webkit])test('Home always opens on the first scene
      const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'reduce'});
      await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
      const page=await context.newPage();
+     await page.addInitScript(()=>{window.__firstHomeVisible=null;const check=()=>{const v=document.querySelector('.home-scroll-viewport');if(v&&!document.documentElement.classList.contains('gtz-home-boot')){window.__firstHomeVisible={scene:document.body.dataset.homeScene,scroll:v.scrollTop};return;}requestAnimationFrame(check);};requestAnimationFrame(check);});
      await page.goto(base+'index.html',{waitUntil:'load'});
      await page.waitForFunction(()=>document.body.dataset.homeScene==='0');
      assert.equal(await page.getByRole('link',{name:'나의 감띠 찾기'}).count(),0);
      assert.equal(await page.evaluate(()=>history.scrollRestoration),'manual');
+     await page.waitForFunction(()=>window.__firstHomeVisible!==null);
+     assert.equal(await page.evaluate(()=>window.__firstHomeVisible.scene),'0');
+     assert.ok(await page.evaluate(()=>window.__firstHomeVisible.scroll<2));
      if(mobile){
        assert.ok(await page.locator('.hero-copy').evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)>=24));
+       assert.ok(await page.locator('.hero-poster .poster-viewport').evaluate(el=>el.getBoundingClientRect().height<=190));
        await page.evaluate(()=>{const v=document.querySelector('.home-scroll-viewport');v.scrollTop=v.clientHeight;});
      }else{await page.keyboard.press('PageDown');}
      await page.waitForFunction(()=>Number(document.body.dataset.homeScene)>0);
@@ -122,6 +128,41 @@ for(const engine of [chromium,webkit])test('Home always opens on the first scene
      await page.waitForFunction(()=>Number(document.body.dataset.homeScene)>0);
      await page.locator('.wordmark').click();
      await page.waitForFunction(()=>document.body.dataset.homeScene==='0');
+     await context.close();
+   }
+ }finally{await browser.close();}
+});
+
+// License is read locally; the two real personalized faces must be ready
+// before the continuous rotation begins.
+for(const engine of [chromium,webkit])test('Home MY ID shows issuance state and rotates actual card artwork: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+   for(const [viewport,issued] of [[{width:390,height:844},true],[{width:1440,height:900},false]]){
+     const mobile=viewport.width<700;
+     const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'no-preference'});
+     if(issued)await context.addInitScript(({license})=>localStorage.setItem('gamttiz-my-license-v1',JSON.stringify(license)),{license});
+     await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+     const page=await context.newPage();
+     await page.goto(base+'index.html#home-license',{waitUntil:'load'});
+     const section=page.locator('#home-license'),card=section.locator('.home-license-card');
+     await page.waitForFunction(()=>document.body.dataset.homeScene===document.querySelector('#home-license').dataset.scene);
+     assert.equal(await section.getAttribute('data-license-state'),issued?'issued':'unissued');
+     assert.equal(await section.locator('.home-license-member').getAttribute('href'),'member.html');
+     assert.equal(await section.locator('#home-license-issue').getAttribute('href'),'license.html');
+     const neighbors=await section.evaluate(el=>[el.previousElementSibling.classList.contains('home-package'),el.nextElementSibling.id]);
+     assert.deepEqual(neighbors,[true,'experiences']);
+     if(issued){
+       await page.waitForFunction(()=>document.querySelector('.home-license-card').dataset.ready==='true');
+       assert.ok((await section.locator('#home-license-record').textContent()).includes(license.number));
+       assert.ok((await section.locator('.home-license-back').getAttribute('src')).startsWith('data:image/png'));
+       await page.waitForFunction(()=>document.querySelector('.home-license-card').dataset.side==='back');
+       assert.ok(await section.locator('.home-license-back').isVisible());
+     }else{
+       assert.ok((await section.locator('#home-license-description').textContent()).includes('멤버 전용 콘텐츠'));
+       assert.ok(await section.locator('#home-license-record').isHidden());
+     }
+     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=2));
      await context.close();
    }
  }finally{await browser.close();}

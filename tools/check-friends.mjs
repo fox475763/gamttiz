@@ -260,6 +260,8 @@ test('Canonical liquid glass is scoped to existing page surfaces and leaves the 
  assert.match(src('member.html'),/id="radar-search-scrim"/);
  assert.match(src('member.html'),/id="radar-filter-panel" aria-hidden="true" inert/);
  assert.match(src('member.html'),/class="radar-filter-panel radar-glass-field"/);
+ assert.match(src('index.html'),/id="home-license"/);
+ assert.match(src('home-license.js'),/M\.readLicense\(localStorage\)/);
  assert.match(src('friend-dex.js'),/detailScroll\.scrollTop=0/);
 });
 
