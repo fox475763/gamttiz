@@ -327,6 +327,30 @@
   };
   tabs.forEach(tab=>tab.addEventListener('click',()=>{view=tab.dataset.radarView;tabs.forEach(t=>t.setAttribute('aria-pressed',String(t===tab)));render();}));
   [search,category,sort].forEach(control=>control?.addEventListener(control===search?'input':'change',render));
+  // Keep the live search visible; the secondary filters unfold beneath it.
+  const filterToggle=document.getElementById('radar-filter-toggle');
+  const filterPanel=document.getElementById('radar-filter-panel');
+  const toolbar=filterToggle?.closest('.radar-toolbar');
+  function setFilters(open,restoreFocus=false){
+    if(!filterToggle||!filterPanel)return;
+    filterToggle.setAttribute('aria-expanded',String(open));
+    filterPanel.setAttribute('aria-hidden',String(!open));
+    filterPanel.inert=!open;
+    toolbar?.classList.toggle('filters-open',open);
+    if(restoreFocus)filterToggle.focus({preventScroll:true});
+  }
+  if(filterToggle&&filterPanel){
+    filterToggle.addEventListener('click',()=>setFilters(filterToggle.getAttribute('aria-expanded')!=='true'));
+    toolbar.addEventListener('keydown',event=>{
+      if(event.key==='Escape'&&filterToggle.getAttribute('aria-expanded')==='true'){
+        event.preventDefault();event.stopPropagation();setFilters(false,true);
+      }
+    });
+    document.addEventListener('click',event=>{
+      if(filterToggle.getAttribute('aria-expanded')==='true'&&!toolbar.contains(event.target))
+        setFilters(false,filterPanel.contains(document.activeElement));
+    });
+  }
   const healthView=document.getElementById('radar-health');
   let refreshing=false,loaded=false,lastSignature='',timer=0,generation=0;
   const controllers=new Set();
@@ -388,7 +412,7 @@
     revealAnchor();if(!timer)timer=window.setInterval(refresh,homePreview?300000:120000);
     if(loaded)startPreviewTimer();refresh();
   }
-  function leave(){sessionKey='';if(homePreview)homeRunning=false;generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
+  function leave(){setFilters(false);sessionKey='';if(homePreview)homeRunning=false;generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
   if(homePreview)enter();else member.register('radar',{enter,leave});
   window.addEventListener('focus',refresh);
   window.addEventListener('online',refresh);

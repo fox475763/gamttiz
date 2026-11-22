@@ -1,5 +1,5 @@
 /* FRY RADER — brand-led visual news index. Native vertical scroll only.
-   A strong red masthead, neutral utility strip and calm photo grid. */
+   An animated red masthead, collapsible glass filters and calm photo grid. */
 .member-page #main:has(.radar-tool:not([hidden])) {
   --press-ink:#302b26;
   --press-muted:#71685a;
@@ -9,7 +9,7 @@
   --press-paper:#fffdf8;
   --radar-gutter:max(6.4vw,calc((100vw - 1060px)/2));
   background:var(--press-paper);
-  padding:0 var(--radar-gutter) 112px;
+  padding:0 var(--radar-gutter) 24px;
 }
 .member-page #main:has(.radar-tool:not([hidden])) .member-ambient {display:none}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) {max-width:1060px;color:var(--press-ink)}
@@ -17,16 +17,24 @@
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead {
   position:relative;isolation:isolate;overflow:hidden;
   margin-inline:calc(-1 * var(--radar-gutter));
-  padding:clamp(21px,3vw,42px) var(--radar-gutter) clamp(34px,4.5vw,66px);
+  padding:clamp(58px,6vw,90px) var(--radar-gutter) clamp(34px,4.5vw,66px);
   color:#fff;background:linear-gradient(115deg,#c8202a 0%,#db292f 55%,#c92b30 100%);
 }
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead::before {
-  content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;
-  background:repeating-radial-gradient(circle at 94% 110%,transparent 0 59px,#fff3 60px 61px,transparent 62px 94px);
-  opacity:.52;
-}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-back {margin:0 0 24px;color:#fff;font-size:12px;font-weight:600;min-height:36px}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-back span {width:32px;height:32px;color:#90151c;--gtz-liquid-elevation:0 2px 8px #90151c22}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-art {position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope {position:absolute;left:78%;top:56%;width:clamp(320px,49vw,680px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;overflow:hidden;background:repeating-radial-gradient(circle,transparent 0 17%,#ffffff23 17.25% 17.55%,transparent 17.8% 25%);border:1px solid #ffffff20;opacity:.9}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope::before {content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(50% - .5px),#ffffff25 50%,transparent calc(50% + .5px)),linear-gradient(transparent calc(50% - .5px),#ffffff25 50%,transparent calc(50% + .5px));pointer-events:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-sweep {position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg 275deg,#ffffff04 285deg,#ffd69c30 337deg,#fff2c65a 359deg,#fff4ce70 360deg);animation:radar-masthead-turn 6.8s linear infinite}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-sweep::after {content:"";position:absolute;left:50%;top:0;bottom:50%;width:1.5px;background:linear-gradient(transparent,#ffe9bc);box-shadow:0 0 12px #ffdf9c;transform:translateX(-50%)}
+@keyframes radar-masthead-turn {to{transform:rotate(360deg)}}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope i {position:absolute;width:6px;height:6px;border-radius:50%;background:#ffe6b6;box-shadow:0 0 9px #ffe3b5;animation:radar-masthead-signal 6.8s ease-out infinite;opacity:.25}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope i:nth-of-type(1){top:22%;left:68%;animation-delay:.6s}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope i:nth-of-type(2){top:63%;left:77%;animation-delay:2.4s}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope i:nth-of-type(3){top:66%;left:29%;animation-delay:4.3s}
+@keyframes radar-masthead-signal {0%,100%{opacity:.22;transform:scale(.85)}8%{opacity:.9;transform:scale(1.4)}36%{opacity:.25;transform:scale(.9)}}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-back-link {position:absolute;top:clamp(10px,1.8vw,22px);right:max(18px,env(safe-area-inset-right,0px));display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 3px;background:none;border:0;color:#fff;font-size:12px;font-weight:550;line-height:1.2;text-decoration:none;transition:opacity .2s ease}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-back-link span {font-size:14px;line-height:1;transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-back-link:hover span {transform:translate(2px,-2px)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-back-link:focus-visible {outline:2px solid #fff;outline-offset:2px;border-radius:3px}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-tool-head {max-width:none;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:end;gap:clamp(24px,5vw,70px);margin:0;padding:0;border:0}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-kicker {font-size:11px;font-weight:700;letter-spacing:.115em;color:#ffe3a1;margin:0 0 10px}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) h1 {font-size:clamp(42px,5.55vw,77px);font-weight:800;letter-spacing:-.055em;line-height:1.02;margin:0;color:white;text-wrap:nowrap}
@@ -34,10 +42,28 @@
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-intro {max-width:365px;font-size:14px;line-height:1.75;letter-spacing:-.012em;color:#fff;margin:0 0 2px;word-break:keep-all;text-wrap:pretty}
 /* Separate search / filters from the feed without repeated card frames. */
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-board {padding:0 0 60px;margin:0;background:transparent;max-width:none}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-toolbar {margin:0 calc(-1 * var(--radar-gutter)) clamp(30px,4vw,54px);padding:clamp(19px,3vw,32px) var(--radar-gutter);background:#f3f2ef;border-bottom:1px solid #dedbd6;--gtz-liquid-surface:linear-gradient(145deg,#fff,#faf9f7);--gtz-liquid-active:linear-gradient(145deg,#fff,#eae7e2)}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls {grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:14px;margin:0}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-toolbar {margin:0 calc(-1 * var(--radar-gutter)) clamp(30px,4vw,54px);padding:clamp(19px,3vw,32px) var(--radar-gutter);background:#f3f2ef;border-bottom:1px solid #dedbd6;--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.66),rgba(255,255,255,.22) 52%,rgba(255,255,255,.38));--gtz-liquid-active:linear-gradient(145deg,rgba(255,255,255,.82),rgba(255,255,255,.46))}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls {display:block;margin:0}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-row {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:10px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-label {grid-column:auto;min-width:0}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle {display:inline-flex;position:relative;align-items:center;justify-content:center;gap:8px;min-width:92px;min-height:44px;padding:0 15px;border-radius:12px;color:#302b26;font:inherit;font-size:13px;font-weight:650;line-height:1.4;cursor:pointer;transition:transform .28s cubic-bezier(.22,1,.36,1),color .2s ease}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle svg {width:16px;height:16px;flex:none;transition:transform .42s cubic-bezier(.22,1,.36,1)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle[aria-expanded="true"] {color:var(--press-red);--gtz-liquid-surface:linear-gradient(145deg,#fff8f7,#f2dede)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle[aria-expanded="true"] svg {transform:rotate(180deg)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle:active {transform:scale(.96)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle:focus-visible {outline:2px solid var(--press-red);outline-offset:3px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-reveal {display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transform:translateY(-9px) scale(.975);transform-origin:top center;transition:grid-template-rows .42s cubic-bezier(.22,1,.36,1),opacity .25s ease,transform .42s cubic-bezier(.22,1,.36,1),visibility 0s linear .42s;pointer-events:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .filters-open .radar-filter-reveal {grid-template-rows:1fr;opacity:1;visibility:visible;transform:translateY(0) scale(1);transition-delay:0s;pointer-events:auto}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-clip {min-height:0;overflow:hidden}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel {display:block;margin:12px 3px 8px;padding:16px;position:relative;border-radius:22px;--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.47),rgba(255,255,255,.14) 52%,rgba(255,255,255,.23));--gtz-liquid-active:var(--gtz-liquid-surface);--gtz-liquid-elevation:0 3px 10px #22252b16,inset 0 1px 2px #fff9,inset 0 -3px 7px #30394c13}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel:focus-within {outline:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-glass-field {--gtz-liquid-surface:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.35))}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button {transition:transform .28s cubic-bezier(.22,1,.36,1),color .2s ease,background .2s ease}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button:active {transform:scale(.965)}
+@media(hover:hover){.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle:hover,.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel .radar-view-tabs button:hover {transform:scale(1.035);color:var(--press-red)}}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls label {min-width:0;gap:7px;font-size:11px;font-weight:600;line-height:1.4;color:#58534e;letter-spacing:0}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-glass-field {min-width:0;border-radius:12px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls label .radar-glass-field {min-width:0;border-radius:12px}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field :is(input,select) {min-width:0;min-height:44px;padding-inline:12px;font-size:13px;font-weight:500;color:#302b26;line-height:1.4;letter-spacing:-.015em;border:0;background:transparent;box-shadow:none}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field input {padding-left:35px}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls input::placeholder {color:#716b64;opacity:1}
@@ -85,7 +111,14 @@
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-deal-panel {margin:0 0 22px;padding:18px;border-radius:15px}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-deal-panel h3 {font-size:18px;letter-spacing:-.03em}
 .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-deal-panel p {font-size:13px;line-height:1.65}
-.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner {margin:0;font-size:13px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner {margin:0 auto 0 0;padding:0;width:fit-content;max-width:100%;font-size:12px;color:#6e6962;text-align:left}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner summary {display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 3px;font-size:11px;font-weight:500;color:#817b73;list-style:none;cursor:pointer;background:none;border:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner summary::-webkit-details-marker {display:none}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner summary:hover {color:var(--press-red)}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner summary:focus-visible {outline:2px solid var(--press-red);outline-offset:2px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner[open] {width:100%;max-width:480px}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner .member-note-body {padding:12px 15px 15px;border:1px solid var(--press-line);border-radius:12px;background:#fff;text-align:left;line-height:1.65}
+.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-owner .member-note-body .member-btn {font-size:12px;min-height:44px;margin:5px 0}
 @media(hover:hover) {
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-card:hover h3,.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-archive-row:hover .radar-archive-title {color:var(--press-red)}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-card:hover .radar-card-image {transform:scale(1.018)}
@@ -94,20 +127,22 @@
   .member-page #main:has(.radar-tool:not([hidden])) {--radar-gutter:6.4vw}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-tool-head {grid-template-columns:1fr;gap:13px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-intro {max-width:460px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-label {grid-column:1/-1}
+
 }
 @media(max-width:600px) {
-  .member-page #main:has(.radar-tool:not([hidden])) {--radar-gutter:clamp(24px,7.2vw,36px);padding-bottom:100px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead {padding-block:20px 32px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead::before {opacity:.4;background-position:30px 0}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-back {margin-bottom:21px}
+  .member-page #main:has(.radar-tool:not([hidden])) {--radar-gutter:clamp(24px,7.2vw,36px);padding-bottom:24px}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead {padding-block:59px 32px}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope {left:91%;top:65%;opacity:.52}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-back-link {top:7px;right:16px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-kicker {margin-bottom:9px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) h1 {font-size:clamp(39px,10.4vw,56px)}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .member-intro {font-size:13px;line-height:1.75}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-toolbar {padding-block:21px 23px;margin-bottom:35px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-updated {font-size:11px;max-width:112px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls {gap:11px 8px}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-search-row {gap:8px}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle {min-width:78px;padding-inline:10px;font-size:12px}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-panel {padding:12px;margin-inline:2px}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-fields {gap:8px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field select {padding-inline:7px;font-size:12px;font-weight:500;letter-spacing:-.02em}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls .radar-glass-field input {font-size:16px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-view-tabs {gap:8px;margin-top:16px}
@@ -127,9 +162,10 @@
 @media(max-width:359px) {
   .member-page #main:has(.radar-tool:not([hidden])) {--radar-gutter:20px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) h1 {font-size:37px}
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-controls {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-toggle {min-width:70px;padding-inline:8px}
   .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-card h3 {font-size:17px}
 }
 @media(prefers-reduced-motion:reduce) {
-  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-card :is(h3,img) {transition:none;transform:none}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-card :is(h3,img),.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-filter-reveal {transition:none;transform:none}
+  .member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-sweep,.member-page #main .radar-tool[data-member-view="radar"]:not([hidden]) .radar-masthead-scope i {animation:none}
 }

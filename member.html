@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Member · 감띠즈 멤버 — GAMTTIZ</title><meta name="description" content="감띠즈 라이센스 소지자만을 위한 감튀 레이더."><meta name="theme-color" content="#f6f5f2">
-  <link rel="icon" href="assets/badge.png"><link rel="apple-touch-icon" href="assets/badge.png"><link rel="manifest" href="member.webmanifest?v=20261122radarneutral1">
-  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="site-font.css"><link rel="stylesheet" href="experience.css"><link rel="stylesheet" href="studio-polish.css"><link rel="stylesheet" href="catalog-news.css"><link rel="stylesheet" href="site-features.css?v=20261121droplet1"><link rel="stylesheet" href="typography-system.css?v=20261113a"><link rel="stylesheet" href="editorial.css?v=20261113glassrestore"><link rel="stylesheet" href="license-wallet.css?v=20261120reopen6"><link rel="stylesheet" href="fry-radar.css?v=20261122radarneutral1"><link rel="stylesheet" href="member.css?v=20261122radarneutral1">
-  <script src="member-model.js?v=20261122radarneutral1" defer></script><script src="member.js?v=20261121walletsmooth11" defer></script><script src="radar-model.js?v=20261122radarneutral1" defer></script><script src="fry-radar.js?v=20261122radarneutral1" defer></script><script src="site-features.js?v=20261121walletsmooth11" defer></script>
-<link rel="stylesheet" href="ui-system.css?v=20261122radarneutral1">
-<link rel="stylesheet" href="liquid-glass.css?v=20261121material1">  <link rel="stylesheet" href="brand-type.css?v=20261122type1"><link rel="stylesheet" href="radar-editorial.css?v=20261122radarneutral1">
+  <link rel="icon" href="assets/badge.png"><link rel="apple-touch-icon" href="assets/badge.png"><link rel="manifest" href="member.webmanifest?v=20261122radarsweep1">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="refinement.css"><link rel="stylesheet" href="site-font.css"><link rel="stylesheet" href="experience.css"><link rel="stylesheet" href="studio-polish.css"><link rel="stylesheet" href="catalog-news.css"><link rel="stylesheet" href="site-features.css?v=20261121droplet1"><link rel="stylesheet" href="typography-system.css?v=20261113a"><link rel="stylesheet" href="editorial.css?v=20261113glassrestore"><link rel="stylesheet" href="license-wallet.css?v=20261120reopen6"><link rel="stylesheet" href="fry-radar.css?v=20261122radarsweep1"><link rel="stylesheet" href="member.css?v=20261122radarsweep1">
+  <script src="member-model.js?v=20261122radarsweep1" defer></script><script src="member.js?v=20261121walletsmooth11" defer></script><script src="radar-model.js?v=20261122radarsweep1" defer></script><script src="fry-radar.js?v=20261122radarsweep1" defer></script><script src="site-features.js?v=20261121walletsmooth11" defer></script>
+<link rel="stylesheet" href="ui-system.css?v=20261122radarsweep1">
+<link rel="stylesheet" href="liquid-glass.css?v=20261121material1">  <link rel="stylesheet" href="brand-type.css?v=20261122type1"><link rel="stylesheet" href="radar-editorial.css?v=20261122radarsweep1">
 </head>
 <body class="member-page refined-page">
   <a class="skip" href="#main">본문으로 건너뛰기</a>
@@ -33,14 +33,27 @@
       </section>
       <section class="member-tool radar-tool" data-member-view="radar" hidden>
         <div class="radar-masthead">
-          <a class="member-back" href="#hub"><span aria-hidden="true">←</span> Member</a>
+          <div class="radar-masthead-art" aria-hidden="true"><div class="radar-masthead-scope"><div class="radar-masthead-sweep"></div><i></i><i></i><i></i></div></div>
+          <a class="radar-back-link" href="#hub" aria-label="Member로 돌아가기">Member <span aria-hidden="true">↗</span></a>
           <div class="member-tool-head"><div><p class="member-kicker">GAMTTIZ / 감튀 레이더</p><h1 tabindex="-1">FRY RADER<span>.</span></h1></div><p class="member-intro">감자튀김 할인과 이벤트, 신메뉴부터 굿즈·콜라보, 맛집과 트렌드까지. 감튀 애호가를 위한 소식을 원문과 함께 모아봅니다.</p></div>
         </div>
         <section class="radar-board" aria-labelledby="board-title">
       <div class="radar-toolbar">
-      <div class="radar-controls"><label class="radar-search-label"><span>검색</span><span class="radar-glass-field"><input id="radar-search" type="search" placeholder="브랜드, 감자튀김, 행사 검색" autocomplete="off"></span></label><label><span>카테고리</span><span class="radar-glass-field"><select id="radar-category"><option value="all">전체</option><option value="discount">할인</option><option value="event">이벤트</option><option value="festival">축제</option><option value="new-product">신메뉴</option><option value="goods">굿즈·콜라보</option><option value="sauce">소스·시즈닝</option><option value="place">맛집·팝업</option><option value="trend">감튀 트렌드</option><option value="other">기타</option></select></span></label><label><span>정렬</span><span class="radar-glass-field"><select id="radar-sort"><option value="newest">최신순</option><option value="oldest">오래된순</option><option value="ending">종료 임박순</option></select></span></label></div>
-      <div class="radar-view-tabs" role="group" aria-label="소식 모아보기">
+      <div class="radar-controls">
+        <div class="radar-search-row">
+          <label class="radar-search-label"><span>검색</span><span class="radar-glass-field"><input id="radar-search" type="search" placeholder="브랜드, 감자튀김, 행사 검색" autocomplete="off"></span></label>
+          <button id="radar-filter-toggle" class="radar-filter-toggle radar-glass-field" type="button" aria-expanded="false" aria-controls="radar-filter-panel" aria-label="검색 필터">검색 <svg aria-hidden="true" viewBox="0 0 16 16" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+        <div class="radar-filter-reveal" id="radar-filter-panel" aria-hidden="true" inert>
+          <div class="radar-filter-clip">
+            <div class="radar-filter-panel radar-glass-field">
+              <div class="radar-filter-fields"><label><span>카테고리</span><span class="radar-glass-field"><select id="radar-category"><option value="all">전체</option><option value="discount">할인</option><option value="event">이벤트</option><option value="festival">축제</option><option value="new-product">신메뉴</option><option value="goods">굿즈·콜라보</option><option value="sauce">소스·시즈닝</option><option value="place">맛집·팝업</option><option value="trend">감튀 트렌드</option><option value="other">기타</option></select></span></label><label><span>정렬</span><span class="radar-glass-field"><select id="radar-sort"><option value="newest">최신순</option><option value="oldest">오래된순</option><option value="ending">종료 임박순</option></select></span></label></div>
+              <div class="radar-view-tabs" role="group" aria-label="소식 모아보기">
         <button type="button" data-radar-view="all" aria-pressed="true">전체</button><button type="button" data-radar-view="saved" aria-pressed="false">즐겨찾기</button><button type="button" data-radar-view="new" aria-pressed="false">새 소식</button><button type="button" data-radar-view="ending" aria-pressed="false">종료 임박</button><button type="button" data-radar-view="discount" aria-pressed="false">가격 혜택</button>
+      </div>
+            </div>
+          </div>
+        </div>
       </div>
       </div>
       <div class="radar-board-heading"><div><p class="radar-kicker">LATEST FRY SIGNALS</p><h2 id="board-title">감튀 소식</h2></div><p id="radar-updated" class="radar-updated">소식을 확인하고 있어요.</p></div>
@@ -56,7 +69,7 @@
         <div id="radar-archive-list" class="radar-list" aria-live="polite"></div>
       </div>
     </section>
-        <details id="radar-admin" class="member-note radar-owner"><summary>관리자 로그인</summary><div class="member-note-body"><p>소식을 삭제하려면 GitHub에서 <strong>fox475763</strong> 계정으로 로그인해야 합니다. 비밀번호를 이 사이트에 입력하거나 저장하지 않아요.</p><ol><li>아래 관리자 로그인을 누릅니다.</li><li>GitHub 로그인 후 삭제할 소식을 선택합니다.</li><li>삭제 확인에 체크하고 Submit new issue를 누릅니다.</li></ol><a class="member-btn primary" href="https://github.com/fox475763/gamttiz/issues/new?template=fry-delete.yml" rel="noopener noreferrer">GitHub 관리자 로그인 · 글 선택 ↗</a><p>GitHub Actions가 계정 소유권을 재검증한 뒤 삭제를 실행합니다. 다른 계정은 게시물을 변경할 수 없으며, 삭제한 소식의 재수집은 차단됩니다.</p></div></details>
+        <details id="radar-admin" class="radar-owner"><summary>관리자 로그인 <span aria-hidden="true">↗</span></summary><div class="member-note-body"><p>소식을 삭제하려면 GitHub에서 <strong>fox475763</strong> 계정으로 로그인해야 합니다. 비밀번호를 이 사이트에 입력하거나 저장하지 않아요.</p><ol><li>아래 관리자 로그인을 누릅니다.</li><li>GitHub 로그인 후 삭제할 소식을 선택합니다.</li><li>삭제 확인에 체크하고 Submit new issue를 누릅니다.</li></ol><a class="member-btn primary" href="https://github.com/fox475763/gamttiz/issues/new?template=fry-delete.yml" rel="noopener noreferrer">GitHub 관리자 로그인 · 글 선택 ↗</a><p>GitHub Actions가 계정 소유권을 재검증한 뒤 삭제를 실행합니다. 다른 계정은 게시물을 변경할 수 없으며, 삭제한 소식의 재수집은 차단됩니다.</p></div></details>
       </section>
     </div>
     <input type="file" id="member-import-file" accept="application/json,.json" hidden>
