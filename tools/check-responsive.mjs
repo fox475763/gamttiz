@@ -13,6 +13,47 @@ const base='http://127.0.0.1:'+server.address().port+'/';
 const pages=['index.html','member.html','license.html','play.html','collection.html','draw.html','products.html','project.html','quiz.html','combo.html','news.html','member.html#radar'];
 const license={version:1,name:'테스트 감띠',number:'GTZ - 0001',issuedAt:'2026-11-20T00:00:00Z',character:0};
 
+// Isolated radar regression: validate the actual cascade and layout independently
+// of the Home/Dex scrolling assertions and of live stories aging into the archive.
+for(const engine of [chromium,webkit])test('Fry Rader brand layout and headline-only feed: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+   for(const viewport of [{width:320,height:640},{width:390,height:844},{width:1440,height:900}]){
+     const context=await browser.newContext({viewport,serviceWorkers:'block',reducedMotion:'reduce'});
+     await context.addInitScript(({license})=>localStorage.setItem('gamttiz-my-license-v1',JSON.stringify(license)),{license});
+     await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+     const today=new Date().toISOString();
+     const items=Array.from({length:3},(_,i)=>({id:'qa-radar-'+i,title:'감자튀김 소식 테스트 '+(i+1),summary:'화면에 나오면 안 되는 기사 요약',url:'https://example.com/fries/'+i,source:'QA',category:'event',publishedAt:today,collectedAt:today}));
+     await context.route('**/data/fry-radar.json',route=>route.fulfill({json:{updatedAt:today,items}}));
+     const page=await context.newPage();
+     await page.goto(base+'member.html#radar',{waitUntil:'domcontentloaded'});
+     await page.waitForFunction(()=>document.querySelectorAll('#radar-list .radar-entry').length===3);
+     const layout=await page.evaluate(()=>{
+       const q=s=>document.querySelector(s),style=s=>getComputedStyle(q(s)),rect=s=>q(s).getBoundingClientRect();
+       const list=rect('#radar-list'),photo=rect('#radar-list .radar-card-photo');
+       return {overflow:document.documentElement.scrollWidth-innerWidth,hero:style('.radar-masthead').backgroundImage,toolbar:style('.radar-toolbar').backgroundColor,
+         columns:style('#radar-list').gridTemplateColumns.split(' ').length,rowGap:parseFloat(style('#radar-list').rowGap),left:list.left,right:innerWidth-list.right,
+         photoWidth:photo.width,listWidth:list.width,selectFont:parseFloat(style('#radar-brand').fontSize),selectWeight:style('#radar-brand').fontWeight,
+         summaries:document.querySelectorAll('#radar-list .radar-card p').length};
+     });
+     assert.ok(layout.overflow<=2&&layout.left>=19&&layout.right>=19,JSON.stringify(layout));
+     assert.ok(layout.hero.includes('linear-gradient')&&layout.toolbar==='rgb(255, 240, 201)',JSON.stringify(layout));
+     assert.equal(layout.columns,viewport.width<600?1:2);
+     assert.ok(layout.rowGap>=30&&layout.photoWidth>=layout.listWidth*(viewport.width<600?.95:.43),JSON.stringify(layout));
+     assert.ok(layout.selectFont<=13&&Number(layout.selectWeight)<=550,JSON.stringify(layout));
+     assert.equal(layout.summaries,0);
+     const save=page.locator('#radar-list .radar-action').first();await save.click();
+     assert.equal(await save.getAttribute('aria-pressed'),'true');
+     await page.locator('[data-radar-view="saved"]').click();
+     assert.equal(await page.locator('#radar-list .radar-entry').count(),1);
+     await page.locator('[data-radar-view="all"]').click();
+     await page.evaluate(()=>window.scrollTo(0,200));
+     await page.waitForFunction(()=>scrollY>0);
+     await context.close();
+   }
+ }finally{await browser.close();}
+});
+
 for(const engine of [chromium,webkit])test('Home scroll is native, stable and readable: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
  try{
