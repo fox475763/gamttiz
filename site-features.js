@@ -97,7 +97,7 @@
     // CSS lens there. Chromium's accelerated reference filters do support it.
     if(!/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)||/iPhone|iPad|iPod/.test(navigator.userAgent)||!window.CSS?.supports('backdrop-filter','url(#gtz-menu-refraction)'))return false;
     try{
-      const w=256,h=44,r=14,depth=8,canvas=document.createElement('canvas');
+      const w=256,h=44,r=14,depth=11,canvas=document.createElement('canvas');
       canvas.width=w;canvas.height=h;
       const ctx=canvas.getContext('2d');if(!ctx)return false;
       const pixels=ctx.createImageData(w,h);
@@ -111,8 +111,8 @@
         const t=Math.min(1,Math.max(0,-distance/depth));
         const bend=Math.pow(1-t,1.3);
         const i=4*(y*w+x);
-        pixels.data[i]=Math.round(128-nx*bend*36);
-        pixels.data[i+1]=Math.round(128-ny*bend*112);
+        pixels.data[i]=Math.round(128-nx*bend*32);
+        pixels.data[i+1]=Math.round(128-ny*bend*95);
         pixels.data[i+2]=128;pixels.data[i+3]=255;
       }
       ctx.putImageData(pixels,0,0);
@@ -126,11 +126,168 @@
       Object.entries({x:'0',y:'0',width:'1',height:'1',preserveAspectRatio:'none',result:'menuLensMap',href}).forEach(([k,v])=>map.setAttribute(k,v));
       map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
       const distort=document.createElementNS(ns,'feDisplacementMap');
-      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.42',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
+      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.40',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
       filter.append(map,distort);svg.append(filter);document.body.append(svg);
       canvas.width=canvas.height=0;
       return true;
     }catch{return false;}
+  }
+  // WebKit cannot sample a reference filter from backdrop-filter. Instead
+  // refract ONE live, local DOM mirror of the scene, clipped to the menu
+  // lens shapes. No screenshot, network service, or duplicate interactive UI.
+  // Shadow DOM isolates IDs/style selectors from the actual application.
+  let menuMirror=null,mirrorGeneration=0;
+  const svgNS='http://www.w3.org/2000/svg';
+  function stopMenuMirror(){
+    mirrorGeneration++;
+    if(!menuMirror)return;
+    const m=menuMirror;menuMirror=null;
+    cancelAnimationFrame(m.frame);m.observer?.disconnect();
+    m.host.remove();m.svg.remove();if(dock.dataset.menuRefraction==='mirror')delete dock.dataset.menuRefraction;
+  }
+  function startMenuMirror(){
+    stopMenuMirror();
+    if(!window.CSS?.supports('filter','url(#gtz-mirror-lens)')||!Element.prototype.attachShadow||
+       !window.CSS.supports('clip-path','path("M0 0 L1 0 L1 1 Z")'))return;
+    const generation=mirrorGeneration,host=make('div','control-menu-mirror'),scene=make('div','control-menu-mirror-scene');
+    host.inert=true;host.setAttribute('aria-hidden','true');host.append(scene);
+    const svg=document.createElementNS(svgNS,'svg');
+    svg.setAttribute('width','0');svg.setAttribute('height','0');svg.setAttribute('aria-hidden','true');
+    svg.style.cssText='position:absolute;overflow:hidden;pointer-events:none';
+    const filter=document.createElementNS(svgNS,'filter'),map=document.createElementNS(svgNS,'feImage'),distort=document.createElementNS(svgNS,'feDisplacementMap');
+    Object.entries({id:'gtz-menu-mirror-lens',filterUnits:'userSpaceOnUse',primitiveUnits:'userSpaceOnUse','color-interpolation-filters':'sRGB'}).forEach(([k,v])=>filter.setAttribute(k,v));
+    Object.entries({x:'0',y:'0',preserveAspectRatio:'none',result:'lensMap'}).forEach(([k,v])=>map.setAttribute(k,v));
+    Object.entries({in:'SourceGraphic',in2:'lensMap',scale:'34',xChannelSelector:'R',yChannelSelector:'G'}).forEach(([k,v])=>distort.setAttribute(k,v));
+    filter.append(map,distort);svg.append(filter);document.body.append(svg,host);
+    const shadow=scene.attachShadow({mode:'open'}),pairs=new WeakMap(),scrollables=new Set(),canvases=new Set(),videos=new Set();
+    const m={host,scene,svg,frame:0,observer:null};menuMirror=m;
+    const skip=node=>node===dock||node===scrim||node===host||node===svg||node.nodeType===1&&
+      (node.matches('script,iframe,object,embed,audio,link,meta,base,template,.control-dock,.control-scrim,.control-menu-mirror')||node.id==='gtz-menu-refraction');
+    // Avoid loading/playing a second media stream. Images, SVG, and canvas
+    // are locally mirrored; a video uses its poster plus frame copy if safe.
+    function cloneNode(node){
+      if(skip(node))return null;
+      if(node.nodeType===3||node.nodeType===8){const copy=node.cloneNode();pairs.set(node,copy);return copy;}
+      if(node.nodeType!==1)return null;
+      let copy;
+      if(node.tagName==='VIDEO'){
+        copy=document.createElement('canvas');copy.className=node.className;copy.style.cssText=node.style.cssText;
+        copy.width=node.videoWidth||1;copy.height=node.videoHeight||1;videos.add(node);
+      }else{
+        // Unknown custom elements may have a constructor/side effects.
+        if(node.localName.includes('-')&&node.namespaceURI==='http://www.w3.org/1999/xhtml')return null;
+        copy=node.cloneNode(false);
+        for(const attr of [...copy.attributes])if(/^on/i.test(attr.name)||attr.name==='autofocus')copy.removeAttribute(attr.name);
+        if(node.tagName==='CANVAS')canvases.add(node);
+      }
+      pairs.set(node,copy);
+      if(node.scrollTop||node.scrollLeft||node.scrollHeight>node.clientHeight+2||node.scrollWidth>node.clientWidth+2)scrollables.add(node);
+      if(node instanceof HTMLInputElement||node instanceof HTMLTextAreaElement){copy.value=node.value;if(node instanceof HTMLInputElement)copy.checked=node.checked;}
+      for(const child of node.childNodes){const cc=cloneNode(child);if(cc)copy.append(cc);}
+      return copy;
+    }
+    try{
+      const styleLoads=[];
+      for(const sheet of document.head.querySelectorAll('link[rel="stylesheet"],style')){
+        const copy=sheet.cloneNode(true);
+        if(copy.tagName==='LINK'){
+          copy.href=sheet.href;
+          styleLoads.push(new Promise(resolve=>{copy.onload=()=>resolve(true);copy.onerror=()=>resolve(false);}));
+        }
+        shadow.append(copy);
+      }
+      const cloneHtml=document.createElement('html'),cloneBody=cloneNode(document.body);
+      cloneHtml.className=document.documentElement.className;cloneHtml.dir=document.documentElement.dir;
+      const rootStyle=getComputedStyle(document.documentElement);
+      for(let i=0;i<rootStyle.length;i++){const prop=rootStyle[i];if(prop.startsWith('--'))cloneHtml.style.setProperty(prop,rootStyle.getPropertyValue(prop));}
+      cloneHtml.style.setProperty('background',rootStyle.background);
+      cloneHtml.append(cloneBody);shadow.append(cloneHtml);
+      const shim=make('style');
+      shim.textContent='html{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;display:block!important;scroll-behavior:auto!important} body{scroll-behavior:auto!important}';
+      shadow.append(shim);
+      const dim=make('div');dim.style.cssText='position:absolute;inset:0;z-index:1190;pointer-events:none;background:'+getComputedStyle(scrim).backgroundColor;shadow.append(dim);
+      const syncAttrs=(node,copy,attr)=>{
+        if(/^on/i.test(attr)||attr==='autofocus')return;
+        if(node===document.documentElement){if(attr==='class')cloneHtml.className=node.className;return;}
+        if(node.tagName==='VIDEO')return;
+        if(node.hasAttribute(attr))copy.setAttribute(attr,node.getAttribute(attr));else copy.removeAttribute(attr);
+      };
+      m.observer=new MutationObserver(records=>{
+        for(const record of records){const node=record.target;if(skip(node)||host.contains(node)||dock.contains(node))continue;
+          const copy=pairs.get(node);
+          if(record.type==='attributes'){if(node===document.documentElement)syncAttrs(node,cloneHtml,record.attributeName);else if(copy)syncAttrs(node,copy,record.attributeName);}
+          else if(record.type==='characterData'&&copy)copy.data=node.data;
+          else if(record.type==='childList'&&copy){
+            for(const old of record.removedNodes){pairs.get(old)?.remove();scrollables.delete(old);canvases.delete(old);videos.delete(old);}
+            for(const added of record.addedNodes){if(skip(added))continue;const cc=cloneNode(added);if(!cc)continue;let after=added.nextSibling;while(after&&!pairs.get(after))after=after.nextSibling;const adjacent=after&&pairs.get(after);copy.insertBefore(cc,adjacent?.parentNode===copy?adjacent:null);}
+          }
+        }
+      });
+      m.observer.observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
+      m.observer.observe(document.documentElement,{attributes:true});
+      const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+      if(!ctx){stopMenuMirror();return;}
+      let lastGeometry='',lastTick=0,mediaTick=0;
+      // All lenses share this viewport-size displacement map. Only regenerate
+      // it when the actual on-screen menu geometry changes (open, hover, scroll).
+      function updateMap(){
+        const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return false;
+        const clip=menuScroll.getBoundingClientRect();
+        const rects=[...menuLinks.children].filter(el=>Number(getComputedStyle(el).opacity)>.97).map(el=>{
+          const r=el.getBoundingClientRect(),rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||13;
+          return {x:Math.max(0,clip.left,r.left),y:Math.max(0,clip.top,r.top),right:Math.min(w,clip.right,r.right),bottom:Math.min(h,clip.bottom,r.bottom),r:rad};
+        }).filter(r=>r.right-r.x>3&&r.bottom-r.y>3);
+        if(!rects.length)return false;
+        const key=[w,h,...rects.flatMap(r=>[r.x,r.y,r.right,r.bottom,r.r].map(n=>Math.round(n*2)/2))].join(',');
+        if(key===lastGeometry)return true;lastGeometry=key;
+        const step=.65,mw=Math.ceil(w*step),mh=Math.ceil(h*step);canvas.width=mw;canvas.height=mh;
+        const img=ctx.createImageData(mw,mh),data=img.data;
+        for(let i=0;i<data.length;i+=4){data[i]=data[i+1]=data[i+2]=128;data[i+3]=255;}
+        let path='';
+        for(const a of rects){
+          const rw=a.right-a.x,rh=a.bottom-a.y,r=Math.min(a.r,rw/2,rh/2),cx=a.x+rw/2,cy=a.y+rh/2;
+          path+='M'+(a.x+r)+' '+a.y+' H'+(a.right-r)+' Q'+a.right+' '+a.y+' '+a.right+' '+(a.y+r)+' V'+(a.bottom-r)+' Q'+a.right+' '+a.bottom+' '+(a.right-r)+' '+a.bottom+' H'+(a.x+r)+' Q'+a.x+' '+a.bottom+' '+a.x+' '+(a.bottom-r)+' V'+(a.y+r)+' Q'+a.x+' '+a.y+' '+(a.x+r)+' '+a.y+' Z ';
+          for(let y=Math.max(0,Math.floor(a.y*step));y<Math.min(mh,Math.ceil(a.bottom*step));y++)for(let x=Math.max(0,Math.floor(a.x*step));x<Math.min(mw,Math.ceil(a.right*step));x++){
+            const px=(x+.5)/step-cx,py=(y+.5)/step-cy,qx=Math.abs(px)-(rw/2-r),qy=Math.abs(py)-(rh/2-r);
+            const ox=Math.max(qx,0),oy=Math.max(qy,0),o=Math.hypot(ox,oy),d=o+Math.min(Math.max(qx,qy),0)-r;
+            if(d>0)continue;
+            let nx=0,ny=0;if(o>0){nx=Math.sign(px)*ox/o;ny=Math.sign(py)*oy/o;}else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
+            const curve=Math.pow(Math.max(0,1+d/11),1.22),i=4*(y*mw+x);
+            data[i]=Math.round(128-nx*curve*62);data[i+1]=Math.round(128-ny*curve*62);
+          }
+        }
+        ctx.putImageData(img,0,0);
+        for(const el of [filter,map,distort]){el.setAttribute('width',w);el.setAttribute('height',h);}
+        filter.setAttribute('x','0');filter.setAttribute('y','0');distort.setAttribute('x','0');distort.setAttribute('y','0');
+        const href=canvas.toDataURL('image/png');map.setAttribute('href',href);map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
+        host.style.clipPath='path("'+path+'")';return true;
+      }
+      function syncScene(now){
+        if(menuMirror!==m||generation!==mirrorGeneration||dock.dataset.mode!=='menu')return;
+        m.frame=requestAnimationFrame(syncScene);
+        if(now-lastTick<32)return;lastTick=now;
+        try{cloneHtml.scrollTop=window.scrollY;cloneHtml.scrollLeft=window.scrollX;
+        for(const el of scrollables){const copy=pairs.get(el);if(!el.isConnected){scrollables.delete(el);continue;}if(copy){copy.scrollTop=el.scrollTop;copy.scrollLeft=el.scrollLeft;}}
+        for(const anim of document.getAnimations()){
+          const el=anim.effect?.target,copy=pairs.get(el);if(!copy||!copy.getAnimations)continue;
+          const same=copy.getAnimations().find(a=>a.animationName===anim.animationName&&a.transitionProperty===anim.transitionProperty);
+          if(same&&anim.currentTime!==null){try{same.pause();same.currentTime=anim.currentTime;}catch{}}
+        }
+        if(now-mediaTick>70){mediaTick=now;for(const el of [...canvases,...videos]){
+          if(!el.isConnected)continue;const copy=pairs.get(el);const r=el.getBoundingClientRect();if(!copy||r.bottom<0||r.top>innerHeight||r.right<0||r.left>innerWidth)continue;
+          try{const w=el.videoWidth||el.width,h=el.videoHeight||el.height;if(w&&h){if(copy.width!==w)copy.width=w;if(copy.height!==h)copy.height=h;copy.getContext('2d')?.drawImage(el,0,0,w,h);}}catch{}
+        }}
+        if(updateMap()){if(!scene.style.filter){scene.style.filter='url(#gtz-menu-mirror-lens)';return;}host.style.visibility='visible';dock.dataset.menuRefraction='mirror';}
+        }catch{stopMenuMirror();}
+      }
+      // Await cached styles before displaying the clone, then enable the
+      // ordinary CSS filter (not SVG backdrop-filter) on the full live scene.
+      Promise.race([Promise.all(styleLoads),new Promise(resolve=>setTimeout(()=>resolve(null),1800))]).then(results=>{
+        if(menuMirror!==m||generation!==mirrorGeneration)return;
+        if(!results||results.some(v=>!v)){stopMenuMirror();return;}
+        m.frame=requestAnimationFrame(syncScene);
+      }).catch(()=>stopMenuMirror());
+    }catch{stopMenuMirror();}
   }
   function resetMenuLight(){
     if(lightFrame)cancelAnimationFrame(lightFrame);
@@ -158,10 +315,10 @@
   menuLinks.addEventListener('pointercancel',resetMenuLight,{passive:true});
   function toggleMenuRefraction(active){
     clearTimeout(refractionTimer);delete dock.dataset.menuRefraction;
-    if(!active){resetMenuLight();return;}
+    if(!active){resetMenuLight();stopMenuMirror();return;}
     if(transparencyReduced.matches)return;
     // Enable the more expensive optical pass only once the entry springs settle.
-    refractionTimer=window.setTimeout(()=>{if(dock.dataset.mode==='menu'&&prepareMenuRefraction())dock.dataset.menuRefraction='ready';},motionReduced.matches?0:820);
+    refractionTimer=window.setTimeout(()=>{if(dock.dataset.mode==='menu'){if(prepareMenuRefraction())dock.dataset.menuRefraction='ready';else startMenuMirror();}},motionReduced.matches?0:820);
   }
   // A bottom-up stagger gives each droplet its own spring trajectory from Menu.
   [...menuLinks.children].forEach((item,index,items)=>{

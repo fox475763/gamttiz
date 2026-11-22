@@ -1,9 +1,9 @@
 /* Only Member's static UI is cached; no license or personal data is stored here. */
-const CACHE='gamttiz-member-20261122-radar-v35';
+const CACHE='gamttiz-member-20261122-radar-v36';
 const VERSION='20261122radarred1';
 const WALLET_VERSION='20261121walletsmooth11';
-const CONTROL_VERSION='20261122menulens2';
-const paths=['member.html','member.webmanifest','member-icon.svg','assets/badge.png','assets/fry-radar-thumbnail.png?v=20261122radarred1','style.css','refinement.css','site-font.css','experience.css','studio-polish.css','catalog-news.css','site-features.css?v=20261122menulens2','typography-system.css?v=20261113a','brand-type.css?v=20261122type1','assets/fonts/wanted-sans-variable.woff2','editorial.css?v=20261113glassrestore','license-wallet.css?v=20261120reopen6',`site-features.js?v=${CONTROL_VERSION}`,`member.js?v=${WALLET_VERSION}`,...['member.css','member-model.js','fry-radar.css','fry-radar.js','radar-editorial.css','radar-model.js','ui-system.css'].map(p=>`${p}?v=${VERSION}`),...Array.from({length:14},(_,i)=>`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`)];
+const CONTROL_VERSION='20261122menulens3';
+const paths=['member.html','member.webmanifest','member-icon.svg','assets/badge.png','assets/fry-radar-thumbnail.png?v=20261122radarred1','style.css','refinement.css','site-font.css','experience.css','studio-polish.css','catalog-news.css','site-features.css?v=20261122menulens3','typography-system.css?v=20261113a','brand-type.css?v=20261122type1','assets/fonts/wanted-sans-variable.woff2','editorial.css?v=20261113glassrestore','license-wallet.css?v=20261120reopen6',`site-features.js?v=${CONTROL_VERSION}`,`member.js?v=${WALLET_VERSION}`,...['member.css','member-model.js','fry-radar.css','fry-radar.js','radar-editorial.css','radar-model.js','ui-system.css'].map(p=>`${p}?v=${VERSION}`),...Array.from({length:14},(_,i)=>`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`)];
 paths.push(`member.webmanifest?v=${VERSION}`);
 const urls=new Set(paths.map(p=>new URL(p,self.registration.scope).href));
 const memberURL=new URL('member.html',self.registration.scope).href;
