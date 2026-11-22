@@ -113,42 +113,32 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    await trigger.click();
    await page.waitForFunction(()=>Array.from(document.querySelectorAll('.control-menu-links > :is(a,button)')).every(el=>Number(getComputedStyle(el).opacity)>.995&&Math.abs(parseFloat(getComputedStyle(el).scale)-1)<.001));
    await page.waitForTimeout(180);
-   await page.waitForFunction(expected=>document.querySelector('.control-dock').dataset.menuRefraction===expected,engine===chromium?'ready':'mirror');
+   await page.waitForFunction(expected=>document.querySelector('.control-dock').dataset.menuRefraction===expected,engine===chromium?'ready':'canvas');
    const material=await menu.evaluate(el=>{
      const list=[...el.querySelectorAll('.control-menu-links > :is(a,button)')],root=getComputedStyle(el),row=getComputedStyle(list[1]),optics=list[1].querySelector('.control-menu-optics'),lens=getComputedStyle(optics),edge=getComputedStyle(list[1],'::before'),box=list[1].getBoundingClientRect();
      return {shell:root.backgroundImage,shadow:root.boxShadow,border:root.borderTopWidth,blur:root.backdropFilter,edge:getComputedStyle(el,'::before').display,
         row:row.backdropFilter,baseColor:row.backgroundColor,gradient:lens.backgroundImage,rim:edge.backgroundImage,rimWidth:edge.borderTopWidth,lens:lens.backdropFilter,bevel:getComputedStyle(optics,'::before').boxShadow,rowShadow:row.boxShadow,light:lens.animationName,sheen:getComputedStyle(optics,'::before').animationName,glint:getComputedStyle(optics,'::after').backgroundImage,
-        actual:!!document.querySelector('#gtz-menu-refraction feDisplacementMap'),mirror:!!document.querySelector('#gtz-menu-mirror-lens feDisplacementMap'),label:getComputedStyle(list[1].querySelector('.control-menu-text')).zIndex,
+        actual:!!document.querySelector('#gtz-menu-refraction feDisplacementMap'),mirror:!!document.querySelector('.control-menu-edge-canvas'),label:getComputedStyle(list[1].querySelector('.control-menu-text')).zIndex,
         width:box.width,height:box.height,first:getComputedStyle(list[0]).transitionDelay,last:getComputedStyle(list.at(-1)).transitionDelay,
         selected:getComputedStyle(list[0]).color,selectedBackground:getComputedStyle(list[0]).backgroundColor};
    });
    assert.equal(material.shell,'none');assert.equal(material.shadow,'none');assert.equal(material.border,'0px');assert.equal(material.blur,'none');assert.equal(material.edge,'none');
    assert.ok(material.row==='none'&&material.gradient.includes('linear-gradient')&&material.rim.includes('linear-gradient')&&material.bevel==='none'&&material.rowShadow==='none'&&material.sheen==='menu-light-slide'&&material.label==='2',JSON.stringify(material));
-   assert.ok(material.baseColor.startsWith('rgba(20, 12, 18, 0.0')&&parseFloat(material.rimWidth)<=1&&material.glint.includes('radial-gradient'),JSON.stringify(material));
+   assert.ok(material.baseColor.startsWith('rgba(20, 12, 18, 0.1')&&parseFloat(material.rimWidth)<=1&&material.glint.includes('radial-gradient'),JSON.stringify(material));
    assert.equal(material.actual,engine===chromium);
    assert.equal(material.mirror,engine===webkit);
    assert.equal(material.lens.includes('url('),engine===chromium);
    if(engine===webkit){
-     const state=await page.evaluate(()=>{const scene=document.querySelector('.control-menu-mirror-scene'),original=document.querySelector('.hero-poster'),copy=scene.shadowRoot.querySelector('.hero-poster'),a=original.getBoundingClientRect(),b=copy.getBoundingClientRect();return {filter:getComputedStyle(scene).filter,hasImage:!!copy.querySelector('img'),dx:Math.abs(a.x-b.x),dy:Math.abs(a.y-b.y)};});
-     assert.ok(state.filter.includes('gtz-menu-mirror-lens')&&state.hasImage&&state.dx<3&&state.dy<3,JSON.stringify(state));
-     await page.evaluate(()=>{document.querySelector('.poster-label').textContent='LIVE LENS TEST';});
-     await page.waitForFunction(()=>document.querySelector('.control-menu-mirror-scene').shadowRoot.querySelector('.poster-label').textContent==='LIVE LENS TEST');
+     await page.evaluate(()=>{const layer=document.createElement('div');layer.id='lens-test-stripes';layer.style.cssText='position:fixed;inset:0;background:#123;z-index:1189;pointer-events:none';for(let x=0;x<innerWidth;x+=14){const bar=document.createElement('div');bar.style.cssText='position:absolute;top:0;bottom:0;width:7px;left:'+x+'px;background:#f84';layer.append(bar);}document.body.append(layer);});
+     const read=()=>page.evaluate(()=>{const c=document.querySelector('.control-menu-edge-canvas'),p=c.getBoundingClientRect(),r=document.querySelectorAll('.control-menu-links > :is(a,button)')[1].getBoundingClientRect(),ctx=c.getContext('2d'),d=ctx.getImageData(0,0,c.width,c.height).data;let count=0,hash=0;for(let i=3;i<d.length;i+=4){if(d[i]>0){count++;hash=(hash+Math.imul(i,d[i]))|0;}}const center=ctx.getImageData(Math.floor(r.x+r.width/2-p.x),Math.floor(r.y+r.height/2-p.y),1,1).data[3];return {count,hash,center};});
+     await page.waitForTimeout(350);const first=await read();assert.ok(first.count>30&&first.center===0,JSON.stringify(first));
+     await page.evaluate(()=>{document.querySelector('#lens-test-stripes').style.transform='translateX(3px)';});
+     await page.waitForTimeout(350);const moved=await read();assert.ok(moved.count>30&&moved.hash!==first.hash,JSON.stringify({first,moved}));
+     await page.evaluate(()=>document.querySelector('#lens-test-stripes').remove());
+   }else{
+     const pixels=await page.evaluate(async()=>{const f=document.querySelector('#gtz-menu-refraction feImage'),image=new Image();image.src=f.getAttribute('href');await image.decode();const c=document.createElement('canvas');c.width=image.naturalWidth;c.height=image.naturalHeight;const ctx=c.getContext('2d');ctx.drawImage(image,0,0);const read=(x,y)=>Array.from(ctx.getImageData(Math.floor(x),Math.floor(y),1,1).data).slice(0,2);return {center:read(c.width/2,c.height/2),left:read(2,c.height/2),top:read(c.width/2,2)};});
+     assert.deepEqual(pixels.center,[128,128]);assert.ok(pixels.left[0]>140&&pixels.left[0]<155&&pixels.top[1]>148,JSON.stringify(pixels));
    }
-   // Sample the generated displacement texture itself: zero in the center,
-   // strong in both edge directions. WebKit's mirrored center is also clipped out.
-   const pixels=await page.evaluate(async native=>{
-     const f=document.querySelector(native?'#gtz-menu-refraction feImage':'#gtz-menu-mirror-lens feImage');
-     const image=new Image();image.src=f.getAttribute('href');await image.decode();
-     const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
-     const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0);
-     const read=(x,y)=>Array.from(ctx.getImageData(Math.max(0,Math.min(canvas.width-1,Math.floor(x))),Math.max(0,Math.min(canvas.height-1,Math.floor(y))),1,1).data).slice(0,2);
-     if(native)return {center:read(canvas.width/2,canvas.height/2),left:read(2,canvas.height/2),top:read(canvas.width/2,2)};
-     const r=document.querySelectorAll('.control-menu-links > :is(a,button)')[1].getBoundingClientRect(),host=document.querySelector('.control-menu-mirror');
-     const sx=canvas.width/host.clientWidth,sy=canvas.height/host.clientHeight;
-     return {center:read((r.left+r.width/2)*sx,(r.top+r.height/2)*sy),left:read((r.left+2)*sx,(r.top+r.height/2)*sy),top:read((r.left+r.width/2)*sx,(r.top+2)*sy),ring:document.querySelector('.control-menu-mirror-ring').style.clipPath};
-   },engine===chromium);
-   assert.deepEqual(pixels.center,[128,128]);assert.ok(pixels.left[0]>148&&pixels.top[1]>148,JSON.stringify(pixels));
-   if(engine===webkit)assert.ok(pixels.ring.startsWith('path(')&&((pixels.ring.match(/M/g)||[]).length>=4),pixels.ring);
    const driftBefore=await items.nth(1).locator('.control-menu-optics').evaluate(el=>getComputedStyle(el,'::before').transform);
    await page.waitForFunction(previous=>getComputedStyle(document.querySelectorAll('.control-menu-optics')[1],'::before').transform!==previous,driftBefore,{timeout:8000});
    assert.ok(material.width<255&&material.height>=37&&material.height<=44,JSON.stringify(material));
@@ -172,7 +162,7 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    assert.ok(bounds.x>=-1&&bounds.y>=-2&&bounds.x+bounds.width<=viewport.width+1&&bounds.y+bounds.height<=btn.y+3);
    await trigger.click();
    await page.waitForFunction(()=>document.querySelector('.control-menu').getAttribute('aria-hidden')==='true'&&getComputedStyle(document.querySelector('.control-menu')).visibility==='hidden');
-   assert.equal(await page.locator('.control-menu-mirror').count(),0);
+   assert.equal(await page.locator('.control-menu-edge-canvas').count(),0);
    await context.close();
   }
  }finally{await browser.close();}

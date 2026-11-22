@@ -92,7 +92,7 @@
   const transparencyReduced=window.matchMedia('(prefers-reduced-transparency: reduce)');
   // A clear, flat center with an optically curved perimeter. Both renderer
   // paths use the same rounded-rectangle surface-normal and smooth rim falloff.
-  const MENU_EDGE_DEPTH=7.5;
+  const MENU_EDGE_DEPTH=9.5;
   function menuEdgeVector(px,py,w,h,r,depth){
     const qx=Math.abs(px)-(w/2-r),qy=Math.abs(py)-(h/2-r);
     const ox=Math.max(qx,0),oy=Math.max(qy,0),outer=Math.hypot(ox,oy);
@@ -103,10 +103,10 @@
     if(outer>0){nx=Math.sign(px)*ox/outer;ny=Math.sign(py)*oy/outer;}
     else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
     const t=Math.max(0,Math.min(1,-distance/depth));
-    const falloff=1-t*t*(3-2*t);
+    const falloff=1-t*t*t*(t*(t*6-15)+10);
     // Give rounded corners a little more optical power, like a liquid-glass
     // capsule: the background line curves into the clear central face.
-    const corner=1+.19*Math.abs(nx*ny)*2;
+    const corner=1+.10*Math.abs(nx*ny)*2;
     return [nx*falloff*corner,ny*falloff*corner];
   }
   function prepareMenuRefraction(){
@@ -116,15 +116,15 @@
     // CSS lens there. Chromium's accelerated reference filters do support it.
     if(!/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)||/iPhone|iPad|iPod/.test(navigator.userAgent)||!window.CSS?.supports('backdrop-filter','url(#gtz-menu-refraction)'))return false;
     try{
-      const w=256,h=44,r=21,depth=8.25,canvas=document.createElement('canvas');
+      const w=256,h=44,r=21,depth=10.5,canvas=document.createElement('canvas');
       canvas.width=w;canvas.height=h;
       const ctx=canvas.getContext('2d');if(!ctx)return false;
       const pixels=ctx.createImageData(w,h);
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){
         const [nx,ny]=menuEdgeVector(x+.5-w/2,y+.5-h/2,w,h,r,depth);
         const i=4*(y*w+x);
-        pixels.data[i]=Math.round(128-nx*43);
-        pixels.data[i+1]=Math.round(128-ny*113);
+        pixels.data[i]=Math.round(128-nx*23);
+        pixels.data[i+1]=Math.round(128-ny*65);
         pixels.data[i+2]=128;pixels.data[i+3]=255;
       }
       ctx.putImageData(pixels,0,0);
@@ -138,185 +138,110 @@
       Object.entries({x:'0',y:'0',width:'1',height:'1',preserveAspectRatio:'none',result:'menuLensMap',href}).forEach(([k,v])=>map.setAttribute(k,v));
       map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
       const distort=document.createElementNS(ns,'feDisplacementMap');
-      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.45',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
+      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.34',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
       filter.append(map,distort);svg.append(filter);document.body.append(svg);
       canvas.width=canvas.height=0;
       return true;
     }catch{return false;}
   }
-  // WebKit cannot sample a reference filter from backdrop-filter. Instead
-  // refract ONE live, local DOM mirror of the scene, clipped to the menu
-  // lens shapes. No screenshot, network service, or duplicate interactive UI.
-  // Shadow DOM isolates IDs/style selectors from the actual application.
-  let menuMirror=null,mirrorGeneration=0;
-  const svgNS='http://www.w3.org/2000/svg';
-  function stopMenuMirror(){
-    mirrorGeneration++;
-    if(!menuMirror)return;
-    const m=menuMirror;menuMirror=null;
-    cancelAnimationFrame(m.frame);m.observer?.disconnect();
-    for(const optics of menuLinks.querySelectorAll('.control-menu-optics')){optics.style.removeProperty('--menu-drift-x');optics.style.removeProperty('--menu-drift-angle');}
-    m.host.remove();m.svg.remove();if(dock.dataset.menuRefraction==='mirror')delete dock.dataset.menuRefraction;
+  // Safari uses a single Canvas2D rim, not a cloned document or a GPU SVG filter.
+  let mobileLens=null;
+  function stopMobileLens(){
+    if(!mobileLens)return;
+    cancelAnimationFrame(mobileLens.frame);mobileLens.canvas.remove();mobileLens=null;
+    if(dock.dataset.menuRefraction==='canvas')delete dock.dataset.menuRefraction;
   }
-  function startMenuMirror(){
-    stopMenuMirror();
-    if(!window.CSS?.supports('filter','url(#gtz-mirror-lens)')||!Element.prototype.attachShadow||
-       !window.CSS.supports('clip-path','path("M0 0 L1 0 L1 1 Z")'))return;
-    const generation=mirrorGeneration,host=make('div','control-menu-mirror'),ring=make('div','control-menu-mirror-ring'),scene=make('div','control-menu-mirror-scene');
-    host.inert=true;host.setAttribute('aria-hidden','true');ring.append(scene);host.append(ring);
-    const svg=document.createElementNS(svgNS,'svg');
-    svg.setAttribute('width','0');svg.setAttribute('height','0');svg.setAttribute('aria-hidden','true');
-    svg.style.cssText='position:absolute;overflow:hidden;pointer-events:none';
-    const filter=document.createElementNS(svgNS,'filter'),map=document.createElementNS(svgNS,'feImage'),distort=document.createElementNS(svgNS,'feDisplacementMap');
-    Object.entries({id:'gtz-menu-mirror-lens',filterUnits:'userSpaceOnUse',primitiveUnits:'userSpaceOnUse','color-interpolation-filters':'sRGB'}).forEach(([k,v])=>filter.setAttribute(k,v));
-    Object.entries({x:'0',y:'0',preserveAspectRatio:'none',result:'lensMap'}).forEach(([k,v])=>map.setAttribute(k,v));
-    Object.entries({in:'SourceGraphic',in2:'lensMap',scale:'46',xChannelSelector:'R',yChannelSelector:'G'}).forEach(([k,v])=>distort.setAttribute(k,v));
-    filter.append(map,distort);svg.append(filter);document.body.append(svg,host);
-    const shadow=scene.attachShadow({mode:'open'}),pairs=new WeakMap(),scrollables=new Set(),canvases=new Set(),videos=new Set();
-    const m={host,scene,svg,frame:0,observer:null};menuMirror=m;
-    const skip=node=>node===dock||node===scrim||node===host||node===svg||node.nodeType===1&&
-      (node.matches('script,iframe,object,embed,audio,link,meta,base,template,.control-dock,.control-scrim,.control-menu-mirror')||node.id==='gtz-menu-refraction');
-    // Avoid loading/playing a second media stream. Images, SVG, and canvas
-    // are locally mirrored; a video uses its poster plus frame copy if safe.
-    function cloneNode(node){
-      if(skip(node))return null;
-      if(node.nodeType===3||node.nodeType===8){const copy=node.cloneNode();pairs.set(node,copy);return copy;}
-      if(node.nodeType!==1)return null;
-      let copy;
-      if(node.tagName==='VIDEO'){
-        copy=document.createElement('canvas');copy.className=node.className;copy.style.cssText=node.style.cssText;
-        copy.width=node.videoWidth||1;copy.height=node.videoHeight||1;videos.add(node);
-      }else{
-        // Unknown custom elements may have a constructor/side effects.
-        if(node.localName.includes('-')&&node.namespaceURI==='http://www.w3.org/1999/xhtml')return null;
-        copy=node.cloneNode(false);
-        for(const attr of [...copy.attributes])if(/^on/i.test(attr.name)||attr.name==='autofocus')copy.removeAttribute(attr.name);
-        if(node.tagName==='CANVAS')canvases.add(node);
-      }
-      pairs.set(node,copy);
-      if(node.scrollTop||node.scrollLeft||node.scrollHeight>node.clientHeight+2||node.scrollWidth>node.clientWidth+2)scrollables.add(node);
-      if(node instanceof HTMLInputElement||node instanceof HTMLTextAreaElement){copy.value=node.value;if(node instanceof HTMLInputElement)copy.checked=node.checked;}
-      for(const child of node.childNodes){const cc=cloneNode(child);if(cc)copy.append(cc);}
-      return copy;
+  function startMobileLens(){
+    stopMobileLens();
+    const canvas=make('canvas','control-menu-edge-canvas'),source=document.createElement('canvas');
+    canvas.setAttribute('aria-hidden','true');
+    const out=canvas.getContext('2d'),ctx=source.getContext('2d',{willReadFrequently:true});
+    if(!out||!ctx)return;
+    const m={canvas,frame:0,last:0};mobileLens=m;document.body.append(canvas);
+    const overlaps=(r,b)=>r.right>b.left&&r.left<b.right&&r.bottom>b.top&&r.top<b.bottom;
+    const visibleColor=c=>c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)';
+    function shape(r,s){
+      const radius=Math.min(r.width/2,r.height/2,parseFloat(s.borderTopLeftRadius)||0);
+      ctx.beginPath();if(ctx.roundRect)ctx.roundRect(r.left,r.top,r.width,r.height,radius);else ctx.rect(r.left,r.top,r.width,r.height);
     }
-    try{
-      const styleLoads=[];
-      for(const sheet of document.head.querySelectorAll('link[rel="stylesheet"],style')){
-        const copy=sheet.cloneNode(true);
-        if(copy.tagName==='LINK'){
-          copy.href=sheet.href;
-          styleLoads.push(new Promise(resolve=>{copy.onload=()=>resolve(true);copy.onerror=()=>resolve(false);}));
+    function paint(el,b){
+      if(el===dock||el===scrim||el===canvas||el.matches('script,style,link,meta,svg,iframe,template,audio,video,canvas'))return;
+      const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+      if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)<.025)return;
+      const inside=overlaps(r,b),clip=/hidden|clip|scroll|auto/.test(s.overflow+s.overflowX+s.overflowY);
+      if(!inside&&(clip||el.classList.contains('home-scene')))return;
+      ctx.save();ctx.globalAlpha*=Number(s.opacity);
+      if(inside&&r.width>0&&r.height>0){
+        if(visibleColor(s.backgroundColor)){shape(r,s);ctx.fillStyle=s.backgroundColor;ctx.fill();}
+        if(parseFloat(s.borderTopWidth)>0&&visibleColor(s.borderTopColor)){shape(r,s);ctx.lineWidth=parseFloat(s.borderTopWidth);ctx.strokeStyle=s.borderTopColor;ctx.stroke();}
+        if(clip){shape(r,s);ctx.clip();}
+        if(el.tagName==='IMG'&&el.complete&&el.naturalWidth){
+          try{
+            const u=new URL(el.currentSrc||el.src,location.href);
+            if(u.origin===location.origin||u.protocol==='data:'||u.protocol==='blob:'){
+              let w=r.width,h=r.height;
+              if(s.objectFit==='contain'||s.objectFit==='cover'){
+                const f=Math[s.objectFit==='contain'?'min':'max'](w/el.naturalWidth,h/el.naturalHeight);
+                w=el.naturalWidth*f;h=el.naturalHeight*f;
+              }
+              ctx.save();shape(r,s);ctx.clip();ctx.drawImage(el,r.left+(r.width-w)/2,r.top+(r.height-h)/2,w,h);ctx.restore();
+            }
+          }catch{}
         }
-        shadow.append(copy);
       }
-      const cloneHtml=document.createElement('html'),cloneBody=cloneNode(document.body);
-      cloneHtml.className=document.documentElement.className;cloneHtml.dir=document.documentElement.dir;
-      const rootStyle=getComputedStyle(document.documentElement);
-      for(let i=0;i<rootStyle.length;i++){const prop=rootStyle[i];if(prop.startsWith('--'))cloneHtml.style.setProperty(prop,rootStyle.getPropertyValue(prop));}
-      cloneHtml.style.setProperty('background',rootStyle.background);
-      cloneHtml.append(cloneBody);shadow.append(cloneHtml);
-      const shim=make('style');
-      shim.textContent='html{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;overflow:hidden!important;display:block!important;scroll-behavior:auto!important} body{scroll-behavior:auto!important}';
-      shadow.append(shim);
-      const dim=make('div');dim.style.cssText='position:absolute;inset:0;z-index:1190;pointer-events:none;background:'+getComputedStyle(scrim).backgroundColor;shadow.append(dim);
-      const syncAttrs=(node,copy,attr)=>{
-        if(/^on/i.test(attr)||attr==='autofocus')return;
-        if(node===document.documentElement){if(attr==='class')cloneHtml.className=node.className;return;}
-        if(node.tagName==='VIDEO')return;
-        if(node.hasAttribute(attr))copy.setAttribute(attr,node.getAttribute(attr));else copy.removeAttribute(attr);
-      };
-      m.observer=new MutationObserver(records=>{
-        for(const record of records){const node=record.target;if(skip(node)||host.contains(node)||dock.contains(node))continue;
-          const copy=pairs.get(node);
-          if(record.type==='attributes'){if(node===document.documentElement)syncAttrs(node,cloneHtml,record.attributeName);else if(copy)syncAttrs(node,copy,record.attributeName);}
-          else if(record.type==='characterData'&&copy)copy.data=node.data;
-          else if(record.type==='childList'&&copy){
-            for(const old of record.removedNodes){pairs.get(old)?.remove();scrollables.delete(old);canvases.delete(old);videos.delete(old);}
-            for(const added of record.addedNodes){if(skip(added))continue;const cc=cloneNode(added);if(!cc)continue;let after=added.nextSibling;while(after&&!pairs.get(after))after=after.nextSibling;const adjacent=after&&pairs.get(after);copy.insertBefore(cc,adjacent?.parentNode===copy?adjacent:null);}
+      for(const node of el.childNodes){
+        if(node.nodeType===1){paint(node,b);continue;}
+        if(node.nodeType!==3||!node.data.trim()||!inside)continue;
+        const range=document.createRange();range.selectNodeContents(node);
+        const rects=[...range.getClientRects()];if(!rects.some(t=>overlaps(t,b)))continue;
+        ctx.font=s.fontStyle+' '+s.fontWeight+' '+s.fontSize+' '+s.fontFamily;ctx.fillStyle=s.color;ctx.textBaseline='middle';
+        if('letterSpacing' in ctx)ctx.letterSpacing=s.letterSpacing==='normal'?'0px':s.letterSpacing;
+        if(rects.length===1){const t=rects[0];ctx.fillText(node.data.trim(),t.left,t.top+t.height/2,t.width);}
+        else if(node.length<600){
+          for(let k=0;k<node.length;k++){if(!node.data[k].trim())continue;range.setStart(node,k);range.setEnd(node,k+1);const t=range.getBoundingClientRect();if(overlaps(t,b))ctx.fillText(node.data[k],t.left,t.top+t.height/2,t.width);}
+        }
+      }
+      ctx.restore();
+    }
+    function render(now){
+      if(mobileLens!==m||dock.dataset.mode!=='menu')return;
+      m.frame=requestAnimationFrame(render);if(now-m.last<65)return;m.last=now;
+      try{
+        const clip=menuScroll.getBoundingClientRect(),left=Math.max(0,Math.floor(clip.left-14)),top=Math.max(0,Math.floor(clip.top-14));
+        const w=Math.min(innerWidth-left,Math.ceil(clip.right-left+14)),h=Math.min(innerHeight-top,Math.ceil(clip.bottom-top+14));
+        if(w<1||h<1)return;
+        const b={left,top,right:left+w,bottom:top+h};
+        if(canvas.width!==w||canvas.height!==h){canvas.width=source.width=w;canvas.height=source.height=h;}
+        canvas.style.left=left+'px';canvas.style.top=top+'px';canvas.style.width=w+'px';canvas.style.height=h+'px';
+        ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
+        ctx.setTransform(1,0,0,1,-left,-top);
+        const root=getComputedStyle(document.documentElement).backgroundColor;
+        if(visibleColor(root)){ctx.fillStyle=root;ctx.fillRect(left,top,w,h);}
+        paint(document.body,b);
+        ctx.fillStyle=getComputedStyle(scrim).backgroundColor;ctx.fillRect(left,top,w,h);
+        const data=ctx.getImageData(0,0,w,h).data,pixels=out.createImageData(w,h),dst=pixels.data;
+        for(const el of menuLinks.children){
+          const r=el.getBoundingClientRect(),s=getComputedStyle(el);
+          if(Number(s.opacity)<.97||!overlaps(r,clip))continue;
+          const radius=Math.min(parseFloat(s.borderTopLeftRadius)||20,r.width/2,r.height/2),depth=Math.min(MENU_EDGE_DEPTH,r.height*.25);
+          for(let y=Math.max(0,Math.ceil(r.top-top),Math.ceil(clip.top-top));y<Math.min(h,r.bottom-top,clip.bottom-top);y++)
+          for(let x=Math.max(0,Math.ceil(r.left-left),Math.ceil(clip.left-left));x<Math.min(w,r.right-left,clip.right-left);x++){
+            const [nx,ny]=menuEdgeVector(x+.5+left-r.left-r.width/2,y+.5+top-r.top-r.height/2,r.width,r.height,radius,depth);
+            const strength=Math.hypot(nx,ny);if(strength<.005)continue;
+            const sx=Math.max(0,Math.min(w-1.001,x-nx*8)),sy=Math.max(0,Math.min(h-1.001,y-ny*4.5));
+            const ix=Math.floor(sx),iy=Math.floor(sy),fx=sx-ix,fy=sy-iy,i=4*(y*w+x),a=4*(iy*w+ix);
+            let delta=0;
+            for(let c=0;c<3;c++){
+              const v=(data[a+c]*(1-fx)+data[a+4+c]*fx)*(1-fy)+(data[a+w*4+c]*(1-fx)+data[a+w*4+4+c]*fx)*fy;
+              dst[i+c]=v;delta=Math.max(delta,Math.abs(v-data[i+c]));
+            }
+            dst[i+3]=Math.round(235*Math.min(1,delta/8)*Math.min(1,strength*2.6));
           }
         }
-      });
-      m.observer.observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true});
-      m.observer.observe(document.documentElement,{attributes:true});
-      const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
-      if(!ctx){stopMenuMirror();return;}
-      let lastGeometry='',lastTick=0,mediaTick=0,animationTick=0;
-      const opticsLayers=[...menuLinks.querySelectorAll('.control-menu-optics')];
-      // All lenses share this viewport-size displacement map. Only regenerate
-      // it when the actual on-screen menu geometry changes (open, hover, scroll).
-      // A closed outer contour plus its counter-clockwise inset contour
-      // makes a hollow ring. The real page, not the duplicate, is visible in
-      // the entire central opening, even while text/images animate.
-      function roundedContour(x,y,right,bottom,r,reverse=false){
-        r=Math.max(0,Math.min(r,(right-x)/2,(bottom-y)/2));
-        const arc=(endX,endY,dir)=>' A'+r+' '+r+' 0 0 '+dir+' '+endX+' '+endY;
-        if(reverse)return 'M'+(x+r)+' '+y+arc(x,y+r,0)+' V'+(bottom-r)+arc(x+r,bottom,0)+' H'+(right-r)+arc(right,bottom-r,0)+' V'+(y+r)+arc(right-r,y,0)+' H'+(x+r)+' Z ';
-        return 'M'+(x+r)+' '+y+' H'+(right-r)+arc(right,y+r,1)+' V'+(bottom-r)+arc(right-r,bottom,1)+' H'+(x+r)+arc(x,bottom-r,1)+' V'+(y+r)+arc(x+r,y,1)+' Z ';
-      }
-      function updateMap(){
-        const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return false;
-        const clip=menuScroll.getBoundingClientRect();
-        const rects=[...menuLinks.children].filter(el=>Number(getComputedStyle(el).opacity)>.97).map(el=>{
-          const r=el.getBoundingClientRect(),rad=parseFloat(getComputedStyle(el).borderTopLeftRadius)||20;
-          return {x:r.left,y:r.top,right:r.right,bottom:r.bottom,r:rad};
-        }).filter(r=>Math.min(w,clip.right,r.right)-Math.max(0,clip.left,r.x)>3&&Math.min(h,clip.bottom,r.bottom)-Math.max(0,clip.top,r.y)>3);
-        if(!rects.length)return false;
-        const key=[w,h,clip.left,clip.top,clip.right,clip.bottom,...rects.flatMap(r=>[r.x,r.y,r.right,r.bottom,r.r].map(n=>Math.round(n*2)/2))].join(',');
-        if(key===lastGeometry)return true;lastGeometry=key;
-        const step=.85,mw=Math.ceil(w*step),mh=Math.ceil(h*step);canvas.width=mw;canvas.height=mh;
-        const img=ctx.createImageData(mw,mh),data=img.data;
-        for(let i=0;i<data.length;i+=4){data[i]=data[i+1]=data[i+2]=128;data[i+3]=255;}
-        let path='';
-        for(const a of rects){
-          const rw=a.right-a.x,rh=a.bottom-a.y,r=Math.min(a.r,rw/2,rh/2),cx=a.x+rw/2,cy=a.y+rh/2;
-          const d=Math.min(MENU_EDGE_DEPTH,rh*.23,rw*.23);
-          path+=roundedContour(a.x,a.y,a.right,a.bottom,r);
-          path+=roundedContour(a.x+d,a.y+d,a.right-d,a.bottom-d,Math.max(0,r-d),true);
-          for(let y=Math.max(0,Math.floor(a.y*step));y<Math.min(mh,Math.ceil(a.bottom*step));y++)for(let x=Math.max(0,Math.floor(a.x*step));x<Math.min(mw,Math.ceil(a.right*step));x++){
-            const [nx,ny]=menuEdgeVector((x+.5)/step-cx,(y+.5)/step-cy,rw,rh,r,d);
-            if(nx===0&&ny===0)continue;
-            const i=4*(y*mw+x);
-            data[i]=Math.round(128-nx*96);data[i+1]=Math.round(128-ny*47);
-          }
-        }
-        ctx.putImageData(img,0,0);
-        for(const el of [filter,map,distort]){el.setAttribute('width',w);el.setAttribute('height',h);}
-        filter.setAttribute('x','0');filter.setAttribute('y','0');distort.setAttribute('x','0');distort.setAttribute('y','0');
-        const href=canvas.toDataURL('image/png');map.setAttribute('href',href);map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
-        // Clip the whole mirror to the scroll viewport, and separately clip
-        // the refraction to the exact rings, without making fake cut edges.
-        host.style.clipPath='inset('+Math.max(0,clip.top)+'px '+Math.max(0,w-clip.right)+'px '+Math.max(0,h-clip.bottom)+'px '+Math.max(0,clip.left)+'px)';
-        ring.style.clipPath='path("'+path+'")';return true;
-      }
-      function syncScene(now){
-        if(menuMirror!==m||generation!==mirrorGeneration||dock.dataset.mode!=='menu')return;
-        m.frame=requestAnimationFrame(syncScene);
-        if(now-lastTick<32)return;lastTick=now;
-        try{if(cloneHtml.scrollTop!==window.scrollY)cloneHtml.scrollTop=window.scrollY;if(cloneHtml.scrollLeft!==window.scrollX)cloneHtml.scrollLeft=window.scrollX;
-        for(const el of scrollables){const copy=pairs.get(el);if(!el.isConnected){scrollables.delete(el);continue;}if(copy){if(copy.scrollTop!==el.scrollTop)copy.scrollTop=el.scrollTop;if(copy.scrollLeft!==el.scrollLeft)copy.scrollLeft=el.scrollLeft;}}
-        // Keep the mirror's own CSS animations running on the compositor;
-        // correct phase only occasionally instead of forcing a repaint at 30Hz.
-        if(now-animationTick>180){animationTick=now;for(const anim of document.getAnimations()){
-          const el=anim.effect?.target,copy=pairs.get(el);if(!copy||!copy.getAnimations)continue;
-          const same=copy.getAnimations().find(a=>a.animationName===anim.animationName&&a.transitionProperty===anim.transitionProperty);
-          if(same&&anim.currentTime!==null){try{if(anim.playState==='paused'){if(same.playState!=='paused')same.pause();if(same.currentTime!==anim.currentTime)same.currentTime=anim.currentTime;}else{if(same.playState==='paused')same.play();if(same.currentTime===null||Math.abs(Number(same.currentTime)-Number(anim.currentTime))>90)same.currentTime=anim.currentTime;}}catch{}}
-        }}
-        if(!motionReduced.matches){for(let i=0;i<opticsLayers.length;i++){const phase=((now/14000+i*.059)%1),x=50-68*Math.cos(phase*2*Math.PI);opticsLayers[i].style.setProperty('--menu-drift-x',x.toFixed(2)+'%');opticsLayers[i].style.setProperty('--menu-drift-angle',(phase*360).toFixed(2)+'deg');}}
-        if(now-mediaTick>70){mediaTick=now;for(const el of [...canvases,...videos]){
-          if(!el.isConnected)continue;const copy=pairs.get(el);const r=el.getBoundingClientRect();if(!copy||r.bottom<0||r.top>innerHeight||r.right<0||r.left>innerWidth)continue;
-          try{const w=el.videoWidth||el.width,h=el.videoHeight||el.height;if(w&&h){if(copy.width!==w)copy.width=w;if(copy.height!==h)copy.height=h;copy.getContext('2d')?.drawImage(el,0,0,w,h);}}catch{}
-        }}
-        if(updateMap()){if(!scene.style.filter){scene.style.filter='url(#gtz-menu-mirror-lens)';return;}host.style.visibility='visible';dock.dataset.menuRefraction='mirror';}
-        }catch{stopMenuMirror();}
-      }
-      // Await cached styles before displaying the clone, then enable the
-      // ordinary CSS filter (not SVG backdrop-filter) on the full live scene.
-      Promise.race([Promise.all(styleLoads),new Promise(resolve=>setTimeout(()=>resolve(null),1800))]).then(results=>{
-        if(menuMirror!==m||generation!==mirrorGeneration)return;
-        if(!results||results.some(v=>!v)){stopMenuMirror();return;}
-        m.frame=requestAnimationFrame(syncScene);
-      }).catch(()=>stopMenuMirror());
-    }catch{stopMenuMirror();}
+        out.putImageData(pixels,0,0);dock.dataset.menuRefraction='canvas';
+      }catch{/* Keep the previous complete frame; never flash a cleared layer. */}
+    }
+    m.frame=requestAnimationFrame(render);
   }
   function resetMenuLight(){
     if(lightFrame)cancelAnimationFrame(lightFrame);
@@ -345,10 +270,10 @@
   menuLinks.addEventListener('pointercancel',resetMenuLight,{passive:true});
   function toggleMenuRefraction(active){
     clearTimeout(refractionTimer);delete dock.dataset.menuRefraction;
-    if(!active){resetMenuLight();stopMenuMirror();return;}
+    if(!active){resetMenuLight();stopMobileLens();return;}
     if(transparencyReduced.matches)return;
     // Enable the more expensive optical pass only once the entry springs settle.
-    refractionTimer=window.setTimeout(()=>{if(dock.dataset.mode==='menu'){if(prepareMenuRefraction())dock.dataset.menuRefraction='ready';else startMenuMirror();}},motionReduced.matches?0:820);
+    refractionTimer=window.setTimeout(()=>{if(dock.dataset.mode==='menu'){if(prepareMenuRefraction())dock.dataset.menuRefraction='ready';else startMobileLens();}},motionReduced.matches?0:820);
   }
   // A bottom-up stagger gives each droplet its own spring trajectory from Menu.
   [...menuLinks.children].forEach((item,index,items)=>{

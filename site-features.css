@@ -793,7 +793,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 }
 .control-dock .control-menu .control-menu-links > :is(a,button){
   --menu-light-x:22%;--menu-light-y:12%;
-  background-color:rgba(20,12,18,.025);
+  background-color:rgba(20,12,18,.10);
   border-radius:999px;
   background-image:none;
   -webkit-backdrop-filter:none;backdrop-filter:none;
@@ -803,8 +803,8 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .control-dock .control-menu .control-menu-links > :is(a,button) > .control-menu-optics{
   position:absolute;inset:0;z-index:0;display:block;pointer-events:none;
   border-radius:inherit;overflow:hidden;
-  -webkit-backdrop-filter:blur(.25px) saturate(1.10);
-  backdrop-filter:blur(.25px) saturate(1.10);
+  -webkit-backdrop-filter:blur(1.25px) saturate(1.04);
+  backdrop-filter:blur(1.25px) saturate(1.04);
   background:linear-gradient(135deg,rgba(255,255,255,.025),transparent 56%,rgba(255,255,255,.018));
   box-shadow:none;
   transition:--menu-light-x .17s ease,--menu-light-y .17s ease,opacity .24s ease;
@@ -843,11 +843,11 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 }
 /* Native reference filtering samples the actual backdrop every frame. */
 .control-dock[data-mode="menu"][data-menu-refraction="ready"] .control-menu .control-menu-optics{
-  backdrop-filter:url(#gtz-menu-refraction);
+  backdrop-filter:url(#gtz-menu-refraction) blur(1.25px) saturate(1.04);
 }
-/* In WebKit, optics sit over the live, clipped DOM refraction layer. */
-.control-dock[data-mode="menu"][data-menu-refraction="mirror"] .control-menu .control-menu-optics{
-  backdrop-filter:none;-webkit-backdrop-filter:none;animation:none;
+/* In WebKit, optics sit over the live, narrow Canvas2D refraction layer. */
+.control-dock[data-mode="menu"][data-menu-refraction="canvas"] .control-menu .control-menu-optics{
+  animation:none;
 }
 /* A compositor-driven sheen is independent of registered-property animation
    support and stays smoothly moving on Safari, too. */
@@ -856,14 +856,13 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   background:radial-gradient(ellipse 58% 9% at 50% 1%,rgba(255,255,255,.54),transparent 95%),radial-gradient(ellipse 58% 9% at 50% 99%,rgba(255,244,219,.34),transparent 95%),linear-gradient(100deg,transparent 6%,rgba(255,255,255,.035) 50%,transparent 94%);
   animation:menu-light-slide 12s ease-in-out infinite;animation-delay:calc(var(--menu-index,0)*-.71s);
 }
-.control-menu-mirror{position:fixed;inset:0;z-index:1195;pointer-events:none;overflow:hidden;visibility:hidden;isolation:isolate}
-.control-menu-mirror-ring,.control-menu-mirror-scene{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.control-menu-edge-canvas{position:fixed;z-index:1195;pointer-events:none;display:block}
 @media(prefers-reduced-motion:reduce){
  .control-dock .control-menu .control-menu-optics,.control-dock .control-menu .control-menu-optics::before{transition:none;animation:none!important}
  .control-dock .control-menu .control-menu-links > :is(a,button).glass-pressed::before{animation:none}
 }
 @media(prefers-reduced-transparency:reduce){
- .control-menu-mirror{display:none}
+ .control-menu-edge-canvas{display:none}
  .control-dock .control-menu .control-menu-links > :is(a,button):not([aria-current="page"]){background-color:rgba(24,19,23,.86)}
  .control-dock .control-menu .control-menu-optics{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 }
