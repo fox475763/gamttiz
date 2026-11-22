@@ -161,11 +161,16 @@ for(const engine of [chromium,webkit])test('Home MY ID shows issuance state and 
        await page.waitForFunction(()=>document.querySelector('.home-license-card').dataset.side==='back');
        assert.ok(await section.locator('.home-license-back').isVisible());
        assert.ok(await section.locator('#home-license-benefit').isHidden());
+       assert.doesNotMatch(await section.locator('#home-license-issue').innerText(),/무료/);
      }else{
        assert.ok((await section.locator('#home-license-description').textContent()).includes('멤버 전용 콘텐츠'));
        assert.ok(await section.locator('#home-license-record').isHidden());
        assert.ok(await section.locator('#home-license-benefit').isVisible());
+       assert.match(await section.locator('#home-license-title').innerText(),/무료 라이센스/);
        assert.match(await section.locator('#home-license-title').innerText(),/멤버 콘텐츠/);
+       assert.match(await section.locator('.home-license-free').innerText(),/무료 발급/);
+       assert.match(await section.locator('#home-license-description').innerText(),/결제 없이/);
+       assert.match(await section.locator('#home-license-issue').innerText(),/무료 라이센스 발급/);
        assert.equal(await section.locator('.home-license-actions a').first().getAttribute('href'),'license.html');
      }
      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=2));
