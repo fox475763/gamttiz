@@ -248,29 +248,110 @@
     lightFrame=0;lightPoint=null;
     if(lightTarget){lightTarget.style.removeProperty('--menu-light-x');lightTarget.style.removeProperty('--menu-light-y');lightTarget=null;}
   }
-  function menuLight(event){
-    if(motionReduced.matches||dock.dataset.mode!=='menu')return;
-    const item=event.target.closest('.control-menu-links > :is(a,button)');if(!item)return;
+  // Stable row centers are independent of visual scale, so the cursor and
+  // captured touch can glide across the whole dock without hover oscillation.
+  const guideItems=[...menuLinks.children];
+  menuLinks.dataset.guided='';
+  let guideIndex=-1,guideTouch=null,blockTouchClickUntil=0,guideScrollFrame=0;
+  function guideSelection(index){
+    if(index===guideIndex)return;
+    guideIndex=index;
+    menuLinks.toggleAttribute('data-following',index>=0);
+    guideItems.forEach((item,i)=>{
+      const distance=Math.abs(i-index);
+      item.classList.toggle('menu-guide-active',index>=0&&distance===0);
+      item.classList.toggle('menu-guide-near',index>=0&&distance===1);
+    });
+  }
+  function guideAt(x,y){
+    const box=menuLinks.getBoundingClientRect(),clip=menuScroll.getBoundingClientRect();
+    if(x<box.left-8||x>box.right+8||y<Math.max(box.top,clip.top)-5||y>Math.min(box.bottom,clip.bottom)+5)return -1;
+    let best=-1,minimum=Infinity;
+    guideItems.forEach((item,i)=>{
+      const r=item.getBoundingClientRect(),center=(r.top+r.bottom)/2;
+      if(center<clip.top||center>clip.bottom)return;
+      const distance=Math.abs(center-y);
+      if(distance<minimum){minimum=distance;best=i;}
+    });
+    return best;
+  }
+  function menuLight(event,item){
+    if(motionReduced.matches||dock.dataset.mode!=='menu'||!item)return;
     if(lightTarget!==item){resetMenuLight();lightTarget=item;}
     lightPoint={x:event.clientX,y:event.clientY};if(lightFrame)return;
     lightFrame=requestAnimationFrame(()=>{
       lightFrame=0;if(!lightTarget||!lightPoint)return;
       const rect=lightTarget.getBoundingClientRect(),clamp=n=>Math.max(8,Math.min(92,n));
-      // Smoothly move the specular hotspot toward the pointer.
-      const x=clamp((lightPoint.x-rect.left)/Math.max(1,rect.width)*100);
-      const y=clamp((lightPoint.y-rect.top)/Math.max(1,rect.height)*100);
-      lightTarget.style.setProperty('--menu-light-x',x.toFixed(1)+'%');
-      lightTarget.style.setProperty('--menu-light-y',y.toFixed(1)+'%');
+      lightTarget.style.setProperty('--menu-light-x',clamp((lightPoint.x-rect.left)/Math.max(1,rect.width)*100).toFixed(1)+'%');
+      lightTarget.style.setProperty('--menu-light-y',clamp((lightPoint.y-rect.top)/Math.max(1,rect.height)*100).toFixed(1)+'%');
     });
   }
-  menuLinks.addEventListener('pointerover',event=>{if(event.pointerType!=='touch')menuLight(event);},{passive:true});
-  menuLinks.addEventListener('pointermove',event=>{if(event.pointerType!=='touch')menuLight(event);},{passive:true});
-  menuLinks.addEventListener('pointerdown',menuLight,{passive:true});
-  menuLinks.addEventListener('pointerleave',resetMenuLight,{passive:true});
-  menuLinks.addEventListener('pointercancel',resetMenuLight,{passive:true});
+  function followGuide(event){
+    if(dock.dataset.mode!=='menu')return -1;
+    const index=guideAt(event.clientX,event.clientY);
+    guideSelection(index);
+    if(index>=0)menuLight(event,guideItems[index]);else resetMenuLight();
+    return index;
+  }
+  function clearGuide(){
+    guideSelection(-1);resetMenuLight();
+  }
+  function stopGuideTouch(){
+    if(guideScrollFrame)cancelAnimationFrame(guideScrollFrame);guideScrollFrame=0;
+    const touch=guideTouch;guideTouch=null;
+    if(touch&&menuLinks.hasPointerCapture?.(touch.id))menuLinks.releasePointerCapture(touch.id);
+    clearGuide();
+  }
+  function scrollGuide(){
+    if(!guideTouch){guideScrollFrame=0;return;}
+    const r=menuScroll.getBoundingClientRect(),y=guideTouch.y;
+    const speed=y<r.top+30?-Math.min(7,(r.top+30-y)*.22):y>r.bottom-30?Math.min(7,(y-r.bottom+30)*.22):0;
+    if(speed){menuScroll.scrollTop+=speed;followGuide({clientX:guideTouch.x,clientY:y});}
+    guideScrollFrame=requestAnimationFrame(scrollGuide);
+  }
+  menuLinks.addEventListener('pointerover',event=>{if(event.pointerType!=='touch')followGuide(event);},{passive:true});
+  menuLinks.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch'){
+      if(guideTouch?.id!==event.pointerId)return;
+      guideTouch.x=event.clientX;guideTouch.y=event.clientY;
+    }
+    followGuide(event);
+  },{passive:true});
+  menuLinks.addEventListener('pointerdown',event=>{
+    if(event.pointerType==='touch'){
+      if(guideTouch)return;
+      guideTouch={id:event.pointerId,x:event.clientX,y:event.clientY};
+      try{menuLinks.setPointerCapture(event.pointerId);}catch{}
+      guideScrollFrame=requestAnimationFrame(scrollGuide);
+    }
+    followGuide(event);
+  },{passive:true});
+  menuLinks.addEventListener('pointerup',event=>{
+    if(event.pointerType!=='touch'||guideTouch?.id!==event.pointerId)return;
+    const index=followGuide(event),target=guideItems[index];
+    blockTouchClickUntil=performance.now()+700;
+    stopGuideTouch();
+    // A single deliberate release commits the item under the finger.
+    // The original link/button handler still owns navigation and actions.
+    if(target&&dock.dataset.mode==='menu')target.click();
+  });
+  menuLinks.addEventListener('click',event=>{
+    if(event.isTrusted&&event.detail>0&&performance.now()<blockTouchClickUntil){
+      event.preventDefault();event.stopImmediatePropagation();return;
+    }
+    if(event.isTrusted&&event.detail>0&&!event.ctrlKey&&!event.metaKey&&!event.shiftKey&&!event.altKey){
+      const index=guideAt(event.clientX,event.clientY),chosen=guideItems[index];
+      if(chosen&&!chosen.contains(event.target)){event.preventDefault();event.stopImmediatePropagation();chosen.click();}
+    }
+  },true);
+  menuLinks.addEventListener('pointerleave',()=>{if(!guideTouch)clearGuide();},{passive:true});
+  menuLinks.addEventListener('pointercancel',stopGuideTouch,{passive:true});
+  menuLinks.addEventListener('lostpointercapture',()=>{if(guideTouch)stopGuideTouch();});
+  menuLinks.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))guideSelection(guideItems.indexOf(event.target));});
+  menuLinks.addEventListener('focusout',event=>{if(!menuLinks.contains(event.relatedTarget)&&!guideTouch)clearGuide();});
   function toggleMenuRefraction(active){
     clearTimeout(refractionTimer);delete dock.dataset.menuRefraction;
-    if(!active){resetMenuLight();stopMobileLens();return;}
+    if(!active){stopGuideTouch();stopMobileLens();return;}
     if(transparencyReduced.matches)return;
     // Enable the more expensive optical pass only once the entry springs settle.
     refractionTimer=window.setTimeout(()=>{if(dock.dataset.mode==='menu'){if(prepareMenuRefraction())dock.dataset.menuRefraction='ready';else startMobileLens();}},motionReduced.matches?0:820);
@@ -308,7 +389,7 @@
   const glassPressTimers=new WeakMap();
   dock.addEventListener('pointerdown',event=>{
     const target=event.target.closest('button,a');
-    if(!target || !dock.contains(target))return;
+    if(!target || !dock.contains(target)||menuLinks.contains(target))return;
     clearTimeout(glassPressTimers.get(target));
     target.classList.remove('glass-pressed');
     void target.offsetWidth;
@@ -335,7 +416,7 @@
     const next=dock.dataset.mode===mode?'closed':mode;
     dock.dataset.mode=next;
     toggleMenuRefraction(next==='menu');
-    if(next==='menu'){syncCurrentMenuLink();menuScroll.scrollTop=0;}
+    if(next==='menu'){syncCurrentMenuLink();clearGuide();menuScroll.scrollTop=0;}
     if(next==='contact')contactScroll.scrollTop=0;
     updateMenuTextColor();
     scrim.classList.toggle('is-open',next!=='closed');
@@ -364,7 +445,7 @@
   trigger.addEventListener('contextmenu',event=>event.preventDefault());
   trigger.addEventListener('click',()=>{if(gestureHandled){gestureHandled=false;return;}setMode('menu');});
   let menuSwipeX=null;
-  menu.addEventListener('pointerdown',event=>{menuSwipeX=event.clientX;});
+  menu.addEventListener('pointerdown',event=>{if(!menuLinks.contains(event.target))menuSwipeX=event.clientX;});
   menu.addEventListener('pointerup',event=>{if(menuSwipeX!==null && event.clientX-menuSwipeX < -45)setMode('search');menuSwipeX=null;});
   menu.addEventListener('pointercancel',event=>{
     menuSwipeX=null;

@@ -101,7 +101,7 @@ for(const engine of [chromium,webkit])test('Fry Rader search-anchored glass over
 });
 
 // The large menu shell is intentionally invisible; each item has its own glass.
-for(const engine of [chromium,webkit])test('Independent liquid glass menu droplets, stagger and isolated hover/touch: '+engine.name(),{timeout:45000},async()=>{
+for(const engine of [chromium,webkit])test('Independent liquid glass menu droplets, stagger and sliding hover/touch: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
  try{
   for(const [viewport,mobile] of [[{width:390,height:844},true],[{width:1100,height:800},false]]){
@@ -141,21 +141,29 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    }
    const driftBefore=await items.nth(1).locator('.control-menu-optics').evaluate(el=>getComputedStyle(el,'::before').transform);
    await page.waitForFunction(previous=>getComputedStyle(document.querySelectorAll('.control-menu-optics')[1],'::before').transform!==previous,driftBefore,{timeout:8000});
-   assert.ok(material.width<255&&material.height>=37&&material.height<=44,JSON.stringify(material));
+   assert.ok(material.width<255&&material.height>=29&&material.height<=36,JSON.stringify(material));
    assert.notEqual(material.first,material.last);assert.equal(material.selected,'rgb(233, 54, 54)');
-   const target=items.nth(2),neighbor=items.nth(3),a=await target.boundingBox(),b=await neighbor.boundingBox();
-   if(mobile)await target.dispatchEvent('pointerdown',{pointerType:'touch',bubbles:true});
-   else await target.hover();
-   await page.waitForTimeout(300);
-   assert.ok(await target.evaluate(el=>el.style.getPropertyValue('--menu-light-x').endsWith('%')));
-   assert.equal(await neighbor.evaluate(el=>el.style.getPropertyValue('--menu-light-x')),'');
-   const enlarged=await target.boundingBox(),still=await neighbor.boundingBox();
-   assert.ok(enlarged.width>a.width*1.03&&enlarged.height>a.height*1.04,JSON.stringify({a,enlarged}));
-   assert.ok(Math.abs(still.width-b.width)<1&&Math.abs(still.y-b.y)<1,JSON.stringify({b,still}));
-   if(mobile)await target.dispatchEvent('pointercancel',{pointerType:'touch',bubbles:true});
-   else await page.mouse.move(0,0);
+   const target=items.nth(2),neighbor=items.nth(3),far=items.nth(5),a=await target.boundingBox(),b=await neighbor.boundingBox(),f=await far.boundingBox();
+   const point=box=>({clientX:box.x+box.width/2,clientY:box.y+box.height/2});
+   if(mobile)await target.dispatchEvent('pointerdown',{pointerType:'touch',pointerId:7,bubbles:true,...point(a)});
+   else await page.mouse.move(a.x+a.width/2,a.y+a.height/2);
+   await page.waitForTimeout(430);
+   assert.ok(await target.evaluate(el=>el.classList.contains('menu-guide-active')&&el.style.getPropertyValue('--menu-light-x').endsWith('%')));
+   const enlarged=await target.boundingBox(),middle=await neighbor.boundingBox(),still=await far.boundingBox();
+   assert.ok(enlarged.width>middle.width*1.10&&middle.width>still.width*1.08&&Math.abs(still.width-f.width)<1.5,JSON.stringify({enlarged,middle,still}));
+   await page.evaluate(()=>{window.__menuCommits=[];document.querySelector('.control-menu-links').addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();window.__menuCommits.push(e.target.closest('a,button')?.textContent);},true);});
+   if(mobile){
+     await target.dispatchEvent('pointermove',{pointerType:'touch',pointerId:7,bubbles:true,...point(f)});
+   }else await page.mouse.move(f.x+f.width/2,f.y+f.height/2,{steps:5});
+   await page.waitForFunction(()=>document.querySelector('.control-menu-links').children[5].classList.contains('menu-guide-active'));
+   assert.deepEqual(await page.evaluate(()=>window.__menuCommits),[]);
+   if(mobile)await target.dispatchEvent('pointerup',{pointerType:'touch',pointerId:7,bubbles:true,...point(f)});
+   else await page.mouse.click(f.x+f.width/2,f.y+f.height/2);
+   assert.equal(await page.evaluate(()=>window.__menuCommits.length),1);
+   assert.equal(await page.evaluate(()=>window.__menuCommits[0]),await far.textContent());
+   if(!mobile)await page.mouse.move(0,0);
    await page.waitForTimeout(450);
-   const normal=await target.boundingBox();assert.ok(Math.abs(normal.width-a.width)<1.5);
+   assert.equal(await menu.locator('.menu-guide-active').count(),0);
    const scroll=menu.locator('.control-panel-scroll');await scroll.evaluate(el=>{el.scrollTop=el.scrollHeight});
    assert.ok(await scroll.evaluate(el=>el.scrollHeight-el.clientHeight-el.scrollTop<=3));
    const bounds=await menu.boundingBox(),btn=await trigger.boundingBox();
