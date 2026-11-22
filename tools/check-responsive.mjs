@@ -201,7 +201,7 @@ for(const engine of [chromium,webkit])test('Home highlights all three compact Pl
    const preview=page.locator('.radar-preview-item img.radar-thumb-fallback');
    await page.waitForFunction(()=>document.querySelector('.radar-preview-item img.radar-thumb-fallback'));
    assert.ok(await preview.count()>0);
-   assert.match(await preview.first().getAttribute('src'),/fry-radar-thumbnail\.png$/);
+   assert.match(await preview.first().getAttribute('src'),/fry-radar-thumbnail\.png\?v=20261122radarred1$/);
    assert.equal(await page.locator('.radar-preview-title-row .radar-member-badge').innerText(),'멤버 전용');
    assert.equal(await page.locator('.radar-member-badge svg').count(),1);
    await context.close();

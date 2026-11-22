@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" role="img" aria-labelledby="title desc">
   <title id="title">GAMTTIZ · FRY RADER</title>
-  <desc id="desc">감띠즈 감튀레이더 공통 썸네일. 크림색 바탕 위에 감자튀김과 레이더를 결합한 브랜드 심볼.</desc>
-  <rect width="1280" height="800" fill="#f7f4ef"/>
+  <desc id="desc">감띠즈 감튀레이더 공통 썸네일. 감띠즈 레드 바탕 위에 노란 감자튀김과 레이더를 결합한 브랜드 심볼.</desc>
+  <rect width="1280" height="800" fill="#d62c30"/>
   <g transform="translate(640 341)">
     <!-- Minimal radar arc: the small dot is its single detected signal. -->
-    <circle r="164" fill="none" stroke="#e7d8ce" stroke-width="5"/>
-    <path d="M 116 -116 A 164 164 0 1 0 164 0" fill="none" stroke="#c93436" stroke-width="7" stroke-linecap="round"/>
-    <circle cx="143" cy="-80" r="10" fill="#c93436"/>
-    <!-- Three rounded fries and the curved, red GAMTTIZ carton. -->
-    <g fill="#f5b533">
+    <circle r="164" fill="none" stroke="#ffce52" stroke-opacity=".32" stroke-width="5"/>
+    <path d="M 116 -116 A 164 164 0 1 0 164 0" fill="none" stroke="#ffce52" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="143" cy="-80" r="10" fill="#ffce52"/>
+    <!-- Three rounded fries and the curved GAMTTIZ carton. -->
+    <g fill="#ffe08a">
       <rect x="-65" y="-76" width="31" height="106" rx="8" transform="rotate(-11 -49.5 -23)"/>
       <rect x="-16" y="-104" width="33" height="137" rx="8"/>
       <rect x="34" y="-67" width="31" height="101" rx="8" transform="rotate(11 49.5 -17)"/>
     </g>
-    <path d="M-82 -1 Q-41 14 0 14 Q41 14 82 -1 L68 80 Q66 91 54 91 H-54 Q-66 91-68 80Z" fill="#c93436"/>
-    <path d="M-22 55 Q0 63 22 55" fill="none" stroke="#f7f4ef" stroke-width="5" stroke-linecap="round"/>
+    <path d="M-82 -1 Q-41 14 0 14 Q41 14 82 -1 L68 80 Q66 91 54 91 H-54 Q-66 91-68 80Z" fill="#ffb511"/>
+    <path d="M-22 55 Q0 63 22 55" fill="none" stroke="#d62c30" stroke-width="5" stroke-linecap="round"/>
   </g>
-  <text x="640" y="587" text-anchor="middle" fill="#a72a2c" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="700" letter-spacing="5">FRY RADER</text>
-  <text x="640" y="628" text-anchor="middle" fill="#a72a2c" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="600" letter-spacing="5">GAMTTIZ</text>
+  <text x="640" y="587" text-anchor="middle" fill="#ffe08a" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="700" letter-spacing="5">FRY RADER</text>
+  <text x="640" y="628" text-anchor="middle" fill="#ffe08a" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="600" letter-spacing="5">GAMTTIZ</text>
 </svg>
