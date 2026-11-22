@@ -78,7 +78,8 @@
   const fallbackImage=(className)=>{
     const img=el('img',className+' radar-thumb-fallback');
     img.src='assets/fry-radar-thumbnail.svg';img.alt='감튀레이더 공통 썸네일 · 실제 기사 사진 아님';
-    img.loading='lazy';img.decoding='async';img.width=1280;img.height=800;
+    // The same small local SVG is cached and shared across cards; load it immediately.
+    img.loading='eager';img.decoding='async';img.width=1280;img.height=800;
     return img;
   };
   const sourceImage=item=>{
