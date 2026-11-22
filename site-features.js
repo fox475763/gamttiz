@@ -163,7 +163,7 @@
       const r=el.getBoundingClientRect(),s=getComputedStyle(el);
       if(s.display==='none'||s.visibility==='hidden'||Number(s.opacity)<.025)return;
       const inside=overlaps(r,b),clip=/hidden|clip|scroll|auto/.test(s.overflow+s.overflowX+s.overflowY);
-      if(!inside&&(clip||el.classList.contains('home-scene')))return;
+      if(!inside&&(clip||el.classList.contains('home-scene')||el.matches('section,article,figure,aside,header,footer')&&r.width>0&&r.height>0))return;
       ctx.save();ctx.globalAlpha*=Number(s.opacity);
       if(inside&&r.width>0&&r.height>0){
         if(visibleColor(s.backgroundColor)){shape(r,s);ctx.fillStyle=s.backgroundColor;ctx.fill();}
@@ -212,7 +212,7 @@
     let cachedScene=null,sceneTime=0,sceneKey='';
     function render(now){
       if(mobileLens!==m||dock.dataset.mode!=='menu')return;
-      m.frame=requestAnimationFrame(render);if(now-m.last<65)return;m.last=now;
+      m.frame=requestAnimationFrame(render);if(now-m.last<(m.interval||34))return;m.last=now;const started=performance.now();
       try{
         const clip=menuScroll.getBoundingClientRect(),left=Math.max(0,Math.floor(clip.left-14)),top=Math.max(0,Math.floor(clip.top-14));
         const w=Math.min(innerWidth-left,Math.ceil(clip.right-left+14)),h=Math.min(innerHeight-top,Math.ceil(clip.bottom-top+14));
@@ -221,7 +221,7 @@
         if(canvas.width!==w||canvas.height!==h){canvas.width=source.width=w;canvas.height=source.height=h;}
         canvas.style.left=left+'px';canvas.style.top=top+'px';canvas.style.width=w+'px';canvas.style.height=h+'px';
         const key=[left,top,w,h].join(',');
-        if(!cachedScene||now-sceneTime>130||key!==sceneKey){
+        if(!cachedScene||now-sceneTime>95||key!==sceneKey){
         ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);
         ctx.setTransform(1,0,0,1,-left,-top);
         const root=getComputedStyle(document.documentElement).backgroundColor;
@@ -251,7 +251,8 @@
             dst[i+3]=Math.round(235*Math.min(1,delta/8)*Math.min(1,strength*2.6));
           }
         }
-        out.putImageData(pixels,0,0);dock.dataset.menuRefraction='canvas';
+        out.putImageData(pixels,0,0);if(dock.dataset.menuRefraction!=='canvas')dock.dataset.menuRefraction='canvas';
+        m.interval=Math.max(30,Math.min(60,(performance.now()-started)*2.4));
       }catch{/* Keep the previous complete frame; never flash a cleared layer. */}
     }
     m.frame=requestAnimationFrame(render);

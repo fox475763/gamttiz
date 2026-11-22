@@ -118,17 +118,17 @@
 /* A restrained, translucent liquid-glass treatment taken from the shared Menu.
    Only interactive controls and key surfaces use backdrop blur; news cards remain lightweight. */
 .member-page{
-  --mem-glass:linear-gradient(145deg,rgba(255,255,255,.82),rgba(255,255,255,.22) 49%,rgba(237,234,225,.48));
-  --mem-glass-edge:rgba(255,255,255,.88);
-  --mem-glass-shadow:inset 0 2px 2px rgba(255,255,255,.96),inset 0 -3px 8px rgba(110,100,76,.12),inset 3px 0 10px rgba(255,255,255,.5),0 10px 34px -20px rgba(55,45,27,.36);
+  --mem-glass:#fffdf9;
+  --mem-glass-edge:#e4ded4;
+  --mem-glass-shadow:none;
 }
 .member-page .member-main :is(.member-id-chip,.member-tile,.member-note,.member-back span,.member-surface,.member-lock-mark,.member-tile-link,.member-btn:not(.primary)){
   background:var(--mem-glass);border-color:var(--mem-glass-edge);box-shadow:var(--mem-glass-shadow);
 }
 .member-page .member-main :is(.member-id-chip,.member-tile,.member-note,.member-surface,.member-back span){
-  -webkit-backdrop-filter:blur(12px) saturate(1.22);backdrop-filter:blur(12px) saturate(1.22);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
 }
-.member-page .member-main .member-locked{background:linear-gradient(145deg,#ffffffca,#f7f4eb83 60%,#eee8da90);border-color:#ffffffdc;box-shadow:var(--mem-glass-shadow)}
+.member-page .member-main .member-locked{background:#fffdf9;border-color:#e4ded4;box-shadow:var(--mem-glass-shadow)}
 
 .member-page .member-main .member-btn.primary{background:linear-gradient(135deg,#56524a 0%,#302e29 48%,#211f1c 100%);border-color:#ffffff65;box-shadow:inset 0 1px 2px #ffffff5c,inset 0 -3px 7px #0004,0 5px 18px #4c3c2225}
 
@@ -186,3 +186,17 @@
 }
 @media(max-width:540px){.member-page .radar-tool .radar-list{grid-template-columns:1fr}.member-page .radar-tool .radar-card{padding:15px}}
 @media(prefers-reduced-motion:reduce){.member-radar-sweep{transition:none!important}}
+
+/* Members and the unissued-license guide share the site's solid paper design. */
+.member-page .member-main :is(.member-id-chip,.member-tile,.member-note,.member-back span,.member-surface,.member-lock-mark,.member-tile-link,.member-btn:not(.primary),.member-locked){
+  background:#fffdf9;border-color:#e4ded4;box-shadow:none;
+}
+.member-page .member-main .member-note{background:#f5f1e9}
+.member-page .member-main .member-lock-mark{background:#fff1d4;border-color:#efdbad;color:#b8322c}
+.member-page .member-main .member-btn.primary{background:#e93636;border-color:#e93636;color:#fff;box-shadow:none}
+.member-page .member-main .member-tile-link{background:#fff1dc;border-color:#efdbb5;color:#be3430}
+@media(hover:hover) and (pointer:fine){
+ .member-page .member-main .member-tile:hover{box-shadow:0 7px 20px #4b35210e;border-color:#d8c8b0}
+ .member-page .member-main .member-tile:hover .member-tile-link{background:#e93636;color:#fff;box-shadow:none}
+ .member-page .member-main .member-btn:not(:disabled):hover{box-shadow:none}
+}

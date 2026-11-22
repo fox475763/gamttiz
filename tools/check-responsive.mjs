@@ -517,13 +517,12 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      assert.ok(overflow<=2,filename+' horizontal overflow '+overflow+'px at '+viewport.width);
      if(['play.html','collection.html','draw.html','member.html#radar'].includes(filename)){
        const target=filename==='play.html'?'.hub-grid>a':filename==='collection.html'?'.dex-toolbar':filename==='draw.html'?'.draw-machine':'.radar-glass-field';
-       const material=await page.locator(target).first().evaluate(el=>({
-         blur:getComputedStyle(el.querySelector(':scope > .gtz-liquid-optics')).backdropFilter,
-         edge:getComputedStyle(el,'::before').backgroundImage,
-         animation:getComputedStyle(el,'::before').animationName,
-         border:getComputedStyle(el).borderTopWidth
-       }));
-       assert.ok(material.blur.includes('blur(1.25px)')&&material.edge.includes('linear-gradient')&&material.animation==='none',filename+' canonical glass');
+       const material=await page.locator(target).first().evaluate(el=>{
+         const optics=el.querySelector(':scope > .gtz-liquid-optics'),style=getComputedStyle(el);
+         return {glass:!!optics,blur:optics?getComputedStyle(optics).backdropFilter:style.backdropFilter,background:style.backgroundColor,shadow:style.boxShadow};
+       });
+       if(filename==='member.html#radar')assert.ok(material.glass&&material.blur.includes('blur(1.25px)'),filename+' search lens');
+       else assert.ok(!material.glass&&material.blur==='none'&&material.background!=='rgba(0, 0, 0, 0)',filename+' solid paper card '+JSON.stringify(material));
      }
      if(filename==='play.html'){
        const cards=page.locator('.hub-grid>a');
@@ -535,10 +534,10 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        assert.equal(await page.locator('.hub-icon').first().evaluate(el=>getComputedStyle(el).boxShadow),'none');
        const layout=await cards.evaluateAll(items=>items.map(card=>{
          const icon=card.querySelector('.hub-icon'),title=card.querySelector('h2'),ib=icon.getBoundingClientRect(),tb=title.getBoundingClientRect(),cb=card.getBoundingClientRect();
-         return {href:card.getAttribute('href'),aligned:ib.width>=50&&ib.right<=tb.left&&tb.right<=cb.right,material:getComputedStyle(card,'::before').backgroundImage.includes('conic-gradient')&&getComputedStyle(card).backdropFilter!=='none'};
+         return {href:card.getAttribute('href'),aligned:ib.width>=50&&ib.right<=tb.left&&tb.right<=cb.right,material:!card.querySelector(':scope > .gtz-liquid-optics')&&getComputedStyle(card).backdropFilter==='none'};
        }));
        assert.deepEqual(layout.map(c=>c.href),['quiz.html','combo.html','draw.html']);
-       assert.ok(layout.every(c=>c.aligned&&c.material),'Play glass and icon alignment at '+viewport.width);
+       assert.ok(layout.every(c=>c.aligned&&c.material),'Play paper and icon alignment at '+viewport.width);
      }
      if(filename==='license.html'){
        await page.locator('#license-edit').click();
@@ -549,11 +548,13 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        const square=await rail.locator('.license-friend.is-profile-current').boundingBox();
        assert.ok(square&&Math.abs(square.width-square.height)<2,'favorite profile card must be square');
        const previous=await rail.locator('input:checked').getAttribute('value');
-       await page.locator('#license-profile-next').click();
+       assert.equal(await page.locator('.license-profile-controls').count(),0);
+       assert.equal(await rail.locator('.gtz-liquid-optics').count(),0);
+       await rail.focus();await page.keyboard.press('ArrowRight');
        await page.waitForFunction(n=>document.querySelector('#license-friends input:checked').value!==n,previous);
        await rail.focus();
        await page.keyboard.press('End');
-       await page.waitForFunction(()=>document.querySelector('#license-profile-count').textContent==='14 / 14');
+       await page.waitForFunction(()=>document.querySelector('#license-friends input:checked').value==='13');
        assert.equal(await rail.locator('input:checked').getAttribute('value'),'13');
        await page.locator('#license-cancel').click();
      }

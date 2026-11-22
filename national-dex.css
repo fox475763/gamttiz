@@ -15,7 +15,7 @@
 .dex-page .dex-glass{
   position:relative;isolation:isolate;border:0;
   background:linear-gradient(145deg,rgba(255,255,255,.71),rgba(255,255,255,.17) 50%,rgba(255,255,255,.42));
-  -webkit-backdrop-filter:blur(14px) saturate(1.28);backdrop-filter:blur(14px) saturate(1.28);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
   box-shadow:inset 0 1px 2px rgba(255,255,255,.8),inset 0 -4px 9px rgba(62,65,70,.055),0 8px 24px rgba(37,35,33,.075);
 }
 .dex-page .dex-glass::before{
@@ -73,11 +73,11 @@
 .dex-page .dex-unknown .dex-tile-info strong{color:#777770}
 .dex-page #dex-empty{text-align:center;padding:40px 12px;color:var(--dex-muted);font-size:14px}
 /* Large individual index entry. The native dialog supplies focus trapping and Escape. */
-.dex-page .dex-detail{position:fixed;inset:0;margin:auto;height:fit-content;width:min(920px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 36px);padding:0;overflow:auto;overscroll-behavior:contain;border-radius:30px;scrollbar-width:thin;color:var(--dex-dark);background:linear-gradient(145deg,rgba(255,255,253,.94),rgba(246,246,242,.83));-webkit-backdrop-filter:blur(20px) saturate(1.3);backdrop-filter:blur(20px) saturate(1.3);box-shadow:inset 0 1px 3px #fffd,0 26px 90px #25232138}
+.dex-page .dex-detail{position:fixed;inset:0;margin:auto;height:fit-content;width:min(920px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 36px);padding:0;overflow:auto;overscroll-behavior:contain;border-radius:30px;scrollbar-width:thin;color:var(--dex-dark);background:linear-gradient(145deg,rgba(255,255,253,.94),rgba(246,246,242,.83));-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:inset 0 1px 3px #fffd,0 26px 90px #25232138}
 .dex-page .dex-detail:not([open]){display:none}
 .dex-page .dex-detail[open]{animation:dex-dialog-in .28s cubic-bezier(.2,.8,.2,1) both}
-.dex-page .dex-detail::backdrop{background:#25232142;-webkit-backdrop-filter:blur(8px) saturate(.9);backdrop-filter:blur(8px) saturate(.9)}
-.dex-page .dex-modal-head{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:44px minmax(0,1fr) 44px 44px;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #68686320;background:linear-gradient(145deg,#ffffffe8,#f6f6f2d4);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25)}
+.dex-page .dex-detail::backdrop{background:#25232142;-webkit-backdrop-filter:none;backdrop-filter:none;}
+.dex-page .dex-modal-head{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:44px minmax(0,1fr) 44px 44px;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #68686320;background:linear-gradient(145deg,#ffffffe8,#f6f6f2d4);-webkit-backdrop-filter:none;backdrop-filter:none;}
 .dex-page .dex-modal-index{text-align:center;display:flex;flex-direction:column;gap:3px}
 .dex-page .dex-modal-index span{color:#686863;font-size:9px;letter-spacing:.11em;font-weight:750}
 .dex-page .dex-modal-index strong{font-size:16px;color:var(--dex-red);font-weight:800;line-height:1.1;letter-spacing:.04em;font-variant-numeric:tabular-nums}
@@ -227,3 +227,28 @@
 /* Start the catalog at entry 01 without the former half-viewport blank spacer. */
 .dex-page .dex-dial .dex-grid{padding-top:12px;scroll-padding-top:12px;scroll-snap-type:y proximity}
 .dex-page .dex-dial .dex-tile{scroll-snap-align:start}
+
+/* Solid collection catalogue: editorial paper instead of optical cards. */
+.dex-page .dex-glass,.dex-page .dex-tile{
+  background:#fffdf9;border:1px solid #e4ded4;box-shadow:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+.dex-page .dex-glass::before{content:none;display:none}
+.dex-page .dex-toolbar{background:#fffdf9}
+.dex-page .dex-unknown{background:#efeeeb;border-color:#dedbd4}
+.dex-page .dex-tile:is(.is-selected,.is-dial-current){background:#fff6e9;border-color:#dc5149;box-shadow:none}
+.dex-page .dex-search,.dex-page .dex-sort{background:none;box-shadow:none}
+.dex-page .dex-tools :is(.dex-search input,.dex-sort select),
+.dex-page .dex-filters button,.dex-page .dex-dial-controls button,.dex-page :is(.dex-arrow,.dex-close){
+  background:#fffdf9;border:1px solid #ddd7cd;box-shadow:none;
+}
+.dex-page .dex-filters button[aria-pressed=true]{background:#e93636;border-color:#e93636;color:#fff;box-shadow:none}
+.dex-page .dex-filters button[aria-pressed=true] span{color:#fff}
+.dex-page .dex-detail{background:#fffdf9;border:1px solid #e0d9ce;box-shadow:0 16px 48px #24232129;overflow:hidden}
+.dex-page .dex-modal-head{background:#fffdf9;border-color:#e4ded4}
+.dex-page .dex-detail::backdrop{background:#24232170;backdrop-filter:none;-webkit-backdrop-filter:none}
+.dex-page #dex-profile :is(.profile-face-inset,.profile-type,.profile-secret,.profile-episode,.profile-traits span){
+  background:#fffdf9;box-shadow:none;border:1px solid #e4ded4;
+}
+.dex-page #dex-profile :is(.profile-secret,.profile-traits span){background:#fff1e5;border-color:#efddc5}
+@media(hover:hover){.dex-page .dex-tile:hover{background:#fff8e9;box-shadow:0 6px 18px #2924160d}}

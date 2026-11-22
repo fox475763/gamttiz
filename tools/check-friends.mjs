@@ -46,7 +46,7 @@ test('National index includes accessible search, sort, status filters and dialog
  assert.match(html,/<dialog id="dex-detail"/);
  assert.match(html,/id="dex-sort"/);
  for(const f of ['all','known','unknown'])assert.ok(html.includes('data-dex-filter="'+f+'"'));
- assert.match(css,/conic-gradient/);assert.match(css,/backdrop-filter:blur/);
+ assert.match(css,/\.dex-glass::before\{content:none;display:none\}/);assert.match(css,/backdrop-filter:none/);
  assert.match(js,/detail\.showModal\(\)/);assert.match(js,/detail\.close\(\)/);
  assert.match(js,/history\.replaceState/);
 });
@@ -216,7 +216,7 @@ test('Play game cards use three matching vector icons and shared light glass wit
    assert.match(grid,new RegExp('href="'+href+'" class="'+cls+'"'));
  }
  assert.match(html,/play-hub\.css\?v=/);
- assert.match(css,/backdrop-filter:blur\(22px\)/);
+ assert.match(css,/backdrop-filter:none/);assert.match(css,/background:#fffdf9;border:1px solid #e4ded4/);
  assert.match(css,/conic-gradient/);
  assert.match(css,/mask-composite:exclude/);
  assert.match(css,/prefers-reduced-motion:reduce/);
@@ -249,7 +249,7 @@ test('Canonical liquid glass uses the reference menu material on all existing gl
  assert.match(css,/mask-composite:exclude/);
  assert.match(css,/animation-play-state:paused/);
  assert.match(js,/IntersectionObserver/);
- assert.match(css,/\.control-trigger/);assert.match(css,/\.control-search/);assert.doesNotMatch(css,/\.control-menu-links/);
+ assert.match(css,/\.control-trigger/);assert.match(css,/\.control-search/);assert.doesNotMatch(css,/\.control-menu-links/);assert.doesNotMatch(js,/\.play-page|\.dex-page|\.daily-page|\.license-profile-picker|\.member-main/);
  assert.match(js,/GAMTTIZGlassOptics/);assert.match(js,/feDisplacementMap/);assert.match(js,/output\.putImageData/);
  assert.doesNotMatch(css,/\.license-flip|\.license-art|\.license-front|\.license-back/);
  assert.match(src('collection.html'),/id="dex-detail-scroll"/);

@@ -8,48 +8,15 @@
   --gtz-liquid-selected:rgba(255,255,255,.92);
 }
 :is(
-  .play-page .play-hub .hub-grid>a,
-  .play-page .hub-grid .hub-action-icon,
-  .dex-page .dex-glass,
-  .dex-page .dex-search,
-  .dex-page .dex-sort,
-  .dex-page .dex-filters button,
-  .dex-page .dex-dial-controls button,
-  .dex-page .dex-modal-head .dex-arrow,
-  .dex-page .dex-modal-head .dex-close,
-  .dex-page #dex-profile .profile-face-inset,
-  .dex-page #dex-profile .profile-type,
-  .dex-page #dex-profile .profile-secret,
-  .dex-page #dex-profile .profile-episode,
-  .dex-page #dex-profile .profile-traits span,
-  .daily-page .draw-machine,
-  .daily-page .draw-machine-top span:last-child,
-  .daily-page .draw-control .draw-replay,
-  .member-page .member-main .member-id-chip,
-  .member-page .member-main .member-tile,
-  .member-page .member-main .member-note,
-  .member-page .member-main .member-back span,
-  .member-page .member-main .member-surface,
-  .member-page .member-main .member-lock-mark,
-  .member-page .member-main .member-tile-link,
-  .member-page .member-main .member-btn:not(.primary),
-  .member-page .member-main .member-locked,
-  .member-page .radar-tool .radar-glass-field,
-  .member-page .radar-tool .radar-view-tabs button,
-  .member-page .radar-tool .radar-action,
-  .member-page .radar-tool .radar-deal-panel,
-  .license-page.has-license:not(.license-wallet-view) .license-member-link,
-  .license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend,
-  .license-page .license-profile-controls .license-profile-arrow,
   .control-trigger,
   .control-search,
   .control-search-results,
   .control-contact,
   .control-contact-links > :is(a,button),
   .control-result,
+  .member-page .radar-tool .radar-glass-field,
   .member-page .radar-tool .radar-filter-panel,
-  .dex-page .dex-detail,
-  .dex-page .dex-modal-head
+  .license-page.has-license:not(.license-wallet-view) .license-member-link
 ){
   isolation:isolate;
   border-color:transparent;
@@ -121,8 +88,6 @@
 .dex-page .dex-detail[open]{display:flex;flex-direction:column;overflow:hidden}
 .dex-page .dex-detail-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .dex-page .dex-modal-head{border-radius:inherit}
-/* Light-page detail dialogs need separation from the dark modal scrim. */
-.dex-page .dex-detail.gtz-liquid-surface{background-color:rgba(255,255,255,.85)!important}
 @media(prefers-reduced-motion:reduce){.gtz-liquid-optics::before{animation:none!important}}
 @media(prefers-reduced-transparency:reduce){
   .gtz-liquid-surface.gtz-liquid-surface{background-color:#f7f5ef!important}

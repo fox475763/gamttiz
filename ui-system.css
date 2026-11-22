@@ -3,9 +3,9 @@
  --gtz-red:#e93636;--gtz-ink:#252321;--gtz-muted:#746e66;
  --gtz-space-1:4px;--gtz-space-2:8px;--gtz-space-3:12px;--gtz-space-4:16px;--gtz-space-6:24px;
  --gtz-radius:16px;--gtz-radius-lg:24px;--gtz-touch:44px;
- --gtz-glass:linear-gradient(145deg,#ffffffdc,#ffffff80 55%,#eee9df9e);
- --gtz-glass-border:rgba(255,255,255,.88);
- --gtz-glass-shadow:inset 0 1px 2px #fff,0 6px 20px #3a302218;
+ --gtz-glass:#fffdf9;
+ --gtz-glass-border:#e4ded4;
+ --gtz-glass-shadow:none;
  --gtz-ease:cubic-bezier(.22,1,.36,1);
 }
 *,*::before,*::after{box-sizing:border-box}

@@ -255,8 +255,11 @@
     flip.setAttribute('aria-label',isBack?'카드 앞면 보기':'카드 뒷면 보기');
     $('license-turn').textContent = isBack?'↻ 앞면 보기':'↻ 뒷면 보기';
   }
-  // The nearest square is the dial's active profile; geometry is measured
-  // from the actual cards, including gaps and centering padding.
+  // Dock magnification follows a continuous horizontal position, not detents.
+  // Read stable centers; selected radio state only changes on a deliberate
+  // click, keyboard selection, or when a native swipe finishes settling.
+  let profileHover=null,profileAnimation=0,profileClock=0;
+  const profileMotion=[];
   function profileCenter(el){const r=el.getBoundingClientRect();return r.left+r.width/2;}
   function closestProfile(){
     if(!friends.clientWidth)return selected;
@@ -264,12 +267,34 @@
     [...friends.children].forEach((card,i)=>{const d=Math.abs(profileCenter(card)-center);if(d<dist){dist=d;best=i;}});
     return best;
   }
-  function paintProfileDial(index=closestProfile()){
-    [...friends.children].forEach((card,i)=>{
-      card.classList.toggle('is-profile-current',i===index);
-      card.classList.toggle('is-profile-near',Math.abs(i-index)===1);
-      card.classList.toggle('is-profile-far',Math.abs(i-index)>1);
+  function updateProfileTargets(){
+    const cards=[...friends.children];if(!cards.length||!friends.clientWidth)return;
+    const center=profileHover??profileCenter(friends),step=cards.length>1?Math.abs(profileCenter(cards[1])-profileCenter(cards[0])):cards[0].offsetWidth;
+    let best=0,minimum=Infinity;
+    for(let i=0;i<cards.length;i++){
+      const distance=Math.abs(profileCenter(cards[i])-center)/Math.max(1,step);
+      if(distance<minimum){minimum=distance;best=i;}
+      const t=Math.max(0,1-distance/2),target=.74+.35*t*t*(3-2*t);
+      const m=profileMotion[i]||(profileMotion[i]={value:target,velocity:0,target});
+      m.target=target;
+    }
+    cards.forEach((card,i)=>{card.classList.toggle('is-profile-current',i===best);card.classList.toggle('is-profile-near',Math.abs(i-best)===1);card.classList.toggle('is-profile-far',Math.abs(i-best)>1);});
+  }
+  function profileSpring(now){
+    profileAnimation=0;
+    const dt=Math.max(.001,Math.min(.05,(now-profileClock)/1000));profileClock=now;
+    let busy=false;
+    profileMotion.forEach((m,i)=>{
+      const diff=m.value-m.target,decay=17,wd=11,env=Math.exp(-decay*dt),c=Math.cos(wd*dt),s=Math.sin(wd*dt),b=(m.velocity+decay*diff)/wd;
+      m.value=m.target+env*(diff*c+b*s);m.velocity=env*((-decay*diff+b*wd)*c+(-decay*b-diff*wd)*s);
+      if(reduced.matches||Math.abs(m.value-m.target)<.0005&&Math.abs(m.velocity)<.005){m.value=m.target;m.velocity=0;}else busy=true;
+      friends.children[i]?.style.setProperty('--profile-live-size',m.value.toFixed(4));
     });
+    if(busy)profileAnimation=requestAnimationFrame(profileSpring);
+  }
+  function paintProfileDial(){
+    updateProfileTargets();
+    if(!profileAnimation){profileClock=performance.now();profileAnimation=requestAnimationFrame(profileSpring);}
   }
   function centerProfile(index,smooth=false){
     const card=friends.children[index];if(!card||!friends.clientWidth)return;
@@ -279,9 +304,6 @@
   function setSelected(index,scroll=true,smooth=false) {
     selected = Math.max(0,Math.min(names.length-1,index));
     const radio = friends.querySelector(`input[value="${selected}"]`); if(radio) radio.checked = true;
-    $('license-profile-prev').disabled=selected===0;
-    $('license-profile-next').disabled=selected===names.length-1;
-    $('license-profile-count').textContent=`${String(selected+1).padStart(2,'0')} / ${names.length}`;
     if(scroll)centerProfile(selected,smooth);
     paintProfileDial(smooth&&scroll?closestProfile():selected);
   }
@@ -324,8 +346,7 @@
     const radio=document.createElement('input'); radio.type='radio'; radio.name='character'; radio.value=String(index); radio.setAttribute('aria-label',name); radio.checked=index===0;
     const img=document.createElement('img'); img.src=imagePath(index); img.alt=''; img.loading='lazy'; img.decoding='async';
     const text=document.createElement('span'); text.className='license-profile-name';text.textContent=name;
-    const num=document.createElement('small');num.className='license-profile-no';num.textContent='NO. '+String(index+1).padStart(2,'0');
-    label.append(radio,num,img,text); friends.append(label);
+    label.append(radio,img,text); friends.append(label);
     radio.addEventListener('change',()=>chooseProfile(index));
   });
   if(!wallet){
@@ -340,8 +361,8 @@
     };
     friends.addEventListener('scroll',onScroll,{passive:true});
     friends.addEventListener('scrollend',settle,{passive:true});
-    $('license-profile-prev').addEventListener('click',()=>chooseProfile(selected-1));
-    $('license-profile-next').addEventListener('click',()=>chooseProfile(selected+1));
+    friends.addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&!profileDrag){profileHover=e.clientX;paintProfileDial();}},{passive:true});
+    friends.addEventListener('pointerleave',()=>{profileHover=null;paintProfileDial();},{passive:true});
     friends.addEventListener('keydown',e=>{
       const keys=['ArrowLeft','ArrowRight','Home','End'];if(!keys.includes(e.key))return;
       e.preventDefault();const index=e.key==='Home'?0:e.key==='End'?names.length-1:selected+(e.key==='ArrowRight'?1:-1);
@@ -359,7 +380,7 @@
     },{passive:false});
     friends.addEventListener('pointerdown',e=>{
       if(!editing||e.pointerType!=='mouse'||e.button!==0)return;
-      skipProfileClick=false;profileDrag={id:e.pointerId,x:e.clientX,left:friends.scrollLeft,moved:false};
+      profileHover=null;skipProfileClick=false;profileDrag={id:e.pointerId,x:e.clientX,left:friends.scrollLeft,moved:false};
     });
     friends.addEventListener('pointermove',e=>{
       if(!profileDrag||profileDrag.id!==e.pointerId)return;
@@ -369,7 +390,7 @@
     });
     function endProfileDrag(e){
       if(!profileDrag||profileDrag.id!==e.pointerId)return;
-      const moved=profileDrag.moved;profileDrag=null;
+      const moved=profileDrag.moved;profileDrag=null;profileHover=null;
       if(moved){skipProfileClick=true;const index=closestProfile();friends.classList.remove('is-profile-dragging');chooseProfile(index,true);}
     }
     friends.addEventListener('pointerup',endProfileDrag);
