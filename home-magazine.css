@@ -391,3 +391,15 @@
  .home-cinema>footer{width:calc(100% - 2 * clamp(16px,5vw,22px))}
 }
 @media(prefers-reduced-motion:reduce){.home-cinema #main .carousel-dot::after,.home-cinema #main .experience-links>a::before{transition:none!important}}
+
+/* A quiet editorial marker, aligned with (not part of) the radar headline. */
+.home-cinema #main .radar-preview-title-row{display:flex;align-items:center;flex-wrap:wrap;gap:7px clamp(9px,1.3vw,17px)}
+.home-cinema #main .radar-preview-title-row h2{margin:0;min-width:0}
+.home-cinema #main .radar-member-badge{display:inline-flex;align-items:center;gap:4px;flex:none;padding:5px 9px;border:1px solid #b5272c45;border-radius:999px;background:#fff9f3;color:#a92128;font:700 11px/1.15 var(--type-sans);letter-spacing:-.025em;white-space:nowrap}
+.home-cinema #main .radar-member-badge svg{display:block;flex:none;width:14px;height:14px}
+.home-cinema[data-home-ink="white"] #main .radar-member-badge{background:#fff1;color:#fff;border-color:#ffffff80}
+@media(max-width:700px){
+ .home-cinema #main .radar-preview-title-row{gap:5px 8px}
+ .home-cinema #main .radar-member-badge{padding:4px 7px;font-size:10px}
+ .home-cinema #main .radar-member-badge svg{width:13px;height:13px}
+}

@@ -28,7 +28,7 @@ for(const engine of [chromium,webkit])test('Fry Rader search-anchored glass over
      const page=await context.newPage();
      await page.goto(base+'member.html#radar',{waitUntil:'domcontentloaded'});
      await page.waitForFunction(()=>document.querySelectorAll('#radar-list .radar-entry').length===3);
-     await page.waitForFunction(()=>Array.from(document.querySelectorAll('#radar-list img.radar-thumb-fallback')).every(img=>img.complete&&img.naturalWidth===1280));
+     await page.waitForFunction(()=>Array.from(document.querySelectorAll('#radar-list img.radar-thumb-fallback')).every(img=>img.complete&&img.naturalWidth>0&&img.naturalHeight>0));
      assert.equal(await page.locator('#radar-list img.radar-thumb-fallback').count(),3);
      const toggle=page.locator('#radar-search'),panel=page.locator('#radar-filter-panel'),scrim=page.locator('#radar-search-scrim');
      assert.equal(await page.locator('#radar-filter-toggle').count(),0);
@@ -201,7 +201,9 @@ for(const engine of [chromium,webkit])test('Home highlights all three compact Pl
    const preview=page.locator('.radar-preview-item img.radar-thumb-fallback');
    await page.waitForFunction(()=>document.querySelector('.radar-preview-item img.radar-thumb-fallback'));
    assert.ok(await preview.count()>0);
-   assert.match(await preview.first().getAttribute('src'),/fry-radar-thumbnail\.svg$/);
+   assert.match(await preview.first().getAttribute('src'),/fry-radar-thumbnail\.png$/);
+   assert.equal(await page.locator('.radar-preview-title-row .radar-member-badge').innerText(),'멤버 전용');
+   assert.equal(await page.locator('.radar-member-badge svg').count(),1);
    await context.close();
   }
  }finally{await browser.close();}

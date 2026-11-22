@@ -1,44 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" role="img" aria-labelledby="title desc">
-<title id="title">GAMTTIZ · FRY RADER</title>
-<desc id="desc">감띠즈 감튀레이더 공통 썸네일. 붉은 레이더 화면 위에 노란 감자튀김 심볼.</desc>
-<defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e14438"/><stop offset="1" stop-color="#931d26"/></linearGradient>
-  <radialGradient id="glow"><stop stop-color="#ffdd86" stop-opacity=".2"/><stop offset="1" stop-color="#ffce6a" stop-opacity="0"/></radialGradient>
-  <linearGradient id="scan" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#ffcd59" stop-opacity="0"/><stop offset="1" stop-color="#ffcd59" stop-opacity=".27"/></linearGradient>
-  <pattern id="grid" width="52" height="52" patternUnits="userSpaceOnUse"><path d="M52 0H0V52" fill="none" stroke="#ffd99e" stroke-width="1" opacity=".085"/></pattern>
-</defs>
-<rect width="1280" height="800" fill="url(#bg)"/>
-<rect width="1280" height="800" fill="url(#grid)"/>
-<circle cx="898" cy="400" r="374" fill="url(#glow)"/>
-<g fill="none" stroke="#ffdf99" opacity=".34" stroke-width="1.5">
-  <circle cx="902" cy="400" r="305"/><circle cx="902" cy="400" r="241"/><circle cx="902" cy="400" r="177"/><circle cx="902" cy="400" r="113"/>
-  <path d="M597 400h610M902 95v610M686 184l432 432M1118 184 686 616" stroke-dasharray="5 10"/>
-</g>
-<path d="M902 400 L902 95 A305 305 0 0 1 1118 184 Z" fill="url(#scan)"/>
-<path d="M902 400 1118 184" stroke="#ffd775" stroke-width="2.5" opacity=".82"/>
-<g fill="#ffdb78"><circle cx="1005" cy="192" r="6"/><circle cx="1096" cy="477" r="5"/><circle cx="715" cy="451" r="5"/><circle cx="891" cy="640" r="4"/></g>
-<g fill="#ffdb78" opacity=".13"><circle cx="1005" cy="192" r="15"/><circle cx="1096" cy="477" r="13"/><circle cx="715" cy="451" r="13"/></g>
-<g transform="translate(797 240)">
-  <g fill="#ffc94f" stroke="#ffe18e" stroke-width="3" stroke-linejoin="round">
-    <rect x="29" y="27" width="34" height="164" rx="9" transform="rotate(-13 46 110)"/>
-    <rect x="77" y="0" width="36" height="187" rx="9" transform="rotate(-4 95 94)"/>
-    <rect x="123" y="18" width="34" height="166" rx="9" transform="rotate(12 140 101)"/>
-    <rect x="164" y="54" width="29" height="141" rx="8" transform="rotate(20 177 124)"/>
+  <title id="title">GAMTTIZ · FRY RADER</title>
+  <desc id="desc">감띠즈 감튀레이더 공통 썸네일. 크림색 바탕 위에 감자튀김과 레이더를 결합한 브랜드 심볼.</desc>
+  <rect width="1280" height="800" fill="#f7f4ef"/>
+  <g transform="translate(640 341)">
+    <!-- Minimal radar arc: the small dot is its single detected signal. -->
+    <circle r="164" fill="none" stroke="#e7d8ce" stroke-width="5"/>
+    <path d="M 116 -116 A 164 164 0 1 0 164 0" fill="none" stroke="#c93436" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="143" cy="-80" r="10" fill="#c93436"/>
+    <!-- Three rounded fries and the curved, red GAMTTIZ carton. -->
+    <g fill="#f5b533">
+      <rect x="-65" y="-76" width="31" height="106" rx="8" transform="rotate(-11 -49.5 -23)"/>
+      <rect x="-16" y="-104" width="33" height="137" rx="8"/>
+      <rect x="34" y="-67" width="31" height="101" rx="8" transform="rotate(11 49.5 -17)"/>
+    </g>
+    <path d="M-82 -1 Q-41 14 0 14 Q41 14 82 -1 L68 80 Q66 91 54 91 H-54 Q-66 91-68 80Z" fill="#c93436"/>
+    <path d="M-22 55 Q0 63 22 55" fill="none" stroke="#f7f4ef" stroke-width="5" stroke-linecap="round"/>
   </g>
-  <path d="M2 143 Q105 177 208 143 L192 281 Q190 303 168 303 H43 Q21 303 18 281Z" fill="#fff3d9"/>
-  <path d="M2 143 Q105 177 208 143 L204 166 Q105 198 6 166Z" fill="#ffd77e"/>
-  <path d="M83 242q22 17 45 0" stroke="#b92a2f" stroke-width="7" stroke-linecap="round" fill="none"/>
-  <circle cx="72" cy="217" r="6" fill="#b92a2f"/><circle cx="138" cy="217" r="6" fill="#b92a2f"/>
-</g>
-<path d="M88 130h464" stroke="#ffdfa1" opacity=".55" stroke-width="2"/>
-<text x="88" y="104" fill="#ffdfa0" font-family="Arial,sans-serif" font-weight="700" font-size="24" letter-spacing="5">GAMTTIZ / FRENCH FRY LOVERS</text>
-<g fill="#fff8e6" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="114" letter-spacing="-4">
- <text x="88" y="343">FRY</text><text x="88" y="458">RADER.</text>
-</g>
-<rect x="91" y="503" width="57" height="5" rx="2.5" fill="#ffcf63"/>
-<text x="91" y="559" fill="#ffe0a0" font-family="Arial,sans-serif" font-weight="700" font-size="23" letter-spacing="4">FRESH FRY NEWS</text>
-<g transform="translate(89 678)" font-family="Arial,sans-serif" font-weight="700" font-size="17" letter-spacing="3">
- <rect width="285" height="42" rx="21" fill="#7e1521" stroke="#ffdb9a" stroke-opacity=".55"/>
- <circle cx="24" cy="21" r="5" fill="#ffd36b"/><text x="42" y="27" fill="#fff0cb">GAMTTIZ ORIGINAL</text>
-</g>
+  <text x="640" y="587" text-anchor="middle" fill="#a72a2c" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="700" letter-spacing="5">FRY RADER</text>
+  <text x="640" y="628" text-anchor="middle" fill="#a72a2c" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="600" letter-spacing="5">GAMTTIZ</text>
 </svg>
