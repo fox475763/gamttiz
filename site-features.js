@@ -74,7 +74,8 @@
     const text=make('span','control-menu-text');
     text.append(make('span','control-menu-title',label));
     if(translation)text.append(make('small','control-menu-subtitle',translation));
-    item.replaceChildren(text);
+    const optics=make('span','control-menu-optics');optics.setAttribute('aria-hidden','true');
+    item.replaceChildren(optics,text);
     item.insertAdjacentHTML('afterbegin','<svg class="control-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+artwork+'</svg>');
     return item;
   };
@@ -83,6 +84,85 @@
   const menuContact=make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
   const menuSearch=make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
   menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menuScroll.append(menuLinks);
+  // Build an optical displacement texture locally; no page screenshot or
+  // personal content is sampled. The rounded-rectangle distance field bends
+  // only the pixels near its beveled edge, leaving the center undistorted.
+  let opticsPrepared=false,refractionTimer=0,lightFrame=0,lightTarget=null,lightPoint=null;
+  const motionReduced=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const transparencyReduced=window.matchMedia('(prefers-reduced-transparency: reduce)');
+  function prepareMenuRefraction(){
+    if(opticsPrepared)return !!document.getElementById('gtz-menu-refraction');
+    opticsPrepared=true;
+    // WebKit can parse URL backdrops but not render them safely, so use the
+    // CSS lens there. Chromium's accelerated reference filters do support it.
+    if(!/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)||/iPhone|iPad|iPod/.test(navigator.userAgent)||!window.CSS?.supports('backdrop-filter','url(#gtz-menu-refraction)'))return false;
+    try{
+      const w=256,h=44,r=14,depth=6,canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d');if(!ctx)return false;
+      const pixels=ctx.createImageData(w,h);
+      for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+        const px=x+.5-w/2,py=y+.5-h/2,qx=Math.abs(px)-(w/2-r),qy=Math.abs(py)-(h/2-r);
+        const ox=Math.max(qx,0),oy=Math.max(qy,0),outside=Math.hypot(ox,oy);
+        const distance=outside+Math.min(Math.max(qx,qy),0)-r;
+        let nx=0,ny=0;
+        if(outside>0){nx=Math.sign(px)*ox/outside;ny=Math.sign(py)*oy/outside;}
+        else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
+        const t=Math.min(1,Math.max(0,-distance/depth));
+        const bend=Math.pow(1-t,1.5);
+        const i=4*(y*w+x);
+        pixels.data[i]=Math.round(128-nx*bend*22);
+        pixels.data[i+1]=Math.round(128-ny*bend*100);
+        pixels.data[i+2]=128;pixels.data[i+3]=255;
+      }
+      ctx.putImageData(pixels,0,0);
+      const ns='http://www.w3.org/2000/svg',svg=document.createElementNS(ns,'svg');
+      svg.setAttribute('width','0');svg.setAttribute('height','0');svg.setAttribute('aria-hidden','true');
+      svg.style.cssText='position:absolute;overflow:hidden;pointer-events:none';
+      const filter=document.createElementNS(ns,'filter');
+      const attrs={id:'gtz-menu-refraction',filterUnits:'objectBoundingBox',primitiveUnits:'objectBoundingBox',x:'-.08',y:'-.25',width:'1.16',height:'1.5','color-interpolation-filters':'sRGB'};
+      Object.entries(attrs).forEach(([k,v])=>filter.setAttribute(k,v));
+      const map=document.createElementNS(ns,'feImage'),href=canvas.toDataURL('image/png');
+      Object.entries({x:'0',y:'0',width:'1',height:'1',preserveAspectRatio:'none',result:'menuLensMap',href}).forEach(([k,v])=>map.setAttribute(k,v));
+      map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
+      const distort=document.createElementNS(ns,'feDisplacementMap');
+      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.34',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
+      filter.append(map,distort);svg.append(filter);document.body.append(svg);
+      canvas.width=canvas.height=0;
+      return true;
+    }catch{return false;}
+  }
+  function resetMenuLight(){
+    if(lightFrame)cancelAnimationFrame(lightFrame);
+    lightFrame=0;lightPoint=null;
+    if(lightTarget){lightTarget.style.removeProperty('--menu-light-x');lightTarget.style.removeProperty('--menu-light-y');lightTarget=null;}
+  }
+  function menuLight(event){
+    if(motionReduced.matches||dock.dataset.mode!=='menu')return;
+    const item=event.target.closest('.control-menu-links > :is(a,button)');if(!item)return;
+    if(lightTarget!==item){resetMenuLight();lightTarget=item;}
+    lightPoint={x:event.clientX,y:event.clientY};if(lightFrame)return;
+    lightFrame=requestAnimationFrame(()=>{
+      lightFrame=0;if(!lightTarget||!lightPoint)return;
+      const rect=lightTarget.getBoundingClientRect(),clamp=n=>Math.max(8,Math.min(92,n));
+      // Smoothly move the specular hotspot toward the pointer.
+      const x=clamp((lightPoint.x-rect.left)/Math.max(1,rect.width)*100);
+      const y=clamp((lightPoint.y-rect.top)/Math.max(1,rect.height)*100);
+      lightTarget.style.setProperty('--menu-light-x',x.toFixed(1)+'%');
+      lightTarget.style.setProperty('--menu-light-y',y.toFixed(1)+'%');
+    });
+  }
+  menuLinks.addEventListener('pointermove',event=>{if(event.pointerType!=='touch')menuLight(event);},{passive:true});
+  menuLinks.addEventListener('pointerdown',menuLight,{passive:true});
+  menuLinks.addEventListener('pointerleave',resetMenuLight,{passive:true});
+  menuLinks.addEventListener('pointercancel',resetMenuLight,{passive:true});
+  function toggleMenuRefraction(active){
+    clearTimeout(refractionTimer);delete dock.dataset.menuRefraction;
+    if(!active){resetMenuLight();return;}
+    if(transparencyReduced.matches)return;
+    // Enable the more expensive optical pass only once the entry springs settle.
+    refractionTimer=window.setTimeout(()=>{if(dock.dataset.mode==='menu'&&prepareMenuRefraction())dock.dataset.menuRefraction='ready';},motionReduced.matches?0:820);
+  }
   // A bottom-up stagger gives each droplet its own spring trajectory from Menu.
   [...menuLinks.children].forEach((item,index,items)=>{
     item.style.setProperty('--menu-index',index);
@@ -142,6 +222,7 @@
   function setMode(mode){
     const next=dock.dataset.mode===mode?'closed':mode;
     dock.dataset.mode=next;
+    toggleMenuRefraction(next==='menu');
     if(next==='menu'){syncCurrentMenuLink();menuScroll.scrollTop=0;}
     if(next==='contact')contactScroll.scrollTop=0;
     updateMenuTextColor();

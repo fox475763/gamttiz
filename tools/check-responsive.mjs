@@ -113,21 +113,27 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    await trigger.click();
    await page.waitForFunction(()=>Array.from(document.querySelectorAll('.control-menu-links > :is(a,button)')).every(el=>Number(getComputedStyle(el).opacity)>.995&&Math.abs(parseFloat(getComputedStyle(el).scale)-1)<.001));
    await page.waitForTimeout(180);
+   if(engine===chromium)await page.waitForFunction(()=>document.querySelector('.control-dock').dataset.menuRefraction==='ready');
    const material=await menu.evaluate(el=>{
-     const list=[...el.querySelectorAll('.control-menu-links > :is(a,button)')],root=getComputedStyle(el),row=getComputedStyle(list[1]),edge=getComputedStyle(list[1],'::before'),box=list[1].getBoundingClientRect();
+     const list=[...el.querySelectorAll('.control-menu-links > :is(a,button)')],root=getComputedStyle(el),row=getComputedStyle(list[1]),optics=list[1].querySelector('.control-menu-optics'),lens=getComputedStyle(optics),edge=getComputedStyle(list[1],'::before'),box=list[1].getBoundingClientRect();
      return {shell:root.backgroundImage,shadow:root.boxShadow,border:root.borderTopWidth,blur:root.backdropFilter,edge:getComputedStyle(el,'::before').display,
-        row:row.backdropFilter,gradient:row.backgroundImage,rim:edge.backgroundImage,
+        row:row.backdropFilter,gradient:lens.backgroundImage,rim:edge.backgroundImage,lens:lens.backdropFilter,bevel:getComputedStyle(optics,'::before').boxShadow,
+        actual:!!document.querySelector('#gtz-menu-refraction feDisplacementMap'),label:getComputedStyle(list[1].querySelector('.control-menu-text')).zIndex,
         width:box.width,height:box.height,first:getComputedStyle(list[0]).transitionDelay,last:getComputedStyle(list.at(-1)).transitionDelay,
         selected:getComputedStyle(list[0]).color,selectedBackground:getComputedStyle(list[0]).backgroundColor};
    });
    assert.equal(material.shell,'none');assert.equal(material.shadow,'none');assert.equal(material.border,'0px');assert.equal(material.blur,'none');assert.equal(material.edge,'none');
-   assert.ok(material.row.includes('blur(5px)')&&material.gradient.includes('linear-gradient')&&material.rim.includes('conic-gradient'),JSON.stringify(material));
+   assert.ok(material.row==='none'&&material.lens.includes('blur(')&&material.gradient.includes('linear-gradient')&&material.rim.includes('conic-gradient')&&material.bevel!=='none'&&material.label==='2',JSON.stringify(material));
+   assert.equal(material.actual,engine===chromium);
+   assert.equal(material.lens.includes('url('),engine===chromium);
    assert.ok(material.width<255&&material.height>=37&&material.height<=44,JSON.stringify(material));
    assert.notEqual(material.first,material.last);assert.equal(material.selected,'rgb(233, 54, 54)');
    const target=items.nth(2),neighbor=items.nth(3),a=await target.boundingBox(),b=await neighbor.boundingBox();
    if(mobile)await target.dispatchEvent('pointerdown',{pointerType:'touch',bubbles:true});
    else await target.hover();
    await page.waitForTimeout(300);
+   assert.ok(await target.evaluate(el=>el.style.getPropertyValue('--menu-light-x').endsWith('%')));
+   assert.equal(await neighbor.evaluate(el=>el.style.getPropertyValue('--menu-light-x')),'');
    const enlarged=await target.boundingBox(),still=await neighbor.boundingBox();
    assert.ok(enlarged.width>a.width*1.03&&enlarged.height>a.height*1.04,JSON.stringify({a,enlarged}));
    assert.ok(Math.abs(still.width-b.width)<1&&Math.abs(still.y-b.y)<1,JSON.stringify({b,still}));
@@ -248,7 +254,7 @@ for(const engine of [chromium,webkit])test('Home highlights all three compact Pl
    await page.waitForFunction(()=>document.querySelector('.radar-preview-item img.radar-thumb-fallback'));
    assert.ok(await preview.count()>0);
    assert.match(await preview.first().getAttribute('src'),/fry-radar-thumbnail\.png\?v=20261122radarred1$/);
-   assert.equal(await page.locator('.radar-preview-title-row .radar-member-badge').innerText(),'멤버 전용');
+   assert.equal((await page.locator('.radar-preview-title-row .radar-member-badge').textContent()).trim(),'멤버 전용');
    assert.equal(await page.locator('.radar-member-badge svg').count(),1);
    await context.close();
   }
