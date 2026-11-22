@@ -97,7 +97,7 @@
     // CSS lens there. Chromium's accelerated reference filters do support it.
     if(!/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)||/iPhone|iPad|iPod/.test(navigator.userAgent)||!window.CSS?.supports('backdrop-filter','url(#gtz-menu-refraction)'))return false;
     try{
-      const w=256,h=44,r=14,depth=6,canvas=document.createElement('canvas');
+      const w=256,h=44,r=14,depth=8,canvas=document.createElement('canvas');
       canvas.width=w;canvas.height=h;
       const ctx=canvas.getContext('2d');if(!ctx)return false;
       const pixels=ctx.createImageData(w,h);
@@ -109,10 +109,10 @@
         if(outside>0){nx=Math.sign(px)*ox/outside;ny=Math.sign(py)*oy/outside;}
         else if(qx>qy)nx=Math.sign(px);else ny=Math.sign(py);
         const t=Math.min(1,Math.max(0,-distance/depth));
-        const bend=Math.pow(1-t,1.5);
+        const bend=Math.pow(1-t,1.3);
         const i=4*(y*w+x);
-        pixels.data[i]=Math.round(128-nx*bend*22);
-        pixels.data[i+1]=Math.round(128-ny*bend*100);
+        pixels.data[i]=Math.round(128-nx*bend*36);
+        pixels.data[i+1]=Math.round(128-ny*bend*112);
         pixels.data[i+2]=128;pixels.data[i+3]=255;
       }
       ctx.putImageData(pixels,0,0);
@@ -126,7 +126,7 @@
       Object.entries({x:'0',y:'0',width:'1',height:'1',preserveAspectRatio:'none',result:'menuLensMap',href}).forEach(([k,v])=>map.setAttribute(k,v));
       map.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
       const distort=document.createElementNS(ns,'feDisplacementMap');
-      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.34',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
+      Object.entries({in:'SourceGraphic',in2:'menuLensMap',scale:'.42',xChannelSelector:'R',yChannelSelector:'G',x:'0',y:'0',width:'1',height:'1'}).forEach(([k,v])=>distort.setAttribute(k,v));
       filter.append(map,distort);svg.append(filter);document.body.append(svg);
       canvas.width=canvas.height=0;
       return true;

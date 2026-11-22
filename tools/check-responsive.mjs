@@ -117,13 +117,14 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    const material=await menu.evaluate(el=>{
      const list=[...el.querySelectorAll('.control-menu-links > :is(a,button)')],root=getComputedStyle(el),row=getComputedStyle(list[1]),optics=list[1].querySelector('.control-menu-optics'),lens=getComputedStyle(optics),edge=getComputedStyle(list[1],'::before'),box=list[1].getBoundingClientRect();
      return {shell:root.backgroundImage,shadow:root.boxShadow,border:root.borderTopWidth,blur:root.backdropFilter,edge:getComputedStyle(el,'::before').display,
-        row:row.backdropFilter,gradient:lens.backgroundImage,rim:edge.backgroundImage,lens:lens.backdropFilter,bevel:getComputedStyle(optics,'::before').boxShadow,
+        row:row.backdropFilter,baseColor:row.backgroundColor,gradient:lens.backgroundImage,rim:edge.backgroundImage,rimWidth:edge.borderTopWidth,lens:lens.backdropFilter,bevel:getComputedStyle(optics,'::before').boxShadow,glint:getComputedStyle(optics,'::after').backgroundImage,
         actual:!!document.querySelector('#gtz-menu-refraction feDisplacementMap'),label:getComputedStyle(list[1].querySelector('.control-menu-text')).zIndex,
         width:box.width,height:box.height,first:getComputedStyle(list[0]).transitionDelay,last:getComputedStyle(list.at(-1)).transitionDelay,
         selected:getComputedStyle(list[0]).color,selectedBackground:getComputedStyle(list[0]).backgroundColor};
    });
    assert.equal(material.shell,'none');assert.equal(material.shadow,'none');assert.equal(material.border,'0px');assert.equal(material.blur,'none');assert.equal(material.edge,'none');
    assert.ok(material.row==='none'&&material.lens.includes('blur(')&&material.gradient.includes('linear-gradient')&&material.rim.includes('conic-gradient')&&material.bevel!=='none'&&material.label==='2',JSON.stringify(material));
+   assert.ok(material.baseColor.startsWith('rgba(20, 12, 18, 0.0')&&parseFloat(material.rimWidth)<=1&&material.glint.includes('radial-gradient'),JSON.stringify(material));
    assert.equal(material.actual,engine===chromium);
    assert.equal(material.lens.includes('url('),engine===chromium);
    assert.ok(material.width<255&&material.height>=37&&material.height<=44,JSON.stringify(material));
