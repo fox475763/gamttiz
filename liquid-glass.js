@@ -105,7 +105,7 @@
     if(!el.isConnected||!el.getClientRects().length)return false;
     const dock=el.closest('.control-dock');
     if(dock&&el!==dock.querySelector('.control-trigger')&&el.closest('[aria-hidden="true"]'))return false;
-    if(!native&&dock===null&&document.querySelector('.control-dock[data-mode="menu"]'))return false;
+    if(!native&&document.querySelector('.control-dock[data-mode="menu"]')&&(!dock||el.classList.contains('control-trigger')))return false;
     return true;
   }
   function render(now){

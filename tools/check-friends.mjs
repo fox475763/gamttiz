@@ -238,19 +238,19 @@ test('Play icons stay flat and the geometric Motion layer loops behind the game 
  assert.match(css,/\.play-page \.play-geo\{animation:none!important/);
 });
 
-test('Canonical liquid glass is scoped to existing page surfaces and leaves the menu alone',()=>{
+test('Canonical liquid glass uses the menu's reference material on all existing glass surfaces',()=>{
  const css=src('liquid-glass.css'),js=src('liquid-glass.js');
- for(const page of ['play.html','collection.html','draw.html','member.html','license.html']){
+ for(const page of ['index.html','play.html','collection.html','draw.html','member.html','license.html','project.html','products.html','news.html','quiz.html','combo.html']){
    const html=src(page);assert.match(html,/liquid-glass\.css\?v=/);assert.match(html,/liquid-glass\.js\?v=/);
  }
- assert.match(css,/rgba\(255,255,255,\.16\),rgba\(255,255,255,\.015\) 48%,rgba\(255,255,255,\.06\)/);
- assert.match(css,/backdrop-filter:blur\(5px\) saturate\(1\.2\)/);
- assert.match(css,/animation:gtz-liquid-turn 11s linear infinite/);
- assert.match(css,/mask-composite:exclude;pointer-events:none/);
+ assert.match(css,/--gtz-liquid-tint:rgba\(20,12,18,\.10\)/);
+ assert.match(css,/--gtz-liquid-blur:blur\(1\.25px\) saturate\(1\.04\)/);
+ assert.match(css,/animation:gtz-liquid-sweep 12s ease-in-out infinite/);
+ assert.match(css,/mask-composite:exclude/);
  assert.match(css,/animation-play-state:paused/);
  assert.match(js,/IntersectionObserver/);
- assert.doesNotMatch(css,/\.control-(?:trigger|search|dock|menu|contact)/);
- assert.doesNotMatch(js,/\.control-(?:trigger|search|dock|menu|contact)/);
+ assert.match(css,/\.control-trigger/);assert.match(css,/\.control-search/);assert.doesNotMatch(css,/\.control-menu-links/);
+ assert.match(js,/GAMTTIZGlassOptics/);assert.match(js,/feDisplacementMap/);assert.match(js,/output\.putImageData/);
  assert.doesNotMatch(css,/\.license-flip|\.license-art|\.license-front|\.license-back/);
  assert.match(src('collection.html'),/id="dex-detail-scroll"/);
  assert.equal((src('member.html').match(/class="radar-glass-field"/g)||[]).length,3);
@@ -265,17 +265,19 @@ test('Canonical liquid glass is scoped to existing page surfaces and leaves the 
  assert.match(src('friend-dex.js'),/detailScroll\.scrollTop=0/);
 });
 
-test('Glass visibility observer animates only visible surfaces and handles dynamically created cards',()=>{
- const observed=[],callbacks={},made=()=>({nodeType:1,matches:()=>true,querySelectorAll:()=>[],classes:new Set(),classList:{toggle(k,on){on?this.owner.classes.add(k):this.owner.classes.delete(k)}}});
- const a=made(),b=made();a.classList.owner=a;b.classList.owner=b;
- const document={nodeType:9,body:{},querySelectorAll:()=>[a]};
- class IntersectionObserver{constructor(cb){callbacks.intersect=cb}observe(el){observed.push(el)}}
+test('Glass visibility observer adds only one optical layer to each static or dynamic surface',()=>{
+ const observed=[],callbacks={};
+ const made=()=>{const el={nodeType:1,isConnected:true,matches:sel=>!sel.includes('.gtz-liquid-optics,canvas'),closest:()=>null,querySelectorAll:()=>[],classes:new Set(),dataset:{},children:[],setAttribute(){},prepend(child){this.children.unshift(child);child.isConnected=true;}};
+ el.classList={add(k){el.classes.add(k)},remove(k){el.classes.delete(k)},toggle(k,on){on?el.classes.add(k):el.classes.delete(k)}};return el;};
+ const a=made(),b=made(),body=made();
+ const document={nodeType:9,readyState:'complete',body,hidden:false,querySelectorAll:()=>[a],createElement:()=>made(),addEventListener(){}};
+ class IntersectionObserver{constructor(cb){callbacks.intersect=cb}observe(el){observed.push(el)}unobserve(){}}
  class MutationObserver{constructor(cb){callbacks.mutate=cb}observe(){}}
- const sandbox=vm.createContext({window:{IntersectionObserver,MutationObserver},IntersectionObserver,MutationObserver,document,matchMedia:()=>({matches:false})});
+ const sandbox=vm.createContext({window:{IntersectionObserver,MutationObserver},IntersectionObserver,MutationObserver,document,navigator:{userAgent:'Safari'},CSS:{supports:()=>false},matchMedia:()=>({matches:false}),getComputedStyle:()=>({position:'static'}),requestAnimationFrame:()=>1,addEventListener(){}});
  vm.runInContext(src('liquid-glass.js'),sandbox);
- assert.equal(observed.length,1);
+ assert.equal(observed.length,1);assert.equal(a.children.length,1);
  callbacks.intersect([{target:a,isIntersecting:true}]);assert.ok(a.classes.has('gtz-liquid-visible'));
  callbacks.intersect([{target:a,isIntersecting:false}]);assert.ok(!a.classes.has('gtz-liquid-visible'));
- callbacks.mutate([{addedNodes:[b]}]);assert.equal(observed.length,2);
- callbacks.mutate([{addedNodes:[b]}]);assert.equal(observed.length,2);
+ callbacks.mutate([{target:body,addedNodes:[b]}]);assert.equal(observed.length,2);
+ callbacks.mutate([{target:body,addedNodes:[b]}]);assert.equal(observed.length,2);assert.equal(b.children.length,1);
 });
