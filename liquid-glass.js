@@ -1,33 +1,139 @@
-/* Animate clear glass only while its surface intersects the viewport.
-   The floating menu is intentionally not included. */
+/* One reference optical material for the dock and all opted-in site surfaces.
+   Native SVG displacement on Chromium; a narrow sampled Canvas2D rim on Safari.
+   Only visible surfaces are rendered. The menu's specialized animation is untouched. */
 (()=>{
   'use strict';
-  const selector=".play-page .play-hub .hub-grid>a,.play-page .hub-grid .hub-action-icon,.dex-page .dex-glass,.dex-page .dex-search,.dex-page .dex-sort,.dex-page .dex-filters button,.dex-page .dex-dial-controls button,.dex-page .dex-modal-head .dex-arrow,.dex-page .dex-modal-head .dex-close,.dex-page #dex-profile .profile-face-inset,.dex-page #dex-profile .profile-type,.dex-page #dex-profile .profile-secret,.dex-page #dex-profile .profile-episode,.dex-page #dex-profile .profile-traits span,.daily-page .draw-machine,.daily-page .draw-machine-top span:last-child,.daily-page .draw-control .draw-replay,.member-page .member-main .member-id-chip,.member-page .member-main .member-tile,.member-page .member-main .member-note,.member-page .member-main .member-back span,.member-page .member-main .member-surface,.member-page .member-main .member-lock-mark,.member-page .member-main .member-tile-link,.member-page .member-main .member-btn:not(.primary),.member-page .member-main .member-locked,.member-page .radar-tool .radar-glass-field,.member-page .radar-tool .radar-view-tabs button,.member-page .radar-tool .radar-action,.member-page .radar-tool .radar-deal-panel,.license-page.has-license:not(.license-wallet-view) .license-member-link,.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend,.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend:has(input:checked),.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend.is-profile-current:has(input:checked),.license-page .license-profile-controls .license-profile-arrow";
-  const marked=new WeakSet();
-  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const selector=".play-page .play-hub .hub-grid>a,.play-page .hub-grid .hub-action-icon,.dex-page .dex-glass,.dex-page .dex-search,.dex-page .dex-sort,.dex-page .dex-filters button,.dex-page .dex-dial-controls button,.dex-page .dex-modal-head .dex-arrow,.dex-page .dex-modal-head .dex-close,.dex-page #dex-profile .profile-face-inset,.dex-page #dex-profile .profile-type,.dex-page #dex-profile .profile-secret,.dex-page #dex-profile .profile-episode,.dex-page #dex-profile .profile-traits span,.daily-page .draw-machine,.daily-page .draw-machine-top span:last-child,.daily-page .draw-control .draw-replay,.member-page .member-main .member-id-chip,.member-page .member-main .member-tile,.member-page .member-main .member-note,.member-page .member-main .member-back span,.member-page .member-main .member-surface,.member-page .member-main .member-lock-mark,.member-page .member-main .member-tile-link,.member-page .member-main .member-btn:not(.primary),.member-page .member-main .member-locked,.member-page .radar-tool .radar-glass-field,.member-page .radar-tool .radar-view-tabs button,.member-page .radar-tool .radar-action,.member-page .radar-tool .radar-deal-panel,.license-page.has-license:not(.license-wallet-view) .license-member-link,.license-page:not(.has-license):not(.license-wallet-view) .license-profile-picker .license-friend,.license-page .license-profile-controls .license-profile-arrow,.control-trigger,.control-search,.control-search-results,.control-contact,.control-contact-links > :is(a,button),.control-result,.member-page .radar-tool .radar-filter-panel,.dex-page .dex-detail,.dex-page .dex-modal-head";
+  const reduced=matchMedia('(prefers-reduced-transparency: reduce)');
+  const native=/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)&&!/iPhone|iPad|iPod/.test(navigator.userAgent)&&CSS.supports('backdrop-filter','url(#gtz-liquid-test)');
+  const tracked=new Map(),visible=new Set(),filterCache=new Map(),ns='http://www.w3.org/2000/svg';
+  let svg=null,source=null,ctx=null,frame=0,last=0,cursor=0,serial=0;
   const observer='IntersectionObserver' in window?new IntersectionObserver(entries=>{
-    entries.forEach(entry=>entry.target.classList.toggle('gtz-liquid-visible',entry.isIntersecting));
-  },{threshold:0.01}):null;
+    for(const entry of entries){const el=entry.target;el.classList.toggle('gtz-liquid-visible',entry.isIntersecting);if(entry.isIntersecting)visible.add(el);else visible.delete(el);}
+    schedule();
+  },{threshold:.01}):null;
+  const resize='ResizeObserver' in window?new ResizeObserver(()=>schedule()):null;
   function add(el){
-    if(marked.has(el))return;
-    marked.add(el);
-    if(observer)observer.observe(el);else if(!reduced.matches)el.classList.add('gtz-liquid-visible');
+    if(el.closest('.gtz-liquid-optics'))return;
+    let state=tracked.get(el);
+    if(state&&state.layer.isConnected)return;
+    const layer=document.createElement('span');layer.className='gtz-liquid-optics';layer.setAttribute('aria-hidden','true');
+    el.classList.add('gtz-liquid-surface');
+    if(getComputedStyle(el).position==='static')el.classList.add('gtz-liquid-relative');
+    if(el.matches('button,a,.dex-search,.dex-sort,.radar-glass-field,.license-friend'))el.dataset.glassControl='';
+    el.prepend(layer);state={layer,canvas:null,key:''};tracked.set(el,state);
+    if(observer)observer.observe(el);else{visible.add(el);el.classList.add('gtz-liquid-visible');}
+    resize?.observe(el);
   }
   function scan(root){
     if(root.nodeType===1&&root.matches(selector))add(root);
     root.querySelectorAll?.(selector).forEach(add);
   }
-  function remove(el){
-    if(!marked.has(el))return;
-    marked.delete(el);observer?.unobserve(el);el.classList.remove('gtz-liquid-visible');
+  function scanRemoved(){
+    for(const el of tracked.keys())if(!el.isConnected){observer?.unobserve(el);resize?.unobserve(el);visible.delete(el);tracked.delete(el);}
   }
-  function unscan(root){
-    if(root.nodeType===1&&marked.has(root))remove(root);
-    root.querySelectorAll?.(selector).forEach(remove);
+  function radius(s,w,h){
+    const v=s.borderTopLeftRadius.split(' ')[0];
+    return Math.min(w/2,h/2,v.endsWith('%')?parseFloat(v)*Math.min(w,h)/100:parseFloat(v)||0);
   }
-  scan(document);
-  if('MutationObserver' in window)new MutationObserver(changes=>{
-    for(const change of changes)for(const node of change.removedNodes||[])if(!node.isConnected)unscan(node);
-    for(const change of changes)for(const node of change.addedNodes)scan(node);
-  }).observe(document.body,{childList:true,subtree:true});
+  function nativeFilter(el,state,r,style,optics){
+    // Quantized element geometry keeps the optical rim ~9px thick on cards,
+    // round buttons and large panels as well as the compact menu.
+    const w=Math.max(4,Math.round(el.offsetWidth/4)*4),h=Math.max(4,Math.round(el.offsetHeight/4)*4),rad=Math.round(radius(style,w,h));
+    const key=[w,h,rad].join(':');if(state.key===key)return;
+    let id=filterCache.get(key);
+    if(!id){
+      const mapCanvas=document.createElement('canvas'),mw=Math.min(256,w),mh=Math.min(144,h);
+      mapCanvas.width=mw;mapCanvas.height=mh;const c=mapCanvas.getContext('2d'),pixels=c.createImageData(mw,mh);
+      const depth=Math.min(9.5,w*.25,h*.25);
+      for(let y=0;y<mh;y++)for(let x=0;x<mw;x++){
+        const [nx,ny]=optics.edgeVector((x+.5)*w/mw-w/2,(y+.5)*h/mh-h/2,w,h,rad,depth),i=4*(y*mw+x);
+        pixels.data[i]=Math.max(0,Math.min(255,Math.round(128-nx*8*255/(.34*w))));
+        pixels.data[i+1]=Math.max(0,Math.min(255,Math.round(128-ny*4.5*255/(.34*h))));
+        pixels.data[i+2]=128;pixels.data[i+3]=255;
+      }
+      c.putImageData(pixels,0,0);
+      if(!svg){svg=document.createElementNS(ns,'svg');svg.setAttribute('width','0');svg.setAttribute('height','0');svg.setAttribute('aria-hidden','true');svg.style.cssText='position:absolute;pointer-events:none;overflow:hidden';document.body.append(svg);}
+      id='gtz-liquid-refraction-'+(++serial);
+      const f=document.createElementNS(ns,'filter'),im=document.createElementNS(ns,'feImage'),disp=document.createElementNS(ns,'feDisplacementMap');
+      const set=(e,o)=>Object.entries(o).forEach(([k,v])=>e.setAttribute(k,v));
+      set(f,{id,filterUnits:'objectBoundingBox',primitiveUnits:'objectBoundingBox',x:'-.15',y:'-.25',width:'1.3',height:'1.5','color-interpolation-filters':'sRGB'});
+      const href=mapCanvas.toDataURL('image/png');set(im,{x:0,y:0,width:1,height:1,preserveAspectRatio:'none',result:'lens',href});im.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',href);
+      set(disp,{in:'SourceGraphic',in2:'lens',scale:'.34',xChannelSelector:'R',yChannelSelector:'G',x:0,y:0,width:1,height:1});
+      f.append(im,disp);svg.append(f);filterCache.set(key,id);
+      // Only retire unused filters; animated transforms keep offset sizes stable.
+      if(filterCache.size>90)for(const [k,oldId] of filterCache){if(k!==key&&![...tracked.values()].some(v=>v.key===k)){document.getElementById(oldId)?.remove();filterCache.delete(k);if(filterCache.size<=70)break;}}
+    }
+    state.layer.style.setProperty('--gtz-liquid-filter','url(#'+id+') blur(1.25px) saturate(1.04)');state.key=key;
+  }
+  function canvasFilter(el,state,r,style,optics){
+    // Paint only the viewport crop behind this surface, not the surface's
+    // own content. No cloned DOM, external screenshot, or network upload.
+    const left=Math.max(0,Math.floor(r.left-10)),top=Math.max(0,Math.floor(r.top-10)),right=Math.min(innerWidth,Math.ceil(r.right+10)),bottom=Math.min(innerHeight,Math.ceil(r.bottom+10));
+    const w=right-left,h=bottom-top;if(w<2||h<2||w*h>600000||r.width*r.height>650000)return;
+    const b={left,top,right,bottom};
+    if(!source){source=document.createElement('canvas');ctx=source.getContext('2d',{willReadFrequently:true});}
+    if(!ctx)return;
+    if(source.width!==w||source.height!==h){source.width=w;source.height=h;}
+    ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.fillRect(0,0,w,h);ctx.setTransform(1,0,0,1,-left,-top);
+    const root=getComputedStyle(document.documentElement).backgroundColor;if(root!=='rgba(0, 0, 0, 0)'&&root!=='transparent'){ctx.fillStyle=root;ctx.fillRect(left,top,w,h);}
+    const dock=document.querySelector('.control-dock'),scrim=document.querySelector('.control-scrim'),inDock=!!el.closest('.control-dock');
+    optics.paintBackdrop(ctx,b,node=>node===el||node===dock||node===scrim);
+    if(inDock&&scrim?.classList.contains('is-open')){ctx.fillStyle=getComputedStyle(scrim).backgroundColor;ctx.fillRect(left,top,w,h);}
+    const data=ctx.getImageData(0,0,w,h).data;
+    const cw=Math.max(1,Math.ceil(r.width)),ch=Math.max(1,Math.ceil(r.height));
+    if(!state.canvas){state.canvas=document.createElement('canvas');state.canvas.setAttribute('aria-hidden','true');state.layer.prepend(state.canvas);}
+    const canvas=state.canvas,output=canvas.getContext('2d');if(!output)return;
+    // Reuse the single canvas per surface; update with one complete pixel buffer.
+    if(canvas.width!==cw||canvas.height!==ch){canvas.width=cw;canvas.height=ch;}
+    const img=output.createImageData(cw,ch),dst=img.data,rad=radius(style,r.width,r.height),depth=Math.min(9.5,r.width*.25,r.height*.25);
+    for(let y=Math.max(0,Math.floor(top-r.top));y<Math.min(ch,bottom-r.top);y++)for(let x=Math.max(0,Math.floor(left-r.left));x<Math.min(cw,right-r.left);x++){
+      const px=x+.5-r.width/2,py=y+.5-r.height/2;
+      if(Math.abs(px)<r.width/2-rad&&Math.abs(py)<r.height/2-depth)continue;
+      const [nx,ny]=optics.edgeVector(px,py,r.width,r.height,rad,depth),strength=Math.hypot(nx,ny);
+      if(strength<.005)continue;
+      const bx=x+r.left-left,by=y+r.top-top;
+      if(bx<0||by<0||bx>=w||by>=h)continue;
+      const sx=Math.max(0,Math.min(w-1.001,bx-nx*8)),sy=Math.max(0,Math.min(h-1.001,by-ny*4.5));
+      const ix=Math.floor(sx),iy=Math.floor(sy),fx=sx-ix,fy=sy-iy,a=4*(iy*w+ix),i=4*(y*cw+x),base=4*(Math.floor(by)*w+Math.floor(bx));let delta=0;
+      for(let k=0;k<3;k++){const v=(data[a+k]*(1-fx)+data[a+4+k]*fx)*(1-fy)+(data[a+4*w+k]*(1-fx)+data[a+4*w+4+k]*fx)*fy;dst[i+k]=v;delta=Math.max(delta,Math.abs(v-data[base+k]));}
+      dst[i+3]=Math.round(235*Math.min(1,delta/8)*Math.min(1,strength*2.6));
+    }
+    output.putImageData(img,0,0);
+  }
+  function isActive(el){
+    if(!el.isConnected||!el.getClientRects().length)return false;
+    const dock=el.closest('.control-dock');
+    if(dock&&el!==dock.querySelector('.control-trigger')&&el.closest('[aria-hidden="true"]'))return false;
+    if(!native&&dock===null&&document.querySelector('.control-dock[data-mode="menu"]'))return false;
+    return true;
+  }
+  function render(now){
+    frame=0;if(document.hidden||reduced.matches||!visible.size)return;
+    const optics=window.GAMTTIZGlassOptics;
+    if(!optics)return;
+    if(now-last<(native?120:80)){schedule();return;}last=now;
+    const active=[...visible].filter(isActive);
+    // Chromium only prepares filters when geometry changes. Mobile updates
+    // one visible surface per tick; the menu's own lens remains priority.
+    const trigger=active.find(el=>el.classList.contains('control-trigger')),others=active.filter(el=>el!==trigger);
+    const turn=cursor++;const batch=native?active:active.length?[trigger&&(!others.length||turn%2===0)?trigger:others[(trigger?Math.floor(turn/2):turn)%others.length]]:[];
+    for(const el of batch){
+      const state=tracked.get(el),r=el.getBoundingClientRect(),style=getComputedStyle(el);
+      if(!state||r.width<2||r.height<2||style.visibility==='hidden'||Number(style.opacity)<.05)continue;
+      try{if(native)nativeFilter(el,state,r,style,optics);else canvasFilter(el,state,r,style,optics);}catch{/* Stable CSS glass remains if sampling fails. */}
+    }
+    if(!native)schedule();
+  }
+  function schedule(){if(!frame&&!document.hidden&&!reduced.matches)frame=requestAnimationFrame(render);}
+  function init(){
+    scan(document);schedule();
+    new MutationObserver(records=>{
+      for(const record of records){for(const node of record.addedNodes)if(node.nodeType===1&&!node.matches('.gtz-liquid-optics,canvas'))scan(node);
+        if(record.target.nodeType===1&&tracked.has(record.target)&&!tracked.get(record.target).layer.isConnected)add(record.target);}
+      scanRemoved();schedule();
+    }).observe(document.body,{childList:true,subtree:true});
+    addEventListener('resize',schedule,{passive:true});document.addEventListener('visibilitychange',schedule);reduced.addEventListener?.('change',schedule);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else if(document.readyState==='interactive')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

@@ -793,7 +793,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 }
 .control-dock .control-menu .control-menu-links > :is(a,button){
   --menu-light-x:22%;--menu-light-y:12%;
-  background-color:rgba(20,12,18,.10);
+  background-color:rgba(20,12,18,.10);background-color:var(--gtz-liquid-tint,rgba(20,12,18,.10));
   border-radius:999px;
   background-image:none;
   -webkit-backdrop-filter:none;backdrop-filter:none;
@@ -805,7 +805,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   border-radius:inherit;overflow:hidden;
   -webkit-backdrop-filter:blur(1.25px) saturate(1.04);
   backdrop-filter:blur(1.25px) saturate(1.04);
-  background:linear-gradient(135deg,rgba(255,255,255,.025),transparent 56%,rgba(255,255,255,.018));
+  background:var(--gtz-liquid-sheen,linear-gradient(135deg,rgba(255,255,255,.025),transparent 56%,rgba(255,255,255,.018)));
   box-shadow:none;
   transition:--menu-light-x .17s ease,--menu-light-y .17s ease,opacity .24s ease;
 }
@@ -827,7 +827,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 /* A hairline only; the refraction (not fake embossed shadows) is the shape. */
 .control-dock .control-menu .control-menu-links > :is(a,button)::before{
   z-index:1;border-width:1px;
-  background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.035) 54%,rgba(255,255,255,.12)) border-box;
+  background:var(--gtz-liquid-rim,linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.035) 54%,rgba(255,255,255,.12))) border-box;
   opacity:1;
 }
 .control-dock[data-mode="menu"] .control-menu .control-menu-optics{
@@ -877,7 +877,7 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
   transition-property:translate,scale,opacity,transform,background-color,box-shadow,color;
   transition-duration:.66s,.66s,.36s,0s,.32s,.32s,.32s;
   transition-timing-function:var(--menu-ease),var(--menu-ease),ease,linear,cubic-bezier(.22,1,.36,1),ease,cubic-bezier(.22,1,.36,1);
-  background-color:rgba(20,12,18,.10);
+  background-color:rgba(20,12,18,.10);background-color:var(--gtz-liquid-tint,rgba(20,12,18,.10));
   color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.73);box-shadow:none;
 }
 .control-dock:is([data-mode="menu"],[data-menu-closing]) .control-menu .control-menu-links[data-guided] > :is(a,button) .control-menu-subtitle{color:rgba(255,255,255,.72)}

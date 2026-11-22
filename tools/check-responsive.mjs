@@ -110,6 +110,9 @@ for(const engine of [chromium,webkit])test('Independent liquid glass menu drople
    const page=await context.newPage();
    await page.goto(base+'index.html',{waitUntil:'load'});
    const trigger=page.locator('.control-trigger'),menu=page.locator('.control-menu'),items=menu.locator('.control-menu-links > :is(a,button)');
+   await page.waitForFunction(()=>document.querySelector('.control-trigger > .gtz-liquid-optics'));
+   const triggerMaterial=await trigger.evaluate(el=>({color:getComputedStyle(el).backgroundColor,shadow:getComputedStyle(el).boxShadow,blur:getComputedStyle(el.querySelector('.gtz-liquid-optics')).backdropFilter}));
+   assert.ok(triggerMaterial.color.startsWith('rgba(20, 12, 18, 0.1')&&triggerMaterial.shadow==='none'&&triggerMaterial.blur.includes('blur(1.25px)'),JSON.stringify(triggerMaterial));
    await trigger.click();
    await page.waitForFunction(()=>Array.from(document.querySelectorAll('.control-menu-links > :is(a,button)')).every(el=>Number(getComputedStyle(el).opacity)>.995&&Math.abs(parseFloat(getComputedStyle(el).scale)-1)<.001));
    await page.waitForTimeout(180);
@@ -499,9 +502,9 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
          const menu=document.querySelector('.control-menu'),contact=document.querySelector('.control-contact');
          const link=contact.querySelector('.control-contact-links a'),copy=contact.querySelector('.contact-copy');
          const a=getComputedStyle(link),b=getComputedStyle(copy);
-         return {frame:getComputedStyle(contact,'::before').backgroundImage.includes('conic-gradient'),
-           border:getComputedStyle(contact).borderTopWidth,button:b.backgroundImage.includes('linear-gradient')&&a.borderRadius===b.borderRadius&&b.backdropFilter!=='none',
-           sweep:getComputedStyle(copy,'::before').backgroundImage.includes('conic-gradient'),height:copy.getBoundingClientRect().height};
+         return {frame:getComputedStyle(contact,'::before').backgroundImage.includes('linear-gradient'),
+           border:getComputedStyle(contact).borderTopWidth,button:b.backgroundImage==='none'&&a.borderRadius===b.borderRadius&&getComputedStyle(copy.querySelector('.gtz-liquid-optics')).backdropFilter.includes('blur(1.25px)'),
+           sweep:getComputedStyle(copy.querySelector('.gtz-liquid-optics'),'::before').animationName==='gtz-liquid-sweep',height:copy.getBoundingClientRect().height};
        });
        assert.ok(material.frame&&material.border==='0px'&&material.button&&material.sweep&&material.height>=44,'Contact liquid glass material mismatch');
        await contact.locator('.contact-copy').click();
@@ -515,12 +518,12 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      if(['play.html','collection.html','draw.html','member.html#radar'].includes(filename)){
        const target=filename==='play.html'?'.hub-grid>a':filename==='collection.html'?'.dex-toolbar':filename==='draw.html'?'.draw-machine':'.radar-glass-field';
        const material=await page.locator(target).first().evaluate(el=>({
-         blur:getComputedStyle(el).backdropFilter,
+         blur:getComputedStyle(el.querySelector(':scope > .gtz-liquid-optics')).backdropFilter,
          edge:getComputedStyle(el,'::before').backgroundImage,
          animation:getComputedStyle(el,'::before').animationName,
          border:getComputedStyle(el).borderTopWidth
        }));
-       assert.ok(material.blur.includes('blur(5px)')&&material.edge.includes('conic-gradient')&&material.animation==='none'&&material.border==='0px',filename+' canonical glass');
+       assert.ok(material.blur.includes('blur(1.25px)')&&material.edge.includes('linear-gradient')&&material.animation==='none',filename+' canonical glass');
      }
      if(filename==='play.html'){
        const cards=page.locator('.hub-grid>a');
