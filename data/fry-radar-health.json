@@ -1,12 +1,12 @@
 {
-  "checkedAt": "2026-11-21T21:14:35.930Z",
+  "checkedAt": "2026-11-22T00:23:42.597Z",
   "schedule": "Hourly at :17 KST; stale-run recovery at :47; GitHub scheduling may be delayed",
   "news": {
     "feedsSucceeded": 193,
     "failedFeeds": 0,
-    "newsCandidates": 668,
-    "googleCandidates": 430,
-    "newVerified": 2,
+    "newsCandidates": 782,
+    "googleCandidates": 474,
+    "newVerified": 0,
     "availableQueries": 168,
     "attemptedBingQueries": 168,
     "attemptedGoogleQueries": 25,
@@ -228,7 +228,7 @@
         "blockedDetail": 0,
         "duplicate": 2
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "collectionUrl": "https://www.lotteeatz.com/event/main/",
       "fallbackQueries": [
         "롯데리아 포테이토",
@@ -259,7 +259,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "collectionUrl": "https://www.mcdonalds.co.kr/kor/promotion/detail.do?seq=404",
       "indexedCandidates": 0,
       "browserFallback": true,
@@ -280,16 +280,14 @@
     {
       "brand": "버거킹",
       "url": "https://www.burgerking.co.kr/event",
-      "reachable": false,
+      "reachable": true,
       "candidates": 0,
       "checked": 0,
       "added": 0,
       "relevant": 0,
       "errors": [
         "fetch failed",
-        "fetch failed",
-        "The operation was aborted due to timeout",
-        "브라우저 보조 수집 실패: browser returned no HTML"
+        "fetch failed"
       ],
       "excluded": {
         "unrelated": 0,
@@ -298,15 +296,19 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T19:24:22.117Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
+      "collectionUrl": "https://pf.kakao.com/_xcBxnxah",
       "indexedCandidates": 0,
+      "browserCandidates": 0,
       "fallbackQueries": [
         "버거킹 감자튀김",
         "버거킹 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
         "버거킹 감자튀김 종료 연장",
         "버거킹 쉐이킹프라이 행사"
       ],
-      "fallbackArticles": []
+      "fallbackArticles": [],
+      "verifiedDetails": 0,
+      "remaining": 0
     },
     {
       "brand": "맘스터치",
@@ -368,7 +370,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "collectionUrl": "https://www.frankburger.co.kr/board/index.php?board=event_01&tab=3&type=list",
       "fallbackQueries": [
         "프랭크버거 감자튀김",
@@ -399,7 +401,7 @@
         "blockedDetail": 13,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "indexedCandidates": 0,
       "browserFallback": true,
       "browserCandidates": 13,
@@ -431,7 +433,7 @@
         "blockedDetail": 16,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "collectionUrl": "https://www.smdnewsroom.co.kr/?s=%EC%89%90%EC%9D%B4%ED%81%AC%EC%89%91",
       "fallbackQueries": [
         "쉐이크쉑 감자튀김",
@@ -459,7 +461,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "collectionUrl": "https://www.fiveguys.co.kr/%EB%AA%A8%EB%93%A0-%EC%86%8C%EC%8B%9D-%EB%B3%B4%EA%B8%B0/",
       "fallbackQueries": [
         "파이브가이즈 감자튀김",
@@ -474,15 +476,12 @@
     {
       "brand": "다운타우너",
       "url": "https://pf.kakao.com/_feexixj",
-      "reachable": false,
+      "reachable": true,
       "candidates": 0,
       "checked": 0,
       "added": 0,
       "relevant": 0,
-      "errors": [
-        "The operation was aborted due to timeout",
-        "브라우저 보조 수집 실패: browser returned no HTML"
-      ],
+      "errors": [],
       "excluded": {
         "unrelated": 0,
         "oldOrUnknownDate": 0,
@@ -490,27 +489,28 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T19:24:22.117Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
+      "collectionUrl": "https://pf.kakao.com/_feexixj",
       "indexedCandidates": 0,
+      "browserCandidates": 0,
       "fallbackQueries": [
         "다운타우너 감자튀김",
         "다운타우너 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
         "다운타우너 감자튀김 종료 연장"
       ],
-      "fallbackArticles": []
+      "fallbackArticles": [],
+      "verifiedDetails": 0,
+      "remaining": 0
     },
     {
       "brand": "바스버거",
       "url": "https://pf.kakao.com/_AXkns",
-      "reachable": false,
+      "reachable": true,
       "candidates": 0,
       "checked": 0,
       "added": 0,
       "relevant": 0,
-      "errors": [
-        "The operation was aborted due to timeout",
-        "브라우저 보조 수집 실패: browser returned no HTML"
-      ],
+      "errors": [],
       "excluded": {
         "unrelated": 0,
         "oldOrUnknownDate": 0,
@@ -518,14 +518,18 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T19:24:22.117Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
+      "collectionUrl": "https://pf.kakao.com/_AXkns",
       "indexedCandidates": 0,
+      "browserCandidates": 0,
       "fallbackQueries": [
         "바스버거 감자튀김",
         "바스버거 (감자튀김 OR 감튀 OR 포테이토 OR 프라이 OR 양념감자) 행사",
         "바스버거 감자튀김 종료 연장"
       ],
-      "fallbackArticles": []
+      "fallbackArticles": [],
+      "verifiedDetails": 0,
+      "remaining": 0
     },
     {
       "brand": "KFC",
@@ -543,7 +547,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "collectionUrl": "https://www.kfckorea.com/promotion/promotionList/A801",
       "fallbackQueries": [
         "KFC 프라이 신메뉴",
@@ -573,7 +577,7 @@
         "blockedDetail": 0,
         "duplicate": 0
       },
-      "lastReachableAt": "2026-11-21T21:14:35.930Z",
+      "lastReachableAt": "2026-11-22T00:23:42.597Z",
       "collectionUrl": "https://popeyes.co.kr/event",
       "fallbackQueries": [
         "파파이스 케이준후라이",
@@ -588,7 +592,7 @@
   ],
   "summary": {
     "sources": 12,
-    "reachable": 8,
+    "reachable": 11,
     "detailCandidates": 97,
     "detailChecked": 95,
     "detailVerified": 66,
@@ -604,5 +608,5 @@
     "unavailable": 0,
     "unconfirmed": 5
   },
-  "lastCompletedAt": "2026-11-21T21:17:55.179Z"
+  "lastCompletedAt": "2026-11-22T00:26:17.586Z"
 }
