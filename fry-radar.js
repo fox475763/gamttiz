@@ -100,7 +100,9 @@
     if(nearEnd(item))top.append(el('span','radar-new',model.daysLeft(item)===0?'오늘 종료':'D-'+model.daysLeft(item)));
     const title=el('h3','',item.title);
     // Source thumbnail display, retaining the original GAMTTIZ illustration as fallback.
-    const picture=el('div','radar-card-media');
+    const media=el('div','radar-card-media');
+    const picture=el('div','radar-card-photo');
+    media.append(picture);
     let imageAdded=false;
     if(typeof item.imageUrl==='string'){
       try{
@@ -121,14 +123,12 @@
     if(!imageAdded)picture.append(friesArt());
     if(imageAdded && item.imageNote){
       const note=el('span','radar-image-note',item.imageNote);
-      picture.append(note);
+      media.append(note);
     }
     const summary=el('p','',item.summary||'원문에서 자세히 확인해 주세요.');
     const bottom=el('div','radar-card-bottom');
-    bottom.append(el('span','',item.source||'출처 확인'),el('span','','↗'));
-    node.append(top);
-    node.append(picture);
-    node.append(title,summary,bottom);
+    bottom.append(el('span','radar-source',item.source||'출처 확인'),el('span','radar-read-link','원문 보기 ↗'));
+    node.append(media,top,title,summary,bottom);
     return node;
   };
   // 지난 소식은 큰 카드 대신 제목만 표시하는 가로형 링크 목록으로 보여줍니다.
