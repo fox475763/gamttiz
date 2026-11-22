@@ -238,7 +238,7 @@ test('Play icons stay flat and the geometric Motion layer loops behind the game 
  assert.match(css,/\.play-page \.play-geo\{animation:none!important/);
 });
 
-test('Canonical liquid glass uses the menu's reference material on all existing glass surfaces',()=>{
+test('Canonical liquid glass uses the reference menu material on all existing glass surfaces',()=>{
  const css=src('liquid-glass.css'),js=src('liquid-glass.js');
  for(const page of ['index.html','play.html','collection.html','draw.html','member.html','license.html','project.html','products.html','news.html','quiz.html','combo.html']){
    const html=src(page);assert.match(html,/liquid-glass\.css\?v=/);assert.match(html,/liquid-glass\.js\?v=/);
