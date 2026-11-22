@@ -3,7 +3,7 @@
   if(page==='license.html'&&new URLSearchParams(location.search).get('wallet')==='1')return;
   const pages = [
     {title:'홈', description:'감띠즈를 처음부터 둘러보기', url:'index.html', keys:'home gamttiz 감띠즈'},
-    {title:'감띠즈 도감', description:'14종의 감띠와 미공개 친구들의 도감', url:'collection.html', keys:'collection dex 도감 캐릭터 키링 감띠'},
+    {title:'감띠즈 도감', description:'16종의 감띠와 미공개 친구들의 도감', url:'collection.html', keys:'collection dex 도감 캐릭터 키링 감띠'},
     {title:'제품 정보', description:'랜덤박스, 키링, 홀더', url:'products.html', keys:'products 랜덤박스 굿즈 제품'},
     {title:'공지', description:'감띠즈의 공식 공지와 제작·운영 소식', url:'news.html', keys:'notice news 공지 소식 게시글'},
     {title:'Fry Rader (감튀 레이더)', description:'감자튀김 할인·이벤트·굿즈 등 외부 소식', url:'member.html#radar', keys:'fry radar rader 레이더 감튀 소식 할인 이벤트'},
@@ -15,7 +15,7 @@
     {title:'Member · 멤버 전용', description:'라이센스 보유자의 감튀 레이더', url:'member.html', keys:'member 멤버 회원 감튀 레이더 웹앱'},
     {title:'프로젝트 정보', description:'기획 의도, 제작자, 디자인 정보', url:'project.html', keys:'project info 포트폴리오'}
   ];
-  const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
+  const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠','버터갈릭감띠','매콤감띠'];
   names.forEach((name,index) => pages.push({title:name, description:`감띠즈 ${String(index+1).padStart(2,'0')}번 친구 자세히 보기`, url:`collection.html#friend-${String(index+1).padStart(2,'0')}`, keys:`감자튀김 캐릭터 ${name}`}));
   const make = (tag, className, value) => { const el=document.createElement(tag); if(className)el.className=className; if(value)el.textContent=value; return el; };
   const header = document.querySelector('.header');
@@ -563,7 +563,7 @@
   const externalEntry=page!=='index.html' && (externalReferrer || new URLSearchParams(location.search).has('utm_source'));
   if(externalEntry && !dismissed){
     const guide=make('aside','site-entry-guide');guide.setAttribute('aria-label','방문 안내');
-    guide.append(make('strong','','감띠즈에 오신 걸 환영해요.'),make('span','','이 페이지를 즐긴 뒤 홈에서 14명의 친구도 만나보세요.'));
+    guide.append(make('strong','','감띠즈에 오신 걸 환영해요.'),make('span','','이 페이지를 즐긴 뒤 홈에서 16명의 친구도 만나보세요.'));
     const homeLink=make('a','','홈 둘러보기 ↗');homeLink.href='index.html';guide.append(homeLink);
     const dismiss=make('button','','닫기 ✕');dismiss.type='button';dismiss.addEventListener('click',()=>{guide.remove();try{sessionStorage.setItem('gamttiz-entry-dismissed','1');}catch{}});guide.append(dismiss);
     header?.after(guide);

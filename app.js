@@ -12,8 +12,10 @@ const products = [
   ['웨지감띠','Weji Gamtti','조각 사과처럼 옆으로 누운 감자튀김'],
   ['부스러끼','Bueureokki','겁이 많아 어딘가에 숨어 있는 감자튀김'],
   ['두리감띠','Duri Gamtti','서로 등을 맞대고 붙어 사는 감자튀김'],
-  ['촉촉감띠','Chokchok Gamtti','기름을 머금어 촉촉하고 흐물흐물한 감자튀김']
-].map(([name,english,description],i)=>({name,english,description,image:`assets/keyring-${String(i+1).padStart(2,'0')}.png`,illustration:`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`}));
+  ['촉촉감띠','Chokchok Gamtti','기름을 머금어 촉촉하고 흐물흐물한 감자튀김'],
+  ["버터갈릭감띠","Butter Garlic Gamtti","고소한 버터와 마늘 향을 두른 감자튀김."],
+  ["매콤감띠","Spicy Gamtti","매운 양념을 입고 뜨거운 열기를 내뿜는 감자튀김."]
+].map(([name,english,description],i)=>({name,english,description,image:i<14?`assets/keyring-${String(i+1).padStart(2,'0')}.png`:`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`,isIllustration:i>=14,illustration:`assets/illustrations/friend-${String(i+1).padStart(2,'0')}.svg`}));
 const holder={name:'감띠즈 홀더',english:'GAMTTIZ HOLDER',description:'수집한 감띠즈 키링을 보관할 수 있는 보관통이자 직접 키링을 원하는 대로 걸 수 있는 키링입니다.',image:'assets/holder.png'};
 // 원본 제품 설명을 바탕으로 쓴 사이트용 상상 이야기입니다.
 const stories=[
@@ -30,13 +32,15 @@ const stories=[
   ['옆으로 누운 웨지감띠는 하늘 구경을 좋아해요. 친구들이 바쁠 때도 구름 하나를 발견하면 꼭 알려줘요.','“저 구름, 감자처럼 보이지 않아?”'],
   ['부스러끼가 안 보인다면 너무 걱정하지 마세요. 조용한 구석에서 용기를 모으고 있을지도 몰라요.','“나 여기 있어… 찾았어?”'],
   ['등을 딱 붙이고 사는 두리감띠는 서로 다른 방향을 바라봐요. 그래서 둘이 함께면 놓치는 장면이 없답니다.','“뒤쪽은 내가 볼게!”'],
-  ['촉촉감띠는 느긋하게 움직이는 걸 좋아해요. 친구들이 서두를 때면 한 번 쉬어 가자고 이야기해요.','“조금 천천히 가도 괜찮아.”']
+  ['촉촉감띠는 느긋하게 움직이는 걸 좋아해요. 친구들이 서두를 때면 한 번 쉬어 가자고 이야기해요.','“조금 천천히 가도 괜찮아.”'],
+  ["부드러운 버터갈릭 소스를 멋스럽게 두르고 다니는 감띠. 친구들과 함께하는 시간에 은은하고 따뜻한 향기를 더한다. 작은 칭찬과 다정한 인사를 건네는 일을 좋아하며, 낯선 친구도 편하게 웃을 수 있게 도와준다.","“오늘도 부드럽게, 달콤하게!”"],
+  ["새빨간 양념과 작은 불꽃이 눈에 띄는 열정 가득한 친구. 무엇이든 힘차게 도전하지만 생각보다 매운맛에 놀랄 때도 있다. 친구가 망설이면 용기를 북돋아 주고, 즐거운 일에는 누구보다 크게 반응한다. 가끔은 한숨 돌리는 연습도 한다.","“앗 매워! 그래도 도전!”"]
 ];
 const gallery=document.querySelector('#gallery');
 const dialog=document.querySelector('#detail');
 let current=0;
 products.forEach((p,i)=>{
-  const card=document.createElement('button');card.type='button';card.className='card friend-carousel-card';card.setAttribute('aria-label',`${p.name} 상세 보기`);
+  const card=document.createElement('button');card.type='button';card.className='card friend-carousel-card'+(p.isIllustration?' is-new-friend':'');card.setAttribute('aria-label',`${p.name} 상세 보기`);
   const img=document.createElement('img');img.src=p.image;const variants=window.GTZDisplayAssets?.[p.image];if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 45vw, 260px';}img.alt=`${p.name} — ${p.description}`;img.width=1080;img.height=1350;img.loading='lazy';img.decoding='async';
   const label=document.createElement('span');label.className='card-label';
   const name=document.createElement('span');name.textContent=p.name;
@@ -45,13 +49,13 @@ products.forEach((p,i)=>{
 function showDetail(index){
   current=index;const p=index===-1?holder:products[index];
   {const img=document.querySelector('#detail-image'),variants=window.GTZDisplayAssets?.[p.image];img.removeAttribute('srcset');img.src=p.image;if(variants?.length){img.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');img.sizes='(max-width:600px) 92vw, 640px';}}
-  document.querySelector('#detail-image').alt=`${p.name} 원본 제품 소개`;
+  document.querySelector('#detail-image').alt=`${p.name} ${p.isIllustration?'원본 일러스트':'원본 제품 소개'}`;
   document.querySelector('#detail-title').textContent=p.name;
   document.querySelector('#detail-english').textContent=p.english;
   document.querySelector('#detail-description').textContent=p.description;
   const story=document.querySelector('#detail-story');story.hidden=index===-1;
   if(index!==-1){document.querySelector('#detail-story-text').textContent=stories[index][0];document.querySelector('#detail-quote').textContent=stories[index][1];}
-  document.querySelector('#detail-count').textContent=index===-1?'GAMTTIZ HOLDER':`${String(index+1).padStart(2,'0')} / 14`;
+  document.querySelector('#detail-count').textContent=index===-1?'GAMTTIZ HOLDER':`${String(index+1).padStart(2,'0')} / ${products.length}`;
   document.querySelector('#original').href=p.image;
   document.querySelector('.dialog-nav').hidden=index===-1;
   document.querySelector('.dialog-nav').style.display=index===-1?'none':'flex';
@@ -59,9 +63,9 @@ function showDetail(index){
 }
 document.querySelector('#close').addEventListener('click',()=>dialog.close());
 dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
-document.querySelector('#previous').addEventListener('click',()=>showDetail((current+13)%14));
-document.querySelector('#next').addEventListener('click',()=>showDetail((current+1)%14));
-dialog.addEventListener('keydown',e=>{if(current<0)return;if(e.key==='ArrowRight'){e.preventDefault();showDetail((current+1)%14);}if(e.key==='ArrowLeft'){e.preventDefault();showDetail((current+13)%14);}});
+document.querySelector('#previous').addEventListener('click',()=>showDetail((current+products.length-1)%products.length));
+document.querySelector('#next').addEventListener('click',()=>showDetail((current+1)%products.length));
+dialog.addEventListener('keydown',e=>{if(current<0)return;if(e.key==='ArrowRight'){e.preventDefault();showDetail((current+1)%products.length);}if(e.key==='ArrowLeft'){e.preventDefault();showDetail((current+products.length-1)%products.length);}});
 document.querySelector('.holder-open')?.addEventListener('click',()=>showDetail(-1));
 const linkedFriend=Number(new URLSearchParams(location.search).get('friend'));
 if(Number.isInteger(linkedFriend)&&linkedFriend>=1&&linkedFriend<=products.length)showDetail(linkedFriend-1);

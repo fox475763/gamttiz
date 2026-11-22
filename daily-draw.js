@@ -17,12 +17,13 @@
     try{
       const saved=JSON.parse(localStorage.getItem(key));
       if(!(saved?.date===date&&allIds.includes(saved.id)))return null;
-      const bag=Array.isArray(saved.remaining)&&saved.remaining.every(id=>allIds.includes(id))?[...new Set(saved.remaining)].filter(id=>id!==saved.id):allIds.filter(id=>id!==saved.id);
+      const validBag=Array.isArray(saved.remaining)&&saved.remaining.every(id=>allIds.includes(id));
+      const bag=validBag?[...new Set([...saved.remaining,...(saved.roster===allIds.length?[]:allIds.filter(id=>id>14))])].filter(id=>id!==saved.id):allIds.filter(id=>id!==saved.id);
       return {id:saved.id,slot:Number.isInteger(saved.slot)&&saved.slot>=0&&saved.slot<fries.length?saved.slot:(saved.id-1)%fries.length,remaining:bag};
     }catch{return null;}
   }
-  function save(){try{localStorage.setItem(key,JSON.stringify({date,id:selected,slot:selectedSlot,remaining}));}catch{/* Private-mode storage is optional. */}}
-  // Draw without replacement until all 14 friends are seen; reshuffle for the next round.
+  function save(){try{localStorage.setItem(key,JSON.stringify({date,id:selected,slot:selectedSlot,remaining,roster:allIds.length}));}catch{/* Private-mode storage is optional. */}}
+  // Draw without replacement until all 16 friends are seen; reshuffle for the next round.
   function choose(){
     if(!remaining.length)remaining=[...allIds];
     const candidates=remaining.filter(id=>id!==selected),pool=candidates.length?candidates:remaining;

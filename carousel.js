@@ -58,7 +58,7 @@ function slideProduct(viewport,nextIndex,onComplete){
   nextImage.src=product.image;
 }
 if(posterViewport){
-  setInterval(()=>{if(homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(posterViewport)||posterViewport.closest('.hero-poster:hover'))return;const next=(posterIndex+1)%products.length;slideProduct(posterViewport,next,()=>{posterIndex=next;});},4200);
+  setInterval(()=>{if(homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(posterViewport)||posterViewport.closest('.hero-poster:hover'))return;const next=(posterIndex+1)%products.filter(p=>!p.isIllustration).length;slideProduct(posterViewport,next,()=>{posterIndex=next;});},4200);
 }
 const storyGroups=[
   {element:document.querySelector('.story-row:not(.reverse) .story-image'),indexes:[7,13]},

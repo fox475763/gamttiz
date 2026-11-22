@@ -320,11 +320,11 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
      await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
      const page=await context.newPage();
      await page.goto(base+'index.html',{waitUntil:'domcontentloaded'});
-     await page.waitForFunction(()=>window.GTZHomeMotion&&document.querySelectorAll('#friends-dots button').length===14);
+     await page.waitForFunction(()=>window.GTZHomeMotion&&document.querySelectorAll('#friends-dots button').length===16);
      assert.equal(await page.locator('#main section').count(),11);
      assert.equal(await page.locator('.story-row').count(),2);
-     assert.equal(await page.locator('#gallery .friend-carousel-card:not([aria-hidden])').count(),14);
-     assert.equal(await page.locator('#friends-dots button').count(),14);
+     assert.equal(await page.locator('#gallery .friend-carousel-card:not([aria-hidden])').count(),16);
+     assert.equal(await page.locator('#friends-dots button').count(),16);
      assert.equal(await page.locator('.control-trigger').count(),1);
      assert.equal(await page.locator('.cinema-opening,.cinema-chapter,.is-pinned').count(),0);
      const ambient=await page.evaluate(async()=>{
@@ -400,7 +400,7 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
      assert.equal(catalog.edges.length,10);
      for(const [name,left,right] of catalog.edges){assert.ok(Math.abs(left-catalog.edges[0][1])<=2&&Math.abs(right-catalog.edges[0][2])<=2,name+' follows the shared catalog grid');}
      assert.equal(catalog.labelPosition,'static','card captions must be separate from product art');
-     assert.equal(catalog.photos,14);
+     assert.equal(catalog.photos,16);
      assert.ok(catalog.borders.every(r=>r==='0px'),'editorial content must not revert to a rounded card grid');
      assert.equal(await page.locator('#friends-count,#friends-prev,#friends-next,#friends-pause,.home-friend-index,.home-friend-arrow').count(),0);
      // Fixed-width indicator slots must not wrap or shift as any item is selected.
@@ -408,7 +408,7 @@ for(const engine of [chromium,webkit])test('Home scroll is native, stable and re
        await page.setViewportSize({width,height:844});
        await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().length>0);
        const dots=page.locator('#friends-dots button');
-       for(let i=0;i<14;i++){
+       for(let i=0;i<16;i++){
          await dots.nth(i).click();
          assert.equal(await dots.nth(i).getAttribute('aria-pressed'),'true');
          const bounds=await page.locator('#friends-dots').evaluate(el=>{
@@ -561,7 +561,7 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        await page.locator('#license-edit').click();
        const rail=page.locator('#license-friends');
        await rail.waitFor({state:'visible'});
-       assert.equal(await rail.locator('.license-friend').count(),14);
+       assert.equal(await rail.locator('.license-friend').count(),16);
        assert.equal(await rail.evaluate(el=>getComputedStyle(el).scrollSnapType),'x mandatory');
        const square=await rail.locator('.license-friend.is-profile-current').boundingBox();
        assert.ok(square&&Math.abs(square.width-square.height)<2,'favorite profile card must be square');
@@ -578,8 +578,8 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      }
      if(filename==='collection.html'){
        assert.equal(await page.locator('.dex-tile').count(),20);
-       assert.equal(await page.locator('.dex-unknown').count(),6);
-       assert.equal(await page.locator('.dex-tile .dex-face').count(),15);
+       assert.equal(await page.locator('.dex-unknown').count(),4);
+       assert.equal(await page.locator('.dex-tile .dex-face').count(),17);
        assert.equal(await page.locator('.dex-dual-face .dex-face').count(),2);
        const dial=page.locator('#dex-grid');
        assert.equal(await dial.evaluate(el=>getComputedStyle(el).scrollSnapType),'y mandatory');
@@ -608,8 +608,10 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
        assert.equal(await page.locator('#dex-current').textContent(),'NO. 08 / 20');
        await page.keyboard.press('Escape');
        assert.equal(await page.locator('#dex-detail').evaluate(el=>el.open),false);
-       await page.goto(base+'collection.html#friend-14');
-       assert.match(await page.locator('#dex-current').textContent(),/NO\. 14/);
+       await page.goto(base+'collection.html#friend-15');
+       assert.equal(await page.locator('#dex-profile h2').textContent(),'버터갈릭감띠');
+       await page.locator('#dex-next').click();
+       assert.equal(await page.locator('#dex-profile h2').textContent(),'매콤감띠');
        await page.locator('#dex-close').click();
      }
      if(filename==='draw.html'){

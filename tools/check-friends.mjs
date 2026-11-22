@@ -7,12 +7,12 @@ const ctx=vm.createContext({Intl,Date});
 vm.runInContext(src('friends-data.js'),ctx);
 vm.runInContext(src('friends-profile.js'),ctx);
 const {characters,number,image,dayKey,targetAngle}=ctx.GTZFriends;
-test('14 complete, unique profiles and original illustrations',()=>{
- assert.equal(characters.length,14);
- assert.equal(new Set(characters.map(c=>c.name)).size,14);
+test('16 complete, unique profiles and original illustrations',()=>{
+ assert.equal(characters.length,16);
+ assert.equal(new Set(characters.map(c=>c.name)).size,16);
  characters.forEach((c,i)=>{assert.equal(c.id,i+1);for(const key of ['origin','story','likes','habit','friend','quote','message','type'])assert.ok(c[key].length>0);assert.ok(c.story.length>85);assert.equal(image(c.id),'assets/illustrations/friend-'+number(c.id)+'.svg');assert.match(ctx.GTZProfile(c,{daily:true}),new RegExp('collection.html#friend-'+number(c.id)));});
 });
-test('All 14 entries have face-focused original SVG crops and distinct expanded field notes',()=>{
+test('All 16 entries have face-focused original SVG crops and distinct expanded field notes',()=>{
   const {facePortrait}=ctx.GTZFriends;
   const subtitles=new Set(),episodes=new Set();
   characters.forEach(c=>{
@@ -25,14 +25,14 @@ test('All 14 entries have face-focused original SVG crops and distinct expanded 
     const profile=ctx.GTZProfile(c);
     for(const text of ['표정 확대','외형 특징','특기','약한 순간','감띠의 소소한 비밀','어느 날, 감띠즈에서'])assert.ok(profile.includes(text));
   });
-  assert.equal(subtitles.size,14);assert.equal(episodes.size,14);assert.equal(characters[8].faceCrops.length,2);
+  assert.equal(subtitles.size,16);assert.equal(episodes.size,16);assert.equal(characters[8].faceCrops.length,2);
 });
 test('Korea midnight changes the daily draw date',()=>{
  assert.equal(dayKey(new Date('2026-11-20T14:59:59Z')),'2026-11-20');
  assert.equal(dayKey(new Date('2026-11-20T15:00:00Z')),'2026-11-21');
 });
 test('Every selected segment lands at the top pointer, including repeated spins',()=>{
- let current=0;for(let id=1;id<=14;id++){let target=targetAngle(current,id);assert.ok(target-current>=1800&&target-current<=2160);const facing=(target+(id-1)*360/14)%360;assert.ok(Math.min(facing,360-facing)<1e-6);current=target;}
+ let current=0;for(let id=1;id<=characters.length;id++){let target=targetAngle(current,id);assert.ok(target-current>=1800&&target-current<=2160);const facing=(target+(id-1)*360/characters.length)%360;assert.ok(Math.min(facing,360-facing)<1e-6);current=target;}
 });
 test('Home carousel stays in place; Play and search link to the new pages',()=>{
  const home=src('index.html'),play=src('play.html'),shared=src('site-features.js');
@@ -71,14 +71,16 @@ test('National index interaction: filter, exact number search, sort, detail navi
  const mock=vm.createContext({GTZFriends:ctx.GTZFriends,GTZProfile:ctx.GTZProfile,document:doc,URL,URLSearchParams,location,history,window:{addEventListener(k,fn){eventMap[k]=fn;}}});
  vm.runInContext(src('friend-dex.js'),mock);
  const grid=nodes['dex-grid'],search=nodes['dex-search'],sort=nodes['dex-sort'],detail=nodes['dex-detail'],profile=nodes['dex-profile'];
- assert.equal(grid.children.length,20);assert.equal(detail.open,false);assert.equal(grid.children.filter(b=>b.innerHTML.includes('dex-face')).length,14);assert.match(grid.children[8].className,/dex-dual-face/);
- filters[2].emit('click');assert.equal(grid.children.filter(b=>!b.hidden).length,6);
+ assert.equal(grid.children.length,20);assert.equal(detail.open,false);assert.equal(grid.children.filter(b=>b.innerHTML.includes('dex-face')).length,16);assert.match(grid.children[8].className,/dex-dual-face/);
+ filters[2].emit('click');assert.equal(grid.children.filter(b=>!b.hidden).length,4);
  filters[0].emit('click');search.value='No. 07';search.emit('input');assert.equal(grid.children.filter(b=>!b.hidden).length,1);
  grid.children.find(b=>!b.hidden).emit('click');assert.equal(detail.open,true);assert.match(profile.innerHTML,/빙빙이/);
  nodes['dex-next'].emit('click');assert.equal(nodes['dex-current'].textContent,'NO. 08 / 20');
  nodes['dex-close'].emit('click');assert.equal(location.hash,'');assert.equal(detail.open,false);
  sort.value='desc';sort.emit('change');assert.match(grid.children[0].attrs['aria-label'],/No\. 20/);
- location.href='https://example.test/gamttiz/collection.html#friend-15';location.hash='#friend-15';eventMap.hashchange();assert.equal(detail.open,true);assert.match(profile.innerHTML,/\?\?\?/);
+ location.href='https://example.test/gamttiz/collection.html#friend-15';location.hash='#friend-15';eventMap.hashchange();assert.equal(detail.open,true);assert.match(profile.innerHTML,/버터갈릭감띠/);
+ location.hash='#friend-16';eventMap.hashchange();assert.match(profile.innerHTML,/매콤감띠/);
+ location.hash='#friend-17';eventMap.hashchange();assert.match(profile.innerHTML,/\?\?\?/);
 });
 
 test('GAMTTIZ DEX uses existing editorial palette and has no collection-record panel',()=>{
@@ -123,7 +125,7 @@ test('Dial follows scroll center, skips hidden rows, resets filters and navigate
  nodes['dex-dial-down'].emit('click');flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 02');
  grid.scrollTop=500;grid.emit('scroll');flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 06');
  assert.equal(grid.children.filter(b=>b.classes.has('is-dial-current')).length,1);
- grid.children.forEach((b,i)=>b.hidden=i<14);filter.emit('click');flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 15');
+ grid.children.forEach((b,i)=>b.hidden=i<16);filter.emit('click');flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 17');
  grid.emit('keydown',{key:'End',preventDefault(){}});flush();assert.equal(nodes['dex-dial-number'].textContent,'NO. 20');assert.equal(nodes['dex-dial-down'].disabled,true);
  grid.children.forEach(b=>b.hidden=true);filter.emit('click');flush();assert.equal(shell.hidden,true);
 });
@@ -135,7 +137,7 @@ test('Daily fry pick replaces the roulette with independent selectable fries',()
  assert.match(css,/touch-action:none/);assert.match(css,/fry-extract/);assert.match(css,/fry-character-in/);
  assert.match(js,/pointermove/);assert.match(js,/d\.pull>=threshold\(\)/);assert.doesNotMatch(html,/id="draw-button"/);assert.equal((html.match(/class="fry-holder-vector" viewBox="0 0 480 480"/g)||[]).length,2);assert.doesNotMatch(html,/holder-fbx-render/);assert.match(html,/class="fry-holder-face"/);assert.match(css,/fry-holder-face\{pointer-events:visiblePainted\}/);assert.match(css,/is-preview:not\(:disabled\) \.fry-stick/);assert.doesNotMatch(js,/f\.addEventListener\('click'/);
 });
-test('Fry drag, 14 unique random draws, fresh reload and back navigation, legacy migration and Korea-date reset',async()=>{
+test('Fry drag, 16 unique random draws, fresh reload and back navigation, legacy migration and Korea-date reset',async()=>{
   let today='2026-11-21',randomCalls=0;
   const storage=new Map();
   class El {
@@ -167,24 +169,24 @@ test('Fry drag, 14 unique random draws, fresh reload and back navigation, legacy
   assert.equal(storage.has(key),false);
   first.emit('pointerdown',point);first.emit('pointermove',{...point,clientY:25});first.emit('pointerup',{...point,clientY:55});
   await flush();
-  const saved=JSON.parse(storage.get(key));assert.equal(saved.slot,2);assert.equal(saved.id,4);
-  const name=nodes['fry-reveal-name'].textContent;assert.equal(name,characters[3].name);
+  const saved=JSON.parse(storage.get(key));assert.equal(saved.slot,2);assert.equal(saved.id,5);
+  const name=nodes['fry-reveal-name'].textContent;assert.equal(name,characters[4].name);
   assert.equal(nodes['draw-profile'].hidden,false);assert.equal(fries.filter(f=>f.classes.has('is-picked')).length,1);
   nodes['draw-replay'].emit('click');assert.equal(nodes['draw-profile'].hidden,true);assert.equal(randomCalls,1);
   const another=fries[4];another.emit('pointerdown',point);another.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(nodes['fry-reveal-name'].textContent,name);
   assert.equal(randomCalls,2);
   const second=JSON.parse(storage.get(key)),reload=run();assert.equal(reload['fry-reveal-name'].textContent,'');assert.equal(reload['draw-profile'].hidden,true);assert.ok(reload['fry-stack'].children.every(f=>!f.disabled&&!f.classes.has('is-picked')));
-  assert.equal(second.remaining.length,12);
+  assert.equal(second.remaining.length,14);
   const seen=new Set([saved.id,second.id]);
-  for(let i=0;i<12;i++){
+  for(let i=0;i<14;i++){
     reload['draw-replay'].emit('click');const f=reload['fry-stack'].children[i%5];f.emit('pointerdown',point);f.emit('pointermove',{...point,clientY:25});await flush();
     const record=JSON.parse(storage.get(key));assert.ok(!seen.has(record.id));seen.add(record.id);
   }
-  assert.equal(seen.size,14);assert.equal(randomCalls,14);assert.equal(JSON.parse(storage.get(key)).remaining.length,0);
+  assert.equal(seen.size,16);assert.equal(randomCalls,16);assert.equal(JSON.parse(storage.get(key)).remaining.length,0);
   const last=JSON.parse(storage.get(key)).id;
-  reload['draw-replay'].emit('click');const next=reload['fry-stack'].children[1];next.emit('pointerdown',point);next.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,last);assert.equal(JSON.parse(storage.get(key)).remaining.length,13);
+  reload['draw-replay'].emit('click');const next=reload['fry-stack'].children[1];next.emit('pointerdown',point);next.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,last);assert.equal(JSON.parse(storage.get(key)).remaining.length,15);
   storage.set(key,JSON.stringify({date:today,id:7}));const old=run();assert.equal(old['fry-reveal-name'].textContent,'');assert.equal(old['draw-profile'].hidden,true);
-  old['draw-replay'].emit('click');const legacyFry=old['fry-stack'].children[0];legacyFry.emit('pointerdown',point);legacyFry.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,7);assert.equal(JSON.parse(storage.get(key)).remaining.length,12);
+  old['draw-replay'].emit('click');const legacyFry=old['fry-stack'].children[0];legacyFry.emit('pointerdown',point);legacyFry.emit('pointermove',{...point,clientY:25});await flush();assert.notEqual(JSON.parse(storage.get(key)).id,7);assert.equal(JSON.parse(storage.get(key)).remaining.length,14);
   old.pageEvent('pagehide');old.pageEvent('pageshow',{persisted:true});assert.equal(old['draw-profile'].hidden,true);assert.equal(old['fry-reveal-name'].textContent,'');assert.equal(old['draw-placeholder'].hidden,false);assert.equal(old['draw-replay'].hidden,true);assert.ok(old['fry-stack'].children.every(f=>!f.disabled&&!f.classes.has('is-picked')));
   // Leaving during extraction must not let a queued animation restore the old result.
   legacyFry.emit('pointerdown',point);legacyFry.emit('pointermove',{...point,clientY:25});old.pageEvent('pagehide');old.pageEvent('pageshow',{persisted:true});await flush();assert.equal(old['draw-profile'].hidden,true);assert.equal(old['fry-reveal'].hidden,true);

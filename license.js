@@ -4,7 +4,7 @@
   const COUNTER = 'gamttiz-license-local-sequence';
   const wallet = new URLSearchParams(location.search).get('wallet') === '1';
   if(wallet) document.body.classList.add('license-wallet-view','license-wallet-inactive');
-  const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠'];
+  const names = ['감띠','뚱감띠','케이준띠','탄감띠','덜감띠','케찹 감띠','빙빙이','휜감띠','감감이와 띠띠','울룩불룩띠','웨지감띠','부스러끼','두리감띠','촉촉감띠','버터갈릭감띠','매콤감띠'];
   const $ = id => document.getElementById(id);
   const form = $('license-form'), input = $('license-name'), friends = $('license-friends');
   const oathChecks = Array.from({length:5},(_,i)=>$('license-oath-'+(i+1)));

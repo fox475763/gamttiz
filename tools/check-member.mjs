@@ -10,7 +10,8 @@ const sample={version:1,name:'감띠 팬',character:3,number:'GTZ - 0008',issued
 test('existing license and legacy IDs, invalid licenses denied',()=>{
   assert.deepEqual(M.license(sample),sample);
   assert.ok(M.license({...sample,number:'GTZ-ABC234-XYZ567'}));
-  for(const bad of [null,{}, {...sample,character:14},{...sample,number:'GTZ - 0000'},{...sample,issuedAt:'invalid'},{...sample,name:''}])assert.equal(M.license(bad),null);
+  assert.equal(M.license({...sample,character:14}).character,14);assert.equal(M.license({...sample,character:15}).character,15);
+  for(const bad of [null,{}, {...sample,character:16},{...sample,number:'GTZ - 0000'},{...sample,issuedAt:'invalid'},{...sample,name:''}])assert.equal(M.license(bad),null);
   assert.deepEqual(M.readLicense({getItem:()=>JSON.stringify(sample)}),sample);
   assert.equal(M.readLicense({getItem:()=>'{broken'}),null);
 });
