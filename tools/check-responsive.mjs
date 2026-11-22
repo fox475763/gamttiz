@@ -100,6 +100,52 @@ for(const engine of [chromium,webkit])test('Fry Rader search-anchored glass over
  }finally{await browser.close();}
 });
 
+// The large menu shell is intentionally invisible; each item has its own glass.
+for(const engine of [chromium,webkit])test('Independent liquid glass menu droplets, stagger and isolated hover/touch: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+  for(const [viewport,mobile] of [[{width:390,height:844},true],[{width:1100,height:800},false]]){
+   const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'no-preference'});
+   await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+   const page=await context.newPage();
+   await page.goto(base+'index.html',{waitUntil:'load'});
+   const trigger=page.locator('.control-trigger'),menu=page.locator('.control-menu'),items=menu.locator('.control-menu-links > :is(a,button)');
+   await trigger.click();
+   await page.waitForFunction(()=>Array.from(document.querySelectorAll('.control-menu-links > :is(a,button)')).every(el=>Number(getComputedStyle(el).opacity)>.995&&Math.abs(parseFloat(getComputedStyle(el).scale)-1)<.001));
+   await page.waitForTimeout(180);
+   const material=await menu.evaluate(el=>{
+     const list=[...el.querySelectorAll('.control-menu-links > :is(a,button)')],root=getComputedStyle(el),row=getComputedStyle(list[1]),edge=getComputedStyle(list[1],'::before'),box=list[1].getBoundingClientRect();
+     return {shell:root.backgroundImage,shadow:root.boxShadow,border:root.borderTopWidth,blur:root.backdropFilter,edge:getComputedStyle(el,'::before').display,
+        row:row.backdropFilter,gradient:row.backgroundImage,rim:edge.backgroundImage,
+        width:box.width,height:box.height,first:getComputedStyle(list[0]).transitionDelay,last:getComputedStyle(list.at(-1)).transitionDelay,
+        selected:getComputedStyle(list[0]).color,selectedBackground:getComputedStyle(list[0]).backgroundColor};
+   });
+   assert.equal(material.shell,'none');assert.equal(material.shadow,'none');assert.equal(material.border,'0px');assert.equal(material.blur,'none');assert.equal(material.edge,'none');
+   assert.ok(material.row.includes('blur(5px)')&&material.gradient.includes('linear-gradient')&&material.rim.includes('conic-gradient'),JSON.stringify(material));
+   assert.ok(material.width<255&&material.height>=37&&material.height<=44,JSON.stringify(material));
+   assert.notEqual(material.first,material.last);assert.equal(material.selected,'rgb(233, 54, 54)');
+   const target=items.nth(2),neighbor=items.nth(3),a=await target.boundingBox(),b=await neighbor.boundingBox();
+   if(mobile)await target.dispatchEvent('pointerdown',{pointerType:'touch',bubbles:true});
+   else await target.hover();
+   await page.waitForTimeout(300);
+   const enlarged=await target.boundingBox(),still=await neighbor.boundingBox();
+   assert.ok(enlarged.width>a.width*1.03&&enlarged.height>a.height*1.04,JSON.stringify({a,enlarged}));
+   assert.ok(Math.abs(still.width-b.width)<1&&Math.abs(still.y-b.y)<1,JSON.stringify({b,still}));
+   if(mobile)await target.dispatchEvent('pointercancel',{pointerType:'touch',bubbles:true});
+   else await page.mouse.move(0,0);
+   await page.waitForTimeout(450);
+   const normal=await target.boundingBox();assert.ok(Math.abs(normal.width-a.width)<1.5);
+   const scroll=menu.locator('.control-panel-scroll');await scroll.evaluate(el=>{el.scrollTop=el.scrollHeight});
+   assert.ok(await scroll.evaluate(el=>el.scrollHeight-el.clientHeight-el.scrollTop<=3));
+   const bounds=await menu.boundingBox(),btn=await trigger.boundingBox();
+   assert.ok(bounds.x>=-1&&bounds.y>=-2&&bounds.x+bounds.width<=viewport.width+1&&bounds.y+bounds.height<=btn.y+3);
+   await trigger.click();
+   await page.waitForFunction(()=>document.querySelector('.control-menu').getAttribute('aria-hidden')==='true'&&getComputedStyle(document.querySelector('.control-menu')).visibility==='hidden');
+   await context.close();
+  }
+ }finally{await browser.close();}
+});
+
 // Home entry should reset the real stage, not only the outer document.
 for(const engine of [chromium,webkit])test('Home always opens on the first scene with mobile breathing room: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
@@ -398,7 +444,7 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
      const iconLayout=await shell.locator('.control-menu-links > :is(a,button)').evaluateAll(items=>items.map(item=>{
        const icons=item.querySelectorAll('svg.control-menu-icon'),label=item.querySelector('.control-menu-text');
        const box=icons[0]?.getBoundingClientRect(),text=label?.getBoundingClientRect();
-       return icons.length===1&&icons[0].getAttribute('aria-hidden')==='true'&&box.width===18&&box.right<=text.left;
+       return icons.length===1&&icons[0].getAttribute('aria-hidden')==='true'&&Math.abs(box.width-16)<.6&&box.right<=text.left;
      }));
      assert.ok(iconLayout.length>=11&&iconLayout.every(Boolean),filename+' menu icon layout');
      const bounds=await shell.boundingBox(),t=await trigger.boundingBox();

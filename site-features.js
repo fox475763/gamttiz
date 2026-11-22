@@ -45,7 +45,7 @@
   const searchResults=make('div','control-search-results'); searchResults.setAttribute('aria-live','polite');
   search.append(searchInput,searchResults);
   const menu=make('nav','control-menu'); menu.id='control-menu'; menu.setAttribute('aria-label','컨트롤 메뉴'); menu.setAttribute('aria-hidden','true'); menu.inert=true;
-  // The glass shell never scrolls; only this inner surface does.
+  // The invisible navigation shell is just a scrollable layout; the links are the glass.
   const menuScroll=make('div','control-panel-scroll');
   menuScroll.append(make('span','control-panel-label','GAMTTIZ / MENU'));
   menu.append(menuScroll);
@@ -83,6 +83,11 @@
   const menuContact=make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
   const menuSearch=make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
   menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menuScroll.append(menuLinks);
+  // A bottom-up stagger gives each droplet its own spring trajectory from Menu.
+  [...menuLinks.children].forEach((item,index,items)=>{
+    item.style.setProperty('--menu-index',index);
+    item.style.setProperty('--menu-reverse',items.length-1-index);
+  });
   function syncCurrentMenuLink(){
     const current=new URL(location.href),normalized=url=>url.pathname.replace(/\/$/,'/index.html');
     const links=[...menuLinks.querySelectorAll('a')];
@@ -108,13 +113,15 @@
   contactLinks.append(dm,mail,mailApp,copy);contactScroll.append(contactLinks,copyStatus);
   dock.append(search,menu,contact,trigger);document.body.append(dock);
   // Restart one complete light sweep for every touch or mouse press.
+  const glassPressTimers=new WeakMap();
   dock.addEventListener('pointerdown',event=>{
     const target=event.target.closest('button,a');
     if(!target || !dock.contains(target))return;
+    clearTimeout(glassPressTimers.get(target));
     target.classList.remove('glass-pressed');
     void target.offsetWidth;
     target.classList.add('glass-pressed');
-    window.setTimeout(()=>target.classList.remove('glass-pressed'),900);
+    glassPressTimers.set(target,window.setTimeout(()=>target.classList.remove('glass-pressed'),900));
   });
 
   const normalize=value=>String(value||'').toLocaleLowerCase('ko').replace(/\s+/g,'');
@@ -166,7 +173,11 @@
   let menuSwipeX=null;
   menu.addEventListener('pointerdown',event=>{menuSwipeX=event.clientX;});
   menu.addEventListener('pointerup',event=>{if(menuSwipeX!==null && event.clientX-menuSwipeX < -45)setMode('search');menuSwipeX=null;});
-  menu.addEventListener('pointercancel',()=>{menuSwipeX=null;});
+  menu.addEventListener('pointercancel',event=>{
+    menuSwipeX=null;
+    const target=event.target.closest('.control-menu-links > :is(a,button)');
+    if(target){clearTimeout(glassPressTimers.get(target));target.classList.remove('glass-pressed');}
+  });
   scrim.addEventListener('click',()=>setMode('closed'));
   searchInput.addEventListener('input',renderResults);
   document.addEventListener('pointerdown',event=>{if(dock.dataset.mode!=='closed'&&!dock.contains(event.target))setMode('closed');});
