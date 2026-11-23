@@ -647,3 +647,32 @@ for(const engine of [chromium,webkit])test('Responsive menu, page widths and mem
 
 test.after(()=>new Promise(resolve=>server.close(resolve)));
 
+
+for(const engine of [chromium,webkit])test('Home portrait hero has natural proportions and text-only notices: '+engine.name(),{timeout:60000},async()=>{
+ const browser=await engine.launch();
+ try{
+  for(const viewport of [{width:320,height:568},{width:375,height:667},{width:390,height:844},{width:430,height:932}]){
+   const context=await browser.newContext({viewport,isMobile:true,hasTouch:true,serviceWorkers:'block',reducedMotion:'reduce'});
+   await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+   await context.route('**/news/posts.json',route=>route.fulfill({json:[{id:'qa-notice',date:'2026-11-23',title:'감띠즈 공지 테스트',excerpt:'공식 공지의 본문을 확인해 보세요.',images:['assets/news/qa.png']}]}));
+   const page=await context.newPage();
+   await page.goto(base+'index.html',{waitUntil:'load'});
+   await page.waitForFunction(()=>document.body.dataset.homeScene==='0'&&!document.documentElement.classList.contains('gtz-home-boot'));
+   const layout=await page.evaluate(()=>{
+    const r=s=>document.querySelector(s).getBoundingClientRect();
+    const view=r('.home-scroll-viewport'),hero=r('.hero'),title=r('.brand-letters'),desc=r('.hero-description'),art=r('.poster-viewport'),cta=r('.poster-link');
+    return {width:innerWidth,height:innerHeight,viewTop:view.top,viewBottom:view.bottom,heroTop:hero.top,heroBottom:hero.bottom,titleRight:title.right,artRight:art.right,artWidth:art.width,artHeight:art.height,descBottom:desc.bottom,artTop:art.top,artBottom:art.bottom,ctaTop:cta.top,ctaBottom:cta.bottom};
+   });
+   assert.ok(layout.artHeight<=layout.artWidth*1.12,JSON.stringify(layout));
+   assert.ok(layout.descBottom+8<=layout.artTop&&layout.artBottom+5<=layout.ctaTop,JSON.stringify(layout));
+   assert.ok(layout.titleRight<=layout.width+1&&layout.artRight<=layout.width+1,JSON.stringify(layout));
+   assert.ok(layout.heroTop>=layout.viewTop-2&&layout.ctaBottom<=layout.viewBottom+2,JSON.stringify(layout));
+   await page.goto(base+'index.html#home-notice',{waitUntil:'load'});
+   await page.waitForFunction(()=>document.querySelector('#home-notice .home-news-feed-card'));
+   assert.equal(await page.locator('#home-notice .home-news-feed-card').count(),1);
+   assert.equal(await page.locator('#home-notice .home-news-feed-card img,#home-notice .home-news-feed-media').count(),0);
+   assert.match(await page.locator('#home-notice .home-news-feed-card').getAttribute('href'),/news\.html\?id=qa-notice$/);
+   await context.close();
+  }
+ }finally{await browser.close();}
+});

@@ -28,19 +28,13 @@ if (homeNews) {
     for (const post of latest) {
       const card = create('a', 'home-news-feed-card');
       card.href = `news.html?id=${encodeURIComponent(post.id)}`;
-      const imagePath = Array.isArray(post.images) ? post.images[0] : '';
-      const imageWrap = create('div', 'home-news-feed-media');
-      if (typeof imagePath === 'string' && (/^assets\/news\/[a-zA-Z0-9._-]+\.(png|jpe?g|webp|gif)$/i.test(imagePath) || issueMedia(imagePath))) {
-        const image = create('img'); image.alt = `${post.title} 사진`; image.loading = 'lazy'; image.decoding = 'async';
-        image.addEventListener('error',()=>imageWrap.replaceChildren(create('span','','GAMTTIZ')),{once:true});
-        image.src = imagePath;
-        imageWrap.append(image);
-      } else imageWrap.append(create('span', '', 'GAMTTIZ'));
       const info = create('div', 'home-news-feed-copy');
       const date = new Date(post.date);
       const dateText = Number.isNaN(date.valueOf()) ? '공지' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
-      info.append(create('small', '', dateText), create('h3', '', post.title), create('p', '', post.excerpt || post.body?.slice(0, 120) || ''), create('b', '', '자세히 보기 ↗'));
-      card.append(info, imageWrap); list.append(card);
+      info.append(create('small', '', dateText), create('h3', '', post.title), create('p', '', post.excerpt || post.body?.slice(0, 120) || ''));
+      const arrow = create('b', 'home-news-feed-arrow', '↗');
+      arrow.setAttribute('aria-hidden', 'true');
+      card.append(info, arrow); list.append(card);
     }
   }).catch(showEmpty);
 }

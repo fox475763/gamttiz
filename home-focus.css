@@ -205,9 +205,9 @@ body.home-cinema.home-fullpage #main>.hero .hero-poster{max-width:none;min-width
 body.home-cinema #main .numbered-story-title .story-step{font-size:.88em;margin-top:.02em;font-weight:850;line-height:1.16}
 body.home-cinema #main .numbered-story-title{gap:clamp(12px,2vw,26px)}
 body.home-cinema #main #experiences .experience-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,1.6vw,24px);border:0;max-width:none}
-body.home-cinema #main #experiences .experience-links>a{--game-bg:#fff3f1;--game-accent:#a52027;--game-icon:#f9dad6;--game-border:#e8c2bf;display:grid;grid-template-columns:minmax(0,1fr) 26px;grid-template-rows:auto auto auto;align-items:start;align-content:center;gap:12px 8px;min-height:180px;padding:clamp(18px,2vw,30px);border:1px solid var(--game-border)!important;border-radius:20px;background:var(--game-bg);transition:background .2s,transform .25s cubic-bezier(.2,.8,.2,1)}
-body.home-cinema #main #experiences .experience-links>a[href="combo.html"]{--game-bg:#fff7df;--game-accent:#805400;--game-icon:#ffe4a0;--game-border:#edd79f}
-body.home-cinema #main #experiences .experience-links>a[href="draw.html"]{--game-bg:#eef4ff;--game-accent:#355a91;--game-icon:#dce8fd;--game-border:#c8d8f2}
+body.home-cinema #main #experiences .experience-links>a{--game-bg:#fff8f5;--game-accent:#a52027;--game-icon:#fce5df;--game-border:#ead8ce;display:grid;grid-template-columns:minmax(0,1fr) 26px;grid-template-rows:auto auto auto;align-items:start;align-content:center;gap:12px 8px;min-height:180px;padding:clamp(18px,2vw,30px);border:1px solid var(--game-border)!important;border-radius:20px;background:var(--game-bg);transition:background .2s,transform .25s cubic-bezier(.2,.8,.2,1)}
+body.home-cinema #main #experiences .experience-links>a[href="combo.html"]{--game-bg:#fff9e8;--game-accent:#805400;--game-icon:#ffe4a0;--game-border:#ead8ce}
+body.home-cinema #main #experiences .experience-links>a[href="draw.html"]{--game-bg:#fffdf7;--game-accent:#88412c;--game-icon:#f3e7d8;--game-border:#ead8ce}
 body.home-cinema #main #experiences .experience-links>a .home-game-icon{grid-column:1;grid-row:1;width:58px;height:58px;padding:8px;border-radius:16px;background:var(--game-icon);color:var(--game-accent);box-sizing:border-box;align-self:center}
 body.home-cinema #main #experiences .experience-links>a>strong{grid-column:1/-1;grid-row:2;font-size:clamp(19px,1.7vw,27px);line-height:1.25}
 body.home-cinema #main #experiences .experience-links>a>small{grid-column:1/-1;grid-row:3;font-size:15px;color:#51453d}
@@ -247,10 +247,6 @@ body.home-cinema #main #home-notice .home-news-feed-media{grid-column:2;grid-row
  body.home-cinema #main #home-notice .home-news-feed-card{grid-template-columns:minmax(0,1fr) clamp(88px,29vw,120px);gap:12px}
 }
 @media(max-width:700px) and (min-height:681px){
- body.home-cinema.home-fullpage.home-native-touch #main>.hero{height:calc(var(--scene-h,100svh) - 12px);grid-template-rows:auto minmax(0,1fr);align-content:stretch}
- body.home-cinema.home-fullpage #main>.hero .hero-poster{height:100%;min-height:0;display:flex;flex-direction:column;align-self:stretch}
- body.home-cinema.home-fullpage #main>.hero .hero-poster .poster-viewport{flex:1 1 0;height:auto;min-height:0}
- body.home-cinema.home-fullpage #main>.hero .poster-link{flex:none}
  body.home-cinema.home-fullpage #main .story-row .story-image img{max-height:min(43vh,340px)}
  body.home-cinema.home-fullpage #main>.holder .holder-image img{height:min(39vh,330px)}
  body.home-cinema #main .home-license-card{width:min(39vw,190px,calc(35vh * .6286))}
@@ -282,4 +278,59 @@ body.home-native-touch .home-ambient:not(.stage-paused) .stage-color-layer.is-pa
  body.home-native-touch .stage-color-layer,body.home-native-touch .stage-color-layer.is-outgoing{transition:none}
  body.home-native-touch .stage-color-layer::after{animation:none}
  body.home-cinema #main #experiences .experience-links>a{transition:none}
+}
+
+/* Portrait hero: natural-sized artwork rather than a viewport-filling grid row.
+   The native scene engine centers the measured composition in each snap slot. */
+@media(min-width:701px){
+ body.home-cinema.home-fullpage #main>.hero .hero-copy{padding-inline-start:clamp(16px,2.8vw,52px)}
+}
+@media(max-width:700px){
+ body.home-cinema.home-fullpage #main>.hero{
+  height:auto;min-height:0;grid-template-rows:auto auto;align-content:center;align-items:start;
+  padding-inline:clamp(19px,5.5vw,34px);padding-block:24px;gap:clamp(18px,3vh,28px)
+ }
+ body.home-cinema.home-fullpage #main>.hero .hero-copy{
+  padding:0;min-width:0;min-height:0;width:100%;justify-content:flex-start;align-items:flex-start;text-align:left
+ }
+ body.home-cinema.home-fullpage #main>.hero #hero-title{
+  width:100%;margin:0 0 14px;min-height:0;font-size:clamp(34px,12.6vw,58px);
+  line-height:1.08;align-items:flex-start;text-align:left
+ }
+ body.home-cinema.home-fullpage #main>.hero #hero-title .brand-letters{justify-content:flex-start;gap:.065em}
+ body.home-cinema.home-fullpage #main>.hero #hero-title .brand-subtitle{
+  font-size:clamp(15px,4vw,19px);margin-top:9px;line-height:1.35;align-self:flex-start
+ }
+ body.home-cinema.home-fullpage #main>.hero .hero-description{margin:0;font-size:clamp(14px,3.9vw,16px);line-height:1.65;max-width:none}
+ body.home-cinema.home-fullpage #main>.hero .hero-poster{width:100%;height:auto;max-width:none;min-height:0;display:flex;flex:none;align-self:start;gap:12px}
+ body.home-cinema.home-fullpage #main>.hero .hero-poster .poster-viewport{
+  width:100%;height:clamp(175px,min(calc(var(--scene-h,100svh)*.48),88vw),385px);
+  flex:none;min-height:0;border-radius:18px
+ }
+ body.home-cinema.home-fullpage #main>.hero .poster-viewport img{inset:6%;width:88%;height:88%;max-width:88%;object-fit:contain}
+ body.home-cinema.home-fullpage #main>.hero .poster-link{flex:none;min-height:44px;align-self:center;padding-inline:20px}
+}
+@media(max-width:700px) and (max-height:680px){
+ body.home-cinema.home-fullpage #main>.hero{padding-block:14px;gap:14px}
+ body.home-cinema.home-fullpage #main>.hero #hero-title{font-size:clamp(32px,11vw,44px);margin-bottom:8px}
+ body.home-cinema.home-fullpage #main>.hero #hero-title .brand-subtitle{font-size:15px;margin-top:5px}
+ body.home-cinema.home-fullpage #main>.hero .hero-description{font-size:14px;line-height:1.55}
+ body.home-cinema.home-fullpage #main>.hero .hero-poster{gap:9px}
+ body.home-cinema.home-fullpage #main>.hero .hero-poster .poster-viewport{height:clamp(145px,min(calc(var(--scene-h,100svh)*.42),83vw),255px)}
+}
+/* The Home notice feed is text-only; original photos remain on news.html. */
+body.home-cinema #main #home-notice .home-news-feed-list{display:grid;grid-template-columns:1fr;gap:0;margin-top:12px}
+body.home-cinema #main #home-notice .home-news-feed-card{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;
+ padding:clamp(18px,2.6vh,32px) 0;border:0;border-bottom:1px solid #ded7ce;
+ background:transparent;border-radius:0;text-align:left;overflow:visible
+}
+body.home-cinema #main #home-notice .home-news-feed-copy{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:5px;align-items:flex-start;text-align:left}
+body.home-cinema #main #home-notice .home-news-feed-copy h3{font-size:clamp(19px,2vw,28px);margin:0}
+body.home-cinema #main #home-notice .home-news-feed-copy p{margin:0;max-width:72ch}
+body.home-cinema #main #home-notice .home-news-feed-card>.home-news-feed-arrow{grid-column:2;grid-row:1;color:#a52027;font-size:clamp(19px,2vw,24px);padding:4px 6px}
+@media(max-width:700px){
+ body.home-cinema #main #home-notice .home-news-feed-card{padding:16px 0;gap:10px}
+ body.home-cinema #main #home-notice .home-news-feed-copy h3{font-size:19px}
+ body.home-cinema #main #home-notice .home-news-feed-copy p{font-size:14px}
 }
