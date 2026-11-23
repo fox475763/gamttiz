@@ -32,7 +32,7 @@
   if(footer&&social)social.append(footer);
   const scenes=[...main.children].filter(el=>el.matches('section'));
   if(!scenes.length)return;
-  const paletteFor=el=>['red','yellow','white'].includes(el.dataset.palette)?el.dataset.palette:el.matches('.hero,.experience-teaser,.home-contact')||el.querySelector('.story-row.reverse')?'red':el.matches('.home-package,.home-news,.home-news-feed,.social')||el.querySelector('.story-row:not(.reverse)')?'yellow':'white';
+  const paletteFor=el=>['red','yellow','white','studio'].includes(el.dataset.palette)?el.dataset.palette:el.matches('.hero,.home-contact')||(!isHome&&el.matches('.experience-teaser'))||el.querySelector('.story-row.reverse')?'red':el.querySelector('.story-row:not(.reverse)')?(isHome?'studio':'yellow'):el.matches('.home-package,.home-news,.home-news-feed,.social')||(isHome&&el.matches('.experience-teaser'))?'yellow':'white';
   const order=scenes.map(el=>{const palette=paletteFor(el);if(isHome)el.dataset.palette=palette;return {el,palette,fit:1};});
   const status=document.createElement('p');status.className='home-scene-status';status.setAttribute('role','status');status.setAttribute('aria-live','polite');viewport.append(status);
   viewport.setAttribute('aria-label',body.classList.contains('edition-page')?'콘텐츠, 휠 또는 스와이프와 위아래 방향키로 장면 이동':'홈 콘텐츠, 휠 또는 스와이프와 위아래 방향키로 장면 이동');
@@ -45,7 +45,7 @@
   if(touchNative){
     body.classList.add('home-native-touch');
     viewport.setAttribute('aria-label',body.classList.contains('edition-page')?'콘텐츠, 위아래 스와이프로 장면 이동':'홈 콘텐츠, 위아래 스와이프로 장면 이동');
-    const layers=['white','yellow','red'].map(palette=>{
+    const layers=(isHome?['white','studio','yellow','red']:['white','yellow','red']).map(palette=>{
       const layer=document.createElement('div');layer.className='stage-color-layer';layer.dataset.color=palette;host.append(layer);return layer;
     });
     const sceneCount=scenes.length;

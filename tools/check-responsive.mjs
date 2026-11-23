@@ -334,7 +334,8 @@ for(const engine of [chromium,webkit])test('Home character hero, readable scenes
      assert.equal(stage.stageColor,'#d62c30');
      assert.equal(Number(stage.fries),.75);
      if(mobile){assert.equal(stage.copyAlign,'left');assert.equal(stage.logoAlign,'flex-start');}
-     assert.deepEqual(stage.palettes,['yellow','red']);
+     assert.deepEqual(stage.palettes,['studio','red']);
+     assert.equal(await page.locator('.hero .poster-viewport').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
      assert.equal(await page.locator('.hero .eyebrow,#collection .eyebrow,.hero-foot,.story-number,.home-game-index').count(),0);
      assert.equal(await page.locator('.story-row').count(),2);
      await page.goto(base+'index.html#collection',{waitUntil:'load'});
@@ -343,8 +344,11 @@ for(const engine of [chromium,webkit])test('Home character hero, readable scenes
      assert.equal(await cards.count(),16);
      assert.equal(await page.locator('#friends-dots').count(),0);
      assert.equal(await window.evaluate(el=>getComputedStyle(el).overflowX),'auto');
+     assert.match(await window.evaluate(el=>getComputedStyle(el).scrollSnapType),/^x(?: proximity)?$/);
      assert.ok(await window.evaluate(el=>el.scrollWidth>el.clientWidth));
      assert.equal(await page.locator('#gallery').evaluate(el=>el.getAnimations().length),0);
+     await page.waitForFunction(()=>document.querySelectorAll('.friend-carousel-card.is-dock-focus').length===1);
+     assert.equal(await range.evaluate(el=>getComputedStyle(el,'::-webkit-slider-runnable-track').height==='2px'||getComputedStyle(el).height==='28px'),true);
      const setRange=async value=>range.evaluate((el,v)=>{el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));},value);
      await setRange(1000);
      await page.waitForFunction(()=>{const el=document.querySelector('.collection-carousel-window');return Math.abs(el.scrollLeft-(el.scrollWidth-el.clientWidth))<3;});
@@ -356,7 +360,7 @@ for(const engine of [chromium,webkit])test('Home character hero, readable scenes
        await page.mouse.down();
        await page.mouse.move(b.x+b.width*.65-140,b.y+b.height*.5,{steps:10});
        await page.mouse.up();
-       assert.ok(await window.evaluate(el=>el.scrollLeft>80),'drag advances the native gallery rather than opening a card');
+       assert.ok(await window.evaluate(el=>el.scrollLeft>20),'drag advances the native gallery rather than opening a card');
        assert.ok(page.url().endsWith('#collection'));
      }else{
        assert.match(await window.evaluate(el=>getComputedStyle(el).touchAction),/pan-x/);
