@@ -958,13 +958,15 @@ html.gtz-liquid-scrolling .control-menu-edge-canvas,body.home-native-moving .con
   }
 }
 
-/* iOS Home Screen Menu: keep the control in a stable WebKit layer, without
-   backdrop-canvas or a transformed fixed ancestor. The panel itself retains
-   the existing rounded glass droplet layout and interactions. */
+/* iOS Home Screen: preserve the persistent viewport dock while restoring
+   the SAME optical glass surface as regular Safari. No flat opaque coating,
+   no forced loss of backdrop blur. The CSS-only version remains the fallback
+   until liquid-glass.js mounts the canonical optical layer. */
 @media(max-width:900px){
   html.gtz-ios-standalone body > .control-dock{
     position:fixed!important;
     z-index:2147483000!important;
+    display:block!important;
     visibility:visible!important;
     opacity:1!important;
     -webkit-transform:none!important;
@@ -977,20 +979,34 @@ html.gtz-liquid-scrolling .control-menu-edge-canvas,body.home-native-moving .con
     display:grid!important;
     visibility:visible!important;
     opacity:1!important;
-    -webkit-transform:none;
-    transform:none;
-    -webkit-backdrop-filter:none!important;
-    backdrop-filter:none!important;
-    background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42))!important;
-    border:1px solid rgba(255,255,255,.92)!important;
-    box-shadow:0 6px 23px rgba(28,26,38,.20)!important;
+    pointer-events:auto!important;
+    border-radius:50%;
   }
-  html.gtz-ios-standalone body > .control-dock > .control-trigger[data-ink="light"]{
-    background:linear-gradient(145deg,rgba(36,21,26,.54),rgba(37,21,25,.30))!important;
-    border-color:rgba(255,255,255,.55)!important;
+  html.gtz-ios-standalone body > .control-dock > .control-trigger:not(.gtz-liquid-surface){
+    background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.025) 55%,rgba(255,255,255,.11))!important;
+    -webkit-backdrop-filter:blur(5px) saturate(1.2)!important;
+    backdrop-filter:blur(5px) saturate(1.2)!important;
+    border:1px solid rgba(255,255,255,.58)!important;
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.25),0 9px 28px rgba(20,12,17,.14)!important;
+  }
+  html.gtz-ios-standalone body > .control-dock > .control-trigger.gtz-liquid-surface{
+    background-color:var(--gtz-liquid-tint,rgba(20,12,18,.10))!important;
+    background-image:none!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  html.gtz-ios-standalone body > .control-dock > .control-trigger.gtz-liquid-surface > .gtz-liquid-optics{
+    display:block;
+    z-index:0;
+    -webkit-backdrop-filter:blur(1.25px) saturate(1.04);
+    backdrop-filter:blur(1.25px) saturate(1.04);
   }
   html.gtz-ios-standalone body > .control-dock > .control-trigger .control-trigger-label{
-    position:relative;z-index:5;display:block!important;opacity:1!important;visibility:visible!important;
+    position:relative;
+    z-index:5;
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
   }
 }
 
