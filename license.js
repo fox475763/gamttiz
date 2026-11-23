@@ -191,11 +191,20 @@
           drawTemplate(exportFront.getContext('2d'),frontImage);
           drawBack(exportBack.getContext('2d'),sprite,name,member,index,issuedAt);
         }
+        // Download one combined image: original full-resolution front on
+        // the left and back on the right, with a narrow white gutter.
+        const gap=36,joined=document.createElement('canvas');
+        joined.width=W*2+gap;joined.height=H;
+        const joinedCtx=joined.getContext('2d');
+        if(!joinedCtx)throw Error('PNG composition not supported');
+        joinedCtx.fillStyle='#fff';
+        joinedCtx.fillRect(0,0,joined.width,joined.height);
+        joinedCtx.drawImage(exportFront,0,0,W,H);
+        joinedCtx.drawImage(exportBack,W+gap,0,W,H);
         const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
-        const blobFor=canvas=>new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('PNG export failed')),'image/png'));
-        const blobs=await Promise.all([blobFor(exportFront),blobFor(exportBack)]);
+        const blob=await new Promise((resolve,reject)=>joined.toBlob(value=>value?resolve(value):reject(Error('Combined PNG export failed')),'image/png'));
         if(seq!==renderVersion||editing||!record)return;
-        exportFiles=blobs.map((blob,i)=>new File([blob],base+(i===0?'-front':'-back')+'.png',{type:'image/png'}));
+        exportFiles=[new File([blob],base+'-front-back.png',{type:'image/png'})];
         $('download-both').disabled=false;
       }catch{if(seq===renderVersion)status('카드 저장용 이미지를 준비하지 못했어요. 다시 접속해주세요.');}
     };
@@ -488,12 +497,11 @@
   function manualSave(files){
     if(!record||editing||files!==exportFiles)return;
     clearManual();
-    files.forEach((file,i)=>{
-      const side=i===0?'front':'back',url=URL.createObjectURL(file);
-      manualUrls.push(url);$('license-save-'+side).src=url;
-      const link=$('license-save-'+side+'-link');link.href=url;link.download=file.name;
-    });
-    $('license-save-help').textContent=mobile?'각 이미지를 길게 눌러 사진에 저장하세요.':'저장되지 않은 이미지를 선택하세요.';
+    const file=files[0],url=URL.createObjectURL(file);
+    manualUrls.push(url);
+    $('license-save-combined').src=url;
+    const link=$('license-save-combined-link');link.href=url;link.download=file.name;
+    $('license-save-help').textContent=mobile?'앞면과 뒷면이 한 장에 합쳐져 있어요. 이미지를 길게 눌러 사진에 저장하세요.':'앞면과 뒷면이 합쳐진 PNG 한 장을 저장하세요.';
     if(!saveDialog.open)saveDialog.showModal();
   }
   $('license-save-close').addEventListener('click',()=>saveDialog.close());
@@ -516,8 +524,7 @@
         const url=URL.createObjectURL(file),a=document.createElement('a');
         a.href=url;a.download=file.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
       }
-      // A browser may block multiple automatic downloads; each individual PNG
-      // remains available immediately in a simple recovery dialog.
+      // Keep a single-image preview as a recovery option if the download was blocked.
       manualSave(files);
     }catch{manualSave(files);}
   }
