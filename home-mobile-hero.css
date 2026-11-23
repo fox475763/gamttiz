@@ -200,27 +200,16 @@
     outline:2px solid #fff;
     outline-offset:3px;
   }
-  /* First scene only. Restore the large, soft orbital circles instead of
-     the recent field of tiny dots. The discs circle continuously at an even
-     pace, and remain behind the lettering and character artwork. */
-  body.home-cinema[data-home-scene="0"]{
-    --gtz-hero-orbs:
-      radial-gradient(circle at 22% 21%,rgba(255,210,115,.42) 0 12.5vmin,rgba(255,210,115,.15) 13vmin,transparent 14vmin),
-      radial-gradient(circle at 81% 32%,rgba(255,235,164,.28) 0 18vmin,transparent 19vmin),
-      radial-gradient(circle at 24% 83%,rgba(255,189,58,.32) 0 10vmin,transparent 11vmin),
-      radial-gradient(circle at 72% 76%,transparent 0 12.5vmin,rgba(255,235,159,.35) 12.8vmin 13.6vmin,transparent 14vmin);
-  }
+  /* Restore the authentic older compact orbit style (commit 0581d624).
+     Preserve the separate, original-height seamless fry-strip animation. */
   body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]{
     --stage-fries:.52;
-    --stage-dots:1;
+    --stage-dots:.58;
   }
   body.home-cinema[data-home-scene="0"] .stage-color-layer[data-color="red"]{
     --fries-opacity:.52;
-    --dots-opacity:1;
+    --dots-opacity:.58;
   }
-
-  /* Bring the fry sticks back to their original 100px strip height.
-     Move by exactly one repeated 96px tile to make the loop seamless. */
   body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::before{
     content:"";
     display:block;
@@ -239,29 +228,32 @@
     to{transform:translate3d(96px,0,0)}
   }
 
-  /* Same orbital animation for installed Safari and non-native rendering. */
+  /* Float the familiar dots along a closed, gently rotating orbit instead of
+     rocking to a stop at either end of a back-and-forth animation. */
   body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]::after{
-    background-color:transparent;
-    background-image:var(--gtz-hero-orbs);
-    opacity:1;
-    -webkit-mask:none;
-    mask:none;
-    animation:gtz-hero-orb-return 54s linear infinite;
-    animation-play-state:running;
-    will-change:transform;
+    animation:gtz-hero-dots-orbit 28s ease-in-out infinite;
   }
   body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::after{
-    inset:-25%;
-    background:var(--gtz-hero-orbs);
-    opacity:1;
+    background:
+      radial-gradient(circle at 14% 15%,#ffd16c 0 5px,transparent 6px),
+      radial-gradient(circle at 86% 13%,#ffd16c 0 8px,transparent 9px),
+      radial-gradient(circle at 75% 31%,#ffd16c 0 4px,transparent 5px),
+      radial-gradient(circle at 12% 42%,#ffd16c 0 9px,transparent 10px),
+      radial-gradient(circle at 89% 57%,#ffd16c 0 5px,transparent 6px),
+      radial-gradient(circle at 27% 72%,#ffd16c 0 6px,transparent 7px),
+      radial-gradient(circle at 72% 82%,#ffd16c 0 10px,transparent 11px),
+      radial-gradient(circle at 42% 90%,#ffd16c 0 4px,transparent 5px);
+    opacity:.58;
     transform-origin:50% 50%;
-    animation:gtz-hero-orb-return 54s linear infinite;
+    animation:gtz-hero-dots-orbit 28s ease-in-out infinite;
     animation-play-state:running;
     will-change:transform;
   }
-  @keyframes gtz-hero-orb-return{
-    from{transform:rotate(0deg)}
-    to{transform:rotate(360deg)}
+  @keyframes gtz-hero-dots-orbit{
+    0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+    25%{transform:translate3d(1.5%,-1.7%,0) rotate(2deg)}
+    50%{transform:translate3d(2.3%,-3.3%,0) rotate(3.5deg)}
+    75%{transform:translate3d(-1.3%,-1.5%,0) rotate(-1.5deg)}
   }
 }
 /* Shorter iPhone / installed Safari viewport: retain composition and CTA. */
