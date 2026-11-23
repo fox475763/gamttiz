@@ -334,3 +334,24 @@ body.home-cinema #main #home-notice .home-news-feed-card>.home-news-feed-arrow{g
  body.home-cinema #main #home-notice .home-news-feed-copy h3{font-size:19px}
  body.home-cinema #main #home-notice .home-news-feed-copy p{font-size:14px}
 }
+
+
+/* Play scene: brand red with legible white type and the original layout. */
+body.home-cinema #main #experiences[data-palette="red"]{
+  --ed-ink:#fff;--ed-muted:#fff4e8;--ed-red:#ffdc77;--ed-line:#ffffff70;
+  color:#fff;
+}
+body.home-cinema #main #experiences[data-palette="red"] .section-heading h2{color:#fff!important}
+body.home-cinema #main #experiences[data-palette="red"] .section-heading>p{color:#fff4e8!important}
+body.home-cinema #main #experiences[data-palette="red"] .experience-links,
+body.home-cinema #main #experiences[data-palette="red"] .experience-links>a+a{border-color:#ffffff75!important}
+body.home-cinema #main #experiences[data-palette="red"] .experience-links>a{
+  color:#fff!important;background:transparent;
+}
+body.home-cinema #main #experiences[data-palette="red"] .experience-links>a :is(strong,small,b,.home-game-index){color:#fff!important}
+body.home-cinema #main #experiences[data-palette="red"] .experience-links>a .home-game-icon{
+  background:rgba(255,255,255,.94);border-radius:12px;padding:4px;color:#e93636;
+}
+body.home-cinema #main #experiences[data-palette="red"] .experience-links>a:is(:hover,:focus-visible){
+  background:rgba(255,255,255,.08);
+}
