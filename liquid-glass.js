@@ -15,6 +15,11 @@
   },{threshold:.01}):null;
   const resize='ResizeObserver' in window?new ResizeObserver(()=>schedule()):null;
   function add(el){
+    // iOS Safari installed as a Home Screen app can drop WebKit's fixed
+    // backdrop/canvas layer after navigation. Keep Menu's CSS glass face native.
+    const standaloneIOS=(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches)&&
+      (/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1));
+    if(standaloneIOS&&el.classList.contains('control-trigger'))return;
     // The license page's touch-only Menu has a stable CSS glass face.
     // Do not allocate a filtered layer or sample the animated card behind it.
     if(el.classList.contains?.('control-trigger')&&document.body.classList.contains('license-page')&&matchMedia('(max-width:900px) and (pointer:coarse)').matches)return;
