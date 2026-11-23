@@ -1,0 +1,36 @@
+/* PRODUCTS: clean white chapters and a single yellow inquiry finale.
+   The scene backgrounds are controlled by data-palette in products.html. */
+body.products-edition #products-start .clean-product-hero-visual{
+  box-sizing:border-box;
+  width:100%;
+  min-height:0;
+  padding:clamp(12px,2vw,25px);
+  border:1px solid #ece7df;
+  border-radius:clamp(18px,2.5vw,30px);
+  background:#fff;
+  box-shadow:0 12px 35px rgba(31,25,21,.055);
+  overflow:hidden;
+}
+body.products-edition #products-start .clean-product-hero-visual>img{
+  display:block;
+  width:100%;
+  height:clamp(210px,51vh,490px);
+  max-height:none;
+  object-fit:contain;
+  object-position:center;
+  mix-blend-mode:normal;
+  background:#fff;
+}
+body.products-edition #product-inquiry .clean-contact-list a{
+  border-color:rgba(38,29,23,.33);
+}
+@media(max-width:700px){
+  body.products-edition #products-start .clean-product-hero-visual{
+    padding:10px;
+    border-radius:20px;
+  }
+  body.products-edition #products-start .clean-product-hero-visual>img{height:clamp(170px,36vh,320px)}
+}
+@media(max-height:680px){
+  body.products-edition #products-start .clean-product-hero-visual>img{height:clamp(145px,34vh,255px)}
+}
