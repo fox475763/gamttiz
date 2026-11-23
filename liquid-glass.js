@@ -15,6 +15,9 @@
   },{threshold:.01}):null;
   const resize='ResizeObserver' in window?new ResizeObserver(()=>schedule()):null;
   function add(el){
+    // The license page's touch-only Menu has a stable CSS glass face.
+    // Do not allocate a filtered layer or sample the animated card behind it.
+    if(el.classList.contains?.('control-trigger')&&document.body.classList.contains('license-page')&&matchMedia('(max-width:900px) and (pointer:coarse)').matches)return;
     if(el.closest('.gtz-liquid-optics'))return;
     let state=tracked.get(el);
     if(state&&state.layer.isConnected)return;

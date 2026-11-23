@@ -1,6 +1,6 @@
 (() => {
   const page = location.pathname.split('/').pop() || 'index.html';
-  if(page==='license.html'&&new URLSearchParams(location.search).get('wallet')==='1')return;
+  if(page==='license.html'&&window.parent!==window&&new URLSearchParams(location.search).get('wallet')==='1')return;
   const pages = [
     {title:'홈', description:'감띠즈를 처음부터 둘러보기', url:'index.html', keys:'home gamttiz 감띠즈'},
     {title:'감띠즈 도감', description:'16종의 감띠와 미공개 친구들의 도감', url:'collection.html', keys:'collection dex 도감 캐릭터 키링 감띠'},

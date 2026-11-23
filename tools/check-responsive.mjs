@@ -487,6 +487,32 @@ for(const engine of [chromium,webkit])test('Shake opens a mobile 3D license with
  }finally{await browser.close();}
 });
 
+// Keep MY ID navigation independent of the animated card on touch browsers.
+for(const engine of [chromium,webkit])test('Mobile MY ID Menu stays painted and clickable: '+engine.name(),{timeout:45000},async()=>{
+ const browser=await engine.launch();
+ try{
+  for(const issued of [false,true]){
+   const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,serviceWorkers:'block'});
+   if(issued)await context.addInitScript(license=>localStorage.setItem('gamttiz-my-license-v1',JSON.stringify(license)),license);
+   await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
+   const page=await context.newPage();await page.goto(base+'license.html'+(issued?'?wallet=1':''),{waitUntil:'load'});
+   if(issued)await page.waitForFunction(()=>document.body.classList.contains('has-license'));
+   const trigger=page.locator('.control-trigger');
+   const check=async()=>{
+    await trigger.waitFor({state:'visible'});
+    const s=await trigger.evaluate(el=>{const r=el.getBoundingClientRect(),c=getComputedStyle(el);return {visible:c.visibility,opacity:c.opacity,position:getComputedStyle(el.parentElement).position,hit:el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)),optics:!!el.querySelector('.gtz-liquid-optics'),fill:c.backgroundImage,blur:c.backdropFilter};});
+    assert.ok(s.visible==='visible'&&s.opacity==='1'&&s.position==='fixed'&&s.hit&&!s.optics&&s.fill.includes('linear-gradient')&&s.blur==='none',JSON.stringify(s));
+   };
+   await check();
+   await page.locator('#license-flip').tap();await page.waitForTimeout(160);await check();
+   await page.evaluate(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'smooth'}));await page.waitForTimeout(180);await check();
+   await trigger.tap();await page.waitForFunction(()=>document.querySelector('.control-dock').dataset.mode==='menu');
+   await trigger.tap();await page.waitForFunction(()=>document.querySelector('.control-dock').dataset.mode==='closed');
+   await context.close();
+  }
+ }finally{await browser.close();}
+});
+
 for(const engine of [chromium,webkit])test('Responsive menu, page widths and member paths: '+engine.name(),{timeout:180000},async()=>{
  const browser=await engine.launch();
  try{
