@@ -1,31 +1,39 @@
-/* GAMTTIZ | refined mobile-only opening scene.
-   Keep desktop, the existing hero carousel and all other sections untouched. */
-@media (max-width:700px){
+/* GAMTTIZ mobile editorial hero v2
+   The brand wordmark leads. The rotating, transparent character artwork
+   floats on the red scene rather than living inside a white poster card.
+   Desktop and every later section are intentionally unaffected. */
+@media(max-width:700px){
   body.home-cinema #main>.hero,
   body.home-cinema.home-fullpage #main>.hero{
     box-sizing:border-box;
+    display:grid;
     grid-template-columns:minmax(0,1fr);
     grid-template-rows:auto auto;
     justify-items:center;
     align-items:center;
     align-content:center;
-    gap:clamp(16px,2.5svh,25px);
-    padding-inline:clamp(20px,5.8vw,30px);
-    padding-block:clamp(15px,2.5svh,28px);
+    width:100%;
+    min-width:0;
+    min-height:0;
+    height:auto;
+    gap:clamp(13px,2.4svh,22px);
+    padding:clamp(12px,2.2svh,24px) clamp(20px,5.5vw,30px);
   }
   body.home-cinema #main>.hero .hero-copy,
   body.home-cinema.home-fullpage #main>.hero .hero-copy{
-    box-sizing:border-box;
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
+    justify-content:flex-start;
     width:100%;
     min-width:0;
-    padding:0;
+    min-height:0;
     margin:0;
+    padding:0;
     text-align:center;
+    background:transparent;
   }
+  /* One confident, nearly edge-to-edge brand headline. */
   body.home-cinema #main>.hero #hero-title,
   body.home-cinema.home-fullpage #main>.hero #hero-title{
     display:flex;
@@ -34,41 +42,48 @@
     justify-content:center;
     width:100%;
     min-height:0;
-    margin:0 0 clamp(11px,1.8svh,17px);
+    margin:0 0 clamp(13px,2.25svh,20px);
     padding:0;
-    font-size:clamp(34px,10.2vw,49px);
-    line-height:1.04;
-    letter-spacing:-.048em;
+    font-size:clamp(45px,14.8vw,68px);
+    font-weight:900;
+    line-height:1;
+    letter-spacing:-.06em;
     text-align:center;
   }
   body.home-cinema #main>.hero #hero-title .brand-letters,
   body.home-cinema.home-fullpage #main>.hero #hero-title .brand-letters{
     display:flex;
-    justify-content:center;
     align-items:baseline;
-    gap:.045em;
-    width:100%;
+    justify-content:center;
+    width:auto;
+    max-width:100%;
+    margin:0;
+    padding:0;
+    gap:0;
     white-space:nowrap;
+    letter-spacing:-.055em;
+    font-size:inherit;
   }
   body.home-cinema #main>.hero #hero-title .brand-subtitle,
   body.home-cinema.home-fullpage #main>.hero #hero-title .brand-subtitle{
     align-self:center;
-    margin:clamp(8px,1.2svh,11px) 0 0;
-    font-size:clamp(12px,3.2vw,15px);
-    line-height:1.2;
+    margin:clamp(11px,1.55svh,15px) 0 0;
+    color:#ffdc77!important;
+    font-size:clamp(12px,3.05vw,15px);
     font-weight:750;
-    letter-spacing:.13em;
+    line-height:1.2;
+    letter-spacing:.16em;
     text-align:center;
   }
   body.home-cinema #main>.hero .hero-description,
   body.home-cinema.home-fullpage #main>.hero .hero-description{
-    max-width:32ch;
+    width:100%;
+    max-width:34ch;
     margin:0 auto;
-    color:#fff!important;
-    font-size:clamp(13px,3.65vw,15px);
-    font-weight:450;
-    line-height:1.67;
-    letter-spacing:-.024em;
+    color:rgba(255,255,255,.95)!important;
+    font-size:clamp(13px,3.55vw,15px);
+    line-height:1.65;
+    letter-spacing:-.028em;
     text-align:center;
     text-wrap:pretty;
   }
@@ -80,7 +95,7 @@
     justify-content:flex-start;
     justify-self:center;
     align-self:center;
-    gap:clamp(12px,2svh,17px);
+    flex:none;
     width:100%;
     max-width:410px;
     min-width:0;
@@ -88,116 +103,146 @@
     height:auto;
     margin:0 auto;
     padding:0;
-    background:none;
+    gap:clamp(8px,1.6svh,16px);
     border:0;
     border-radius:0;
+    background:transparent;
     box-shadow:none;
   }
+  /* Free-standing character art: no white square, card outline, or inset frame. */
   body.home-cinema #main>.hero .hero-poster .poster-viewport,
   body.home-cinema.home-fullpage #main>.hero .hero-poster .poster-viewport{
-    box-sizing:border-box;
+    position:relative;
     display:block;
     flex:none;
+    box-sizing:border-box;
+    isolation:isolate;
+    overflow:hidden;
     width:100%;
-    height:clamp(212px,min(39svh,86vw),346px);
+    height:clamp(220px,min(41svh,84vw),338px);
     min-height:0;
     margin:0;
-    overflow:hidden;
-    border:1px solid rgba(255,255,255,.7);
-    border-radius:clamp(18px,5vw,24px);
-    background:#fff;
-    box-shadow:0 8px 26px rgba(89,16,20,.11);
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  body.home-cinema #main>.hero .poster-viewport::before,
+  body.home-cinema.home-fullpage #main>.hero .poster-viewport::before{
+    content:"";
+    position:absolute;
+    z-index:0;
+    inset:8% 8% 1%;
+    border:0;
+    border-radius:50%;
+    opacity:1;
+    pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%,rgba(255,210,115,.12) 0%,rgba(255,210,115,.06) 33%,transparent 71%);
   }
   body.home-cinema #main>.hero .poster-viewport img,
   body.home-cinema.home-fullpage #main>.hero .poster-viewport img{
     position:absolute;
-    inset:5%;
-    width:90%;
-    max-width:90%;
-    height:90%;
-    max-height:90%;
+    z-index:1;
+    inset:2% 4%;
+    display:block;
+    width:92%;
+    max-width:92%;
+    height:96%;
+    max-height:96%;
     margin:0;
+    padding:0;
     object-fit:contain;
     object-position:center;
+    background:transparent!important;
+    mix-blend-mode:normal;
+    border:0;
+    filter:drop-shadow(0 9px 9px rgba(105,17,20,.12));
   }
+  /* The sole CTA is a strong yellow action, not another white card. */
   body.home-cinema #main>.hero .poster-link,
   body.home-cinema.home-fullpage #main>.hero .poster-link{
     box-sizing:border-box;
     display:inline-flex;
     flex:none;
-    justify-content:center;
     align-items:center;
+    justify-content:center;
     align-self:center;
-    gap:clamp(18px,6vw,30px);
-    width:auto;
-    min-width:200px;
-    max-width:calc(100% - 85px);
-    min-height:46px;
+    width:min(100%,290px);
+    min-width:0;
+    max-width:100%;
+    min-height:48px;
     margin:0;
-    padding:11px 20px;
-    border:1px solid #fff;
+    padding:11px 19px;
+    gap:clamp(14px,4vw,25px);
+    border:1px solid rgba(255,190,30,.85);
     border-radius:999px;
-    background:#fff;
-    box-shadow:0 5px 16px rgba(67,12,18,.12);
-    color:#bf232b;
+    background:#ffbf2d;
+    box-shadow:0 6px 18px rgba(99,19,16,.12);
+    color:#502319!important;
     font-size:14px;
-    font-weight:780;
-    line-height:1.3;
+    font-weight:800;
+    line-height:1.25;
     letter-spacing:-.025em;
-    text-shadow:none;
     text-decoration:none;
+    text-shadow:none;
     -webkit-tap-highlight-color:transparent;
   }
   body.home-cinema #main>.hero .poster-link:is(:hover,:active,:focus-visible){
-    background:#fff6ef;
-    color:#a81e25;
+    background:#ffda70;
+    color:#502319!important;
   }
-  body.home-cinema #main>.hero .poster-link span{font-size:17px;line-height:1}
-  /* The first red stage should frame the artwork, not compete with it.
-     Other red scenes retain their existing ambient animation. */
+  body.home-cinema #main>.hero .poster-link span{
+    font-size:17px;
+    line-height:1;
+  }
+  body.home-cinema #main>.hero .poster-link:focus-visible{
+    outline:2px solid #fff;
+    outline-offset:3px;
+  }
+  /* Downplay motif texture on the hero ONLY. Other red scenes are unchanged. */
   body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]{
-    --stage-fries:.14;
-    --stage-dots:.09;
+    --stage-fries:.09;
+    --stage-dots:.06;
   }
   body.home-cinema[data-home-scene="0"] .stage-color-layer[data-color="red"]{
-    --fries-opacity:.14;
-    --dots-opacity:.09;
+    --fries-opacity:.09;
+    --dots-opacity:.06;
   }
 }
-/* Short Safari/PWA viewports: preserve natural size before the scene-fit fallback. */
-@media (max-width:700px) and (max-height:700px){
+/* Shorter iPhone / installed Safari viewport: retain composition and CTA. */
+@media(max-width:700px) and (max-height:700px){
   body.home-cinema.home-fullpage #main>.hero{
-    gap:clamp(10px,1.75svh,16px);
-    padding-block:10px;
+    gap:clamp(9px,1.5svh,14px);
+    padding-block:9px;
   }
   body.home-cinema.home-fullpage #main>.hero #hero-title{
-    font-size:clamp(31px,9.8vw,43px);
-    margin-bottom:8px;
+    font-size:clamp(40px,13.5vw,57px);
+    margin-bottom:9px;
   }
   body.home-cinema.home-fullpage #main>.hero #hero-title .brand-subtitle{
     font-size:12px;
-    margin-top:6px;
+    margin-top:8px;
   }
   body.home-cinema.home-fullpage #main>.hero .hero-description{
     font-size:13px;
-    line-height:1.52;
+    line-height:1.48;
   }
-  body.home-cinema.home-fullpage #main>.hero .hero-poster{
-    gap:10px;
-  }
+  body.home-cinema.home-fullpage #main>.hero .hero-poster{gap:9px}
   body.home-cinema.home-fullpage #main>.hero .hero-poster .poster-viewport{
-    height:clamp(166px,min(33svh,77vw),255px);
+    height:clamp(165px,min(35svh,78vw),245px);
   }
   body.home-cinema.home-fullpage #main>.hero .poster-link{
     min-height:44px;
     padding:9px 16px;
   }
 }
-@media (max-width:700px) and (max-height:540px){
+@media(max-width:700px) and (max-height:540px){
   body.home-cinema.home-fullpage #main>.hero #hero-title{
-    font-size:clamp(29px,8vw,36px);
+    font-size:clamp(37px,12.5vw,49px);
+    margin-bottom:7px;
   }
   body.home-cinema.home-fullpage #main>.hero .hero-poster .poster-viewport{
-    height:clamp(130px,29svh,180px);
+    height:clamp(118px,28svh,175px);
   }
 }
