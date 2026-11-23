@@ -1,20 +1,44 @@
-/* PRODUCTS: clean white chapters and a single yellow inquiry finale.
-   The scene backgrounds are controlled by data-palette in products.html. */
+/* PRODUCTS chapters remain white except for the red opening scene
+   and the original yellow inquiry finale. */
+body.products-edition #main #products-start.clean-product-hero {
+  --edition-ink:#fff;
+  --edition-muted:#fff6e9;
+  --edition-accent:#ffdc77;
+  --edition-line:rgba(255,255,255,.56);
+}
+body.products-edition #main #products-start.clean-product-hero :is(h1,.clean-lead){
+  color:#fff!important;
+}
+body.products-edition #main #products-start.clean-product-hero .clean-kicker{
+  color:#ffdc77!important;
+}
+body.products-edition #main #products-start.clean-product-hero .clean-product-index .clean-link{
+  color:#fff!important;
+  border-color:rgba(255,255,255,.75);
+}
+body.products-edition #main #products-start.clean-product-hero .clean-product-index .clean-link:is(:hover,:focus-visible){
+  color:#ffdc77!important;
+}
+/* White rounded gallery tile. Its artwork contains the HOLDER ONLY:
+   the source poster's lower typography is excluded in the SVG crop. */
 body.products-edition #products-start .clean-product-hero-visual{
   box-sizing:border-box;
+  display:grid;
+  place-items:center;
   width:100%;
+  min-width:0;
   min-height:0;
-  padding:clamp(12px,2vw,25px);
-  border:1px solid #ece7df;
+  padding:clamp(5px,1vw,13px);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.94);
   border-radius:clamp(18px,2.5vw,30px);
   background:#fff;
-  box-shadow:0 12px 35px rgba(31,25,21,.055);
-  overflow:hidden;
+  box-shadow:0 17px 42px rgba(61,13,17,.14);
 }
 body.products-edition #products-start .clean-product-hero-visual>img{
   display:block;
   width:100%;
-  height:clamp(210px,51vh,490px);
+  height:clamp(260px,59vh,580px);
   max-height:none;
   object-fit:contain;
   object-position:center;
@@ -24,13 +48,23 @@ body.products-edition #products-start .clean-product-hero-visual>img{
 body.products-edition #product-inquiry .clean-contact-list a{
   border-color:rgba(38,29,23,.33);
 }
+@media(min-width:701px){
+  body.products-edition #main>#products-start.clean-split{
+    grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
+    gap:clamp(22px,4.5vw,65px);
+  }
+}
 @media(max-width:700px){
   body.products-edition #products-start .clean-product-hero-visual{
-    padding:10px;
-    border-radius:20px;
+    padding:6px;
+    border-radius:19px;
   }
-  body.products-edition #products-start .clean-product-hero-visual>img{height:clamp(170px,36vh,320px)}
+  body.products-edition #products-start .clean-product-hero-visual>img{
+    height:clamp(205px,42vh,390px);
+  }
 }
 @media(max-height:680px){
-  body.products-edition #products-start .clean-product-hero-visual>img{height:clamp(145px,34vh,255px)}
+  body.products-edition #products-start .clean-product-hero-visual>img{
+    height:clamp(150px,38vh,290px);
+  }
 }
