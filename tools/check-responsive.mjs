@@ -223,7 +223,7 @@ for(const engine of [chromium,webkit])test('Home always opens on the first scene
      assert.ok(await page.evaluate(()=>window.__firstHomeVisible.scroll<2));
      if(mobile){
        assert.ok(await page.locator('.hero-copy').evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)>=24));
-       assert.ok(await page.locator('.hero-poster .poster-viewport').evaluate(el=>el.getBoundingClientRect().height<=190));
+       assert.ok(await page.locator('.hero-poster .poster-viewport').evaluate(el=>el.offsetHeight>=215));
        await page.evaluate(()=>{const v=document.querySelector('.home-scroll-viewport');v.scrollTop=v.clientHeight;});
      }else{await page.keyboard.press('PageDown');}
      await page.waitForFunction(()=>Number(document.body.dataset.homeScene)>0);
@@ -313,119 +313,52 @@ for(const engine of [chromium,webkit])test('Home highlights all three compact Pl
  }finally{await browser.close();}
 });
 
-for(const engine of [chromium,webkit])test('Home scroll is native, stable and readable: '+engine.name(),{timeout:45000},async()=>{
+for(const engine of [chromium,webkit])test('Home character hero, readable scenes and direct horizontal gallery: '+engine.name(),{timeout:45000},async()=>{
  const browser=await engine.launch();
  try{
    for(const viewport of [{width:1440,height:1000},{width:390,height:844}]){
      const mobile=viewport.width<700;
-     const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'no-preference'});
+     const context=await browser.newContext({viewport,isMobile:mobile,hasTouch:mobile,serviceWorkers:'block',reducedMotion:'reduce'});
      await context.route('**/*',route=>route.request().url().startsWith(base)?route.continue():route.abort());
      const page=await context.newPage();
-     await page.goto(base+'index.html',{waitUntil:'domcontentloaded'});
-     await page.waitForFunction(()=>window.GTZHomeMotion&&document.querySelectorAll('#friends-dots button').length===16);
-     assert.equal(await page.locator('#main section').count(),11);
+     await page.goto(base+'index.html',{waitUntil:'load'});
+     await page.waitForFunction(()=>document.body.dataset.homeScene==='0'&&document.querySelectorAll('#gallery .friend-photo').length===16);
+     const hero=await page.locator('.hero-poster').evaluate(el=>({src:el.querySelector('img').getAttribute('src'),loaded:el.querySelector('img').naturalWidth>0,height:el.querySelector('.poster-viewport').offsetHeight,border:getComputedStyle(el).borderTopWidth,background:getComputedStyle(el).backgroundColor}));
+     assert.match(hero.src,/assets\/illustrations\/friend-01\.svg/);
+     assert.ok(hero.loaded);
+     assert.ok(hero.height>=(mobile?215:300));
+     assert.equal(hero.border,'0px');
+     assert.equal(hero.background,'rgba(0, 0, 0, 0)');
+     assert.equal(await page.locator('.hero .eyebrow,#collection .eyebrow,.hero-foot,.story-number,.home-game-index').count(),0);
      assert.equal(await page.locator('.story-row').count(),2);
-     assert.equal(await page.locator('#gallery .friend-carousel-card:not([aria-hidden])').count(),16);
-     assert.equal(await page.locator('#friends-dots button').count(),16);
+     await page.goto(base+'index.html#collection',{waitUntil:'load'});
+     await page.waitForFunction(()=>document.body.dataset.homeScene===document.querySelector('#collection').dataset.scene);
+     const cards=page.locator('#gallery .friend-carousel-card'),range=page.locator('#friends-scroll'),window=page.locator('.collection-carousel-window');
+     assert.equal(await cards.count(),16);
+     assert.equal(await page.locator('#friends-dots').count(),0);
+     assert.equal(await window.evaluate(el=>getComputedStyle(el).overflowX),'auto');
+     assert.ok(await window.evaluate(el=>el.scrollWidth>el.clientWidth));
+     assert.equal(await page.locator('#gallery').evaluate(el=>el.getAnimations().length),0);
+     const setRange=async value=>range.evaluate((el,v)=>{el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));},value);
+     await setRange(1000);
+     await page.waitForFunction(()=>{const el=document.querySelector('.collection-carousel-window');return Math.abs(el.scrollLeft-(el.scrollWidth-el.clientWidth))<3;});
+     await setRange(0);
+     await page.waitForFunction(()=>document.querySelector('.collection-carousel-window').scrollLeft<2);
+     if(!mobile){
+       const b=await window.boundingBox();
+       await page.mouse.move(b.x+b.width*.65,b.y+b.height*.5);
+       await page.mouse.down();
+       await page.mouse.move(b.x+b.width*.65-140,b.y+b.height*.5,{steps:10});
+       await page.mouse.up();
+       assert.ok(await window.evaluate(el=>el.scrollLeft>80),'drag advances the native gallery rather than opening a card');
+       assert.ok(page.url().endsWith('#collection'));
+     }else{
+       assert.match(await window.evaluate(el=>getComputedStyle(el).touchAction),/pan-x/);
+       await window.evaluate(el=>{el.scrollLeft=180;});
+       await page.waitForFunction(()=>Number(document.querySelector('#friends-scroll').value)>0);
+     }
+     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth<=2));
      assert.equal(await page.locator('.control-trigger').count(),1);
-     assert.equal(await page.locator('.cinema-opening,.cinema-chapter,.is-pinned').count(),0);
-     const ambient=await page.evaluate(async()=>{
-       const layer=document.querySelector('.home-ambient');
-       const rect=()=>{const r=layer.getBoundingClientRect();return [r.x,r.y,r.width,r.height]};
-       const frames=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-       const first=rect(),at=scrollY;
-       document.documentElement.style.scrollBehavior='auto';
-       window.scrollTo(0,at+240);await frames();
-       const second=rect(),style=getComputedStyle(layer,'::before');
-       return {first,second,delta:scrollY-at,position:getComputedStyle(layer).position,
-         pointer:getComputedStyle(layer).pointerEvents,animation:style.animationName,playing:style.animationPlayState,
-         live:layer.classList.contains('is-live'),hasRenderer:!!layer.querySelector('canvas,video'),
-         backgrounds:[...document.querySelectorAll('#main>:is(.collection,.stories,.holder,.home-package,.experience-teaser,.radar-preview,.home-news-feed,.guide,.home-contact,.social),.story-row,.experience-links>a,.guide-grid article,.collection-carousel-window,.friend-photo')].map(el=>getComputedStyle(el).backgroundColor)};
-     });
-     assert.deepEqual(ambient.first,ambient.second,'background stays at the same viewport coordinates during scroll');
-     assert.ok(ambient.delta>=200);
-     assert.equal(ambient.position,'fixed');
-     assert.equal(ambient.pointer,'none');
-     assert.equal(ambient.animation,'gtz-ambient-drift');
-     assert.equal(ambient.playing,ambient.live?'paused':'running');
-     if(ambient.live)assert.ok(ambient.hasRenderer,'active motion has a real canvas or video renderer');
-     assert.ok(ambient.backgrounds.every(color=>color==='rgba(0, 0, 0, 0)'||color==='transparent'),'content sections must be transparent over the fixed canvas');
-     const top=await page.evaluate(()=>{
-       document.documentElement.style.scrollBehavior='auto';
-       const snapshot=()=>['.hero','.hero-copy','.hero-film','.hero-description','.hero .button','.hero-foot','.hero-poster','.poster-viewport'].map(selector=>{
-         const el=document.querySelector(selector),s=getComputedStyle(el);return [selector,el.offsetWidth,el.offsetHeight,s.textAlign,s.fontSize,s.lineHeight,s.padding,s.margin,s.gap,s.borderWidth];
-       });
-       const actual=snapshot();document.body.classList.remove('home-cinema');const original=snapshot();document.body.classList.add('home-cinema');
-       return {actual,original};
-     });
-     assert.deepEqual(top.actual,top.original,'original first-screen sizing and typography must remain unchanged');
-     if(mobile)assert.notEqual(top.actual.find(x=>x[0]==='.hero-description')[3],'center');
-     const stable=await page.evaluate(async()=>{
-       const selectors=['.hero','.hero-copy','.hero-poster','.story-row:not(.reverse)','.story-row:not(.reverse) .story-image','.story-row:not(.reverse) .story-copy','.story-row.reverse','.story-row.reverse .story-image','.story-row.reverse .story-copy'];
-       const frames=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-       const styles=()=>selectors.map(s=>{const e=document.querySelector(s),c=getComputedStyle(e);return {s,top:e.getBoundingClientRect().top,opacity:c.opacity,transform:c.transform,scale:c.scale,translate:c.translate,rotate:c.rotate,position:c.position}});
-       const result=[];
-       for(const scene of ['.hero','.story-row:not(.reverse)','.story-row.reverse']){
-         const start=Math.max(0,scrollY+document.querySelector(scene).getBoundingClientRect().top-innerHeight*.22);
-         window.scrollTo(0,start);await frames();
-         const before=styles(),y=scrollY;
-         window.scrollTo(0,y+120);await frames();
-         const after=styles(),delta=scrollY-y;
-         result.push({scene,delta,before,after});
-       }
-       return result;
-     });
-     for(const {scene,delta,before,after} of stable){
-       assert.ok(delta>=100,scene+' accepts native scroll rather than pinning');
-       for(let i=0;i<before.length;i++){
-         const a=before[i],b=after[i];
-         assert.ok(Math.abs(a.top-b.top-delta)<3,a.s+' moves only with the page');
-         assert.equal(b.opacity,'1',b.s+' remains fully readable');
-         assert.equal(b.transform,'none');
-         assert.equal(b.scale,'none');assert.equal(b.translate,'none');assert.equal(b.rotate,'none');
-         assert.notEqual(b.position,'sticky');
-       }
-     }
-     await page.evaluate(()=>document.querySelector('#collection').scrollIntoView({block:'start'}));
-     await page.waitForFunction(()=>window.GTZHomeMotion.scrolling);
-     await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='paused'));
-     await page.waitForFunction(()=>!window.GTZHomeMotion.scrolling);
-     await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='running'));
-     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
-     assert.ok(overflow<=2,'native home must not cause horizontal overflow');
-     const catalog=await page.evaluate(()=>{
-       const sections=[...document.querySelectorAll('#main>:is(.collection,.stories,.holder,.home-package,.experience-teaser,.radar-preview,.home-news-feed,.guide,.home-contact,.social)')];
-       const edges=sections.map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return [e.className,r.left+parseFloat(s.paddingLeft),r.right-parseFloat(s.paddingRight)]});
-       const label=getComputedStyle(document.querySelector('.friend-carousel-card .card-label'));
-       return {edges,labelPosition:label.position,photos:document.querySelectorAll('#gallery .card:not([aria-hidden]) .friend-photo').length,borders:[...document.querySelectorAll('.friend-carousel-card,.story-image,.holder-image,.experience-links>a,.guide-grid article,.home-news-feed-card')].map(e=>getComputedStyle(e).borderRadius)};
-     });
-     assert.equal(catalog.edges.length,10);
-     for(const [name,left,right] of catalog.edges){assert.ok(Math.abs(left-catalog.edges[0][1])<=2&&Math.abs(right-catalog.edges[0][2])<=2,name+' follows the shared catalog grid');}
-     assert.equal(catalog.labelPosition,'static','card captions must be separate from product art');
-     assert.equal(catalog.photos,16);
-     assert.ok(catalog.borders.every(r=>r==='0px'),'editorial content must not revert to a rounded card grid');
-     assert.equal(await page.locator('#friends-count,#friends-prev,#friends-next,#friends-pause,.home-friend-index,.home-friend-arrow').count(),0);
-     // Fixed-width indicator slots must not wrap or shift as any item is selected.
-     if(mobile)for(const width of [320,375,390,430]){
-       await page.setViewportSize({width,height:844});
-       await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().length>0);
-       const dots=page.locator('#friends-dots button');
-       for(let i=0;i<16;i++){
-         await dots.nth(i).click();
-         assert.equal(await dots.nth(i).getAttribute('aria-pressed'),'true');
-         const bounds=await page.locator('#friends-dots').evaluate(el=>{
-           const b=el.getBoundingClientRect(),r=[...el.children].map(d=>d.getBoundingClientRect());
-           return {fits:r.every(d=>d.left>=b.left-1&&d.right<=b.right+1&&Math.abs(d.top-r[0].top)<1),active:el.querySelectorAll('.is-active').length,overflow:document.documentElement.scrollWidth-innerWidth};
-         });
-         assert.ok(bounds.fits&&bounds.active===1&&bounds.overflow<=2,'dots stay in one row at '+width+'px, item '+i);
-       }
-     }
-     await page.locator('#friends-dots button').nth(6).click();
-     assert.equal(await page.locator('#friends-dots button').nth(6).getAttribute('aria-pressed'),'true');
-     await page.waitForFunction(()=>document.querySelector('#gallery').getAnimations().some(a=>a.playState==='paused'));
-     await page.emulateMedia({reducedMotion:'reduce'});
-     assert.equal(await page.locator('.home-ambient').evaluate(el=>getComputedStyle(el,'::before').animationName),'none');
-     assert.equal(await page.locator('.is-pinned').count(),0);
      await context.close();
    }
  }finally{await browser.close();}

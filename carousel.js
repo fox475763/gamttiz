@@ -1,4 +1,4 @@
-// Rotate only the supplied product introduction images.
+// Rotate the original character art on the home hero; product imagery stays in product sections.
 const carouselMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 const walletOpen=()=>document.documentElement.classList.contains('gtz-wallet-open');
 const posterViewport=document.querySelector('.poster-viewport');
@@ -26,10 +26,12 @@ function slideProduct(viewport,nextIndex,onComplete){
   const oldImage=viewport.querySelector('img');
   if(!oldImage||viewport.dataset.sliding==='true')return;
   const product=products[nextIndex];
+  const illustration=viewport.dataset.artwork==="illustration";
+  const asset=illustration?product.illustration:product.image;
   const nextImage=oldImage.cloneNode(false);
   nextImage.removeAttribute('src');
   nextImage.removeAttribute('srcset');
-  nextImage.alt=`${product.name} 원본 제품 소개`;
+  nextImage.alt=illustration?`${product.name} 캐릭터 일러스트`:`${product.name} 원본 제품 소개`;
   nextImage.removeAttribute('fetchpriority');
   nextImage.loading='eager';
   nextImage.classList.add('carousel-incoming');
@@ -42,8 +44,8 @@ function slideProduct(viewport,nextIndex,onComplete){
     if(walletOpen()||homeMotion.scrolling||!visible(viewport)||document.hidden){release();return;}
     viewport.append(nextImage);
     if(typeof oldImage.animate!=='function'||carouselMotion.matches){finish();return;}
-    const oldMotion=oldImage.animate([{transform:'translateX(0)'},{transform:'translateX(-100%)'}],{duration:420,easing:'cubic-bezier(.25,.6,.35,1)'});
-    const newMotion=nextImage.animate([{transform:'translateX(100%)'},{transform:'translateX(0)'}],{duration:420,easing:'cubic-bezier(.25,.6,.35,1)'});
+    const oldMotion=oldImage.animate(illustration?[{opacity:1},{opacity:0}]:[{transform:'translateX(0)'},{transform:'translateX(-100%)'}],{duration:500,easing:'ease-in-out'});
+    const newMotion=nextImage.animate(illustration?[{opacity:0},{opacity:1}]:[{transform:'translateX(100%)'},{transform:'translateX(0)'}],{duration:500,easing:'ease-in-out'});
     // If scrolling starts mid-slide, commit the already decoded image, with
     // no concurrent moving layers left behind.
     const onScroll=()=>{if(walletOpen()||homeMotion.scrolling){oldMotion.cancel();newMotion.cancel();}};
@@ -56,12 +58,12 @@ function slideProduct(viewport,nextIndex,onComplete){
   };
   nextImage.addEventListener('load',start,{once:true});
   nextImage.addEventListener('error',release,{once:true});
-  const variants=window.GTZDisplayAssets?.[product.image];
+  const variants=illustration?null:window.GTZDisplayAssets?.[asset];
   if(variants?.length)nextImage.srcset=variants.map(([url,w])=>url+' '+w+'w').join(', ');
-  nextImage.src=product.image;
+  nextImage.src=asset;
 }
 if(posterViewport){
-  setInterval(()=>{if(walletOpen()||homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(posterViewport)||posterViewport.closest('.hero-poster:hover'))return;const next=(posterIndex+1)%products.length;slideProduct(posterViewport,next,()=>{posterIndex=next;});},4200);
+  setInterval(()=>{if(walletOpen()||homeMotion.scrolling||document.hidden||carouselMotion.matches||!visible(posterViewport)||posterViewport.closest('.hero-poster:hover'))return;const next=(posterIndex+1)%products.length;slideProduct(posterViewport,next,()=>{posterIndex=next;});},5200);
 }
 const storyGroups=[
   {element:document.querySelector('.story-row:not(.reverse) .story-image'),indexes:[7,13]},
