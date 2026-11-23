@@ -931,3 +931,29 @@ footer .site-footer-contact{margin-left:.7rem;padding:.5rem .8rem;border:1px sol
 .control-menu-edge-canvas{opacity:0;visibility:hidden;transition:opacity .16s ease}
 .control-menu-edge-canvas[data-lens-ready]{opacity:1;visibility:visible}
 html.gtz-liquid-scrolling .control-menu-edge-canvas,body.home-native-moving .control-menu-edge-canvas{opacity:0!important;visibility:hidden!important;transition:none!important}
+
+/* Mobile Menu persistence: keep the always-available control in its own
+   viewport layer, above transformed/full-screen home scenes. Wallet sheets
+   remain above it because their z-index is reserved at 2147483640. */
+@media(max-width:900px){
+  body > .control-dock{
+    position:fixed!important;
+    z-index:2147483000!important;
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    -webkit-transform:translate3d(0,0,0);
+    transform:translate3d(0,0,0);
+    pointer-events:auto;
+  }
+  body > .control-dock > .control-trigger{
+    display:grid!important;
+    visibility:visible!important;
+    opacity:1!important;
+    pointer-events:auto!important;
+  }
+  body > .control-dock > .control-trigger .control-trigger-label{
+    visibility:visible!important;
+    opacity:1!important;
+  }
+}
