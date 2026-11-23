@@ -40,6 +40,10 @@
   trigger.setAttribute('aria-expanded','false');
   trigger.setAttribute('aria-controls','control-search control-menu control-contact');
   trigger.append(make('span','control-trigger-label','Menu'));
+  // Mount the persistent navigation button before optional glass/menu effects initialize.
+  // On slower mobile browsers, those effects must never delay the primary control.
+  dock.append(trigger);
+  document.body.append(dock);
   const search = make('section','control-search'); search.id='control-search'; search.setAttribute('aria-label','사이트 검색'); search.setAttribute('aria-hidden','true'); search.inert=true;
   const searchInput=make('input','control-search-input'); searchInput.type='search'; searchInput.placeholder='감띠즈 검색'; searchInput.autocomplete='off'; searchInput.setAttribute('aria-label','검색어');
   const searchResults=make('div','control-search-results'); searchResults.setAttribute('aria-live','polite');
@@ -451,6 +455,16 @@
   copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText('fox475763@gmail.com');copyStatus.textContent='이메일 주소를 복사했어요.';}catch{copyStatus.textContent='fox475763@gmail.com — 주소를 선택해 복사해 주세요.';}});
   contactLinks.append(dm,mail,mailApp,copy);contactScroll.append(contactLinks,copyStatus);
   dock.append(search,menu,contact,trigger);document.body.append(dock);
+  // Recover the same dock if a mobile browser restores a cached page or a
+  // page transition unexpectedly detaches a body-level overlay.
+  const keepDockMounted=()=>{
+    if(!document.body)return;
+    if(dock.parentNode!==document.body)document.body.append(dock);
+    if(trigger.parentNode!==dock)dock.append(trigger);
+  };
+  new MutationObserver(()=>{if(!dock.isConnected)keepDockMounted();}).observe(document.body,{childList:true});
+  window.addEventListener('pageshow',keepDockMounted);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)keepDockMounted();});
   // Restart one complete light sweep for every touch or mouse press.
   const glassPressTimers=new WeakMap();
   dock.addEventListener('pointerdown',event=>{
