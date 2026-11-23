@@ -506,3 +506,16 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
  .license-page:not(.license-wallet-view) .license-member-link{position:relative;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:7px;min-width:0;width:100%;min-height:46px;padding:10px 16px;font-size:13px;line-height:1.35;text-align:center;white-space:normal}
  .license-page .license-member-link :is(svg,img,i){position:static;flex:0 0 auto;width:1em;height:1em;vertical-align:middle;transform:none}
 }
+
+
+/* Combined front/back image: one downloadable PNG, not two separate cards. */
+.license-save-dialog .license-save-images{grid-template-columns:minmax(0,1fr)}
+.license-save-dialog .license-save-images>div{min-width:0}
+.license-save-dialog .license-save-images #license-save-combined{
+  display:block;width:100%;height:auto;max-height:min(56dvh,480px);
+  aspect-ratio:2196/1718;object-fit:contain;border-radius:9px;
+}
+.license-save-dialog .license-save-images #license-save-combined-link{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:42px;padding:8px 16px;
+}
