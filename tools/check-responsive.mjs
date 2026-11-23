@@ -329,6 +329,12 @@ for(const engine of [chromium,webkit])test('Home character hero, readable scenes
      assert.ok(hero.height>=(mobile?215:300));
      assert.equal(hero.border,'0px');
      assert.equal(hero.background,'rgba(0, 0, 0, 0)');
+     const stage=await page.evaluate(()=>{const hero=document.querySelector('.hero'),layer=document.querySelector('.home-ambient'),red=layer.querySelector('[data-color="red"]');return {heroBg:getComputedStyle(hero).backgroundColor,stageColor:getComputedStyle(red||layer).getPropertyValue(red?'--stage-color':'--stage-base').trim(),fries:getComputedStyle(red||layer).getPropertyValue(red?'--fries-opacity':'--stage-fries').trim(),copyAlign:getComputedStyle(hero.querySelector('.hero-description')).textAlign,logoAlign:getComputedStyle(hero.querySelector('.brand-letters')).justifyContent,palettes:[...document.querySelectorAll('#main>.stories')].map(el=>el.dataset.palette)};});
+     assert.equal(stage.heroBg,'rgba(0, 0, 0, 0)');
+     assert.equal(stage.stageColor,'#d62c30');
+     assert.equal(Number(stage.fries),.75);
+     if(mobile){assert.equal(stage.copyAlign,'left');assert.equal(stage.logoAlign,'flex-start');}
+     assert.deepEqual(stage.palettes,['yellow','red']);
      assert.equal(await page.locator('.hero .eyebrow,#collection .eyebrow,.hero-foot,.story-number,.home-game-index').count(),0);
      assert.equal(await page.locator('.story-row').count(),2);
      await page.goto(base+'index.html#collection',{waitUntil:'load'});
