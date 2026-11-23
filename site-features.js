@@ -39,7 +39,7 @@
   trigger.setAttribute('aria-label','컨트롤 버튼: 누르면 메뉴, 길게 누르면 검색');
   trigger.setAttribute('aria-expanded','false');
   trigger.setAttribute('aria-controls','control-search control-menu control-contact');
-  trigger.textContent = 'Menu';
+  trigger.append(make('span','control-trigger-label','Menu'));
   const search = make('section','control-search'); search.id='control-search'; search.setAttribute('aria-label','사이트 검색'); search.setAttribute('aria-hidden','true'); search.inert=true;
   const searchInput=make('input','control-search-input'); searchInput.type='search'; searchInput.placeholder='감띠즈 검색'; searchInput.autocomplete='off'; searchInput.setAttribute('aria-label','검색어');
   const searchResults=make('div','control-search-results'); searchResults.setAttribute('aria-live','polite');
@@ -578,6 +578,7 @@ const homeColorTracking = document.body.classList.contains('home-cinema');
 function setButtonColor(color) {
   if (color === lastButtonColor) return;
   trigger.style.setProperty('color', color, 'important');
+  trigger.dataset.ink=color==='#ffffff'?'light':'red';
   lastButtonColor = color;
 }
 
@@ -594,19 +595,10 @@ function updateMenuTextColor() {
   const rect = trigger.getBoundingClientRect();
   let behind;
   const x=rect.left+rect.width/2,y=rect.top+rect.height/2;
-  if(homeColorTracking&&document.elementsFromPoint){
-    // Inspect the underlying surface without hiding/repainting the glass dock.
+  // Never hide the fixed dock for a hit test: mobile WebKit can retain a
+  // hidden compositor layer during asynchronous scrolling.
+  if(typeof document.elementsFromPoint==='function'){
     behind=document.elementsFromPoint(x,y).find(el=>!dock.contains(el)&&!scrim.contains(el));
-  }else{
-    const dockVisibility = dock.style.visibility;
-    const scrimVisibility = scrim.style.visibility;
-    dock.style.visibility = 'hidden';
-    scrim.style.visibility = 'hidden';
-    try {behind = document.elementFromPoint(x,y);}
-    finally {
-      dock.style.visibility = dockVisibility;
-      scrim.style.visibility = scrimVisibility;
-    }
   }
 
   let isRed = homeColorTracking&&document.body.dataset.homeInk==='white';
@@ -637,6 +629,8 @@ function scheduleMenuTextColorUpdate() {
 document.addEventListener('gtz-home-palette',scheduleMenuTextColorUpdate);
 window.addEventListener('resize', scheduleMenuTextColorUpdate);
 window.addEventListener('load', scheduleMenuTextColorUpdate);
+window.addEventListener('pageshow', scheduleMenuTextColorUpdate);
+window.visualViewport?.addEventListener('resize',scheduleMenuTextColorUpdate,{passive:true});
 updateMenuTextColor();
 
 // Shake-to-open is a mobile-only wallet and uses explicit sensor consent.

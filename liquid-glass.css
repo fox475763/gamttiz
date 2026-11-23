@@ -116,3 +116,14 @@ body.home-native-moving .gtz-liquid-optics > canvas{
   width:36%;animation-duration:10s;
   background:radial-gradient(ellipse 65% 13% at 50% 2%,rgba(255,255,255,.88),transparent 95%),radial-gradient(ellipse 65% 13% at 50% 98%,rgba(255,238,203,.68),transparent 95%),linear-gradient(100deg,transparent 8%,rgba(255,255,255,.055) 50%,transparent 92%);
 }
+
+/* Keep a real, readable button even while the optional optical rim is suspended.
+   On touch devices avoid a negative-z-index filtered child behind the fixed dock. */
+.control-trigger-label{position:relative;z-index:2;pointer-events:none}
+@media (hover:none), (pointer:coarse){
+  .control-dock .control-trigger{visibility:visible;opacity:1;outline:1px solid rgba(255,255,255,.7);outline-offset:-1px}
+  .control-dock .control-trigger.gtz-liquid-surface > .gtz-liquid-optics{z-index:0}
+  .control-dock .control-trigger-label{text-shadow:0 1px 2px rgba(255,255,255,.85),0 0 5px rgba(255,255,255,.54)}
+  .control-dock .control-trigger[data-ink="light"] .control-trigger-label{text-shadow:0 1px 2px rgba(46,14,18,.75),0 0 5px rgba(46,14,18,.42)}
+  .control-dock .control-trigger.gtz-liquid-surface::after{content:""!important;display:block!important;position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.025) 60%,rgba(255,255,255,.08))}
+}

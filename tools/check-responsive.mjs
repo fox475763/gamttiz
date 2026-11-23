@@ -194,6 +194,8 @@ test('WebKit home scroll keeps actual transparent backdrop and suspends sampled 
   await page.waitForFunction(()=>document.querySelector('.control-trigger .gtz-liquid-optics canvas[data-lens-ready]')&&!document.body.classList.contains('home-native-moving'));
   await page.evaluate(()=>{const v=document.querySelector('.home-scroll-viewport');v.scrollTo({top:v.clientHeight*1.8,behavior:'smooth'});});
   await page.waitForFunction(()=>document.body.classList.contains('home-native-moving'));
+  const buttonState=await page.locator('.control-trigger').evaluate(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {visibility:s.visibility,opacity:s.opacity,hit:el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)),label:el.querySelector('.control-trigger-label')?.textContent}});
+  assert.deepEqual(buttonState,{visibility:'visible',opacity:'1',hit:true,label:'Menu'});
   const moving=await page.evaluate(()=>{const glass=document.querySelector('.control-trigger .gtz-liquid-optics'),canvas=glass.querySelector('canvas');return {blur:getComputedStyle(glass).backdropFilter,visibility:getComputedStyle(canvas).visibility,ready:canvas.hasAttribute('data-lens-ready')};});
   assert.ok(moving.blur.includes('blur(1.25px)')&&moving.visibility==='hidden'&&!moving.ready,JSON.stringify(moving));
   await page.waitForFunction(()=>!document.body.classList.contains('home-native-moving')&&!!document.querySelector('.control-trigger .gtz-liquid-optics canvas[data-lens-ready]'));
