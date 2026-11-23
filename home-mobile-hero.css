@@ -59,9 +59,9 @@
     max-width:100%;
     margin:0;
     padding:0;
-    gap:0;
+    gap:.026em;
     white-space:nowrap;
-    letter-spacing:-.055em;
+    letter-spacing:-.045em;
     font-size:inherit;
   }
   body.home-cinema #main>.hero #hero-title .brand-subtitle,
@@ -200,14 +200,37 @@
     outline:2px solid #fff;
     outline-offset:3px;
   }
-  /* Downplay motif texture on the hero ONLY. Other red scenes are unchanged. */
+  /* First scene only: visible floating golden circles behind the brand.
+     Keep the animation on an inexpensive compositor transform. */
   body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]{
     --stage-fries:.09;
-    --stage-dots:.06;
+    --stage-dots:.46;
   }
   body.home-cinema[data-home-scene="0"] .stage-color-layer[data-color="red"]{
     --fries-opacity:.09;
-    --dots-opacity:.06;
+    --dots-opacity:.46;
+  }
+  body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]::after{
+    animation:gtz-hero-floating-circles 16s ease-in-out infinite alternate;
+  }
+  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::after{
+    background:
+      radial-gradient(circle at 14% 15%,#ffca57 0 5px,transparent 6px),
+      radial-gradient(circle at 86% 13%,#ffca57 0 8px,transparent 9px),
+      radial-gradient(circle at 75% 31%,#ffca57 0 4px,transparent 5px),
+      radial-gradient(circle at 12% 42%,#ffca57 0 9px,transparent 10px),
+      radial-gradient(circle at 89% 57%,#ffca57 0 5px,transparent 6px),
+      radial-gradient(circle at 27% 72%,#ffca57 0 6px,transparent 7px),
+      radial-gradient(circle at 72% 82%,#ffca57 0 10px,transparent 11px),
+      radial-gradient(circle at 42% 90%,#ffca57 0 4px,transparent 5px);
+    opacity:.46;
+    animation:gtz-hero-floating-circles 16s ease-in-out infinite alternate;
+    animation-play-state:running;
+  }
+  @keyframes gtz-hero-floating-circles{
+    0%{transform:translate3d(-2.5%,1.5%,0)}
+    50%{transform:translate3d(2%,-3%,0)}
+    100%{transform:translate3d(-1.5%,2.5%,0)}
   }
 }
 /* Shorter iPhone / installed Safari viewport: retain composition and CTA. */
@@ -244,5 +267,13 @@
   }
   body.home-cinema.home-fullpage #main>.hero .hero-poster .poster-viewport{
     height:clamp(118px,28svh,175px);
+  }
+}
+
+@media(max-width:700px) and (prefers-reduced-motion:reduce){
+  body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]::after,
+  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::after{
+    animation:none!important;
+    transform:none!important;
   }
 }
