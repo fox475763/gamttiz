@@ -957,3 +957,92 @@ html.gtz-liquid-scrolling .control-menu-edge-canvas,body.home-native-moving .con
     opacity:1!important;
   }
 }
+
+/* iOS Home Screen Menu: keep the control in a stable WebKit layer, without
+   backdrop-canvas or a transformed fixed ancestor. The panel itself retains
+   the existing rounded glass droplet layout and interactions. */
+@media(max-width:900px){
+  html.gtz-ios-standalone body > .control-dock{
+    position:fixed!important;
+    z-index:2147483000!important;
+    visibility:visible!important;
+    opacity:1!important;
+    -webkit-transform:none!important;
+    transform:none!important;
+    -webkit-filter:none!important;
+    filter:none!important;
+    overflow:visible!important;
+  }
+  html.gtz-ios-standalone body > .control-dock > .control-trigger{
+    display:grid!important;
+    visibility:visible!important;
+    opacity:1!important;
+    -webkit-transform:none;
+    transform:none;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    background:linear-gradient(145deg,rgba(255,255,255,.75),rgba(255,255,255,.42))!important;
+    border:1px solid rgba(255,255,255,.92)!important;
+    box-shadow:0 6px 23px rgba(28,26,38,.20)!important;
+  }
+  html.gtz-ios-standalone body > .control-dock > .control-trigger[data-ink="light"]{
+    background:linear-gradient(145deg,rgba(36,21,26,.54),rgba(37,21,25,.30))!important;
+    border-color:rgba(255,255,255,.55)!important;
+  }
+  html.gtz-ios-standalone body > .control-dock > .control-trigger .control-trigger-label{
+    position:relative;z-index:5;display:block!important;opacity:1!important;visibility:visible!important;
+  }
+}
+
+/* Native HTML navigation remains usable even when page JavaScript fails to
+   load, is evicted by iOS WebKit, or errors before the glass menu is ready. */
+body > .gtz-rescue-menu{
+  position:fixed;
+  z-index:2147482999;
+  right:14px;
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  width:62px;
+  height:62px;
+  font-family:inherit;
+  overflow:visible;
+  color:#e93636;
+}
+html.gtz-menu-ready body > .gtz-rescue-menu{display:none!important}
+body > .gtz-rescue-menu > summary{
+  box-sizing:border-box;display:grid;place-items:center;
+  width:62px;height:62px;
+  border:1px solid rgba(255,255,255,.94);
+  border-radius:50%;
+  background:linear-gradient(140deg,rgba(255,255,255,.94),rgba(244,244,246,.84));
+  box-shadow:0 6px 23px rgba(28,26,38,.20);
+  color:#e93636;font-size:12px;font-weight:800;
+  cursor:pointer;touch-action:manipulation;
+  list-style:none;
+}
+body > .gtz-rescue-menu > summary::-webkit-details-marker{display:none}
+body > .gtz-rescue-menu[open] > summary{background:#fff5f5}
+body > .gtz-rescue-menu > nav{
+  box-sizing:border-box;position:absolute;
+  right:0;bottom:calc(100% + 12px);
+  display:grid!important;grid-template-columns:1fr;gap:6px;
+  width:min(260px,calc(100vw - 28px));
+  max-height:min(72dvh,650px);padding:12px;
+  overflow-y:auto;overscroll-behavior:contain;
+  background:rgba(42,32,38,.83);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.34);
+  border-radius:22px;
+  box-shadow:0 16px 38px rgba(0,0,0,.22);
+}
+body > .gtz-rescue-menu:not([open]) > nav{display:none!important}
+body > .gtz-rescue-menu > nav > a{
+  display:block;box-sizing:border-box;
+  width:100%;min-height:39px;padding:10px 14px;
+  border:1px solid rgba(255,255,255,.25);border-radius:999px;
+  background:rgba(255,255,255,.08);color:#fff;
+  font-size:13px;font-weight:700;text-decoration:none;
+}
+body > .gtz-rescue-menu > nav > a:focus-visible{
+  outline:2px solid #fff;outline-offset:1px;
+}
+@media(min-width:901px){body > .gtz-rescue-menu{display:none!important}}
