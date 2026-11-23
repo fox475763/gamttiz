@@ -77,7 +77,7 @@
   // Never pretend a generic illustration depicts the actual event.
   const fallbackImage=(className)=>{
     const img=el('img',className+' radar-thumb-fallback');
-    img.src='assets/fry-radar-thumbnail.png?v=20261122radarred1';img.alt='감튀레이더 공통 썸네일 · 실제 기사 사진 아님';
+    img.src='assets/fry-radar-thumbnail-icon.svg?v=20261123attachedicon4';img.alt='감튀레이더 공통 썸네일 · 실제 기사 사진 아님';
     // The same small local PNG is cached and shared across cards; load it immediately.
     img.loading='eager';img.decoding='async';img.width=1280;img.height=800;
     return img;
