@@ -55,7 +55,7 @@
       // Every scene is a real snap target; do not make native scrolled content inert.
     });
     let nativeIndex=0, nativeHeight=0, measureRequest=0, scrollRequest=0, idleTimer=0, scrolling=false;
-    let pendingMeasure=false, paletteTimer=0, layerTimer=0;
+    let pendingMeasure=false, paletteTimer=0, layerTimer=0, layerDepth=2;
     const indexAt=()=>Math.max(0,Math.min(sceneCount-1,Math.round(viewport.scrollTop/Math.max(1,nativeHeight))));
     const indexFromHash=hash=>{
       if(!hash||hash==='#')return 0;
@@ -74,10 +74,17 @@
         // background-color and two large masked gradients.
         clearTimeout(layerTimer);
         layers.forEach(layer=>{
-          layer.classList.toggle('is-outgoing',layer.dataset.color===previousPalette&&layer.dataset.color!==palette);
-          layer.classList.toggle('is-palette',layer.dataset.color===palette);
+          const active=layer.dataset.color===palette;
+          if(isHome){
+            if(layer.classList.contains('is-palette')&&!active)layer.classList.add('is-outgoing');
+            if(active){layer.classList.remove('is-outgoing');layer.style.zIndex=String(++layerDepth);}
+          }else layer.classList.toggle('is-outgoing',layer.dataset.color===previousPalette&&!active);
+          layer.classList.toggle('is-palette',active);
         });
-        layerTimer=setTimeout(()=>layers.forEach(layer=>layer.classList.remove('is-outgoing')),300);
+        layerTimer=setTimeout(()=>layers.forEach(layer=>{
+          layer.classList.remove('is-outgoing');
+          if(isHome){layer.style.zIndex='';}
+        }),isHome?660:300);
         clearTimeout(paletteTimer);
         const ink=palette==='red'?'white':'dark';
         const changeInk=()=>{body.dataset.homeInk=ink;document.dispatchEvent(new Event('gtz-home-palette'));};
@@ -187,6 +194,7 @@
   const clampIndex=index=>Math.max(0,Math.min(scenes.length-1,index));
   const setPalette=(palette,duration=440)=>{
     const previous=host.dataset.palette;
+    if(isHome&&!reduced.matches)duration=Math.max(620,duration);
     host.style.setProperty('--stage-speed',`${duration}ms`);
     host.dataset.palette=palette;body.dataset.homePalette=palette;
     clearTimeout(inkTimer);

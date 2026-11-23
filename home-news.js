@@ -40,7 +40,7 @@ if (homeNews) {
       const date = new Date(post.date);
       const dateText = Number.isNaN(date.valueOf()) ? '공지' : new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }).format(date);
       info.append(create('small', '', dateText), create('h3', '', post.title), create('p', '', post.excerpt || post.body?.slice(0, 120) || ''), create('b', '', '자세히 보기 ↗'));
-      card.append(imageWrap, info); list.append(card);
+      card.append(info, imageWrap); list.append(card);
     }
   }).catch(showEmpty);
 }

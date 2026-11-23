@@ -222,7 +222,7 @@ for(const engine of [chromium,webkit])test('Home always opens on the first scene
      assert.equal(await page.evaluate(()=>window.__firstHomeVisible.scene),'0');
      assert.ok(await page.evaluate(()=>window.__firstHomeVisible.scroll<2));
      if(mobile){
-       assert.ok(await page.locator('.hero-copy').evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)>=24));
+       assert.ok(await page.locator('.hero').evaluate(el=>parseFloat(getComputedStyle(el).paddingTop)>=24));
        assert.ok(await page.locator('.hero-poster .poster-viewport').evaluate(el=>el.offsetHeight>=215));
        await page.evaluate(()=>{const v=document.querySelector('.home-scroll-viewport');v.scrollTop=v.clientHeight;});
      }else{await page.keyboard.press('PageDown');}
@@ -299,7 +299,8 @@ for(const engine of [chromium,webkit])test('Home highlights all three compact Pl
    assert.equal(await games.count(),3);
    assert.deepEqual(await games.evaluateAll(els=>els.map(el=>el.getAttribute('href'))),['quiz.html','combo.html','draw.html']);
    assert.equal(await page.locator('#experiences .home-game-icon svg').count(),3);
-   assert.ok(await games.evaluateAll(els=>els.every(el=>el.getBoundingClientRect().height<115)));
+   assert.ok(await games.evaluateAll((els,mobile)=>els.every(el=>el.getBoundingClientRect().height<(mobile?115:300)),mobile));
+   assert.equal(await games.evaluateAll(els=>new Set(els.map(el=>getComputedStyle(el).backgroundColor)).size),3);
    assert.equal(await page.locator('#collection-dex').getAttribute('href'),'collection.html');
    assert.equal(await page.locator('#collection a[href="draw.html"]').count(),0);
    const preview=page.locator('.radar-preview-item img.radar-thumb-fallback');
@@ -339,6 +340,8 @@ for(const engine of [chromium,webkit])test('Home character hero, readable scenes
      assert.equal(await page.locator('.hero .eyebrow,#collection .eyebrow,.hero-foot,.story-number,.home-game-index').count(),0);
      assert.equal(await page.locator('.story-row').count(),2);
      assert.deepEqual(await page.locator('.numbered-story-title .story-step').allTextContents(),['01','02','03']);
+     assert.ok(await page.locator('.story-step').evaluateAll(els=>els.every(el=>parseFloat(getComputedStyle(el).fontSize)>=.85*parseFloat(getComputedStyle(el.parentElement).fontSize))));
+     assert.equal(await page.locator('#guide').count(),0);
      assert.equal(await page.locator('#main>.home-package').count(),0);
      assert.equal(await page.locator('#experiences').getAttribute('data-palette'),'white');
      assert.equal(await page.locator('#home-notice').getAttribute('data-palette'),'white');
