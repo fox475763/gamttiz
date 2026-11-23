@@ -200,25 +200,36 @@
     outline:2px solid #fff;
     outline-offset:3px;
   }
-  /* First mobile scene only: brighter, full-height fry shapes moving as
-     one seamless 96px tile. The end frame matches the starting frame. */
+  /* First scene only. Restore the large, soft orbital circles instead of
+     the recent field of tiny dots. The discs circle continuously at an even
+     pace, and remain behind the lettering and character artwork. */
+  body.home-cinema[data-home-scene="0"]{
+    --gtz-hero-orbs:
+      radial-gradient(circle at 22% 21%,rgba(255,210,115,.42) 0 12.5vmin,rgba(255,210,115,.15) 13vmin,transparent 14vmin),
+      radial-gradient(circle at 81% 32%,rgba(255,235,164,.28) 0 18vmin,transparent 19vmin),
+      radial-gradient(circle at 24% 83%,rgba(255,189,58,.32) 0 10vmin,transparent 11vmin),
+      radial-gradient(circle at 72% 76%,transparent 0 12.5vmin,rgba(255,235,159,.35) 12.8vmin 13.6vmin,transparent 14vmin);
+  }
   body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]{
     --stage-fries:.52;
-    --stage-dots:.58;
+    --stage-dots:1;
   }
   body.home-cinema[data-home-scene="0"] .stage-color-layer[data-color="red"]{
     --fries-opacity:.52;
-    --dots-opacity:.58;
+    --dots-opacity:1;
   }
+
+  /* Bring the fry sticks back to their original 100px strip height.
+     Move by exactly one repeated 96px tile to make the loop seamless. */
   body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::before{
     content:"";
     display:block;
     left:-96px;
     right:-96px;
     bottom:0;
-    height:142px;
+    height:100px;
     opacity:.52;
-    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='142' viewBox='0 0 96 142'%3E%3Crect x='34' y='20' width='28' height='132' rx='7' fill='%23ffbe31'/%3E%3C/svg%3E") left bottom / 96px 142px repeat-x;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100' viewBox='0 0 96 100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='%23ffbe31'/%3E%3C/svg%3E") left bottom / 96px 100px repeat-x;
     animation:gtz-hero-fries-marquee 8.5s linear infinite;
     animation-play-state:running;
     will-change:transform;
@@ -228,32 +239,29 @@
     to{transform:translate3d(96px,0,0)}
   }
 
-  /* Float the familiar dots along a closed, gently rotating orbit instead of
-     rocking to a stop at either end of a back-and-forth animation. */
+  /* Same orbital animation for installed Safari and non-native rendering. */
   body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]::after{
-    animation:gtz-hero-dots-orbit 28s ease-in-out infinite;
-  }
-  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::after{
-    background:
-      radial-gradient(circle at 14% 15%,#ffd16c 0 5px,transparent 6px),
-      radial-gradient(circle at 86% 13%,#ffd16c 0 8px,transparent 9px),
-      radial-gradient(circle at 75% 31%,#ffd16c 0 4px,transparent 5px),
-      radial-gradient(circle at 12% 42%,#ffd16c 0 9px,transparent 10px),
-      radial-gradient(circle at 89% 57%,#ffd16c 0 5px,transparent 6px),
-      radial-gradient(circle at 27% 72%,#ffd16c 0 6px,transparent 7px),
-      radial-gradient(circle at 72% 82%,#ffd16c 0 10px,transparent 11px),
-      radial-gradient(circle at 42% 90%,#ffd16c 0 4px,transparent 5px);
-    opacity:.58;
-    transform-origin:50% 50%;
-    animation:gtz-hero-dots-orbit 28s ease-in-out infinite;
+    background-color:transparent;
+    background-image:var(--gtz-hero-orbs);
+    opacity:1;
+    -webkit-mask:none;
+    mask:none;
+    animation:gtz-hero-orb-return 54s linear infinite;
     animation-play-state:running;
     will-change:transform;
   }
-  @keyframes gtz-hero-dots-orbit{
-    0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
-    25%{transform:translate3d(1.5%,-1.7%,0) rotate(2deg)}
-    50%{transform:translate3d(2.3%,-3.3%,0) rotate(3.5deg)}
-    75%{transform:translate3d(-1.3%,-1.5%,0) rotate(-1.5deg)}
+  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::after{
+    inset:-25%;
+    background:var(--gtz-hero-orbs);
+    opacity:1;
+    transform-origin:50% 50%;
+    animation:gtz-hero-orb-return 54s linear infinite;
+    animation-play-state:running;
+    will-change:transform;
+  }
+  @keyframes gtz-hero-orb-return{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
   }
 }
 /* Shorter iPhone / installed Safari viewport: retain composition and CTA. */
