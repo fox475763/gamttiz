@@ -9,7 +9,7 @@ if (homeNews) {
   };
   const header = create('div', 'home-news-feed-head');
   const heading = create('div');
-  heading.append(create('p', 'eyebrow', 'GAMTTIZ / OFFICIAL NOTICE'), create('h2', '', '감띠즈 공식 공지.'));
+  heading.append(create('h2', '', '감띠즈 공식 공지.'));
   const allNews = create('a', 'home-news-all', '모든 공지 보기 ↗');
   allNews.href = 'news.html';
   header.append(heading, allNews);

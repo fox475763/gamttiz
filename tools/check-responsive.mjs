@@ -256,8 +256,8 @@ for(const engine of [chromium,webkit])test('Home MY ID shows issuance state and 
      assert.equal(await section.getAttribute('data-license-state'),issued?'issued':'unissued');
      assert.equal(await section.locator('.home-license-member').getAttribute('href'),'member.html');
      assert.equal(await section.locator('#home-license-issue').getAttribute('href'),'license.html');
-     const neighbors=await section.evaluate(el=>[el.previousElementSibling.classList.contains('home-package'),el.nextElementSibling.id]);
-     assert.deepEqual(neighbors,[true,'experiences']);
+     const neighbors=await section.evaluate(el=>[el.previousElementSibling.id,el.nextElementSibling.id]);
+     assert.deepEqual(neighbors,['holder','experiences']);
      if(issued){
        await page.waitForFunction(()=>document.querySelector('.home-license-card').dataset.ready==='true');
        assert.ok((await section.locator('#home-license-record').textContent()).includes(license.number));
@@ -338,6 +338,10 @@ for(const engine of [chromium,webkit])test('Home character hero, readable scenes
      assert.equal(await page.locator('.hero .poster-viewport').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(255, 255, 255)');
      assert.equal(await page.locator('.hero .eyebrow,#collection .eyebrow,.hero-foot,.story-number,.home-game-index').count(),0);
      assert.equal(await page.locator('.story-row').count(),2);
+     assert.deepEqual(await page.locator('.numbered-story-title .story-step').allTextContents(),['01','02','03']);
+     assert.equal(await page.locator('#main>.home-package').count(),0);
+     assert.equal(await page.locator('#experiences').getAttribute('data-palette'),'white');
+     assert.equal(await page.locator('#home-notice').getAttribute('data-palette'),'white');
      await page.goto(base+'index.html#collection',{waitUntil:'load'});
      await page.waitForFunction(()=>document.body.dataset.homeScene===document.querySelector('#collection').dataset.scene);
      const cards=page.locator('#gallery .friend-carousel-card'),range=page.locator('#friends-scroll'),window=page.locator('.collection-carousel-window');
@@ -356,6 +360,21 @@ for(const engine of [chromium,webkit])test('Home character hero, readable scenes
      await page.waitForFunction(()=>document.querySelector('.collection-carousel-window').scrollLeft<2);
      if(!mobile){
        const b=await window.boundingBox();
+       await page.emulateMedia({reducedMotion:'no-preference'});
+       await page.mouse.move(b.x+b.width*.65,b.y+b.height*.5);
+       await page.mouse.wheel(0,300);
+       await page.waitForFunction(()=>document.querySelector('.collection-carousel-window').scrollLeft>100);
+       await page.waitForFunction(()=>!document.querySelector('.collection-carousel-window').classList.contains('is-wheeling'));
+       const before=await window.evaluate(el=>el.scrollLeft);
+       const rb=await range.boundingBox();
+       await page.mouse.move(rb.x+rb.width/2,rb.y+rb.height/2);
+       await page.mouse.wheel(0,420);
+       await page.waitForFunction(before=>document.querySelector('.collection-carousel-window').scrollLeft>before+100,before);
+       await page.waitForFunction(()=>!document.querySelector('.collection-carousel-window').classList.contains('is-wheeling'));
+       assert.equal(await page.evaluate(()=>document.body.dataset.homeScene),await page.locator('#collection').getAttribute('data-scene'));
+       await page.emulateMedia({reducedMotion:'reduce'});
+       await setRange(0);
+       await page.waitForFunction(()=>document.querySelector('.collection-carousel-window').scrollLeft<2);
        await page.mouse.move(b.x+b.width*.65,b.y+b.height*.5);
        await page.mouse.down();
        await page.mouse.move(b.x+b.width*.65-140,b.y+b.height*.5,{steps:10});

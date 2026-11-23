@@ -54,19 +54,18 @@
   }
   function schedule(){if(!pending){pending=true;requestAnimationFrame(paint);}}
   viewport.addEventListener('scroll',schedule,{passive:true});
-  range.addEventListener('pointerdown',()=>viewport.classList.add('is-scrubbing'));
-  range.addEventListener('input',()=>{hoverX=null;viewport.scrollLeft=max()*Number(range.value)/1000;schedule();});
+  range.addEventListener('pointerdown',()=>{cancelWheel();viewport.classList.add('is-scrubbing');});
+  range.addEventListener('input',()=>{cancelWheel();hoverX=null;viewport.scrollLeft=max()*Number(range.value)/1000;schedule();});
   function endScrub(){viewport.classList.remove('is-scrubbing');}
   range.addEventListener('pointerup',endScrub);
   range.addEventListener('pointercancel',endScrub);
   range.addEventListener('blur',endScrub);
   range.addEventListener('keydown',e=>e.stopPropagation());
-  range.addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY)||e.shiftKey)e.stopPropagation();},{passive:true});
   let drag=null,suppressUntil=0;
   viewport.addEventListener('dragstart',e=>e.preventDefault());
   viewport.addEventListener('pointerdown',e=>{
     if(e.pointerType!=='mouse'||e.button!==0)return;
-    drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:viewport.scrollLeft,active:false,lastX:e.clientX,lastT:performance.now(),velocity:0};
+    cancelWheel();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:viewport.scrollLeft,active:false,lastX:e.clientX,lastT:performance.now(),velocity:0};
   });
   viewport.addEventListener('pointermove',e=>{
     if(e.pointerType!=='mouse'||drag?.active)return;
@@ -102,14 +101,44 @@
   viewport.addEventListener('click',e=>{
     if(performance.now()<suppressUntil){e.preventDefault();e.stopImmediatePropagation();suppressUntil=0;}
   },true);
-  viewport.addEventListener('wheel',e=>{
-    if(e.shiftKey&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){
-      e.preventDefault();e.stopPropagation();viewport.scrollLeft+=e.deltaY;
-    }else if(Math.abs(e.deltaX)>Math.abs(e.deltaY))e.stopPropagation();
-  },{passive:false});
+  // A wheel over either dock surface belongs to the horizontal list, not
+  // the vertical full-page scene. Accumulate trackpad/mouse deltas and ease
+  // towards a single target instead of starting competing smooth scrolls.
+  let wheelFrame=0,wheelTarget=0,wheelTime=0;
+  function cancelWheel(){
+    if(wheelFrame)cancelAnimationFrame(wheelFrame);
+    wheelFrame=0;wheelTime=0;viewport.classList.remove('is-wheeling');
+  }
+  function animateWheel(now){
+    const dt=wheelTime?Math.min(50,now-wheelTime):16;
+    wheelTime=now;
+    wheelTarget=Math.max(0,Math.min(max(),wheelTarget));
+    const current=viewport.scrollLeft,diff=wheelTarget-current;
+    if(Math.abs(diff)<.75){
+      viewport.scrollLeft=wheelTarget;cancelWheel();return;
+    }
+    const travel=Math.min(Math.abs(diff),Math.max(1,Math.abs(diff)*(1-Math.exp(-dt/58))));
+    viewport.scrollLeft=current+Math.sign(diff)*travel;
+    wheelFrame=requestAnimationFrame(animateWheel);
+  }
+  function onDockWheel(e){
+    if(e.ctrlKey||e.metaKey||!max()||drag?.active)return;
+    const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+    if(!delta)return;
+    e.preventDefault();e.stopPropagation();
+    if(e.currentTarget===range)hoverX=null;
+    const unit=e.deltaMode===1?18:e.deltaMode===2?viewport.clientWidth:1;
+    const amount=delta*unit;
+    viewport.classList.add('is-wheeling');
+    wheelTarget=Math.max(0,Math.min(max(),(wheelFrame?wheelTarget:viewport.scrollLeft)+amount));
+    if(reduced.matches){viewport.scrollLeft=wheelTarget;cancelWheel();return;}
+    if(!wheelFrame)wheelFrame=requestAnimationFrame(animateWheel);
+  }
+  viewport.addEventListener('wheel',onDockWheel,{passive:false});
+  range.addEventListener('wheel',onDockWheel,{passive:false});
   viewport.addEventListener('keydown',e=>{
     if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)||e.target!==viewport)return;
-    e.preventDefault();e.stopPropagation();
+    e.preventDefault();e.stopPropagation();cancelWheel();
     const step=cards[0].offsetWidth+16;
     viewport.scrollTo({left:e.key==='Home'?0:e.key==='End'?max():viewport.scrollLeft+(e.key==='ArrowLeft'?-step:step),behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
   });
