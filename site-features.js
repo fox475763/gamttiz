@@ -1,5 +1,11 @@
 (() => {
   const page = location.pathname.split('/').pop() || 'index.html';
+  // iOS Home Screen apps use a separate WebKit compositor and page cache.
+  // Preserve a reliable native CSS Menu control instead of canvas refraction.
+  const iosStandalone = (navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) &&
+    (/iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1));
+  document.documentElement.classList.toggle('gtz-ios-standalone', iosStandalone);
+
   if(page==='license.html'&&window.parent!==window&&new URLSearchParams(location.search).get('wallet')==='1')return;
   const pages = [
     {title:'홈', description:'감띠즈를 처음부터 둘러보기', url:'index.html', keys:'home gamttiz 감띠즈'},
@@ -205,6 +211,7 @@
   }
   window.GAMTTIZGlassOptics={edgeVector:menuEdgeVector,paintBackdrop:paintGlassBackdrop};
   function startMobileLens(){
+    if(iosStandalone){stopMobileLens();return;}
     stopMobileLens();
     const canvas=make('canvas','control-menu-edge-canvas'),source=document.createElement('canvas');
     canvas.setAttribute('aria-hidden','true');
@@ -419,6 +426,7 @@
   menuLinks.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))guideSelection(guideItems.indexOf(event.target));});
   menuLinks.addEventListener('focusout',event=>{if(!menuLinks.contains(event.relatedTarget)&&!guideTouch)clearGuide();});
   function toggleMenuRefraction(active){
+    if(iosStandalone){clearTimeout(refractionTimer);stopMobileLens();delete dock.dataset.menuRefraction;return;}
     clearTimeout(refractionTimer);
     if(!active){stopGuideTouch(dock.hasAttribute('data-menu-closing'));stopMobileLens();if(!dock.hasAttribute('data-menu-closing'))delete dock.dataset.menuRefraction;return;}
     delete dock.dataset.menuRefraction;
@@ -646,6 +654,22 @@ window.addEventListener('load', scheduleMenuTextColorUpdate);
 window.addEventListener('pageshow', scheduleMenuTextColorUpdate);
 window.visualViewport?.addEventListener('resize',scheduleMenuTextColorUpdate,{passive:true});
 updateMenuTextColor();
+
+// Only suppress the static, no-script navigation fallback once the complete
+// interactive menu is mounted and visibly inside the viewport.
+function syncPersistentMenu(){
+  keepDockMounted();
+  const r=trigger.getBoundingClientRect(),style=getComputedStyle(trigger);
+  const visible=trigger.isConnected&&r.width>=40&&r.height>=40&&
+    r.right>0&&r.bottom>0&&r.left<window.innerWidth&&r.top<window.innerHeight&&
+    style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>.1;
+  document.documentElement.classList.toggle('gtz-menu-ready',visible);
+}
+syncPersistentMenu();
+window.addEventListener('pageshow',syncPersistentMenu);
+window.addEventListener('orientationchange',syncPersistentMenu);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncPersistentMenu();});
+if(iosStandalone)window.setInterval(syncPersistentMenu,2600);
 
 // Shake-to-open is a mobile-only wallet and uses explicit sensor consent.
 const walletMedia=matchMedia('(max-width: 900px)');
