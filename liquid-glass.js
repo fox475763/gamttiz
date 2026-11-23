@@ -5,6 +5,8 @@
   'use strict';
   const selector=".control-trigger,.control-search,.control-search-results,.control-contact,.control-contact-links > :is(a,button),.control-result,.member-page .radar-tool .radar-glass-field,.member-page .radar-tool .radar-filter-panel,.license-page.has-license:not(.license-wallet-view) .license-member-link";
   const reduced=matchMedia('(prefers-reduced-transparency: reduce)');
+  const standaloneIOS=(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches)&&
+    (/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1));
   const native=/(?:Chrome|Chromium|Edg|OPR)\//.test(navigator.userAgent)&&!/Android|iPhone|iPad|iPod|Mobile/.test(navigator.userAgent)&&CSS.supports('backdrop-filter','url(#gtz-liquid-test)');
   const tracked=new Map(),visible=new Set(),filterCache=new Map(),ns='http://www.w3.org/2000/svg';
   let svg=null,source=null,ctx=null,frame=0,last=0,cursor=0,serial=0;
@@ -15,11 +17,8 @@
   },{threshold:.01}):null;
   const resize='ResizeObserver' in window?new ResizeObserver(()=>schedule()):null;
   function add(el){
-    // iOS Safari installed as a Home Screen app can drop WebKit's fixed
-    // backdrop/canvas layer after navigation. Keep Menu's CSS glass face native.
-    const standaloneIOS=(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches)&&
-      (/iPhone|iPad|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&navigator.maxTouchPoints>1));
-    if(standaloneIOS&&el.classList.contains('control-trigger'))return;
+    // Keep the full optical glass face on iOS Home Screen Menu; only suppress
+    // the fragile sampled canvas pass later. The real WebKit backdrop stays live.
     // The license page's touch-only Menu has a stable CSS glass face.
     // Do not allocate a filtered layer or sample the animated card behind it.
     if(el.classList.contains?.('control-trigger')&&document.body.classList.contains('license-page')&&matchMedia('(max-width:900px) and (pointer:coarse)').matches)return;
@@ -159,6 +158,9 @@
     for(const el of batch){
       const state=tracked.get(el),r=el.getBoundingClientRect(),style=getComputedStyle(el);
       if(!state||r.width<2||r.height<2||style.visibility==='hidden'||Number(style.opacity)<.05)continue;
+      // iOS installed apps can evict sampled pixels after scene navigation.
+      // Retain the canonical blur/sheen/rim on the trigger without Canvas2D.
+      if(standaloneIOS&&el.classList.contains('control-trigger'))continue;
       try{if(native)nativeFilter(el,state,r,style,optics);else canvasFilter(el,state,r,style,optics,now);}catch{/* Native clear face stays visible. */}
     }
     if(!native&&!moving){
