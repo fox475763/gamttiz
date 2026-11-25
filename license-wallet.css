@@ -23,9 +23,25 @@
   .gtz-wallet-content{position:absolute;bottom:0;left:0;right:0;height:min(91dvh,780px);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;background:#17181d radial-gradient(ellipse at 50% 26%,#35363d 0%,#23242a 47%,#15161b 84%);border-radius:30px 30px 0 0;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -8px 36px #0005;transform:translate3d(0,100%,0);transition:transform .4s cubic-bezier(.22,.72,.25,1);overflow:hidden;border-top:1px solid #ffffff20}
   .gtz-wallet-sheet.is-visible .gtz-wallet-content{will-change:transform}
   .gtz-wallet-sheet.is-visible .gtz-wallet-backdrop{will-change:opacity}
-  .gtz-wallet-sheet.is-open .gtz-wallet-content{transform:translate3d(0,0,0)}
-  .gtz-wallet-sheet.is-open .gtz-wallet-backdrop{opacity:1}
-  .gtz-wallet-title{font:600 11px/1.4 Arial,sans-serif;letter-spacing:.23em;color:#f5f5f7;margin:25px 0 10px}
+  .gtz-wallet-sheet.is-open .gtz-wallet-content{transform:translate3d(0,var(--wallet-drag-y,0px),0)}
+  .gtz-wallet-sheet.is-open .gtz-wallet-backdrop{opacity:var(--wallet-drag-opacity,1)}
+  .gtz-wallet-sheet.is-dragging .gtz-wallet-content,
+  .gtz-wallet-sheet.is-dragging .gtz-wallet-backdrop{transition:none!important}
+  .gtz-wallet-grabber{
+    position:absolute;top:0;left:50%;transform:translateX(-50%);
+    display:grid;place-items:center;width:96px;height:26px;padding:0;
+    border:0;border-radius:0;background:transparent;box-shadow:none;
+    color:#fff;cursor:grab;touch-action:none!important;z-index:3;
+    user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;
+  }
+  .gtz-wallet-grabber:active{cursor:grabbing}
+  .gtz-wallet-grabber-bar{
+    display:block;width:36px;height:4px;border-radius:999px;
+    background:rgba(255,255,255,.84);pointer-events:none;
+  }
+  .gtz-wallet-grabber:focus-visible{outline:2px solid #fff;outline-offset:-4px;border-radius:12px}
+
+  .gtz-wallet-title{font:600 11px/1.4 Arial,sans-serif;letter-spacing:.23em;color:#f5f5f7;margin:29px 0 10px}
   .gtz-wallet-close{position:absolute;right:16px;top:15px;height:40px;width:40px;background:#ffffff12;border:1px solid #ffffff18;border-radius:50%;color:#f5f5f7;font-size:25px;line-height:1;cursor:pointer;z-index:2}
   .gtz-wallet-frame{border:0;width:100%;flex:1;min-height:0;background:transparent}
   .gtz-wallet-detail{font-size:12px;color:#f4f4f5;text-decoration:none;padding:12px 16px;min-height:44px;display:flex;align-items:center}
