@@ -700,13 +700,12 @@ const walletMedia=matchMedia('(max-width: 900px)');
   const sheet=make('section','gtz-wallet-sheet');sheet.setAttribute('role','dialog');sheet.setAttribute('aria-modal','true');sheet.setAttribute('aria-label','나의 라이센스');sheet.hidden=true;
   const backdrop=make('button','gtz-wallet-backdrop');backdrop.type='button';backdrop.setAttribute('aria-label','라이센스 닫기');
   const content=make('div','gtz-wallet-content'),title=make('p','gtz-wallet-title','MY LICENSE');
-  const close=make('button','gtz-wallet-close','×');close.type='button';close.setAttribute('aria-label','닫기');
   const frame=make('div','gtz-wallet-frame gtz-wallet-lite');frame.setAttribute('aria-label','나의 감띠즈 라이센스 카드');
   const detail=make('a','gtz-wallet-detail','MY ID 페이지 ↗');detail.href='license.html';
   const grabber=make('button','gtz-wallet-grabber');grabber.type='button';
   grabber.setAttribute('aria-label','라이센스 아래로 끌어 닫기');
   grabber.append(make('span','gtz-wallet-grabber-bar'));
-  content.append(grabber,title,close,frame,detail);sheet.append(backdrop,content);document.body.append(sheet);
+  content.append(grabber,title,frame,detail);sheet.append(backdrop,content);document.body.append(sheet);
   const shakeSettings=make('div','gtz-shake-setting');shakeSettings.hidden=true;
   const shakeButton=make('button','gtz-shake-button','흔들어 카드 열기 켜기');shakeButton.type='button';
   const shakeReconnect=make('button','gtz-shake-reconnect','센서 권한 다시 연결');shakeReconnect.type='button';shakeReconnect.hidden=true;
@@ -720,34 +719,44 @@ const walletMedia=matchMedia('(max-width: 900px)');
   let gravity=null,firstHit=null,lastHit=-Infinity,lastOpened=-Infinity;
   try{enabled=localStorage.getItem(shakeKey)==='1';}catch{}
   const reducedWallet=matchMedia('(prefers-reduced-motion: reduce)');
-  let sheetDrag=null,dragFrame=0,dragOffset=0,ignoreGrabClickUntil=0;
+  // Every part of the sheet except the rotating card and navigation link
+  // is a drag surface. Keep the card's existing pointer gestures separate.
+  let sheetDrag=null,dragFrame=0,dragOffset=0,dragHeight=1,ignoreGrabClickUntil=0;
   function paintSheetDrag(){
     dragFrame=0;
     content.style.setProperty('--wallet-drag-y',dragOffset+'px');
-    backdrop.style.setProperty('--wallet-drag-opacity',String(Math.max(0,1-dragOffset/Math.max(1,content.offsetHeight))));
+    backdrop.style.setProperty('--wallet-drag-opacity',String(Math.max(0,1-dragOffset/dragHeight)));
   }
   function resetSheetDrag(){
     if(dragFrame)cancelAnimationFrame(dragFrame);dragFrame=0;
-    sheetDrag=null;dragOffset=0;
+    const id=sheetDrag?.id;sheetDrag=null;dragOffset=0;
+    if(id!==undefined){try{if(content.hasPointerCapture(id))content.releasePointerCapture(id);}catch{}}
     sheet.classList.remove('is-dragging');
     content.style.removeProperty('--wallet-drag-y');
     backdrop.style.removeProperty('--wallet-drag-opacity');
   }
-  grabber.addEventListener('pointerdown',e=>{
-    if(!open||sheetDrag||e.button!==0)return;
+  content.addEventListener('pointerdown',e=>{
+    if(!open||sheetDrag||!e.isPrimary||e.button!==0)return;
+    if(e.target.closest?.('.gtz-wallet-rotator,.gtz-wallet-detail,a,input,select,textarea'))return;
     e.preventDefault();
     const now=performance.now();
+    dragHeight=Math.max(1,content.offsetHeight);
     sheetDrag={id:e.pointerId,y:e.clientY,lastY:e.clientY,lastTime:now,velocity:0};
-    dragOffset=0;sheet.classList.add('is-dragging');paintSheetDrag();
-    try{grabber.setPointerCapture(e.pointerId);}catch{}
+    // Interrupt a returning sheet without jumping back to its resting point.
+    const matrix=getComputedStyle(content).transform;
+    dragOffset=0;
+    try{if(matrix!=='none')dragOffset=Math.max(0,Math.min(dragHeight,new DOMMatrixReadOnly(matrix).m42));}catch{}
+    sheetDrag.initialOffset=dragOffset;
+    sheet.classList.add('is-dragging');paintSheetDrag();
+    try{content.setPointerCapture(e.pointerId);}catch{}
   });
-  grabber.addEventListener('pointermove',e=>{
+  content.addEventListener('pointermove',e=>{
     if(!sheetDrag||sheetDrag.id!==e.pointerId)return;
     const now=performance.now(),dt=Math.max(1,now-sheetDrag.lastTime);
     const delta=e.clientY-sheetDrag.y;
     sheetDrag.velocity=sheetDrag.velocity*.55+(e.clientY-sheetDrag.lastY)/dt*.45;
     sheetDrag.lastY=e.clientY;sheetDrag.lastTime=now;
-    dragOffset=Math.max(0,Math.min(content.offsetHeight,delta));
+    dragOffset=Math.max(0,Math.min(dragHeight,sheetDrag.initialOffset+delta));
     if(!dragFrame)dragFrame=requestAnimationFrame(paintSheetDrag);
   });
   function finishSheetDrag(e,cancelled=false){
@@ -755,21 +764,20 @@ const walletMedia=matchMedia('(max-width: 900px)');
     const elapsed=performance.now()-sheetDrag.lastTime;
     const velocity=elapsed<120?sheetDrag.velocity:0;
     const distance=dragOffset;
-    const dismiss=!cancelled&&(distance>Math.min(155,content.offsetHeight*.24)||(distance>38&&velocity>.65));
+    const dismiss=!cancelled&&(distance>Math.min(135,dragHeight*.22)||(distance>32&&velocity>.58));
     const id=sheetDrag.id;sheetDrag=null;
     if(dragFrame)cancelAnimationFrame(dragFrame);dragFrame=0;paintSheetDrag();
     ignoreGrabClickUntil=performance.now()+550;
-    try{if(grabber.hasPointerCapture(id))grabber.releasePointerCapture(id);}catch{}
-    // Commit the last finger position before enabling the easing transition.
+    try{if(content.hasPointerCapture(id))content.releasePointerCapture(id);}catch{}
     content.getBoundingClientRect();
     sheet.classList.remove('is-dragging');
     content.getBoundingClientRect();
     if(dismiss)settle(false);
     else{content.style.removeProperty('--wallet-drag-y');backdrop.style.removeProperty('--wallet-drag-opacity');dragOffset=0;}
   }
-  grabber.addEventListener('pointerup',e=>finishSheetDrag(e));
-  grabber.addEventListener('pointercancel',e=>finishSheetDrag(e,true));
-  grabber.addEventListener('lostpointercapture',e=>finishSheetDrag(e,true));
+  content.addEventListener('pointerup',e=>finishSheetDrag(e));
+  content.addEventListener('pointercancel',e=>finishSheetDrag(e,true));
+  content.addEventListener('lostpointercapture',e=>finishSheetDrag(e,true));
   grabber.addEventListener('click',e=>{if(e.detail===0&&performance.now()>ignoreGrabClickUntil&&open)settle(false);});
 
   function mobile(){return walletMedia.matches&&(matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0);}
@@ -1088,7 +1096,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
     window.addEventListener('devicemotion',motion,{passive:true});sync();
   }
   document.addEventListener('visibilitychange',()=>{firstHit=null;gravity=null;if(document.hidden){clearRecovery();updateSetting();}else resumeSensors();});
-  close.addEventListener('click',()=>settle(false));backdrop.addEventListener('click',()=>settle(false));
+  backdrop.addEventListener('click',()=>settle(false));
   window.addEventListener('keydown',e=>{if(e.key==='Escape'&&presented)settle(false);});
   window.addEventListener('storage',e=>{if(e.key===shakeKey||e.key===null)restorePreference();if(e.key==='gamttiz-my-license-v1'||e.key===shakeKey||e.key===null)sync();});
   window.addEventListener('gamttiz:license-change',sync);window.addEventListener('pageshow',e=>{if(e.persisted)resumeSensors();else{restorePreference();sync();}});
