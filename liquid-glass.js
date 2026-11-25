@@ -22,11 +22,11 @@
     if(el.closest('.gtz-liquid-optics'))return;
     let state=tracked.get(el);
     if(state&&state.layer.isConnected)return;
-    const layer=document.createElement('span');layer.className='gtz-liquid-optics';layer.setAttribute('aria-hidden','true');
+    const layer=Array.from(el.children).find(child=>child.classList.contains('gtz-liquid-optics'))||document.createElement('span');layer.className='gtz-liquid-optics';layer.setAttribute('aria-hidden','true');
     el.classList.add('gtz-liquid-surface');
     if(getComputedStyle(el).position==='static')el.classList.add('gtz-liquid-relative');
     if(el.matches('button,a,.dex-search,.dex-sort,.radar-glass-field,.license-friend'))el.dataset.glassControl='';
-    el.prepend(layer);state={layer,canvas:null,key:''};tracked.set(el,state);
+    if(layer.parentNode!==el)el.prepend(layer);state={layer,canvas:null,key:''};tracked.set(el,state);
     if(observer)observer.observe(el);else{visible.add(el);el.classList.add('gtz-liquid-visible');}
     resize?.observe(el);
   }

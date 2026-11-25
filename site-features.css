@@ -942,8 +942,8 @@ html.gtz-liquid-scrolling .control-menu-edge-canvas,body.home-native-moving .con
     display:block!important;
     visibility:visible!important;
     opacity:1!important;
-    -webkit-transform:translate3d(0,0,0);
-    transform:translate3d(0,0,0);
+    -webkit-transform:none;
+    transform:none;
     pointer-events:auto;
   }
   body > .control-dock > .control-trigger{
@@ -1083,9 +1083,13 @@ body > .gtz-rescue-menu > nav > a:focus-visible{outline:2px solid #fff;outline-o
   body > .gtz-rescue-menu > summary,body > .gtz-rescue-menu > nav > a{background:#272126;color:#fff}
 }
 /* An incomplete enhanced control never covers the working native menu. */
-body > .control-dock:not([data-menu-wired="true"]){display:none!important;pointer-events:none!important}
+body > .control-dock:not([data-menu-core]):not([data-menu-wired="true"]){display:none!important;pointer-events:none!important}
 body > .control-dock[data-menu-wired="true"]{visibility:visible!important;opacity:1!important}
 body > .control-dock > .control-trigger{pointer-events:auto!important;touch-action:none}
 body > .control-dock > .control-trigger :is(.gtz-liquid-optics,.control-trigger-label,canvas),
 body > .control-dock > .control-trigger::before,
 body > .control-dock > .control-trigger::after{pointer-events:none!important}
+
+/* One original menu, present before any page script; no alternate visual surface. */
+body > .control-dock[data-menu-core]{display:block!important;visibility:visible!important;opacity:1!important}
+body.license-wallet-view > .control-dock[data-menu-core],body.license-wallet-view > .control-scrim[data-menu-core]{display:none!important}

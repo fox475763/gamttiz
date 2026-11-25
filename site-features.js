@@ -6,6 +6,7 @@
   const iosStandalone = (navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) &&
     (/iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1));
   document.documentElement.classList.toggle('gtz-ios-standalone', iosStandalone);
+  const mobileMenuLifecycle=matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
 
   if(page==='license.html'&&window.parent!==window&&new URLSearchParams(location.search).get('wallet')==='1')return;
   const pages = [
@@ -35,32 +36,33 @@
     const link=make('a','','Member');link.href='member.html';
     const play=nav.querySelector('a[href="play.html"]');if(play)play.after(link);else nav.append(link);
   }
-  const scrim = make('div','control-scrim');
+  const scrim = document.querySelector('body > .control-scrim[data-menu-core]')||make('div','control-scrim');
   scrim.setAttribute('aria-hidden','true');
-  document.body.append(scrim);
+  if(!scrim.isConnected)document.body.append(scrim);
 
-  const dock = make('div','control-dock');
-  dock.dataset.mode = 'closed';
-  const trigger = make('button','control-trigger');
+  const dock = document.querySelector('body > .control-dock[data-menu-core]')||make('div','control-dock');
+  const staticCore=dock.hasAttribute('data-menu-core');
+  const initialMode=staticCore?dock.dataset.mode:'closed';
+  const trigger = dock.querySelector('.control-trigger')||make('button','control-trigger');
+  if(!staticCore)dock.dataset.mode='closed';
   trigger.type = 'button';
   trigger.setAttribute('aria-label','컨트롤 버튼: 누르면 메뉴, 길게 누르면 검색');
   trigger.setAttribute('aria-expanded','false');
   trigger.setAttribute('aria-controls','control-search control-menu control-contact');
-  trigger.append(make('span','control-trigger-label','Menu'));
+  if(!trigger.querySelector('.control-trigger-label'))trigger.append(make('span','control-trigger-label','Menu'));
   // Mount the persistent navigation button before optional glass/menu effects initialize.
   // On slower mobile browsers, those effects must never delay the primary control.
-  dock.append(trigger);
-  document.body.append(dock);
-  const search = make('section','control-search'); search.id='control-search'; search.setAttribute('aria-label','사이트 검색'); search.setAttribute('aria-hidden','true'); search.inert=true;
-  const searchInput=make('input','control-search-input'); searchInput.type='search'; searchInput.placeholder='감띠즈 검색'; searchInput.autocomplete='off'; searchInput.setAttribute('aria-label','검색어');
-  const searchResults=make('div','control-search-results'); searchResults.setAttribute('aria-live','polite');
-  search.append(searchInput,searchResults);
-  const menu=make('nav','control-menu'); menu.id='control-menu'; menu.setAttribute('aria-label','컨트롤 메뉴'); menu.setAttribute('aria-hidden','true'); menu.inert=true;
+  if(trigger.parentNode!==dock)dock.append(trigger);
+  if(!dock.isConnected)document.body.append(dock);
+  const search = dock.querySelector('.control-search')||make('section','control-search'); search.id='control-search'; search.setAttribute('aria-label','사이트 검색'); search.setAttribute('aria-hidden','true'); search.inert=true;
+  const searchInput=search.querySelector('.control-search-input')||make('input','control-search-input'); searchInput.type='search'; searchInput.placeholder='감띠즈 검색'; searchInput.autocomplete='off'; searchInput.setAttribute('aria-label','검색어');
+  const searchResults=search.querySelector('.control-search-results')||make('div','control-search-results'); searchResults.setAttribute('aria-live','polite');
+  if(!staticCore)search.append(searchInput,searchResults);
+  const menu=dock.querySelector('.control-menu')||make('nav','control-menu'); menu.id='control-menu'; menu.setAttribute('aria-label','컨트롤 메뉴'); menu.setAttribute('aria-hidden','true'); menu.inert=true;
   // The invisible navigation shell is just a scrollable layout; the links are the glass.
-  const menuScroll=make('div','control-panel-scroll');
-  menuScroll.append(make('span','control-panel-label','GAMTTIZ / MENU'));
-  menu.append(menuScroll);
-  const menuLinks=make('div','control-menu-links');
+  const menuScroll=menu.querySelector('.control-panel-scroll')||make('div','control-panel-scroll');
+  if(!staticCore){menuScroll.append(make('span','control-panel-label','GAMTTIZ / MENU'));menu.append(menuScroll);}
+  const menuLinks=menuScroll.querySelector('.control-menu-links')||make('div','control-menu-links');
   const menuTranslations={Home:'홈',Collection:'감띠즈 도감',Play:'체험',Member:'멤버 전용','MY ID':'나의 라이센스',Products:'제품',Notice:'브랜드 공지',News:'브랜드 공지','공지':'브랜드 공지','Fry Rader':'감튀 레이더','Fry Radar':'감튀 레이더','Project Info':'프로젝트 정보',Instagram:'인스타그램',Contact:'문의',Search:'검색'};
   // Decorative outline icons are embedded locally, so no icon font or extra request is needed.
   const menuIcons={
@@ -90,11 +92,13 @@
     item.insertAdjacentHTML('afterbegin','<svg class="control-menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'+artwork+'</svg>');
     return item;
   };
-  const home=make('a','','Home');home.href='index.html';menuLinks.append(addMenuSubtitle(home));
-  nav?.querySelectorAll('a').forEach(link=>{const item=link.cloneNode(true);item.removeAttribute('class');item.textContent=item.textContent.replace(/\s*↗\s*$/u,'');menuLinks.append(addMenuSubtitle(item));});
-  const menuContact=make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
-  const menuSearch=make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
-  menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menuScroll.append(menuLinks);
+  if(!staticCore){
+    const home=make('a','','Home');home.href='index.html';menuLinks.append(addMenuSubtitle(home));
+    nav?.querySelectorAll('a').forEach(link=>{const item=link.cloneNode(true);item.removeAttribute('class');item.textContent=item.textContent.replace(/\s*↗\s*$/u,'');menuLinks.append(addMenuSubtitle(item));});
+  }
+  const menuContact=menuLinks.querySelector('[data-menu-action="contact"]')||make('button','','Contact');menuContact.type='button';menuContact.addEventListener('click',()=>setMode('contact'));
+  const menuSearch=menuLinks.querySelector('[data-menu-action="search"]')||make('button','control-menu-search','Search');menuSearch.type='button';menuSearch.addEventListener('click',()=>setMode('search'));
+  if(!staticCore){menuLinks.append(addMenuSubtitle(menuContact),addMenuSubtitle(menuSearch));menuScroll.append(menuLinks);}
   // Build an optical displacement texture locally; no page screenshot or
   // personal content is sampled. The rounded-rectangle distance field bends
   // only the pixels near its beveled edge, leaving the center undistorted.
@@ -449,21 +453,21 @@
   }
   syncCurrentMenuLink();
   window.addEventListener('hashchange',syncCurrentMenuLink);
-  const contact=make('section','control-contact');contact.id='control-contact';contact.setAttribute('aria-label','문의 방법 선택');contact.setAttribute('aria-hidden','true');contact.inert=true;
-  const contactScroll=make('div','control-panel-scroll');
-  contactScroll.append(make('span','control-panel-label','CONTACT GAMTTIZ'));contact.append(contactScroll);
-  const contactLinks=make('div','control-contact-links');
-  const dm=make('a','','Instagram DM ↗');dm.href='https://ig.me/m/gamttiz_official';dm.target='_blank';dm.rel='noopener noreferrer';dm.append(make('small','','@gamttiz_official'));
-  const mail=make('a','','Gmail에서 작성 ↗');
+  const contact=dock.querySelector('.control-contact')||make('section','control-contact');contact.id='control-contact';contact.setAttribute('aria-label','문의 방법 선택');contact.setAttribute('aria-hidden','true');contact.inert=true;
+  const contactScroll=contact.querySelector('.control-panel-scroll')||make('div','control-panel-scroll');
+  if(!staticCore){contactScroll.append(make('span','control-panel-label','CONTACT GAMTTIZ'));contact.append(contactScroll);}
+  const contactLinks=contactScroll.querySelector('.control-contact-links')||make('div','control-contact-links');
+  const dm=contactLinks.querySelector('[data-contact="dm"]')||make('a','','Instagram DM ↗');dm.href='https://ig.me/m/gamttiz_official';dm.target='_blank';dm.rel='noopener noreferrer';if(!staticCore)dm.append(make('small','','@gamttiz_official'));
+  const mail=contactLinks.querySelector('[data-contact="mail"]')||make('a','','Gmail에서 작성 ↗');
   mail.href='https://mail.google.com/mail/?view=cm&fs=1&to=fox475763%40gmail.com&su=GAMTTIZ%20%EB%AC%B8%EC%9D%98';
-  mail.target='_blank';mail.rel='noopener noreferrer';mail.append(make('small','','fox475763@gmail.com'));
-  const mailApp=make('a','','메일 앱으로 열기 ↗');mailApp.href='mailto:fox475763@gmail.com?subject=GAMTTIZ%20%EB%AC%B8%EC%9D%98';
-  mailApp.append(make('small','','기본 메일 앱 사용'));
-  const copy=make('button','contact-copy','이메일 주소 복사');copy.type='button';
-  const copyStatus=make('p','contact-copy-status');copyStatus.setAttribute('role','status');
+  mail.target='_blank';mail.rel='noopener noreferrer';if(!staticCore)mail.append(make('small','','fox475763@gmail.com'));
+  const mailApp=contactLinks.querySelector('[data-contact="mailapp"]')||make('a','','메일 앱으로 열기 ↗');mailApp.href='mailto:fox475763@gmail.com?subject=GAMTTIZ%20%EB%AC%B8%EC%9D%98';
+  if(!staticCore)mailApp.append(make('small','','기본 메일 앱 사용'));
+  const copy=contactLinks.querySelector('.contact-copy')||make('button','contact-copy','이메일 주소 복사');copy.type='button';
+  const copyStatus=contactScroll.querySelector('.contact-copy-status')||make('p','contact-copy-status');copyStatus.setAttribute('role','status');
   copy.addEventListener('click',async()=>{try{await navigator.clipboard.writeText('fox475763@gmail.com');copyStatus.textContent='이메일 주소를 복사했어요.';}catch{copyStatus.textContent='fox475763@gmail.com — 주소를 선택해 복사해 주세요.';}});
-  contactLinks.append(dm,mail,mailApp,copy);contactScroll.append(contactLinks,copyStatus);
-  dock.append(search,menu,contact,trigger);document.body.append(dock);
+  if(!staticCore){contactLinks.append(dm,mail,mailApp,copy);contactScroll.append(contactLinks,copyStatus);dock.append(search,menu,contact,trigger);}
+  if(!dock.isConnected)document.body.append(dock);
   // Recover the same dock if a mobile browser restores a cached page or a
   // page transition unexpectedly detaches a body-level overlay.
   const keepDockMounted=()=>{
@@ -604,6 +608,10 @@
   // animation opacity to switch it back to a different navigation control.
   dock.dataset.menuWired='true';
   document.documentElement.classList.add('gtz-menu-ready');
+  if(staticCore){
+    dock.dataset.mode='closed';scrim.classList.remove('is-open');
+    if(['menu','search','contact'].includes(initialMode))setMode(initialMode);
+  }
   for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu')){
     fallback.open=false;
   }
@@ -732,7 +740,11 @@ function repairMenuLayer(){
     const parent=document.body;
     // Move once, without an intermediate detached state, and only after
     // two failed visibility/interaction checks. Keep the same live node.
-    if(dock.parentNode===parent)parent.append(dock);
+    if(dock.parentNode!==parent)parent.append(dock);
+    // Recompose the actual button only after confirmed interaction failure.
+    const prior=trigger.style.getPropertyValue('will-change');
+    trigger.style.setProperty('will-change','transform');
+    requestAnimationFrame(()=>{if(prior)trigger.style.setProperty('will-change',prior);else trigger.style.removeProperty('will-change');});
     syncPersistentMenu();
     void trigger.offsetWidth;
     lastButtonColor='';
@@ -766,7 +778,7 @@ function verifyMenuLayer(){
 }
 function resumeMenuLayer(restored=false){
   syncPersistentMenu();
-  if(!iosStandalone)return;
+  if(!mobileMenuLifecycle)return;
   if(restored)resetMenuForPageLifecycle();
   const epoch=++menuRestoreEpoch;
   if(menuRestoreFrame)cancelAnimationFrame(menuRestoreFrame);
@@ -788,7 +800,7 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden)resetMenuForPageLifecycle();
   else resumeMenuLayer(iosStandalone);
 });
-if(iosStandalone)window.setInterval(()=>{if(!document.hidden)verifyMenuLayer();},2400);
+if(mobileMenuLifecycle)window.setInterval(()=>{if(!document.hidden)verifyMenuLayer();},2400);
 
 // Shake-to-open is a mobile-only wallet and uses explicit sensor consent.
 const walletMedia=matchMedia('(max-width: 900px)');
