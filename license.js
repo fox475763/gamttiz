@@ -175,7 +175,7 @@
     drawValue(ctx,names[index],950,1233-CROP_Y,510,40);
     drawValue(ctx,member,950,1400-CROP_Y,530,34);
     ctx.fillStyle='#ffe09a';ctx.textAlign='left';ctx.textBaseline='alphabetic';
-    ctx.font='42px Georgia, "Times New Roman", serif';ctx.fillText('issued date.',129,1401);
+    ctx.font='42px Georgia, "Times New Roman", serif';ctx.fillText('Date of Issue:',129,1401);
     ctx.font='600 39px "Wanted Sans Variable", Arial, sans-serif';ctx.fillText(issuedDate(issuedAt),129,1460,545);
     ctx.font='500 23px Arial, sans-serif';ctx.fillText('SCAN TO OPEN MY ID',129,1547,545);
     drawQr(ctx);
