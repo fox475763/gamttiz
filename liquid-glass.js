@@ -19,6 +19,7 @@
   function add(el){
     // Keep the full optical glass face on iOS Home Screen Menu; only suppress
     // the fragile sampled canvas pass later. The real WebKit backdrop stays live.
+    if(document.documentElement.classList.contains('gtz-native-menu')&&el.classList.contains('control-trigger'))return;
     if(el.closest('.gtz-liquid-optics'))return;
     let state=tracked.get(el);
     if(state&&state.layer.isConnected)return;
