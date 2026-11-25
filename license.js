@@ -225,39 +225,46 @@
         const spine=joinedCtx.getImageData(W-8,Math.floor(H/2),1,1).data;
         joinedCtx.fillStyle='rgb('+spine[0]+','+spine[1]+','+spine[2]+')';
         joinedCtx.fillRect(W-4,0,8,H);
-        // Remove the white matte ONLY around the outside of the joined
-        // passport. Recover fractional alpha at the antialiased corners
-        // so there is no white halo on a dark or coloured background.
+        // Strip the white matte from the outside boundary, including all
+        // four curved corners. Sample the solid burgundy safely INSIDE
+        // each page; sampling the top edge could sample the white matte.
         const clearOuterMatte=(x,y,width,height,edge)=>{
           const patch=joinedCtx.getImageData(x,y,width,height);
           const p=patch.data;
           for(let i=0;i<p.length;i+=4){
             const r=p[i],g=p[i+1],b=p[i+2];
-            const white=Math.max(0,Math.min(1,((g-edge[1])/(255-edge[1])+(b-edge[2])/(255-edge[2]))/2));
+            // The original opaque template's white background is always
+            // removed, even if its antialias colour varies across browsers.
+            if(Math.min(r,g,b)>=248){
+              p[i]=edge[0];p[i+1]=edge[1];p[i+2]=edge[2];p[i+3]=0;
+              continue;
+            }
+            if(p[i+3]===0||Math.abs(g-b)>12)continue;
+            const white=Math.max(0,Math.min(1,((g-edge[1])/Math.max(1,255-edge[1])+(b-edge[2])/Math.max(1,255-edge[2]))/2));
             if(white<.008)continue;
-            // White/red blends belong to the outer matte, not gold artwork.
-            const expectedR=edge[0]+(255-edge[0])*white;
-            const expectedG=edge[1]+(255-edge[1])*white;
-            const expectedB=edge[2]+(255-edge[2])*white;
-            if(Math.abs(r-expectedR)>18||Math.abs(g-expectedG)>12||Math.abs(b-expectedB)>12)continue;
-            const a=1-white;
+            if(Math.abs(r-(edge[0]+(255-edge[0])*white))>20)continue;
             p[i]=edge[0];p[i+1]=edge[1];p[i+2]=edge[2];
-            p[i+3]=Math.round(a*255);
+            p[i+3]=Math.round(p[i+3]*(1-white));
           }
           joinedCtx.putImageData(patch,x,y);
         };
-        const outer=64,edgeStrip=4;
+        const outer=80,edgeStrip=12;
         for(const [offset,side] of [[0,'left'],[W,'right']]){
-          const edge=joinedCtx.getImageData(offset+Math.floor(W/2),8,1,1).data;
+          const sampleX=side==='left'?W-18:W+18;
+          const sample=joinedCtx.getImageData(sampleX,Math.floor(H/2),1,1).data;
+          const edge=sample[0]>70&&sample[0]<180&&sample[1]<35&&sample[2]<35?sample:[127,0,0,255];
           const outerX=side==='left'?0:2*W-outer;
           clearOuterMatte(outerX,0,outer,outer,edge);
           clearOuterMatte(outerX,H-outer,outer,outer,edge);
-          // Exclude the already processed corners and the central spine.
-          const left=side==='left'?outer:W+4;
-          const right=side==='left'?W-4:2*W-outer;
+          const left=side==='left'?outer:W;
+          const right=side==='left'?W:2*W-outer;
           clearOuterMatte(left,0,right-left,edgeStrip,edge);
           clearOuterMatte(left,H-edgeStrip,right-left,edgeStrip,edge);
           clearOuterMatte(side==='left'?0:2*W-edgeStrip,outer,edgeStrip,H-2*outer,edge);
+        }
+        // Never offer a PNG whose four outermost corner pixels are opaque.
+        for(const [x,y] of [[0,0],[2*W-1,0],[0,H-1],[2*W-1,H-1]]){
+          if(joinedCtx.getImageData(x,y,1,1).data[3]!==0)throw Error('Transparent PNG corner check failed');
         }
         // Keep Korean names and make the generated filename safe on Windows.
         const safeName=String(record.name).replace(/[<>:"/\\|?*\u0000-\u001f\u007f]/g,'_').trim().replace(/[. ]+$/g,'')||'사용자';
