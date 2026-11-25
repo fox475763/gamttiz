@@ -475,7 +475,7 @@
     if(dock.parentNode!==document.body)document.body.append(dock);
     if(trigger.parentNode!==dock)dock.append(trigger);
   };
-  new MutationObserver(()=>{if(!dock.isConnected||trigger.parentNode!==dock||menu.parentNode!==dock||scrim.parentNode!==document.body)syncPersistentMenu();}).observe(document.body,{childList:true});
+  new MutationObserver(()=>{if(!dock.isConnected||trigger.parentNode!==dock||menu.parentNode!==dock||scrim.parentNode!==document.body||(nativeInstalledMenu&&!document.querySelector('body > .gtz-rescue-menu')))syncPersistentMenu();}).observe(document.body,{childList:true});
   window.addEventListener('pageshow',keepDockMounted);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)keepDockMounted();});
   // Restart one complete light sweep for every touch or mouse press.
@@ -614,7 +614,8 @@
   }
   function bindInstalledMenu(){
     if(!nativeInstalledMenu)return;
-    const details=document.querySelector('body > .gtz-rescue-menu');
+    let details=document.querySelector('body > .gtz-rescue-menu');
+    if(!details&&installedDetails){document.body.append(installedDetails);details=installedDetails;}
     if(!details||details===installedDetails)return;
     installedDetails=details;installedSummary=details.querySelector('summary');
     details.setAttribute('aria-label','감띠즈 메뉴');
@@ -643,7 +644,7 @@
     installedSummary.addEventListener('contextmenu',e=>e.preventDefault());
     document.addEventListener('pointerdown',e=>{if(details.open&&!details.contains(e.target))closeInstalledMenu();});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')closeInstalledMenu();});
-    details.addEventListener('click',e=>{if(e.target.closest('a[href]'))closeInstalledMenu();});
+    details.addEventListener('click',e=>{if(e.target.closest('a[href]'))setTimeout(closeInstalledMenu,0);});
     window.addEventListener('pagehide',()=>{cancelHold();closeInstalledMenu();});
   }
   dock.dataset.menuWired='true';
