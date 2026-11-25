@@ -1017,10 +1017,8 @@ body > .gtz-rescue-menu{
   bottom:calc(14px + env(safe-area-inset-bottom,0px));
   width:62px;height:62px;font-family:inherit;overflow:visible;
 }
-html.gtz-menu-ready body > .gtz-rescue-menu{display:none!important}
-@supports selector(body:has(> .control-dock)){
-  body:has(> .control-dock[data-menu-wired="true"]) > .gtz-rescue-menu{display:none!important}
-}
+/* The ready class controls handoff only in ordinary browser tabs. */
+html.gtz-menu-ready:not(.gtz-native-menu) body > .gtz-rescue-menu{display:none!important}
 body > .gtz-rescue-menu > summary{
   position:relative;z-index:2;box-sizing:border-box;display:grid;place-items:center;
   width:100%;height:100%;padding:0;border:1px solid rgba(255,255,255,.6);
@@ -1152,6 +1150,6 @@ body > .control-dock > .control-trigger::after{pointer-events:none!important}
 }
 /* CSS-only safeguard for standalone startup before scripts run. */
 @media(max-width:900px) and (display-mode:standalone){
-  html:root body > details.gtz-rescue-menu{display:block!important;visibility:visible!important;opacity:1!important}
+  html:root body > details.gtz-rescue-menu.gtz-rescue-menu{display:block!important;visibility:visible!important;opacity:1!important}
   html:not(.gtz-native-menu) body > .control-dock{display:none!important}
 }
