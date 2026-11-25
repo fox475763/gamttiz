@@ -191,20 +191,38 @@
           drawTemplate(exportFront.getContext('2d'),frontImage);
           drawBack(exportBack.getContext('2d'),sprite,name,member,index,issuedAt);
         }
-        // Download one combined image: original full-resolution front on
-        // the left and back on the right, with a narrow white gutter.
-        const gap=36,joined=document.createElement('canvas');
-        joined.width=W*2+gap;joined.height=H;
-        const joinedCtx=joined.getContext('2d');
+        // One full-resolution, borderless passport spread. Keep all original
+        // lettering and the outer rounded corners, but eliminate the gutter
+        // and square off the four inner corners at the book's spine.
+        const joined=document.createElement('canvas');
+        joined.width=W*2;joined.height=H;
+        const joinedCtx=joined.getContext('2d',{willReadFrequently:true});
         if(!joinedCtx)throw Error('PNG composition not supported');
         joinedCtx.fillStyle='#fff';
         joinedCtx.fillRect(0,0,joined.width,joined.height);
         joinedCtx.drawImage(exportFront,0,0,W,H);
-        joinedCtx.drawImage(exportBack,W+gap,0,W,H);
+        joinedCtx.drawImage(exportBack,W,0,W,H);
+        // The templates have white rounded-corner cutouts. Replace only
+        // the neutral/white pixels in the small inner-corner patches with
+        // the matching burgundy edge colour. Gold rules remain untouched.
+        const corner=64;
+        for(const [x,sampleX] of [[W-corner,W-3],[W,W+2]]){
+          const edge=joinedCtx.getImageData(sampleX,Math.floor(H/2),1,1).data;
+          for(const y of [0,H-corner]){
+            const patch=joinedCtx.getImageData(x,y,corner,corner);
+            const p=patch.data;
+            for(let i=0;i<p.length;i+=4){
+              if(Math.min(p[i+1],p[i+2])>12&&Math.abs(p[i+1]-p[i+2])<24){
+                p[i]=edge[0];p[i+1]=edge[1];p[i+2]=edge[2];p[i+3]=255;
+              }
+            }
+            joinedCtx.putImageData(patch,x,y);
+          }
+        }
         const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
         const blob=await new Promise((resolve,reject)=>joined.toBlob(value=>value?resolve(value):reject(Error('Combined PNG export failed')),'image/png'));
         if(seq!==renderVersion||editing||!record)return;
-        exportFiles=[new File([blob],base+'-front-back.png',{type:'image/png'})];
+        exportFiles=[new File([blob],base+'-passport-spread.png',{type:'image/png'})];
         $('download-both').disabled=false;
       }catch{if(seq===renderVersion)status('카드 저장용 이미지를 준비하지 못했어요. 다시 접속해주세요.');}
     };
@@ -501,7 +519,7 @@
     manualUrls.push(url);
     $('license-save-combined').src=url;
     const link=$('license-save-combined-link');link.href=url;link.download=file.name;
-    $('license-save-help').textContent=mobile?'앞면과 뒷면이 한 장에 합쳐져 있어요. 이미지를 길게 눌러 사진에 저장하세요.':'앞면과 뒷면이 합쳐진 PNG 한 장을 저장하세요.';
+    $('license-save-help').textContent=mobile?'앞면과 뒷면이 여권처럼 이어진 한 장의 이미지예요. 길게 눌러 사진에 저장하세요.':'앞면과 뒷면이 이어진 PNG 한 장을 저장하세요.';
     if(!saveDialog.open)saveDialog.showModal();
   }
   $('license-save-close').addEventListener('click',()=>saveDialog.close());
