@@ -187,3 +187,19 @@ body.home-cinema{isolation:isolate;height:100vh;height:100dvh;overflow:hidden;di
   .home-cinema .home-ambient,.home-cinema .home-ambient::before,.home-cinema .home-ambient::after{animation:none;transition:none;transform:none}
   .home-cinema .home-scroll-viewport{scroll-behavior:auto}
 }
+
+/* Unified pale-yellow ambient ornaments across all light stages.
+   Shared by HOME, PRODUCTS and PROJECT INFO, including iOS standalone.
+   Strongly scope the colour and opacity to the decoration only, leaving
+   the original photographs, typography and red/yellow scene palettes intact. */
+body.home-cinema .home-ambient:is([data-palette="white"],[data-palette="studio"]){
+  --stage-motif:#ffb511!important;
+  --stage-fries:.12!important;
+  --stage-dots:.12!important;
+}
+body.home-cinema .home-ambient .stage-color-layer:is([data-color="white"],[data-color="studio"]){
+  --dots-color:#ffb511!important;
+  --fries-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='%23ffb511'/%3E%3C/svg%3E")!important;
+  --fries-opacity:.12!important;
+  --dots-opacity:.12!important;
+}
