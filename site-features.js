@@ -376,7 +376,7 @@
   function stopGuideTouch(preserve=false){
     if(guideScrollFrame)cancelAnimationFrame(guideScrollFrame);guideScrollFrame=0;
     const touch=guideTouch;guideTouch=null;
-    if(touch&&menuLinks.hasPointerCapture?.(touch.id))menuLinks.releasePointerCapture(touch.id);
+    try{if(touch&&menuLinks.hasPointerCapture?.(touch.id))menuLinks.releasePointerCapture(touch.id);}catch{/* A page restore may already have released capture. */}
     if(preserve===true){stopGuideSpring();resetMenuLight();}else clearGuide();
   }
   function scrollGuide(){
@@ -427,7 +427,7 @@
   menuLinks.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))guideSelection(guideItems.indexOf(event.target));});
   menuLinks.addEventListener('focusout',event=>{if(!menuLinks.contains(event.relatedTarget)&&!guideTouch)clearGuide();});
   function toggleMenuRefraction(active){
-    if(iosStandalone){clearTimeout(refractionTimer);stopMobileLens();delete dock.dataset.menuRefraction;return;}
+    if(iosStandalone){if(!active)stopGuideTouch(dock.hasAttribute('data-menu-closing'));clearTimeout(refractionTimer);stopMobileLens();delete dock.dataset.menuRefraction;return;}
     clearTimeout(refractionTimer);
     if(!active){stopGuideTouch(dock.hasAttribute('data-menu-closing'));stopMobileLens();if(!dock.hasAttribute('data-menu-closing'))delete dock.dataset.menuRefraction;return;}
     delete dock.dataset.menuRefraction;
@@ -503,7 +503,7 @@
   }
   // Hold the visible scale and scroll offset during collapse; calculate
   // the actual trigger center for each row, including a scrolled menu.
-  let menuCloseTimer=0;
+  let menuCloseTimer=0,menuClosePulse=null;
   function finishMenuClose(){
     clearTimeout(menuCloseTimer);menuCloseTimer=0;delete dock.dataset.menuClosing;
     menuLinks.style.removeProperty('--menu-close-scroll');
@@ -527,7 +527,7 @@
     dock.dataset.menuClosing='';
     stopGuideSpring();
     // Small settling pulse synchronized with returning droplets.
-    trigger.animate?.([{scale:'1',offset:0},{scale:'.955',offset:.53},{scale:'1.035',offset:.79},{scale:'1',offset:1}],{duration:690,easing:'cubic-bezier(.3,.7,.23,1)'});
+    try{menuClosePulse?.cancel();menuClosePulse=trigger.animate?.([{scale:'1',offset:0},{scale:'.955',offset:.53},{scale:'1.035',offset:.79},{scale:'1',offset:1}],{duration:690,easing:'cubic-bezier(.3,.7,.23,1)'})||null;}catch{menuClosePulse=null;}
     menuCloseTimer=window.setTimeout(finishMenuClose,870);
   }
   // Commit the interactive state before any optional optical animation.
@@ -685,7 +685,7 @@ try{updateMenuTextColor();}catch{/* Navigation remains ready. */}
 // Preserve the original enhanced menu, including the same button and all
 // handlers. A BFCache restore must never resume a partially closed menu,
 // stale pointer capture, timer, or interrupted button animation.
-let menuRestoreFrame=0,menuRestoreEpoch=0,menuRepairing=false;
+let menuRestoreFrame=0,menuRestoreEpoch=0,menuRepairing=false,menuRetryTimer=0,menuFailures=0,lastMenuRepair=0;
 function syncPersistentMenu(){
   keepDockMounted();
   if(search.parentNode!==dock||menu.parentNode!==dock||contact.parentNode!==dock){
@@ -704,6 +704,7 @@ function resetMenuForPageLifecycle(){
   clearTimeout(holdTimer);holdTimer=0;start=null;gestureHandled=false;
   lastTouchRelease=-Infinity;blockTouchClickUntil=0;menuSwipeX=null;
   if(menuRestoreFrame)cancelAnimationFrame(menuRestoreFrame);menuRestoreFrame=0;menuRestoreEpoch++;
+  clearTimeout(menuRetryTimer);menuRetryTimer=0;menuFailures=0;
   // Close synchronously, without launching another closing animation.
   dock.dataset.mode='closed';scrim.classList.remove('is-open');
   trigger.setAttribute('aria-expanded','false');
@@ -716,12 +717,12 @@ function resetMenuForPageLifecycle(){
   delete dock.dataset.menuRefraction;
   // Cancel only the transient pulse on the actual button, not the glass
   // sheen animations on its decorative descendants.
-  try{trigger.getAnimations?.().forEach(animation=>animation.cancel());}catch{}
+  try{menuClosePulse?.cancel();}catch{}menuClosePulse=null;
   clearTimeout(glassPressTimers.get(trigger));trigger.classList.remove('glass-pressed');
   try{if(document.activeElement===searchInput)searchInput.blur();}catch{}
 }
 function repairMenuLayer(){
-  if(menuRepairing||document.hidden||dock.dataset.mode!=='closed')return;
+  if(menuRepairing||document.hidden||dock.dataset.mode!=='closed'||!dock.isConnected)return;
   if(document.documentElement.classList.contains('gtz-wallet-open')||document.querySelector('dialog[open]'))return;
   menuRepairing=true;
   try{
@@ -729,7 +730,9 @@ function repairMenuLayer(){
     // Reattach the SAME node (no replacement, no listener loss) to rebuild
     // WebKit's fixed compositing layer after restoring a cached document.
     const parent=document.body;
-    if(dock.parentNode===parent){dock.remove();parent.append(dock);}
+    // Move once, without an intermediate detached state, and only after
+    // two failed visibility/interaction checks. Keep the same live node.
+    if(dock.parentNode===parent)parent.append(dock);
     syncPersistentMenu();
     void trigger.offsetWidth;
     lastButtonColor='';
@@ -751,12 +754,20 @@ function verifyMenuLayer(){
   }
   // Only repair a concrete geometry/hit-test failure; never switch the
   // existing menu to the native fallback based on a transient measurement.
-  if(!valid||!hit)repairMenuLayer();
+  if(valid&&hit){menuFailures=0;return;}
+  // A single transient viewport hit-test is not a failure. Recheck
+  // after WebKit has had a chance to finish its layout and transition.
+  menuFailures++;
+  if(menuFailures>=2&&performance.now()-lastMenuRepair>500){
+    lastMenuRepair=performance.now();menuFailures=0;repairMenuLayer();
+  }
+  clearTimeout(menuRetryTimer);
+  menuRetryTimer=setTimeout(()=>{menuRetryTimer=0;verifyMenuLayer();},220);
 }
 function resumeMenuLayer(restored=false){
   syncPersistentMenu();
   if(!iosStandalone)return;
-  if(restored){resetMenuForPageLifecycle();repairMenuLayer();}
+  if(restored)resetMenuForPageLifecycle();
   const epoch=++menuRestoreEpoch;
   if(menuRestoreFrame)cancelAnimationFrame(menuRestoreFrame);
   menuRestoreFrame=requestAnimationFrame(()=>{
