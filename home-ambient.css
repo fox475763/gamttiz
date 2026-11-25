@@ -25,7 +25,7 @@ body.home-cinema{isolation:isolate;height:100vh;height:100dvh;overflow:hidden;di
 }
 .home-cinema .home-ambient{
   position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
-  --stage-base:#fff;--stage-motif:#e93636;
+  --stage-base:#fff;--stage-motif:#ffb511;
   --stage-fries:.12;--stage-dots:.16;
   background-color:var(--stage-base);contain:strict;
   transition:background-color .48s cubic-bezier(.22,.61,.36,1);
@@ -39,7 +39,7 @@ body.home-cinema{isolation:isolate;height:100vh;height:100dvh;overflow:hidden;di
   --stage-fries:.18;--stage-dots:.20;
 }
 .home-cinema .home-ambient[data-palette="white"]{
-  --stage-base:#fff;--stage-motif:#e93636;
+  --stage-base:#fff;--stage-motif:#ffb511;
   --stage-fries:.12;--stage-dots:.16;
 }
 /* Same silhouettes, repeat spacing and travel, recoloured without remounting. */
