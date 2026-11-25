@@ -5,6 +5,11 @@
   const iosStandalone = (navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) &&
     (/iPhone|iPad|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1));
   document.documentElement.classList.toggle('gtz-ios-standalone', iosStandalone);
+  // Installed mobile apps use the static native details control as the
+  // permanent navigation surface. Never swap it for a composited button.
+  const nativeInstalledMenu=iosStandalone||(matchMedia('(display-mode: standalone)').matches&&matchMedia('(max-width:900px)').matches);
+  document.documentElement.classList.toggle('gtz-native-menu',nativeInstalledMenu);
+
 
   if(page==='license.html'&&window.parent!==window&&new URLSearchParams(location.search).get('wallet')==='1')return;
   const pages = [
@@ -534,6 +539,7 @@
   function setMode(mode){
     if(mode==='closed'&&dock.dataset.mode==='closed')return;
     const next=dock.dataset.mode===mode?'closed':mode;
+    if(nativeInstalledMenu&&next!=='closed')closeInstalledMenu();
     const wasMenu=dock.dataset.mode==='menu';
     try{
       if(dock.hasAttribute('data-menu-closing'))finishMenuClose();
@@ -594,18 +600,56 @@
   });
   scrim.addEventListener('click',()=>setMode('closed'));
   searchInput.addEventListener('input',renderResults);
-  document.addEventListener('pointerdown',event=>{if(dock.dataset.mode!=='closed'&&!dock.contains(event.target))setMode('closed');});
+  document.addEventListener('pointerdown',event=>{if(dock.dataset.mode!=='closed'&&!dock.contains(event.target)&&!(nativeInstalledMenu&&event.target.closest?.('.gtz-rescue-menu')))setMode('closed');});
   document.addEventListener('keydown',event=>{
     if(event.key==='Escape'&&dock.dataset.mode!=='closed'){event.preventDefault();setMode('closed');trigger.focus({preventScroll:true});}
     if((event.key==='/'&&!/input|textarea/i.test(document.activeElement?.tagName||''))||(event.key.toLowerCase()==='k'&&(event.ctrlKey||event.metaKey))){event.preventDefault();if(dock.dataset.mode!=='search')setMode('search');}
   });
-  // The menu is interactive now. Never use transient WebKit geometry or
-  // animation opacity to switch it back to a different navigation control.
+  // Use one stable, browser-native menu in installed apps. Search/contact
+  // remain enhanced panels; ordinary links never depend on pointer capture.
+  let installedDetails=null,installedSummary=null,installedHold=0,installedPress=null,installedSuppress=0;
+  function closeInstalledMenu(){
+    if(installedDetails)installedDetails.open=false;
+    document.documentElement.classList.remove('gtz-native-menu-open');
+  }
+  function bindInstalledMenu(){
+    if(!nativeInstalledMenu)return;
+    const details=document.querySelector('body > .gtz-rescue-menu');
+    if(!details||details===installedDetails)return;
+    installedDetails=details;installedSummary=details.querySelector('summary');
+    details.setAttribute('aria-label','감띠즈 메뉴');
+    const links=details.querySelector('nav');
+    if(!installedSummary||!links)return;
+    for(const [label,mode] of [['Contact','contact'],['Search','search']]){
+      const btn=make('button','gtz-native-action',label);btn.type='button';addMenuSubtitle(btn);
+      btn.addEventListener('click',()=>{closeInstalledMenu();if(dock.dataset.mode!==mode)setMode(mode);});
+      links.append(btn);
+    }
+    details.addEventListener('toggle',()=>{
+      document.documentElement.classList.toggle('gtz-native-menu-open',details.open);
+      if(details.open&&dock.dataset.mode!=='closed')setMode('closed');
+    });
+    installedSummary.addEventListener('click',e=>{
+      if(performance.now()<installedSuppress){e.preventDefault();return;}
+      if(dock.dataset.mode!=='closed'){e.preventDefault();setMode('closed');closeInstalledMenu();}
+    });
+    const cancelHold=()=>{clearTimeout(installedHold);installedHold=0;installedPress=null;};
+    installedSummary.addEventListener('pointerdown',e=>{
+      if(e.button!==0)return;cancelHold();installedPress={x:e.clientX,y:e.clientY};
+      installedHold=setTimeout(()=>{installedSuppress=performance.now()+900;closeInstalledMenu();if(dock.dataset.mode!=='search')setMode('search');},540);
+    });
+    installedSummary.addEventListener('pointermove',e=>{if(installedPress&&Math.hypot(e.clientX-installedPress.x,e.clientY-installedPress.y)>12)cancelHold();});
+    for(const event of ['pointerup','pointercancel','pointerleave'])installedSummary.addEventListener(event,cancelHold);
+    installedSummary.addEventListener('contextmenu',e=>e.preventDefault());
+    document.addEventListener('pointerdown',e=>{if(details.open&&!details.contains(e.target))closeInstalledMenu();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeInstalledMenu();});
+    details.addEventListener('click',e=>{if(e.target.closest('a[href]'))closeInstalledMenu();});
+    window.addEventListener('pagehide',()=>{cancelHold();closeInstalledMenu();});
+  }
   dock.dataset.menuWired='true';
   document.documentElement.classList.add('gtz-menu-ready');
-  for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu')){
-    fallback.open=false;
-  }
+  bindInstalledMenu();
+  if(!nativeInstalledMenu)for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu'))fallback.open=false;
   const footer=document.querySelector('footer');if(footer){const link=make('button','site-footer-contact','문의하기 ↗');link.type='button';link.addEventListener('click',()=>setMode('contact'));footer.append(link);}
 
   let dismissed=false;try{dismissed=sessionStorage.getItem('gamttiz-entry-dismissed')==='1';}catch{}
@@ -693,13 +737,15 @@ function syncPersistentMenu(){
   const ready=dock.dataset.menuWired==='true'&&dock.isConnected&&
     trigger.parentNode===dock&&menu.parentNode===dock;
   document.documentElement.classList.toggle('gtz-menu-ready',ready);
-  if(ready)for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu')){
+  if(nativeInstalledMenu)bindInstalledMenu();
+  if(ready&&!nativeInstalledMenu)for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu')){
     if(fallback.open)fallback.open=false;
   }
 }
 syncPersistentMenu();
 window.addEventListener('pageshow',event=>{
   clearTimeout(holdTimer);start=null;gestureHandled=false;lastTouchRelease=-Infinity;
+  if(nativeInstalledMenu){closeInstalledMenu();clearTimeout(installedHold);installedSuppress=0;}
   if(event.persisted&&dock.dataset.mode!=='closed')setMode('closed');
   syncPersistentMenu();
 });
@@ -1083,7 +1129,7 @@ const walletMedia=matchMedia('(max-width: 900px)');
     open=next;sheet.classList.toggle('is-open',next);
     sheet.setAttribute('aria-hidden',String(!next));sheet.inert=!next;
     clearTimeout(sheetTimer);
-    if(next){if(dock.dataset.mode!=='closed')setMode(dock.dataset.mode);return;}
+    if(next){if(nativeInstalledMenu)closeInstalledMenu();if(dock.dataset.mode!=='closed')setMode(dock.dataset.mode);return;}
     lastOpened=performance.now();firstHit=null;
     sheetTimer=setTimeout(()=>{
       if(!open){resetSheetDrag();presented=false;disposeWallet();frame.replaceChildren();frameStarted=false;sheet.classList.remove('is-visible');document.documentElement.classList.remove('gtz-wallet-open');notifyFrame();}
