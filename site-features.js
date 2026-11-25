@@ -470,7 +470,7 @@
     if(dock.parentNode!==document.body)document.body.append(dock);
     if(trigger.parentNode!==dock)dock.append(trigger);
   };
-  new MutationObserver(()=>{if(!dock.isConnected)keepDockMounted();}).observe(document.body,{childList:true});
+  new MutationObserver(()=>{if(!dock.isConnected||trigger.parentNode!==dock||menu.parentNode!==dock||scrim.parentNode!==document.body)syncPersistentMenu();}).observe(document.body,{childList:true});
   window.addEventListener('pageshow',keepDockMounted);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)keepDockMounted();});
   // Restart one complete light sweep for every touch or mouse press.
@@ -583,7 +583,7 @@
     if(gestureHandled){gestureHandled=false;return;}
     setMode('menu');
   });
-  dock.dataset.menuWired='true';
+
   let menuSwipeX=null;
   menu.addEventListener('pointerdown',event=>{if(!menuLinks.contains(event.target))menuSwipeX=event.clientX;});
   menu.addEventListener('pointerup',event=>{if(menuSwipeX!==null && event.clientX-menuSwipeX < -45)setMode('search');menuSwipeX=null;});
@@ -599,6 +599,13 @@
     if(event.key==='Escape'&&dock.dataset.mode!=='closed'){event.preventDefault();setMode('closed');trigger.focus({preventScroll:true});}
     if((event.key==='/'&&!/input|textarea/i.test(document.activeElement?.tagName||''))||(event.key.toLowerCase()==='k'&&(event.ctrlKey||event.metaKey))){event.preventDefault();if(dock.dataset.mode!=='search')setMode('search');}
   });
+  // The menu is interactive now. Never use transient WebKit geometry or
+  // animation opacity to switch it back to a different navigation control.
+  dock.dataset.menuWired='true';
+  document.documentElement.classList.add('gtz-menu-ready');
+  for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu')){
+    fallback.open=false;
+  }
   const footer=document.querySelector('footer');if(footer){const link=make('button','site-footer-contact','문의하기 ↗');link.type='button';link.addEventListener('click',()=>setMode('contact'));footer.append(link);}
 
   let dismissed=false;try{dismissed=sessionStorage.getItem('gamttiz-entry-dismissed')==='1';}catch{}
@@ -672,17 +679,23 @@ window.addEventListener('resize', scheduleMenuTextColorUpdate);
 window.addEventListener('load', scheduleMenuTextColorUpdate);
 window.addEventListener('pageshow', scheduleMenuTextColorUpdate);
 window.visualViewport?.addEventListener('resize',scheduleMenuTextColorUpdate,{passive:true});
-updateMenuTextColor();
+try{updateMenuTextColor();}catch{/* Navigation remains ready. */}
 
-// Only suppress the static, no-script navigation fallback once the complete
-// interactive menu is mounted and visibly inside the viewport.
+// Keep the same ready menu through cached-page restores, rotation, and
+// transient viewport/compositor changes. Only actual disconnection or
+// loss of the interactive structure can require the native fallback.
 function syncPersistentMenu(){
   keepDockMounted();
-  const r=trigger.getBoundingClientRect(),style=getComputedStyle(trigger);
-  const visible=dock.dataset.menuWired==='true'&&trigger.isConnected&&r.width>=40&&r.height>=40&&
-    r.right>0&&r.bottom>0&&r.left<window.innerWidth&&r.top<window.innerHeight&&
-    style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>.1;
-  document.documentElement.classList.toggle('gtz-menu-ready',visible);
+  if(search.parentNode!==dock||menu.parentNode!==dock||contact.parentNode!==dock){
+    dock.append(search,menu,contact,trigger);
+  }
+  if(scrim.parentNode!==document.body)document.body.insertBefore(scrim,dock);
+  const ready=dock.dataset.menuWired==='true'&&dock.isConnected&&
+    trigger.parentNode===dock&&menu.parentNode===dock;
+  document.documentElement.classList.toggle('gtz-menu-ready',ready);
+  if(ready)for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu')){
+    if(fallback.open)fallback.open=false;
+  }
 }
 syncPersistentMenu();
 window.addEventListener('pageshow',event=>{
