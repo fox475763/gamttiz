@@ -1061,4 +1061,21 @@ body > .gtz-rescue-menu > nav > a{
 body > .gtz-rescue-menu > nav > a:focus-visible{
   outline:2px solid #fff;outline-offset:1px;
 }
-@media(min-width:901px){body > .gtz-rescue-menu{display:none!important}}
+@media(min-width:901px){
+  body > .gtz-rescue-menu{right:22px;bottom:22px;width:68px;height:68px}
+  body > .gtz-rescue-menu > summary{width:68px;height:68px}
+}
+ /* An incomplete enhanced control must not cover the working native fallback. */
+body > .control-dock:not([data-menu-wired="true"]){display:none!important;pointer-events:none!important}
+body > .control-dock > .control-trigger{pointer-events:auto!important;touch-action:none}
+body > .control-dock > .control-trigger :is(.gtz-liquid-optics,.control-trigger-label,canvas),
+body > .control-dock > .control-trigger::before,
+body > .control-dock > .control-trigger::after{pointer-events:none!important}
+body > .gtz-rescue-menu > summary{
+  background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(20,12,18,.10) 55%,rgba(255,255,255,.11));
+  -webkit-backdrop-filter:blur(5px) saturate(1.2);backdrop-filter:blur(5px) saturate(1.2);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.30),0 9px 28px rgba(20,12,17,.14);
+}
+html:not(.gtz-menu-ready) body > .gtz-rescue-menu{z-index:2147483001}
+
