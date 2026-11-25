@@ -225,6 +225,40 @@
         const spine=joinedCtx.getImageData(W-8,Math.floor(H/2),1,1).data;
         joinedCtx.fillStyle='rgb('+spine[0]+','+spine[1]+','+spine[2]+')';
         joinedCtx.fillRect(W-4,0,8,H);
+        // Remove the white matte ONLY around the outside of the joined
+        // passport. Recover fractional alpha at the antialiased corners
+        // so there is no white halo on a dark or coloured background.
+        const clearOuterMatte=(x,y,width,height,edge)=>{
+          const patch=joinedCtx.getImageData(x,y,width,height);
+          const p=patch.data;
+          for(let i=0;i<p.length;i+=4){
+            const r=p[i],g=p[i+1],b=p[i+2];
+            const white=Math.max(0,Math.min(1,((g-edge[1])/(255-edge[1])+(b-edge[2])/(255-edge[2]))/2));
+            if(white<.008)continue;
+            // White/red blends belong to the outer matte, not gold artwork.
+            const expectedR=edge[0]+(255-edge[0])*white;
+            const expectedG=edge[1]+(255-edge[1])*white;
+            const expectedB=edge[2]+(255-edge[2])*white;
+            if(Math.abs(r-expectedR)>18||Math.abs(g-expectedG)>12||Math.abs(b-expectedB)>12)continue;
+            const a=1-white;
+            p[i]=edge[0];p[i+1]=edge[1];p[i+2]=edge[2];
+            p[i+3]=Math.round(a*255);
+          }
+          joinedCtx.putImageData(patch,x,y);
+        };
+        const outer=64,edgeStrip=4;
+        for(const [offset,side] of [[0,'left'],[W,'right']]){
+          const edge=joinedCtx.getImageData(offset+Math.floor(W/2),8,1,1).data;
+          const outerX=side==='left'?0:2*W-outer;
+          clearOuterMatte(outerX,0,outer,outer,edge);
+          clearOuterMatte(outerX,H-outer,outer,outer,edge);
+          // Exclude the already processed corners and the central spine.
+          const left=side==='left'?outer:W+4;
+          const right=side==='left'?W-4:2*W-outer;
+          clearOuterMatte(left,0,right-left,edgeStrip,edge);
+          clearOuterMatte(left,H-edgeStrip,right-left,edgeStrip,edge);
+          clearOuterMatte(side==='left'?0:2*W-edgeStrip,outer,edgeStrip,H-2*outer,edge);
+        }
         // Keep Korean names and make the generated filename safe on Windows.
         const safeName=String(record.name).replace(/[<>:"/\\|?*\u0000-\u001f\u007f]/g,'_').trim().replace(/[. ]+$/g,'')||'사용자';
         const safeNumber=String(record.number).replace(/\s/g,'').replace(/[<>:"/\\|?*]/g,'_');
