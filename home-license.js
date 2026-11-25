@@ -106,7 +106,7 @@
         date=['year','month','day'].map(type=>parts.find(p=>p.type===type)?.value||'').join('.');
       }
       ctx.fillStyle='#ffe09a';ctx.textAlign='left';ctx.textBaseline='alphabetic';
-      ctx.font='42px Georgia,"Times New Roman",serif';ctx.fillText('issued date.',129,1401);
+      ctx.font='42px Georgia,"Times New Roman",serif';ctx.fillText('Date of Issue:',129,1401);
       ctx.font='600 39px "Wanted Sans Variable",Arial,sans-serif';ctx.fillText(date,129,1460,545);
       ctx.font='500 23px Arial,sans-serif';ctx.fillText('SCAN TO OPEN MY ID',129,1547,545);
       const module=6,quiet=4,x=704,y=1340,size=(qrMatrix.length+quiet*2)*module;
