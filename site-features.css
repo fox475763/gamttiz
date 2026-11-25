@@ -1091,3 +1091,67 @@ body > .control-dock > .control-trigger{pointer-events:auto!important;touch-acti
 body > .control-dock > .control-trigger :is(.gtz-liquid-optics,.control-trigger-label,canvas),
 body > .control-dock > .control-trigger::before,
 body > .control-dock > .control-trigger::after{pointer-events:none!important}
+
+/* Installed mobile web apps: one native, always-painted Menu.
+   Do not hide it based on a JS ready flag, compositor state or viewport probe.
+   The button itself uses a translucent CSS face, never a filtered canvas. */
+@media(max-width:900px){
+  html.gtz-native-menu body > details.gtz-rescue-menu{
+    display:block!important;position:fixed!important;z-index:2147483001!important;
+    top:auto!important;left:auto!important;right:14px!important;
+    bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;
+    width:62px!important;height:62px!important;opacity:1!important;
+    visibility:visible!important;overflow:visible!important;
+    transform:none!important;filter:none!important;isolation:auto!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    pointer-events:auto!important;
+  }
+  html.gtz-native-menu body > .gtz-rescue-menu > summary{
+    display:grid!important;place-items:center;visibility:visible!important;opacity:1!important;
+    transform:none!important;filter:none!important;transition:none!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    background:linear-gradient(145deg,rgba(255,255,255,.24),rgba(255,255,255,.045) 48%,rgba(20,12,18,.12) 73%,rgba(255,255,255,.12))!important;
+    border:1px solid rgba(255,255,255,.72)!important;
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.30),0 5px 16px rgba(20,12,17,.12)!important;
+    -webkit-text-fill-color:currentColor;touch-action:manipulation;
+  }
+  html.gtz-native-menu body > .gtz-rescue-menu > summary::before{
+    inset:1px!important;border:1px solid rgba(255,255,255,.26)!important;
+    background:none!important;-webkit-mask:none!important;mask:none!important;
+  }
+  html.gtz-native-menu body > .gtz-rescue-menu[open] > summary,
+  html.gtz-native-menu body:has(> .control-dock:is([data-mode="search"],[data-mode="contact"])) > .gtz-rescue-menu > summary{
+    background:rgba(255,255,255,.92)!important;color:#e93636!important;
+  }
+  html.gtz-native-menu body > .control-dock:is([data-mode="closed"],[data-mode="menu"]){display:none!important}
+  html.gtz-native-menu body > .control-dock > .control-trigger{display:none!important;pointer-events:none!important}
+  html.gtz-native-menu body > .control-dock[data-mode="search"]{right:14px!important;width:calc(100vw - 28px)!important}
+  html.gtz-native-menu body > .gtz-rescue-menu > nav{gap:6px;max-height:calc(100dvh - 115px);scrollbar-width:none;touch-action:pan-y}
+  html.gtz-native-menu body > .gtz-rescue-menu > nav::-webkit-scrollbar{display:none}
+  html.gtz-native-menu body > .gtz-rescue-menu > nav > :is(a,button){
+    position:relative;display:flex;align-items:center;gap:8px;box-sizing:border-box;
+    width:84%;min-height:39px;padding:7px 11px;
+    border:1px solid rgba(255,255,255,.34);border-radius:999px;
+    background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(20,12,18,.10) 65%,rgba(255,255,255,.045));
+    color:#fff;font-family:inherit;font-size:.81rem;font-weight:720;line-height:1.2;
+    text-align:left;text-decoration:none;text-shadow:0 1px 3px #000b;box-shadow:none;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    touch-action:manipulation;cursor:pointer;transition:width .25s ease,background-color .2s ease;
+  }
+  html.gtz-native-menu body > .gtz-rescue-menu > nav > :is(a,button) > svg{flex:none;width:16px;height:16px}
+  html.gtz-native-menu body > .gtz-rescue-menu > nav > :is(a,button) > span:not(.control-menu-optics){display:flex;flex-direction:column;gap:2px}
+  html.gtz-native-menu body > .gtz-rescue-menu > nav > :is(a,button) small{font-size:.65rem;color:rgba(255,255,255,.72);font-weight:500}
+  html.gtz-native-menu body > .gtz-rescue-menu > nav > button > .control-menu-optics{display:none!important}
+  html.gtz-native-menu body > .gtz-rescue-menu > nav > :is(a,button):is([aria-current="page"],:active,:focus-visible){
+    width:100%;background:rgba(255,255,255,.92);color:#e93636;text-shadow:none;
+  }
+  html.gtz-native-menu body > .gtz-rescue-menu > nav > :is(a,button):is([aria-current="page"],:active,:focus-visible) small{color:#e93636}
+  html.gtz-native-menu body > .gtz-rescue-menu[open] > nav > :is(a,button){animation:gtz-native-menu-enter .28s cubic-bezier(.2,.8,.25,1) both}
+  @keyframes gtz-native-menu-enter{from{opacity:0;translate:0 9px}to{opacity:1;translate:0 0}}
+  @media(prefers-reduced-motion:reduce){html.gtz-native-menu body > .gtz-rescue-menu[open] > nav > :is(a,button){animation:none!important;transition:none!important}}
+}
+/* CSS-only safeguard for standalone startup before scripts run. */
+@media(max-width:900px) and (display-mode:standalone){
+  html:root body > details.gtz-rescue-menu{display:block!important;visibility:visible!important;opacity:1!important}
+  html:not(.gtz-native-menu) body > .control-dock{display:none!important}
+}
