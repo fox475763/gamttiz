@@ -513,7 +513,7 @@ body.license-page:not(.license-wallet-view) .license-main{padding-bottom:90px}
 .license-save-dialog .license-save-images>div{min-width:0}
 .license-save-dialog .license-save-images #license-save-combined{
   display:block;width:100%;height:auto;max-height:min(56dvh,480px);
-  aspect-ratio:2196/1718;object-fit:contain;border-radius:9px;
+  aspect-ratio:2160/1718;object-fit:contain;border-radius:9px;
 }
 .license-save-dialog .license-save-images #license-save-combined-link{
   display:inline-flex;align-items:center;justify-content:center;
