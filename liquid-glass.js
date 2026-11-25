@@ -194,7 +194,15 @@
       document.addEventListener('gtz-home-scroll-state',()=>{if(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling)suspendRims();else if(moving){clearTimeout(settleTimer);settleTimer=setTimeout(resumeRims,220);}});
       document.addEventListener('gtz-home-palette',()=>{if(moving)return;suspendRims();});
     }
-    addEventListener('pageshow',()=>{scan(document);syncVisibility();});
+    function releasePageFrame(){
+      if(frame)cancelAnimationFrame(frame);frame=0;
+      clearTimeout(idleTimer);idleTimer=0;clearTimeout(settleTimer);settleTimer=0;
+      moving=false;document.documentElement.classList.remove('gtz-liquid-scrolling');
+      for(const state of tracked.values())state.canvas?.removeAttribute('data-lens-ready');
+    }
+    addEventListener('pagehide',releasePageFrame);
+    addEventListener('pageshow',()=>{releasePageFrame();scanRemoved();scan(document);syncVisibility();});
+
     document.addEventListener('visibilitychange',syncVisibility);document.addEventListener('gtz-wallet-visibility',syncVisibility);reduced.addEventListener?.('change',schedule);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else if(document.readyState==='interactive')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
