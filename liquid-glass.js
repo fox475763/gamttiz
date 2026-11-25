@@ -19,9 +19,6 @@
   function add(el){
     // Keep the full optical glass face on iOS Home Screen Menu; only suppress
     // the fragile sampled canvas pass later. The real WebKit backdrop stays live.
-    // The license page's touch-only Menu has a stable CSS glass face.
-    // Do not allocate a filtered layer or sample the animated card behind it.
-    if(el.classList.contains?.('control-trigger')&&document.body.classList.contains('license-page')&&matchMedia('(max-width:900px) and (pointer:coarse)').matches)return;
     if(el.closest('.gtz-liquid-optics'))return;
     let state=tracked.get(el);
     if(state&&state.layer.isConnected)return;
@@ -160,7 +157,7 @@
       if(!state||r.width<2||r.height<2||style.visibility==='hidden'||Number(style.opacity)<.05)continue;
       // iOS installed apps can evict sampled pixels after scene navigation.
       // Retain the canonical blur/sheen/rim on the trigger without Canvas2D.
-      if(standaloneIOS&&el.classList.contains('control-trigger'))continue;
+      if(el.classList.contains('control-trigger')&&(standaloneIOS||(document.body.classList.contains('license-page')&&matchMedia('(pointer:coarse)').matches)))continue;
       try{if(native)nativeFilter(el,state,r,style,optics);else canvasFilter(el,state,r,style,optics,now);}catch{/* Native clear face stays visible. */}
     }
     if(!native&&!moving){
@@ -197,6 +194,7 @@
       document.addEventListener('gtz-home-scroll-state',()=>{if(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling)suspendRims();else if(moving){clearTimeout(settleTimer);settleTimer=setTimeout(resumeRims,220);}});
       document.addEventListener('gtz-home-palette',()=>{if(moving)return;suspendRims();});
     }
+    addEventListener('pageshow',()=>{scan(document);syncVisibility();});
     document.addEventListener('visibilitychange',syncVisibility);document.addEventListener('gtz-wallet-visibility',syncVisibility);reduced.addEventListener?.('change',schedule);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else if(document.readyState==='interactive')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
