@@ -825,26 +825,35 @@ const walletMedia=matchMedia('(max-width: 900px)');
     recoveryTimer=setTimeout(async()=>{
       recoveryTimer=0;
       if(sensorSeen||requesting||!mayRecover())return;
-      // Only check an existing grant WITHOUT transient activation. A new
-      // permission prompt is forbidden without that activation by WebKit.
-      // If Safari discarded the grant the call rejects; retain the setting
-      // and offer manual reconnection only on the issued MY ID page.
-      if(!silentAttempted&&navigator.userActivation?.isActive===false){
-        silentAttempted=true;silentPending=true;
-        const epoch=recoveryEpoch;
-        try{
-          const result=await window.DeviceMotionEvent.requestPermission();
-          if(epoch!==recoveryEpoch||!mayRecover())return;
-          if(result==='granted'){sessionAllowed=true;silentPending=false;watchSensor();return;}
-        }catch{}
-        finally{if(epoch===recoveryEpoch)silentPending=false;}
-        if(epoch!==recoveryEpoch)return;
+      // A retained setting is not a new permission grant. Only probe an
+      // existing OS grant when there is no active user gesture.
+      if(!silentAttempted){
+        if(navigator.userActivation?.isActive===true){watchSensor();return;}
+        if(navigator.userActivation?.isActive===false){
+          silentAttempted=true;silentPending=true;
+          const epoch=recoveryEpoch;
+          try{
+            const result=await window.DeviceMotionEvent.requestPermission();
+            if(epoch!==recoveryEpoch||!mayRecover())return;
+            if(result==='granted'){
+              sessionAllowed=true;recoveryNeeded=false;
+              shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
+              updateSetting();return;
+            }
+          }catch{}
+          finally{if(epoch===recoveryEpoch)silentPending=false;}
+          if(epoch!==recoveryEpoch)return;
+          if(!sensorSeen){sessionAllowed=false;recoveryNeeded=true;}
+        }
       }
       if(!mayRecover()||sensorSeen)return;
+      // A previously granted permission can take time to deliver events
+      // after WebKit resumes. Do not mark it revoked simply for being idle.
+      if(sessionAllowed&&!recoveryNeeded)return;
       recoveryNeeded=true;sessionAllowed=false;
-      shakeStatus.textContent='흔들기 설정은 유지됐어요. Safari 센서 권한을 다시 연결해주세요.';
+      shakeStatus.textContent='흔들기 설정은 유지됐어요. iOS에서 센서 권한을 다시 요청한 경우만 연결해주세요.';
       updateSetting();
-    },1200);
+    },500);
   }
   shakeButton.addEventListener('click',()=>{
     if(!mobile()||!hasCard()||!canMotion()||requesting||document.body.classList.contains('license-animating'))return;
@@ -1091,7 +1100,11 @@ const walletMedia=matchMedia('(max-width: 900px)');
   }
   window.addEventListener('devicemotion',motion,{passive:true});
   function resumeSensors(){
-    restorePreference();resetSensor();
+    restorePreference();
+    // Do not discard an already granted session on every app foreground.
+    // Reattach the listener and recheck the OS grant if necessary.
+    clearRecovery();silentAttempted=false;sensorSeen=false;firstHit=null;gravity=null;
+    if(enabled&&sessionAllowed)shakeStatus.textContent='휴대폰을 좌우로 두 번 가볍게 흔들어 카드를 열어보세요.';
     window.removeEventListener?.('devicemotion',motion);
     window.addEventListener('devicemotion',motion,{passive:true});sync();
   }
