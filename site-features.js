@@ -529,25 +529,34 @@
     trigger.animate?.([{scale:'1',offset:0},{scale:'.955',offset:.53},{scale:'1.035',offset:.79},{scale:'1',offset:1}],{duration:690,easing:'cubic-bezier(.3,.7,.23,1)'});
     menuCloseTimer=window.setTimeout(finishMenuClose,870);
   }
+  // Commit the interactive state before any optional optical animation.
+  // A compositor or animation failure must never disable navigation.
   function setMode(mode){
     if(mode==='closed'&&dock.dataset.mode==='closed')return;
     const next=dock.dataset.mode===mode?'closed':mode;
     const wasMenu=dock.dataset.mode==='menu';
-    if(dock.hasAttribute('data-menu-closing'))finishMenuClose();
-    if(wasMenu&&next==='closed')beginMenuClose();
+    try{
+      if(dock.hasAttribute('data-menu-closing'))finishMenuClose();
+      if(wasMenu&&next==='closed')beginMenuClose();
+    }catch{delete dock.dataset.menuClosing;}
     dock.dataset.mode=next;
-    toggleMenuRefraction(next==='menu');
-    if(next==='menu'){syncCurrentMenuLink();clearGuide();resetGuideSpring();menuScroll.scrollTop=0;}
-    if(next==='contact')contactScroll.scrollTop=0;
-    updateMenuTextColor();
     scrim.classList.toggle('is-open',next!=='closed');
     trigger.setAttribute('aria-expanded',String(next!=='closed'));
-    for(const [name,panel] of [['search',search],['menu',menu],['contact',contact]]){const active=next===name;panel.inert=!active;panel.setAttribute('aria-hidden',String(!active));}
+    for(const [name,panel] of [['search',search],['menu',menu],['contact',contact]]){
+      const active=next===name;panel.inert=!active;panel.setAttribute('aria-hidden',String(!active));
+    }
     trigger.setAttribute('aria-label',next==='closed'?'컨트롤 버튼: 누르면 메뉴, 길게 누르면 검색':`${next==='search'?'검색':next==='menu'?'메뉴':'문의'} 닫기`);
-    if(next==='search'){renderResults();loadSearchNews();window.setTimeout(()=>searchInput.focus({preventScroll:true}),180);}
-    else if(document.activeElement===searchInput)trigger.focus({preventScroll:true});
+    try{toggleMenuRefraction(next==='menu');}catch{delete dock.dataset.menuRefraction;}
+    if(next==='menu'){
+      try{syncCurrentMenuLink();clearGuide();resetGuideSpring();}catch{}
+      menuScroll.scrollTop=0;
+    }
+    if(next==='contact')contactScroll.scrollTop=0;
+    try{updateMenuTextColor();}catch{}
+    if(next==='search'){try{renderResults();loadSearchNews();window.setTimeout(()=>searchInput.focus({preventScroll:true}),180);}catch{}}
+    else if(document.activeElement===searchInput)try{trigger.focus({preventScroll:true});}catch{}
   }
-  let start=null, holdTimer=0, gestureHandled=false;
+  let start=null, holdTimer=0, gestureHandled=false,lastTouchRelease=-Infinity;
   trigger.addEventListener('pointerdown',event=>{
     start={x:event.clientX,y:event.clientY};gestureHandled=false;
     clearTimeout(holdTimer);
@@ -558,13 +567,23 @@
     clearTimeout(holdTimer);
     if(!start)return;
     const dx=event.clientX-start.x,dy=event.clientY-start.y;start=null;
-    if(gestureHandled)return;
+    if(gestureHandled){if(event.pointerType==='touch')lastTouchRelease=performance.now();return;}
     if(dx < -34 && Math.abs(dx)>Math.abs(dy)){gestureHandled=true;setMode('search');}
     else if(dy < -34 && Math.abs(dy)>Math.abs(dx)){gestureHandled=true;setMode('menu');}
+    // Do not depend on WebKit dispatching a synthetic click after touch.
+    if(event.pointerType==='touch'){
+      lastTouchRelease=performance.now();
+      if(!gestureHandled&&Math.hypot(dx,dy)<18){gestureHandled=true;setMode('menu');}
+    }
   });
-  trigger.addEventListener('pointercancel',()=>{clearTimeout(holdTimer);start=null;});
+  trigger.addEventListener('pointercancel',()=>{clearTimeout(holdTimer);start=null;gestureHandled=false;});
   trigger.addEventListener('contextmenu',event=>event.preventDefault());
-  trigger.addEventListener('click',()=>{if(gestureHandled){gestureHandled=false;return;}setMode('menu');});
+  trigger.addEventListener('click',event=>{
+    if(event.detail!==0&&performance.now()-lastTouchRelease<750){gestureHandled=false;return;}
+    if(gestureHandled){gestureHandled=false;return;}
+    setMode('menu');
+  });
+  dock.dataset.menuWired='true';
   let menuSwipeX=null;
   menu.addEventListener('pointerdown',event=>{if(!menuLinks.contains(event.target))menuSwipeX=event.clientX;});
   menu.addEventListener('pointerup',event=>{if(menuSwipeX!==null && event.clientX-menuSwipeX < -45)setMode('search');menuSwipeX=null;});
@@ -660,13 +679,17 @@ updateMenuTextColor();
 function syncPersistentMenu(){
   keepDockMounted();
   const r=trigger.getBoundingClientRect(),style=getComputedStyle(trigger);
-  const visible=trigger.isConnected&&r.width>=40&&r.height>=40&&
+  const visible=dock.dataset.menuWired==='true'&&trigger.isConnected&&r.width>=40&&r.height>=40&&
     r.right>0&&r.bottom>0&&r.left<window.innerWidth&&r.top<window.innerHeight&&
     style.display!=='none'&&style.visibility!=='hidden'&&Number(style.opacity)>.1;
   document.documentElement.classList.toggle('gtz-menu-ready',visible);
 }
 syncPersistentMenu();
-window.addEventListener('pageshow',syncPersistentMenu);
+window.addEventListener('pageshow',event=>{
+  clearTimeout(holdTimer);start=null;gestureHandled=false;lastTouchRelease=-Infinity;
+  if(event.persisted&&dock.dataset.mode!=='closed')setMode('closed');
+  syncPersistentMenu();
+});
 window.addEventListener('orientationchange',syncPersistentMenu);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncPersistentMenu();});
 if(iosStandalone)window.setInterval(syncPersistentMenu,2600);
