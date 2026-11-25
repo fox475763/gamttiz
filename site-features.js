@@ -1,5 +1,6 @@
 (() => {
   const page = location.pathname.split('/').pop() || 'index.html';
+  if(document.body?.querySelector(':scope > .control-dock[data-menu-wired="true"]'))return;
   // iOS Home Screen apps use a separate WebKit compositor and page cache.
   // Preserve a reliable native CSS Menu control instead of canvas refraction.
   const iosStandalone = (navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) &&
@@ -681,9 +682,10 @@ window.addEventListener('pageshow', scheduleMenuTextColorUpdate);
 window.visualViewport?.addEventListener('resize',scheduleMenuTextColorUpdate,{passive:true});
 try{updateMenuTextColor();}catch{/* Navigation remains ready. */}
 
-// Keep the same ready menu through cached-page restores, rotation, and
-// transient viewport/compositor changes. Only actual disconnection or
-// loss of the interactive structure can require the native fallback.
+// Preserve the original enhanced menu, including the same button and all
+// handlers. A BFCache restore must never resume a partially closed menu,
+// stale pointer capture, timer, or interrupted button animation.
+let menuRestoreFrame=0,menuRestoreEpoch=0,menuRepairing=false;
 function syncPersistentMenu(){
   keepDockMounted();
   if(search.parentNode!==dock||menu.parentNode!==dock||contact.parentNode!==dock){
@@ -691,21 +693,91 @@ function syncPersistentMenu(){
   }
   if(scrim.parentNode!==document.body)document.body.insertBefore(scrim,dock);
   const ready=dock.dataset.menuWired==='true'&&dock.isConnected&&
-    trigger.parentNode===dock&&menu.parentNode===dock;
+    trigger.parentNode===dock&&menu.parentNode===dock&&
+    search.parentNode===dock&&contact.parentNode===dock;
   document.documentElement.classList.toggle('gtz-menu-ready',ready);
   if(ready)for(const fallback of document.querySelectorAll('body > .gtz-rescue-menu')){
     if(fallback.open)fallback.open=false;
   }
 }
-syncPersistentMenu();
-window.addEventListener('pageshow',event=>{
-  clearTimeout(holdTimer);start=null;gestureHandled=false;lastTouchRelease=-Infinity;
-  if(event.persisted&&dock.dataset.mode!=='closed')setMode('closed');
+function resetMenuForPageLifecycle(){
+  clearTimeout(holdTimer);holdTimer=0;start=null;gestureHandled=false;
+  lastTouchRelease=-Infinity;blockTouchClickUntil=0;menuSwipeX=null;
+  if(menuRestoreFrame)cancelAnimationFrame(menuRestoreFrame);menuRestoreFrame=0;menuRestoreEpoch++;
+  // Close synchronously, without launching another closing animation.
+  dock.dataset.mode='closed';scrim.classList.remove('is-open');
+  trigger.setAttribute('aria-expanded','false');
+  trigger.setAttribute('aria-label','컨트롤 버튼: 누르면 메뉴, 길게 누르면 검색');
+  for(const panel of [search,menu,contact]){panel.inert=true;panel.setAttribute('aria-hidden','true');}
+  try{finishMenuClose();}catch{delete dock.dataset.menuClosing;}
+  try{stopGuideTouch();stopGuideSpring();resetMenuLight();}catch{}
+  clearTimeout(refractionTimer);refractionTimer=0;
+  try{stopMobileLens();}catch{}
+  delete dock.dataset.menuRefraction;
+  // Cancel only the transient pulse on the actual button, not the glass
+  // sheen animations on its decorative descendants.
+  try{trigger.getAnimations?.().forEach(animation=>animation.cancel());}catch{}
+  clearTimeout(glassPressTimers.get(trigger));trigger.classList.remove('glass-pressed');
+  try{if(document.activeElement===searchInput)searchInput.blur();}catch{}
+}
+function repairMenuLayer(){
+  if(menuRepairing||document.hidden||dock.dataset.mode!=='closed')return;
+  if(document.documentElement.classList.contains('gtz-wallet-open')||document.querySelector('dialog[open]'))return;
+  menuRepairing=true;
+  try{
+    syncPersistentMenu();
+    // Reattach the SAME node (no replacement, no listener loss) to rebuild
+    // WebKit's fixed compositing layer after restoring a cached document.
+    const parent=document.body;
+    if(dock.parentNode===parent){dock.remove();parent.append(dock);}
+    syncPersistentMenu();
+    void trigger.offsetWidth;
+    lastButtonColor='';
+    try{updateMenuTextColor();}catch{}
+  }finally{menuRepairing=false;}
+}
+function verifyMenuLayer(){
+  if(document.hidden||dock.dataset.mode!=='closed'||document.documentElement.classList.contains('gtz-wallet-open')||document.querySelector('dialog[open]'))return;
   syncPersistentMenu();
+  const r=trigger.getBoundingClientRect(),cs=getComputedStyle(trigger);
+  const vw=document.documentElement.clientWidth||innerWidth,vh=innerHeight;
+  const x=r.left+r.width/2,y=r.top+r.height/2;
+  if(vw<40||vh<40)return;
+  const valid=r.width>=40&&r.height>=40&&x>=0&&x<vw&&y>=0&&y<vh&&cs.visibility==='visible'&&cs.display!=='none'&&Number(cs.opacity)>.1;
+  let hit=true;
+  if(valid&&document.elementFromPoint){
+    const top=document.elementFromPoint(x,y);
+    hit=!!top&&(top===trigger||trigger.contains(top));
+  }
+  // Only repair a concrete geometry/hit-test failure; never switch the
+  // existing menu to the native fallback based on a transient measurement.
+  if(!valid||!hit)repairMenuLayer();
+}
+function resumeMenuLayer(restored=false){
+  syncPersistentMenu();
+  if(!iosStandalone)return;
+  if(restored){resetMenuForPageLifecycle();repairMenuLayer();}
+  const epoch=++menuRestoreEpoch;
+  if(menuRestoreFrame)cancelAnimationFrame(menuRestoreFrame);
+  menuRestoreFrame=requestAnimationFrame(()=>{
+    menuRestoreFrame=requestAnimationFrame(()=>{
+      menuRestoreFrame=0;if(epoch===menuRestoreEpoch)verifyMenuLayer();
+    });
+  });
+}
+syncPersistentMenu();
+window.addEventListener('pagehide',resetMenuForPageLifecycle);
+window.addEventListener('pageshow',event=>{
+  if(event.persisted&&!iosStandalone)resetMenuForPageLifecycle();
+  resumeMenuLayer(event.persisted);
 });
-window.addEventListener('orientationchange',syncPersistentMenu);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncPersistentMenu();});
-if(iosStandalone)window.setInterval(syncPersistentMenu,2600);
+window.addEventListener('orientationchange',()=>resumeMenuLayer());
+window.visualViewport?.addEventListener('resize',()=>resumeMenuLayer(),{passive:true});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden)resetMenuForPageLifecycle();
+  else resumeMenuLayer(iosStandalone);
+});
+if(iosStandalone)window.setInterval(()=>{if(!document.hidden)verifyMenuLayer();},2400);
 
 // Shake-to-open is a mobile-only wallet and uses explicit sensor consent.
 const walletMedia=matchMedia('(max-width: 900px)');
