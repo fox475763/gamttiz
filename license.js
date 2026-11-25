@@ -219,10 +219,19 @@
             joinedCtx.putImageData(patch,x,y);
           }
         }
-        const base='GAMTTIZ-'+record.number.replace(/\s/g,'');
+        // The original templates have a subpixel white edge at the join.
+        // Paint only the eight-pixel-wide spine with adjacent burgundy.
+        // This stays well outside both gold frames and all card content.
+        const spine=joinedCtx.getImageData(W-8,Math.floor(H/2),1,1).data;
+        joinedCtx.fillStyle='rgb('+spine[0]+','+spine[1]+','+spine[2]+')';
+        joinedCtx.fillRect(W-4,0,8,H);
+        // Keep Korean names and make the generated filename safe on Windows.
+        const safeName=String(record.name).replace(/[<>:"/\\|?*\u0000-\u001f\u007f]/g,'_').trim().replace(/[. ]+$/g,'')||'사용자';
+        const safeNumber=String(record.number).replace(/\s/g,'').replace(/[<>:"/\\|?*]/g,'_');
+        const base=safeName+' '+safeNumber+' 감띠즈 라이센스';
         const blob=await new Promise((resolve,reject)=>joined.toBlob(value=>value?resolve(value):reject(Error('Combined PNG export failed')),'image/png'));
         if(seq!==renderVersion||editing||!record)return;
-        exportFiles=[new File([blob],base+'-passport-spread.png',{type:'image/png'})];
+        exportFiles=[new File([blob],base+'.png',{type:'image/png'})];
         $('download-both').disabled=false;
       }catch{if(seq===renderVersion)status('카드 저장용 이미지를 준비하지 못했어요. 다시 접속해주세요.');}
     };
