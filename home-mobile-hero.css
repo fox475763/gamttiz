@@ -206,11 +206,11 @@
     --stage-fries:.52;
     --stage-dots:.58;
   }
-  body.home-cinema[data-home-scene="0"] .stage-color-layer[data-color="red"]{
+  body.home-cinema .stage-color-layer[data-stage-hero]{
     --fries-opacity:.52;
     --dots-opacity:.58;
   }
-  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::before{
+  body.home-cinema.home-native-touch .home-ambient .stage-color-layer[data-stage-hero].is-palette::before{
     content:"";
     display:block;
     left:-96px;
@@ -243,7 +243,7 @@
     transform-origin:center center;
     animation:gtz-hero-dots-orbit 32s ease-in-out infinite;
   }
-  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::after{
+  body.home-cinema.home-native-touch .home-ambient .stage-color-layer[data-stage-hero].is-palette::after{
     background:
       radial-gradient(circle at 14% 15%,#ffd16c 0 3.5px,transparent 4.5px),
       radial-gradient(circle at 86% 13%,#ffd16c 0 5.5px,transparent 6.5px),
@@ -305,8 +305,8 @@
 
 @media(max-width:700px) and (prefers-reduced-motion:reduce){
   body.home-cinema[data-home-scene="0"] .home-ambient[data-palette="red"]::after,
-  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::after,
-  body.home-cinema.home-native-touch[data-home-scene="0"] .home-ambient .stage-color-layer[data-color="red"].is-palette::before{
+  body.home-cinema.home-native-touch .home-ambient .stage-color-layer[data-stage-hero].is-palette::after,
+  body.home-cinema.home-native-touch .home-ambient .stage-color-layer[data-stage-hero].is-palette::before{
     animation:none!important;
     transform:none!important;
     will-change:auto!important;

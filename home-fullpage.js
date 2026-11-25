@@ -45,8 +45,13 @@
   if(touchNative){
     body.classList.add('home-native-touch');
     viewport.setAttribute('aria-label',body.classList.contains('edition-page')?'콘텐츠, 위아래 스와이프로 장면 이동':'홈 콘텐츠, 위아래 스와이프로 장면 이동');
-    const layers=(isHome?['white','studio','yellow','red']:['white','yellow','red']).map(palette=>{
-      const layer=document.createElement('div');layer.className='stage-color-layer';layer.dataset.color=palette;host.append(layer);return layer;
+    const paletteKeys=isHome?['white','studio','yellow','red','hero-red']:['white','yellow','red'];
+    const layers=paletteKeys.map(key=>{
+      const layer=document.createElement('div');layer.className='stage-color-layer';
+      layer.dataset.color=key==='hero-red'?'red':key;
+      layer.dataset.stageKey=key;
+      if(key==='hero-red')layer.dataset.stageHero='';
+      host.append(layer);return layer;
     });
     const sceneCount=scenes.length;
     viewport.style.setProperty('--scene-count',String(sceneCount));
@@ -56,30 +61,61 @@
     });
     let nativeIndex=0, nativeHeight=0, measureRequest=0, scrollRequest=0, idleTimer=0, scrolling=false;
     let pendingMeasure=false, paletteTimer=0;
-    // Fixed layer order and complementary opacity: the lower layer is
-    // always opaque, so rapid reversals cannot reveal the white base.
-    // Smoothstep maps actual scroll distance to the colour blend.
-    const layerByColor=new Map(layers.map((layer,i)=>[layer.dataset.color,{layer,i}]));
-    const smoothstep=t=>t*t*(3-2*t);
-    function blendStage(position){
-      const p=Math.max(0,Math.min(sceneCount-1,position));
-      const a=Math.floor(p),b=Math.min(sceneCount-1,a+1);
-      const from=order[a].palette,to=order[b].palette;
-      const t=reduced.matches?(p-a>=.5?1:0):smoothstep(p-a);
-      const first=layerByColor.get(from),second=layerByColor.get(to);
-      const weights=new Map();
-      if(from===to||t===0){weights.set(from,1);}
-      else if(t===1){weights.set(to,1);}
-      else if(first.i<second.i){weights.set(from,1);weights.set(to,t);}
-      else{weights.set(to,1);weights.set(from,1-t);}
-      for(const {layer,i} of layerByColor.values()){
-        const opacity=weights.get(layer.dataset.color)||0;
-        const value=opacity.toFixed(5);
-        if(layer.style.opacity!==value)layer.style.opacity=value;
-        layer.classList.toggle('is-palette',opacity>0);
+    // Keep one fully opaque background below one compositor-animated
+    // overlay. No per-scroll-frame style writes or layer reorder while fading.
+    const byKey=new Map(layers.map(layer=>[layer.dataset.stageKey,layer]));
+    const FADE_MS=640;
+    let baseKey=null,overlayKey=null,desiredKey=null,fadeTo=1,fadeTimer=0;
+    const stageKey=index=>isHome&&index===0&&order[index].palette==='red'?'hero-red':order[index].palette;
+    function clearFade(){clearTimeout(fadeTimer);fadeTimer=0;}
+    function stableStage(key){
+      clearFade();baseKey=key;overlayKey=null;fadeTo=1;
+      // The completed overlay is opaque before the old base is removed.
+      for(const layer of layers){
+        const active=layer.dataset.stageKey===key;
+        layer.style.zIndex=active?'1':'0';
+        layer.classList.remove('stage-fading');
+        layer.classList.toggle('is-palette',active);
+        layer.style.opacity=active?'1':'0';
       }
     }
-    function paintStage(){blendStage(viewport.scrollTop/Math.max(1,nativeHeight));}
+    function completeFade(){
+      if(!overlayKey)return;
+      const completed=fadeTo===1?overlayKey:baseKey;
+      stableStage(completed);
+      if(desiredKey!==completed)requestStage(desiredKey);
+    }
+    function fadeOverlay(to){
+      clearFade();fadeTo=to;
+      const layer=byKey.get(overlayKey);
+      layer.style.opacity=String(to);
+      fadeTimer=setTimeout(completeFade,FADE_MS+90);
+    }
+    function requestStage(key,instant=false){
+      if(!byKey.has(key))return;
+      desiredKey=key;
+      if(instant||reduced.matches||document.hidden||!baseKey){stableStage(key);return;}
+      if(overlayKey){
+        // A reversal uses the same two layers and resumes from the current
+        // native transition value. A third colour waits for this fade to end.
+        if(key===baseKey&&fadeTo!==0)fadeOverlay(0);
+        else if(key===overlayKey&&fadeTo!==1)fadeOverlay(1);
+        return;
+      }
+      if(key===baseKey)return;
+      overlayKey=key;
+      const layer=byKey.get(key);
+      layer.style.zIndex='2';
+      layer.style.opacity='0';
+      layer.classList.add('is-palette','stage-fading');
+      // Commit only the start value once, then let the compositor run.
+      void layer.offsetWidth;
+      fadeOverlay(1);
+    }
+    for(const layer of layers)layer.addEventListener('transitionend',event=>{
+      if(event.target!==layer||event.propertyName!=='opacity'||layer.dataset.stageKey!==overlayKey)return;
+      if(Math.abs(Number(getComputedStyle(layer).opacity)-fadeTo)<.005)completeFade();
+    });
     const indexAt=()=>Math.max(0,Math.min(sceneCount-1,Math.round(viewport.scrollTop/Math.max(1,nativeHeight))));
     const indexFromHash=hash=>{
       if(!hash||hash==='#')return 0;
@@ -91,6 +127,7 @@
       if(index===nativeIndex&&body.dataset.homeScene!==undefined&&!announce)return;
       nativeIndex=index;
       const palette=order[index].palette;
+      requestStage(stageKey(index));
       if(host.dataset.palette!==palette){
         host.dataset.palette=palette;body.dataset.homePalette=palette;
         clearTimeout(paletteTimer);
@@ -137,19 +174,19 @@
     function settle(){
       clearTimeout(idleTimer);idleTimer=0;
       if(scrollRequest)cancelAnimationFrame(scrollRequest);scrollRequest=0;
-      setMoving(false);paintStage();selectScene(indexAt(),true);
+      setMoving(false);selectScene(indexAt(),true);
       if(pendingMeasure)queueMeasure();
     }
     viewport.addEventListener('scroll',()=>{
       setMoving(true);
-      if(!scrollRequest)scrollRequest=requestAnimationFrame(()=>{scrollRequest=0;paintStage();if(indexAt()!==nativeIndex)selectScene(indexAt());});
+      if(indexAt()!==nativeIndex&&!scrollRequest)scrollRequest=requestAnimationFrame(()=>{scrollRequest=0;selectScene(indexAt());});
       clearTimeout(idleTimer);idleTimer=setTimeout(settle,180);
     },{passive:true});
     if('onscrollend' in viewport)viewport.addEventListener('scrollend',settle,{passive:true});
     const goNative=(i,instant=false)=>{
       const index=Math.max(0,Math.min(sceneCount-1,i));
       viewport.scrollTo({top:index*nativeHeight,behavior:instant||reduced.matches?'instant':'smooth'});
-      if(instant){blendStage(index);selectScene(index,true);}
+      if(instant){requestStage(stageKey(index),true);selectScene(index,true);}
     };
     document.addEventListener('click',e=>{
       const link=e.target.closest?.('a[href^="#"]');
@@ -168,7 +205,7 @@
       boot();host.classList.add('stage-initial');
       clearTimeout(idleTimer);idleTimer=0;setMoving(false);
       if(scrollRequest)cancelAnimationFrame(scrollRequest);scrollRequest=0;
-      nativeIndex=index;measureNative();viewport.scrollTop=index*nativeHeight;blendStage(index);selectScene(index,true);
+      nativeIndex=index;measureNative();viewport.scrollTop=index*nativeHeight;requestStage(stageKey(index),true);selectScene(index,true);
       // The snap target and scroll offset must be committed before the first
       // paint. In particular WebKit can restore an old inner-scroll offset
       // even though history.scrollRestoration is manual.
@@ -179,7 +216,7 @@
           // Browser restoration runs after pageshow; keep its old offset
           // invisible, then reveal the first correctly positioned frame.
           viewport.scrollTop=index*nativeHeight;
-          unboot();viewport.scrollTop=index*nativeHeight;blendStage(index);selectScene(index,true);
+          unboot();viewport.scrollTop=index*nativeHeight;requestStage(stageKey(index),true);selectScene(index,true);
           host.classList.remove('stage-initial');
         });
       });
@@ -193,7 +230,7 @@
     });addEventListener('load',queueMeasure,{once:true});
     document.fonts?.ready.then(queueMeasure);
     if('ResizeObserver' in window){const observer=new ResizeObserver(queueMeasure);observer.observe(viewport);scenes.forEach(el=>observer.observe(el));}
-    const syncPaused=()=>{host.classList.toggle('stage-paused',document.hidden||reduced.matches);if(!document.hidden)paintStage();};
+    const syncPaused=()=>{host.classList.toggle('stage-paused',document.hidden||reduced.matches);if(document.hidden||reduced.matches)requestStage(stageKey(indexAt()),true);else requestStage(stageKey(indexAt()));};
     document.addEventListener('visibilitychange',syncPaused);reduced.addEventListener?.('change',syncPaused);syncPaused();
     return;
   }
