@@ -68,3 +68,42 @@ body.products-edition #product-inquiry .clean-contact-list a{
     height:clamp(150px,38vh,290px);
   }
 }
+
+/* Mobile: center the actual holder silhouette, not just the SVG's white
+   canvas. Keep the desktop optical offset and other product images intact. */
+@media(max-width:700px){
+  body.products-edition #main #products-start .clean-product-hero-visual{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    justify-self:center;
+    align-self:center;
+    margin:0 auto;
+    padding:6px;
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+  body.products-edition #main #products-start .clean-product-hero-visual>img{
+    display:block;
+    flex:none;
+    align-self:center;
+    width:min(100%,clamp(205px,42vh,390px));
+    height:clamp(205px,42vh,390px);
+    max-width:100%;
+    max-height:none;
+    margin:0;
+    padding:0;
+    object-fit:contain;
+    object-position:50% 50%;
+    /* Correct the right-shifted crop proportionally at every mobile size. */
+    transform:translateX(-5.5%);
+  }
+}
+@media(max-width:700px) and (max-height:680px){
+  body.products-edition #main #products-start .clean-product-hero-visual>img{
+    width:min(100%,clamp(150px,38vh,290px));
+    height:clamp(150px,38vh,290px);
+  }
+}
