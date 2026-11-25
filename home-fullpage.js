@@ -234,7 +234,7 @@
     document.dispatchEvent(new Event('gtz-home-scroll-state'));
   }
   const transform=(offset,fit)=>`translate3d(0,calc(-50% + ${offset}px),0) scale(${fit})`;
-  const overlayOpen=()=>!!document.querySelector('dialog[open],.gtz-rescue-menu[open],.control-dock:not([data-mode="closed"]),.gtz-wallet-sheet[aria-hidden="false"]');
+  const overlayOpen=()=>!!document.querySelector('dialog[open],.control-dock:not([data-mode="closed"]),.gtz-wallet-sheet[aria-hidden="false"]');
   // One continuous virtual dial: only the two adjacent scenes receive a
   // compositor transform. Neither the document nor the stage scrolls.
   function syncPalette(index){
