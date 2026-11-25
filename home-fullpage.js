@@ -55,7 +55,31 @@
       // Every scene is a real snap target; do not make native scrolled content inert.
     });
     let nativeIndex=0, nativeHeight=0, measureRequest=0, scrollRequest=0, idleTimer=0, scrolling=false;
-    let pendingMeasure=false, paletteTimer=0, layerTimer=0, layerDepth=2;
+    let pendingMeasure=false, paletteTimer=0;
+    // Fixed layer order and complementary opacity: the lower layer is
+    // always opaque, so rapid reversals cannot reveal the white base.
+    // Smoothstep maps actual scroll distance to the colour blend.
+    const layerByColor=new Map(layers.map((layer,i)=>[layer.dataset.color,{layer,i}]));
+    const smoothstep=t=>t*t*(3-2*t);
+    function blendStage(position){
+      const p=Math.max(0,Math.min(sceneCount-1,position));
+      const a=Math.floor(p),b=Math.min(sceneCount-1,a+1);
+      const from=order[a].palette,to=order[b].palette;
+      const t=reduced.matches?(p-a>=.5?1:0):smoothstep(p-a);
+      const first=layerByColor.get(from),second=layerByColor.get(to);
+      const weights=new Map();
+      if(from===to||t===0){weights.set(from,1);}
+      else if(t===1){weights.set(to,1);}
+      else if(first.i<second.i){weights.set(from,1);weights.set(to,t);}
+      else{weights.set(to,1);weights.set(from,1-t);}
+      for(const {layer,i} of layerByColor.values()){
+        const opacity=weights.get(layer.dataset.color)||0;
+        const value=opacity.toFixed(5);
+        if(layer.style.opacity!==value)layer.style.opacity=value;
+        layer.classList.toggle('is-palette',opacity>0);
+      }
+    }
+    function paintStage(){blendStage(viewport.scrollTop/Math.max(1,nativeHeight));}
     const indexAt=()=>Math.max(0,Math.min(sceneCount-1,Math.round(viewport.scrollTop/Math.max(1,nativeHeight))));
     const indexFromHash=hash=>{
       if(!hash||hash==='#')return 0;
@@ -68,23 +92,7 @@
       nativeIndex=index;
       const palette=order[index].palette;
       if(host.dataset.palette!==palette){
-        const previousPalette=host.dataset.palette;
         host.dataset.palette=palette;body.dataset.homePalette=palette;
-        // Fade prepainted layers rather than animating the full viewport's
-        // background-color and two large masked gradients.
-        clearTimeout(layerTimer);
-        layers.forEach(layer=>{
-          const active=layer.dataset.color===palette;
-          if(isHome){
-            if(layer.classList.contains('is-palette')&&!active)layer.classList.add('is-outgoing');
-            if(active){layer.classList.remove('is-outgoing');layer.style.zIndex=String(++layerDepth);}
-          }else layer.classList.toggle('is-outgoing',layer.dataset.color===previousPalette&&!active);
-          layer.classList.toggle('is-palette',active);
-        });
-        layerTimer=setTimeout(()=>layers.forEach(layer=>{
-          layer.classList.remove('is-outgoing');
-          if(isHome){layer.style.zIndex='';}
-        }),isHome?660:300);
         clearTimeout(paletteTimer);
         const ink=palette==='red'?'white':'dark';
         const changeInk=()=>{body.dataset.homeInk=ink;document.dispatchEvent(new Event('gtz-home-palette'));};
@@ -128,19 +136,20 @@
     const queueMeasure=()=>{if(scrolling){pendingMeasure=true;return;}if(!measureRequest)measureRequest=requestAnimationFrame(measureNative);};
     function settle(){
       clearTimeout(idleTimer);idleTimer=0;
-      setMoving(false);selectScene(indexAt(),true);
+      if(scrollRequest)cancelAnimationFrame(scrollRequest);scrollRequest=0;
+      setMoving(false);paintStage();selectScene(indexAt(),true);
       if(pendingMeasure)queueMeasure();
     }
     viewport.addEventListener('scroll',()=>{
       setMoving(true);
-      if(indexAt()!==nativeIndex&&!scrollRequest)scrollRequest=requestAnimationFrame(()=>{scrollRequest=0;selectScene(indexAt());});
+      if(!scrollRequest)scrollRequest=requestAnimationFrame(()=>{scrollRequest=0;paintStage();if(indexAt()!==nativeIndex)selectScene(indexAt());});
       clearTimeout(idleTimer);idleTimer=setTimeout(settle,180);
     },{passive:true});
     if('onscrollend' in viewport)viewport.addEventListener('scrollend',settle,{passive:true});
     const goNative=(i,instant=false)=>{
       const index=Math.max(0,Math.min(sceneCount-1,i));
       viewport.scrollTo({top:index*nativeHeight,behavior:instant||reduced.matches?'instant':'smooth'});
-      if(instant)selectScene(index,true);
+      if(instant){blendStage(index);selectScene(index,true);}
     };
     document.addEventListener('click',e=>{
       const link=e.target.closest?.('a[href^="#"]');
@@ -158,7 +167,8 @@
     function restoreEntry(index,reveal=true){
       boot();host.classList.add('stage-initial');
       clearTimeout(idleTimer);idleTimer=0;setMoving(false);
-      nativeIndex=index;measureNative();viewport.scrollTop=index*nativeHeight;selectScene(index,true);
+      if(scrollRequest)cancelAnimationFrame(scrollRequest);scrollRequest=0;
+      nativeIndex=index;measureNative();viewport.scrollTop=index*nativeHeight;blendStage(index);selectScene(index,true);
       // The snap target and scroll offset must be committed before the first
       // paint. In particular WebKit can restore an old inner-scroll offset
       // even though history.scrollRestoration is manual.
@@ -169,7 +179,7 @@
           // Browser restoration runs after pageshow; keep its old offset
           // invisible, then reveal the first correctly positioned frame.
           viewport.scrollTop=index*nativeHeight;
-          unboot();viewport.scrollTop=index*nativeHeight;selectScene(index,true);
+          unboot();viewport.scrollTop=index*nativeHeight;blendStage(index);selectScene(index,true);
           host.classList.remove('stage-initial');
         });
       });
@@ -183,7 +193,7 @@
     });addEventListener('load',queueMeasure,{once:true});
     document.fonts?.ready.then(queueMeasure);
     if('ResizeObserver' in window){const observer=new ResizeObserver(queueMeasure);observer.observe(viewport);scenes.forEach(el=>observer.observe(el));}
-    const syncPaused=()=>host.classList.toggle('stage-paused',document.hidden||reduced.matches);
+    const syncPaused=()=>{host.classList.toggle('stage-paused',document.hidden||reduced.matches);if(!document.hidden)paintStage();};
     document.addEventListener('visibilitychange',syncPaused);reduced.addEventListener?.('change',syncPaused);syncPaused();
     return;
   }
@@ -194,7 +204,7 @@
   const clampIndex=index=>Math.max(0,Math.min(scenes.length-1,index));
   const setPalette=(palette,duration=440)=>{
     const previous=host.dataset.palette;
-    if(isHome&&!reduced.matches)duration=Math.max(620,duration);
+    if(!reduced.matches)duration=Math.max(900,duration);
     host.style.setProperty('--stage-speed',`${duration}ms`);
     host.dataset.palette=palette;body.dataset.homePalette=palette;
     clearTimeout(inkTimer);

@@ -28,7 +28,7 @@ body.home-cinema{isolation:isolate;height:100vh;height:100dvh;overflow:hidden;di
   --stage-base:#fff;--stage-motif:#ffb511;
   --stage-fries:.12;--stage-dots:.16;
   background-color:var(--stage-base);contain:strict;
-  transition:background-color .48s cubic-bezier(.22,.61,.36,1);
+  transition:background-color var(--stage-speed,900ms) cubic-bezier(.22,.61,.36,1);
 }
 .home-cinema .home-ambient[data-palette="red"]{
   --stage-base:#d62c30;--stage-motif:#ffb511;
@@ -49,14 +49,14 @@ body.home-cinema{isolation:isolate;height:100vh;height:100dvh;overflow:hidden;di
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100' viewBox='0 0 96 100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='white'/%3E%3C/svg%3E") 0 100%/96px 100px repeat-x;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='100' viewBox='0 0 96 100'%3E%3Crect x='34' y='39' width='28' height='66' rx='8' fill='white'/%3E%3C/svg%3E") 0 100%/96px 100px repeat-x;
   animation:gtz-stage-fries 8s ease-in-out infinite alternate;
-  transition:background-color .48s,opacity .48s;
+  transition:background-color var(--stage-speed,900ms) cubic-bezier(.22,.61,.36,1),opacity var(--stage-speed,900ms) cubic-bezier(.22,.61,.36,1);
 }
 .home-cinema .home-ambient::after{
   content:'';position:absolute;inset:-25%;
   background-color:var(--stage-motif);opacity:var(--stage-dots);
   --stage-dot-mask:radial-gradient(circle at 13% 17%,#fff 0 4px,transparent 5px),radial-gradient(circle at 29% 45%,#fff 0 7px,transparent 8px),radial-gradient(circle at 46% 22%,#fff 0 3px,transparent 4px),radial-gradient(circle at 67% 31%,#fff 0 6px,transparent 7px),radial-gradient(circle at 83% 59%,#fff 0 4px,transparent 5px),radial-gradient(circle at 22% 78%,#fff 0 5px,transparent 6px),radial-gradient(circle at 58% 69%,#fff 0 8px,transparent 9px),radial-gradient(circle at 74% 86%,#fff 0 3px,transparent 4px);
   -webkit-mask-image:var(--stage-dot-mask);mask-image:var(--stage-dot-mask);
-  animation:hero-dots 70s linear infinite;transition:background-color .48s,opacity .48s;
+  animation:hero-dots 70s linear infinite;transition:background-color var(--stage-speed,900ms) cubic-bezier(.22,.61,.36,1),opacity var(--stage-speed,900ms) cubic-bezier(.22,.61,.36,1);
 }
 @keyframes gtz-stage-fries{from{transform:translateX(0)}to{transform:translateX(42px)}}
 .home-cinema .home-ambient.stage-paused::before,.home-cinema .home-ambient.stage-paused::after{animation-play-state:paused}
