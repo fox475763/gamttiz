@@ -152,7 +152,7 @@
   position:relative;inset:auto;top:auto;flex:0 0 auto;visibility:visible;pointer-events:auto;
   margin-block:var(--scene-space,0px);margin-inline:auto;
   height:auto;min-height:0;max-height:none;
-  transform:scale(var(--scene-fit,1));transform-origin:center;
+  transform:var(--native-scene-transform,none);transform-origin:center;
   scroll-snap-align:center;scroll-snap-stop:normal;scroll-margin:0;
   transition:none;will-change:auto;
 }
@@ -175,7 +175,7 @@
 /* The opaque base is retained throughout a fade. Only the incoming
    layer animates opacity; the browser handles its frames independently. */
 body.home-native-touch .home-ambient .stage-color-layer{transition:none}
-body.home-native-touch .home-ambient .stage-color-layer.stage-fading{transition:opacity 640ms cubic-bezier(.25,.1,.25,1);will-change:opacity}
+body.home-native-touch .home-ambient .stage-color-layer.stage-fading{transition:opacity 720ms cubic-bezier(.25,.1,.25,1);will-change:opacity}
 body.home-native-touch .home-ambient.stage-initial .stage-color-layer,
 body.home-native-touch .home-ambient.stage-paused .stage-color-layer{transition:none!important}
 @media(prefers-reduced-motion:reduce){

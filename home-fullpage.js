@@ -60,17 +60,21 @@
       // Every scene is a real snap target; do not make native scrolled content inert.
     });
     let nativeIndex=0, nativeHeight=0, measureRequest=0, scrollRequest=0, idleTimer=0, scrolling=false;
-    let pendingMeasure=false, paletteTimer=0;
-    // Keep one fully opaque background below one compositor-animated
-    // overlay. No per-scroll-frame style writes or layer reorder while fading.
+    let pendingMeasure=false, paletteTimer=0,lastScrollAt=-Infinity,measureDelay=0;
+    // One opaque base and one overlay. Use the browser animation engine
+    // rather than flushing layout to start CSS transitions during a swipe.
     const byKey=new Map(layers.map(layer=>[layer.dataset.stageKey,layer]));
-    const FADE_MS=640;
-    let baseKey=null,overlayKey=null,desiredKey=null,fadeTo=1,fadeTimer=0;
+    const FADE_MS=720;
+    let baseKey=null,overlayKey=null,desiredKey=null,fadeTo=1,fadeTimer=0,fadeFrame=0,fadeAnimation=null,fadeEpoch=0;
     const stageKey=index=>isHome&&index===0&&order[index].palette==='red'?'hero-red':order[index].palette;
-    function clearFade(){clearTimeout(fadeTimer);fadeTimer=0;}
+    function clearFade(){
+      clearTimeout(fadeTimer);fadeTimer=0;
+      if(fadeFrame)cancelAnimationFrame(fadeFrame);fadeFrame=0;
+      if(fadeAnimation){fadeAnimation.onfinish=null;fadeAnimation.cancel();fadeAnimation=null;}
+      fadeEpoch++;
+    }
     function stableStage(key){
       clearFade();baseKey=key;overlayKey=null;fadeTo=1;
-      // The completed overlay is opaque before the old base is removed.
       for(const layer of layers){
         const active=layer.dataset.stageKey===key;
         layer.style.zIndex=active?'1':'0';
@@ -79,43 +83,60 @@
         layer.style.opacity=active?'1':'0';
       }
     }
-    function completeFade(){
-      if(!overlayKey)return;
+    function completeFade(epoch){
+      if(epoch!==fadeEpoch||!overlayKey)return;
       const completed=fadeTo===1?overlayKey:baseKey;
       stableStage(completed);
       if(desiredKey!==completed)requestStage(desiredKey);
     }
+    function armTimeout(){
+      clearTimeout(fadeTimer);
+      const epoch=fadeEpoch;
+      fadeTimer=setTimeout(()=>completeFade(epoch),FADE_MS+160);
+    }
     function fadeOverlay(to){
-      clearFade();fadeTo=to;
+      fadeTo=to;
       const layer=byKey.get(overlayKey);
+      if(fadeAnimation){
+        // Reverse the existing compositor animation in place, preserving
+        // its current progress even during a fast reversal.
+        const rate=to===1?1:-1;
+        if(fadeAnimation.playbackRate!==rate)fadeAnimation.reverse();
+        armTimeout();
+        return;
+      }
       layer.style.opacity=String(to);
-      fadeTimer=setTimeout(completeFade,FADE_MS+90);
+      armTimeout();
     }
     function requestStage(key,instant=false){
       if(!byKey.has(key))return;
       desiredKey=key;
       if(instant||reduced.matches||document.hidden||!baseKey){stableStage(key);return;}
       if(overlayKey){
-        // A reversal uses the same two layers and resumes from the current
-        // native transition value. A third colour waits for this fade to end.
         if(key===baseKey&&fadeTo!==0)fadeOverlay(0);
         else if(key===overlayKey&&fadeTo!==1)fadeOverlay(1);
         return;
       }
       if(key===baseKey)return;
-      overlayKey=key;
-      const layer=byKey.get(key);
-      layer.style.zIndex='2';
-      layer.style.opacity='0';
+      overlayKey=key;fadeTo=1;
+      const layer=byKey.get(key),epoch=++fadeEpoch;
+      layer.style.zIndex='2';layer.style.opacity='0';
       layer.classList.add('is-palette','stage-fading');
-      // Commit only the start value once, then let the compositor run.
-      void layer.offsetWidth;
-      fadeOverlay(1);
+      if(typeof layer.animate==='function'){
+        try{
+          fadeAnimation=layer.animate([{opacity:0},{opacity:1}],{duration:FADE_MS,easing:'cubic-bezier(.25,.1,.25,1)',fill:'both'});
+          fadeAnimation.onfinish=()=>completeFade(epoch);
+          armTimeout();return;
+        }catch{fadeAnimation=null;}
+      }
+      // Older browser fallback: allow a paint before the transition;
+      // never use offsetWidth or computed style to force one.
+      fadeFrame=requestAnimationFrame(()=>{
+        fadeFrame=requestAnimationFrame(()=>{
+          fadeFrame=0;if(epoch===fadeEpoch&&overlayKey===key)fadeOverlay(fadeTo);
+        });
+      });
     }
-    for(const layer of layers)layer.addEventListener('transitionend',event=>{
-      if(event.target!==layer||event.propertyName!=='opacity'||layer.dataset.stageKey!==overlayKey)return;
-      if(Math.abs(Number(getComputedStyle(layer).opacity)-fadeTo)<.005)completeFade();
-    });
     const indexAt=()=>Math.max(0,Math.min(sceneCount-1,Math.round(viewport.scrollTop/Math.max(1,nativeHeight))));
     const indexFromHash=hash=>{
       if(!hash||hash==='#')return 0;
@@ -166,21 +187,37 @@
         const gap=(height-natural)/2;
         const size=fit.toFixed(5),space=gap.toFixed(2)+'px';
         if(el.style.getPropertyValue('--scene-fit')!==size)el.style.setProperty('--scene-fit',size);
+        const transform=fit>.99999?'none':'scale('+size+')';
+        if(el.style.getPropertyValue('--native-scene-transform')!==transform)el.style.setProperty('--native-scene-transform',transform);
         if(el.style.getPropertyValue('--scene-space')!==space)el.style.setProperty('--scene-space',space);
       });
       if(changedHeight)viewport.scrollTop=previousIndex*height;
     }
-    const queueMeasure=()=>{if(scrolling){pendingMeasure=true;return;}if(!measureRequest)measureRequest=requestAnimationFrame(measureNative);};
+    const queueMeasure=()=>{if(scrolling){pendingMeasure=true;return;}if(!measureRequest&&!measureDelay)measureRequest=requestAnimationFrame(measureNative);};
     function settle(){
       clearTimeout(idleTimer);idleTimer=0;
+      if(!scrolling)return;
       if(scrollRequest)cancelAnimationFrame(scrollRequest);scrollRequest=0;
       setMoving(false);selectScene(indexAt(),true);
-      if(pendingMeasure)queueMeasure();
+      // Delay potentially expensive all-scene measurement until after the
+      // native snap and background fade, and cancel it on a new swipe.
+      if(pendingMeasure){
+        clearTimeout(measureDelay);
+        measureDelay=setTimeout(()=>{measureDelay=0;queueMeasure();},250);
+      }
+    }
+    function checkIdle(){
+      idleTimer=0;
+      const remaining=220-(performance.now()-lastScrollAt);
+      if(remaining>0){idleTimer=setTimeout(checkIdle,remaining);return;}
+      settle();
     }
     viewport.addEventListener('scroll',()=>{
+      lastScrollAt=performance.now();
+      if(measureDelay){clearTimeout(measureDelay);measureDelay=0;pendingMeasure=true;}
       setMoving(true);
       if(indexAt()!==nativeIndex&&!scrollRequest)scrollRequest=requestAnimationFrame(()=>{scrollRequest=0;selectScene(indexAt());});
-      clearTimeout(idleTimer);idleTimer=setTimeout(settle,180);
+      if(!idleTimer)idleTimer=setTimeout(checkIdle,220);
     },{passive:true});
     if('onscrollend' in viewport)viewport.addEventListener('scrollend',settle,{passive:true});
     const goNative=(i,instant=false)=>{
@@ -203,7 +240,7 @@
     const initial=Math.max(0,indexFromHash(location.hash));
     function restoreEntry(index,reveal=true){
       boot();host.classList.add('stage-initial');
-      clearTimeout(idleTimer);idleTimer=0;setMoving(false);
+      clearTimeout(idleTimer);idleTimer=0;clearTimeout(measureDelay);measureDelay=0;setMoving(false);
       if(scrollRequest)cancelAnimationFrame(scrollRequest);scrollRequest=0;
       nativeIndex=index;measureNative();viewport.scrollTop=index*nativeHeight;requestStage(stageKey(index),true);selectScene(index,true);
       // The snap target and scroll offset must be committed before the first
