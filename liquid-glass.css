@@ -128,28 +128,13 @@ body.home-native-moving .gtz-liquid-optics > canvas{
   .control-dock .control-trigger.gtz-liquid-surface::after{content:""!important;display:block!important;position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;background:linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.025) 60%,rgba(255,255,255,.08))}
 }
 
-/* The MY ID scene has a rotating card and animated gold dust. Mobile WebKit
-   can drop a fixed backdrop-filter layer when those surfaces are composited.
-   Keep this one navigation control on a plain, independently painted face. */
-@media (max-width:900px) and (pointer:coarse){
-  body.license-page:not(.license-wallet-view) > .control-dock{position:fixed;z-index:1300;visibility:visible;opacity:1;overflow:visible}
-  body.license-page:not(.license-wallet-view) > .control-dock .control-trigger{
-    display:grid!important;visibility:visible!important;opacity:1!important;
-    color:#e93636!important;-webkit-text-fill-color:#e93636;
-    background:linear-gradient(145deg,rgba(255,255,255,.94),rgba(247,243,236,.68))!important;
-    border:1px solid rgba(255,255,255,.95)!important;border-radius:50%;
-    box-shadow:inset 0 1px 2px #fff,0 0 0 1px rgba(129,100,63,.23),0 6px 18px rgba(65,43,22,.16)!important;
-    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;filter:none!important;
-    -webkit-backface-visibility:visible;backface-visibility:visible;
+/* Same optical face on every page, including MY ID.
+   Keep the lens decorative: only the actual button receives pointer input. */
+@media(max-width:900px){
+  body > .control-dock > .control-trigger.gtz-liquid-surface > .gtz-liquid-optics{
+    display:block;z-index:0;pointer-events:none;
   }
-  body.license-page:not(.license-wallet-view) > .control-dock:not([data-mode="closed"]) .control-trigger{background:#fff9f3!important}
-  body.license-page:not(.license-wallet-view) > .control-dock .control-trigger::before{
-    content:""!important;display:block!important;position:absolute;inset:1px!important;
-    border:1px solid rgba(255,255,255,.8)!important;border-radius:inherit;background:none!important;
-    -webkit-mask:none!important;mask:none!important;box-shadow:none!important;animation:none!important;opacity:1!important;
+  body > .control-dock > .control-trigger .control-trigger-label{
+    position:relative;z-index:5;pointer-events:none;
   }
-  body.license-page:not(.license-wallet-view) > .control-dock .control-trigger::after,
-  body.license-page:not(.license-wallet-view) > .control-dock .control-trigger > .gtz-liquid-optics{display:none!important;content:none!important}
-  body.license-page:not(.license-wallet-view) > .control-dock .control-trigger-label{position:relative;z-index:2;text-shadow:none}
-  body.license-page:not(.license-wallet-view) > .control-dock .control-trigger:focus-visible{outline:2px solid #e93636;outline-offset:3px}
 }
