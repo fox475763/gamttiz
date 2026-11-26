@@ -217,3 +217,8 @@ body.home-native-touch .home-ambient.stage-paused .stage-color-layer{transition:
    The animations resume at the same phase once the finger and momentum settle. */
 body.home-native-touch.home-native-moving .home-ambient .stage-color-layer::before,
 body.home-native-touch.home-native-moving .home-ambient .stage-color-layer::after{animation-play-state:paused!important}
+
+/* The desktop stage can also avoid competing decorative animations during
+   a scene transition. Restore their original phase when it settles. */
+body.home-fullpage.home-stage-moving:not(.home-native-touch) .home-ambient::before,
+body.home-fullpage.home-stage-moving:not(.home-native-touch) .home-ambient::after{animation-play-state:paused!important}

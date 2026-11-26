@@ -52,7 +52,7 @@
   let data=null,key='',loadedKey='',loadingKey='',generation=0,raf=0,lastTime=0,angle=-12,ready=false;
   const load=src=>new Promise((resolve,reject)=>{const image=new Image();image.decoding='async';image.onload=()=>resolve(image);image.onerror=reject;image.src=src;});
   function active(){
-    return !document.hidden&&!document.documentElement.classList.contains('gtz-wallet-open')&&!document.body.classList.contains('home-native-moving')&&section.dataset.scene!==undefined&&section.dataset.scene===document.body.dataset.homeScene;
+    return !document.hidden&&!document.documentElement.classList.contains('gtz-wallet-open')&&!document.body.classList.contains('home-native-moving')&&!document.body.classList.contains('home-stage-moving')&&section.dataset.scene!==undefined&&section.dataset.scene===document.body.dataset.homeScene;
   }
   function paint(){
     const half=Math.floor((angle+90)/180),back=Math.abs(half%2)===1&&ready,rotation=angle-half*180;

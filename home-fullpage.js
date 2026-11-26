@@ -145,6 +145,7 @@
       const target=document.getElementById(id);return target?scenes.findIndex(el=>el===target||el.contains(target)):-1;
     };
     const selectScene=(index,announce=false)=>{
+      const changed=body.dataset.homeScene!==String(index);
       if(index===nativeIndex&&body.dataset.homeScene!==undefined&&!announce)return;
       nativeIndex=index;
       const palette=order[index].palette;
@@ -156,8 +157,10 @@
         const changeInk=()=>{body.dataset.homeInk=ink;document.dispatchEvent(new Event('gtz-home-palette'));};
         if(!body.dataset.homeInk||reduced.matches)changeInk();else paletteTimer=setTimeout(changeInk,palette==='red'?80:45);
       }
-      body.dataset.homeScene=String(index);body.dataset.homeSceneCount=String(sceneCount);
-      document.dispatchEvent(new Event('gtz-home-scene'));
+      if(changed){
+        body.dataset.homeScene=String(index);body.dataset.homeSceneCount=String(sceneCount);
+        document.dispatchEvent(new Event('gtz-home-scene'));
+      }
       if(announce){const heading=scenes[index].querySelector('h1,h2');status.textContent=`${index+1} / ${sceneCount} · ${heading?.textContent.trim()||'감띠즈'}`;}
     };
     const setMoving=active=>{
@@ -180,11 +183,14 @@
       if(changedHeight)viewport.style.setProperty('--scene-h',height+'px');
       // Read all natural sizes together, then write margins/fit together.
       // One native scroll slot always occupies exactly one viewport.
-      const heights=scenes.map(el=>Math.max(el.offsetHeight,el.scrollHeight));
+      const sizes=scenes.map(el=>({box:Math.max(1,el.offsetHeight),content:Math.max(1,el.scrollHeight)}));
       scenes.forEach((el,i)=>{
-        const natural=Math.max(1,heights[i]);
+        const {box,content}=sizes[i];
+        const natural=Math.max(box,content);
         const fit=Math.min(1,Math.max(.35,(height-8)/natural));
-        const gap=(height-natural)/2;
+        // Margins must use the actual flex item's layout height, not its
+        // possibly overflowing content, or later snap slots drift.
+        const gap=(height-box)/2;
         const size=fit.toFixed(5),space=gap.toFixed(2)+'px';
         if(el.style.getPropertyValue('--scene-fit')!==size)el.style.setProperty('--scene-fit',size);
         const transform=fit>.99999?'none':'scale('+size+')';
@@ -314,6 +320,7 @@
   function motion(active){
     if(inMotion===active)return;
     inMotion=active;
+    body.classList.toggle('home-stage-moving',active);
     if(window.GTZHomeMotion)window.GTZHomeMotion.scrolling=active;
     document.dispatchEvent(new Event('gtz-home-scroll-state'));
   }

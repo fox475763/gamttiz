@@ -751,8 +751,18 @@ function repairMenuLayer(){
     try{updateMenuTextColor();}catch{}
   }finally{menuRepairing=false;}
 }
+let menuCheckDeferred=false;
 function verifyMenuLayer(){
-  if(document.hidden||dock.dataset.mode!=='closed'||document.documentElement.classList.contains('gtz-wallet-open')||document.querySelector('dialog[open]'))return;
+  // An embedded wallet intentionally hides the shared menu. Do not try
+  // to repair that hidden layer repeatedly. Preserve the real page menu.
+  if(document.hidden||document.body.classList.contains('license-wallet-view')||dock.dataset.mode!=='closed'||document.documentElement.classList.contains('gtz-wallet-open')||document.querySelector('dialog[open]'))return;
+  // Avoid forced layout/hit testing while the native or desktop stage
+  // moves. Recheck after the scroll, retaining the same live menu.
+  if(document.body.classList.contains('home-native-moving')||window.GTZHomeMotion?.scrolling){
+    if(!dock.isConnected)syncPersistentMenu();
+    menuCheckDeferred=true;return;
+  }
+  menuCheckDeferred=false;
   syncPersistentMenu();
   const r=trigger.getBoundingClientRect(),cs=getComputedStyle(trigger);
   const vw=document.documentElement.clientWidth||innerWidth,vh=innerHeight;
@@ -800,7 +810,12 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden)resetMenuForPageLifecycle();
   else resumeMenuLayer(iosStandalone);
 });
-if(mobileMenuLifecycle)window.setInterval(()=>{if(!document.hidden)verifyMenuLayer();},2400);
+if(mobileMenuLifecycle){
+  window.setInterval(()=>{if(!document.hidden)verifyMenuLayer();},2400);
+  document.addEventListener('gtz-home-scroll-state',()=>{
+    if(menuCheckDeferred&&!document.body.classList.contains('home-native-moving')&&!window.GTZHomeMotion?.scrolling)resumeMenuLayer();
+  });
+}
 
 // Shake-to-open is a mobile-only wallet and uses explicit sensor consent.
 const walletMedia=matchMedia('(max-width: 900px)');
