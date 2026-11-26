@@ -294,3 +294,8 @@
   .catalog-hero-image img, .studio-photo-grid img, .package-photo-grid img, .catalog-holder-image img, .catalog-card img, .news-card-media img { transition: none; }
 }
 
+
+/* Long announcement titles and attachment names must wrap within the card. */
+.news-card-info,.news-detail,.news-attachments,.admin-guide>p>span{min-width:0;overflow-wrap:anywhere}
+.admin-guide p{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline}
+@media(max-width:540px){.admin-guide p{padding:16px;gap:12px}.news-detail>.eyebrow{margin-top:32px}.news-card-info{padding:16px}}

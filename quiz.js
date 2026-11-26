@@ -181,7 +181,7 @@ function renderQuizResult(){
   panel.append(art,copy,extras);quizRoot.append(panel);
   preparedResult={index,promise:quizImageBlob(index).then(blob=>{if(preparedResult?.index===index)preparedResult.blob=blob;return blob;}).catch(error=>{console.error(error);return null;}),blob:null};
 }
-function quizShareUrl(){const base=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'https://fox475763.github.io/gamttiz/':location.href;const url=new URL('quiz.html',base);url.searchParams.set('q',activeQuestions.map(q=>fryQuestions.indexOf(q)).join(','));url.searchParams.set('a',quizAnswers.join(''));return url.href;}
+function quizShareUrl(){const base=/^(localhost|127\.0\.0\.1)$/.test(location.hostname)?'https://gamttiz.frenchfrylover.workers.dev/':location.href;const url=new URL('quiz.html',base);url.searchParams.set('q',activeQuestions.map(q=>fryQuestions.indexOf(q)).join(','));url.searchParams.set('a',quizAnswers.join(''));return url.href;}
 function quizShareText(index){return `내 감튀 취향은 ${fryProfiles[index].type}! 감띠즈의 ${products[index].name}와 닮았대요. 당신의 감띠도 찾아봐요.`;}
 function quizLoadArt(src){return new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=src;});}
 function quizWrap(ctx,text,x,y,maxWidth,lineHeight,maxLines=5){let line='',drawn=0;for(const word of text.split(' ')){const next=line?line+' '+word:word;if(ctx.measureText(next).width>maxWidth&&line){ctx.fillText(line,x,y+drawn*lineHeight);drawn++;line=word;if(drawn>=maxLines)return y+drawn*lineHeight;}else line=next;}if(line){ctx.fillText(line,x,y+drawn*lineHeight);drawn++;}return y+drawn*lineHeight;}

@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.join(root, '.cloudflare-dist');
 const legacy = 'https://fox475763.github.io/gamttiz/';
-const configuredURL = process.env.GAMTTIZ_PUBLIC_URL;
+const configuredURL = process.env.GAMTTIZ_PUBLIC_URL || 'https://gamttiz.frenchfrylover.workers.dev/';
 let base = '';
 if (configuredURL) {
   const url = new URL(configuredURL);
@@ -43,6 +43,9 @@ for (const file of publicFiles) {
   fs.mkdirSync(path.dirname(dest), {recursive:true});
   if (file === '404.html') {
     let html = fs.readFileSync(source, 'utf8').replaceAll('href="/gamttiz/', 'href="/');
+    // A custom 404 is also served at nested, nonexistent URLs. Relative
+    // styles/icons would otherwise resolve to the missing directory.
+    html = html.replace(/\b(href|src)="(?![a-z][a-z0-9+.-]*:|\/|#)([^"]+)"/gi, '$1="/$2"');
     if (base) html = html.replaceAll(legacy, base);
     fs.writeFileSync(dest, html);
   } else if (file === 'robots.txt') {

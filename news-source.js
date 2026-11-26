@@ -22,32 +22,44 @@ function issueToPost(issue) {
   };
 }
 window.gamttizNewsState = {source:'loading', time:null};
+// Fetch both independent sources concurrently. An unavailable API must
+// never erase locally published announcements, and vice versa.
+let newsInFlight=null;
+async function newsJSON(url,options={}){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),8000);
+  try{
+    const response=await fetch(url,{...options,cache:'no-store',signal:controller.signal});
+    if(!response.ok)throw Error('News HTTP '+response.status);
+    const value=await response.json();
+    if(!Array.isArray(value))throw Error('Invalid news list');
+    return value;
+  }finally{clearTimeout(timeout);}
+}
 async function loadNewsPosts({force=false}={}) {
-  try {
-    const cached = JSON.parse(sessionStorage.getItem(newsCacheKey) || 'null');
-    if (!force && cached && Date.now() - cached.time < 15 * 1000) {
-      window.gamttizNewsState = {source:'cached', time:cached.time};
-      return cached.posts;
-    }
-  } catch {}
-  try {
-    const response = await fetch(newsIssueEndpoint + '&_=' + Date.now(), {cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
-    if (!response.ok) throw new Error('GitHub news unavailable');
-    const issues = await response.json();
-    const fromIssues = issues.filter(issue => !issue.pull_request && issue.user?.login?.toLowerCase() === 'fox475763' && /^### 게시자 이름\s*$/m.test(issue.body || '') && /^### 본문\s*$/m.test(issue.body || ''))
-      .map(issueToPost);
-    const staticResponse = await fetch('news/posts.json', {cache:'no-store'});
-    const staticPosts = staticResponse.ok ? await staticResponse.json() : [];
-    const posts = [...new Map([...(Array.isArray(staticPosts) ? staticPosts : []),...fromIssues].map(post=>[post.id,post])).values()]
-      .sort((a,b) => String(b.date).localeCompare(String(a.date)));
-    try { sessionStorage.setItem(newsCacheKey, JSON.stringify({time:Date.now(), posts})); } catch {}
-    window.gamttizNewsState = {source:'live', time:Date.now()};
-    return posts;
-  } catch {
-    const response = await fetch('news/posts.json', {cache:'no-store'});
-    if (!response.ok) { window.gamttizNewsState={source:'offline',time:Date.now()}; return []; }
-    const posts = await response.json();
-    window.gamttizNewsState = {source:'fallback', time:Date.now()};
-    return Array.isArray(posts) ? posts : [];
+  let cached=null;
+  try{cached=JSON.parse(sessionStorage.getItem(newsCacheKey)||'null');}catch{}
+  if(!force&&Array.isArray(cached?.posts)&&Date.now()-cached.time<15000){
+    window.gamttizNewsState={source:'cached',time:cached.time};return cached.posts;
   }
+  if(newsInFlight)return newsInFlight;
+  newsInFlight=(async()=>{
+    const [remote,local]=await Promise.allSettled([
+      newsJSON(newsIssueEndpoint,{headers:{Accept:'application/vnd.github+json'}}),
+      newsJSON('news/posts.json')
+    ]);
+    const staticPosts=local.status==='fulfilled'?local.value:[];
+    const fromIssues=remote.status==='fulfilled'?remote.value.filter(issue=>!issue.pull_request&&issue.user?.login?.toLowerCase()==='fox475763'&&/^### 게시자 이름\s*$/m.test(issue.body||'')&&/^### 본문\s*$/m.test(issue.body||'')).map(issueToPost):[];
+    if(remote.status==='rejected'&&local.status==='rejected'){
+      window.gamttizNewsState={source:'offline',time:Date.now()};
+      if(Array.isArray(cached?.posts))return cached.posts;
+      throw Error('Both news sources unavailable');
+    }
+    const posts=[...new Map([...staticPosts,...fromIssues].filter(post=>post&&typeof post.id==='string'&&typeof post.title==='string').map(post=>[post.id,post])).values()].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    const time=Date.now();
+    try{sessionStorage.setItem(newsCacheKey,JSON.stringify({time,posts}));}catch{}
+    window.gamttizNewsState={source:remote.status==='fulfilled'?'live':'fallback',time};
+    return posts;
+  })();
+  try{return await newsInFlight;}finally{newsInFlight=null;}
 }
