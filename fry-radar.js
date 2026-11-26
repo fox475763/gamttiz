@@ -5,11 +5,12 @@
   const archive=document.getElementById('radar-archive-list');
   const preview=document.getElementById('radar-preview-list');
   const member=window.GTZMember;
-  // The home carousel is a public preview only. The full board stays license-gated.
+  // Both home preview and the full board require a valid local license.
   const homePreview=!!document.getElementById('fry-radar-preview')&&!!preview&&!list&&!archive;
   if(!homePreview&&(!member||!list||!archive))return;
   let homeRunning=false;
-  const isActive=()=>homePreview?homeRunning:member.isActive('radar');
+  const homeLicense=()=>{try{return window.GTZMemberModel?.readLicense(localStorage)||null;}catch{return null;}};
+  const isActive=()=>homePreview?homeRunning&&!!homeLicense():member.isActive('radar');
   const search=document.getElementById('radar-search');
   const category=document.getElementById('radar-category');
   const sort=document.getElementById('radar-sort');
@@ -159,6 +160,14 @@
   // Home carousel: the latest three verified stories.
   const previewDots=document.getElementById('radar-preview-dots');
   const previewCarousel=document.getElementById('radar-preview-carousel');
+  const previewLock=document.getElementById('radar-preview-lock');
+  const previewAll=document.getElementById('radar-preview-all')||document.querySelector('#fry-radar-preview .radar-preview-link');
+  function showHomeAccess(allowed){
+    if(!homePreview)return;
+    if(previewCarousel){previewCarousel.hidden=!allowed;previewCarousel.inert=!allowed;}
+    if(previewAll)previewAll.hidden=!allowed;
+    if(previewLock)previewLock.hidden=allowed;
+  }
   const prefersReducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
   let previewIndex=0;
   let previewTimer=null;
@@ -251,7 +260,7 @@
     prefersReducedMotion?.addEventListener?.('change',startPreviewTimer);
   }
   const renderPreview=()=>{
-    if(!preview)return;
+    if(!preview||!isActive())return;
     stopPreviewTimer();
     preview.replaceChildren();
     const latest=items.filter(item=>!isArchived(item)).sort(byNewest).slice(0,3);
@@ -427,17 +436,45 @@
   };
   function enter(license){
     if(!homePreview&&!sessionKey){sessionKey='gtz:radar:'+String(license?.number||member?.license?.number||'local')+':'+String(license?.issuedAt||member?.license?.issuedAt||'');const value=storageRead(sessionKey+':saved',[]);saved=new Set(Array.isArray(value)?value:[]);previousVisit=Number(storageRead(sessionKey+':visit',0))||0;visitRecorded=false;lastSignature='';view='all';tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.radarView==='all')));}
-    if(homePreview)homeRunning=true;
+    if(homePreview){
+      if(!homeLicense()){showHomeAccess(false);return;}
+      homeRunning=true;showHomeAccess(true);
+      if(!loaded&&!preview.childElementCount)preview.append(el('p','radar-preview-loading','새로운 감튀 소식을 확인하고 있어요.'));
+    }
     const hash=location.hash.slice(1);
     if(!homePreview&&hash.startsWith('post-')&&loaded){let id=hash;try{id=decodeURIComponent(hash);}catch{}if(!document.getElementById(id)){search.value='';category.value='all';view='all';tabs.forEach(t=>t.setAttribute('aria-pressed',String(t.dataset.radarView==='all')));render();}}
     revealAnchor();if(!timer)timer=window.setInterval(refresh,homePreview?300000:120000);
     if(loaded)startPreviewTimer();refresh();
   }
-  function leave(){setFilters(false);sessionKey='';if(homePreview)homeRunning=false;generation++;controllers.forEach(c=>c.abort());controllers.clear();clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';}
-  if(homePreview)enter();else member.register('radar',{enter,leave});
-  window.addEventListener('focus',refresh);
-  window.addEventListener('online',refresh);
-  window.addEventListener('pageshow',homePreview?enter:refresh);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh();});
+  function leave(){
+    setFilters(false);sessionKey='';
+    if(homePreview){
+      homeRunning=false;showHomeAccess(false);
+      preview?.replaceChildren();previewDots?.replaceChildren();
+      items=[];loaded=false;lastSignature='';previewIndex=0;
+    }
+    generation++;controllers.forEach(c=>c.abort());controllers.clear();
+    clearInterval(timer);timer=0;stopPreviewTimer();lastAnchor='';
+  }
+  function syncHomeAccess(){
+    const license=homeLicense();
+    if(!license){
+      if(homeRunning||loaded||refreshing)leave();
+      else{showHomeAccess(false);preview?.replaceChildren();previewDots?.replaceChildren();}
+      return;
+    }
+    if(!homeRunning)enter(license);
+    else{showHomeAccess(true);refresh();}
+  }
+  if(homePreview){
+    syncHomeAccess();
+    window.addEventListener('gamttiz:license-change',syncHomeAccess);
+    window.addEventListener('storage',event=>{if(event.key===null||event.key===window.GTZMemberModel?.KEY)syncHomeAccess();});
+  }else member.register('radar',{enter,leave});
+  const resume=homePreview?syncHomeAccess:refresh;
+  window.addEventListener('focus',resume);
+  window.addEventListener('online',resume);
+  window.addEventListener('pageshow',resume);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)resume();});
   window.addEventListener('pagehide',leave);
 })();
